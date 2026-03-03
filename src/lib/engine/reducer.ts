@@ -271,7 +271,7 @@ export function applyMove(
     const newBoard = placeTileOnBoard(state.board, intent.tile, intent.end);
 
     const wentOut = newHand.length === 0;
-    const winningTeam = getTeam(seat);
+    const winningTeam = getTeam(seat, state.is2v2);
 
     if (wentOut) {
       const newState = endRoundWithDomino(
@@ -326,7 +326,7 @@ export function applyMove(
       nextTurn === state.lastPlayedBy &&
       newPassesSincePlay === veinticincoThreshold
     ) {
-      const winningTeam = getTeam(state.lastPlayedBy);
+      const winningTeam = getTeam(state.lastPlayedBy, state.is2v2);
       const newState = endRoundWithVeinticinco(
         { ...state, consecutivePasses: newConsecutive },
         winningTeam
