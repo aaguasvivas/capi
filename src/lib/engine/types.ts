@@ -56,17 +56,19 @@ const SEATS: Seat[] = ["n", "e", "s", "w"];
 const SEAT_ORDER: Seat[] = ["n", "e", "s", "w"];
 
 export function getNextSeat(seat: Seat, is2v2: boolean): Seat {
-  const idx = SEAT_ORDER.indexOf(seat);
-  const nextIdx = (idx + 1) % SEAT_ORDER.length;
-  return SEAT_ORDER[nextIdx];
+  const order = is2v2 ? SEAT_ORDER : (["n", "s"] as const);
+  const idx = order.indexOf(seat);
+  const nextIdx = (idx + 1) % order.length;
+  return order[nextIdx];
 }
 
 export function getSeatsForGame(is2v2: boolean): Seat[] {
   return is2v2 ? SEATS : ["n", "s"];
 }
 
-export function getTeam(seat: Seat): 0 | 1 {
-  return seat === "n" || seat === "s" ? 0 : 1;
+export function getTeam(seat: Seat, is2v2: boolean): 0 | 1 {
+  if (is2v2) return seat === "n" || seat === "s" ? 0 : 1;
+  return seat === "n" ? 0 : 1;
 }
 
 export function getOpponentTeam(team: 0 | 1): 0 | 1 {

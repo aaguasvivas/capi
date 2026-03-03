@@ -14,7 +14,7 @@ export function teamPips(state: GameState, team: 0 | 1): number {
     ? (["n", "e", "s", "w"] as const)
     : (["n", "s"] as const);
   return seats.reduce((sum, seat) => {
-    if (getTeam(seat) === team) {
+    if (getTeam(seat, state.is2v2) === team) {
       return sum + handPips(state.hands[seat] ?? []);
     }
     return sum;
@@ -35,7 +35,7 @@ export function scoreDomino(state: GameState, winningTeam: 0 | 1): number {
 export function scoreTrancao(state: GameState): { winnerTeam: 0 | 1; pts: number } {
   const team0 = teamPips(state, 0);
   const team1 = teamPips(state, 1);
-  const starterTeam = getTeam(state.starterThisRound);
+  const starterTeam = getTeam(state.starterThisRound, state.is2v2);
   if (team0 < team1) return { winnerTeam: 0, pts: team1 - team0 };
   if (team1 < team0) return { winnerTeam: 1, pts: team0 - team1 };
   return { winnerTeam: starterTeam, pts: 0 };
