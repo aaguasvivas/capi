@@ -161,7 +161,7 @@ describe("applyMove - play and pass", () => {
     const result = applyMove(state, "s", {
       type: "play",
       tile: [3, 4],
-      end: "right",
+      end: "left",
     });
     expect(result.success).toBe(true);
     expect(result.newState.board).toHaveLength(2);
@@ -193,7 +193,7 @@ describe("applyMove - play and pass", () => {
     const r1 = applyMove(state, "s", {
       type: "play",
       tile: [3, 4],
-      end: "right",
+      end: "left",
     });
     expect(r1.success).toBe(true);
     expect(r1.newState.consecutivePasses).toBe(0);
