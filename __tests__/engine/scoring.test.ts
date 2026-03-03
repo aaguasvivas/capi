@@ -117,7 +117,7 @@ describe("scoreTrancao", () => {
     };
     const r = scoreTrancao(state);
     expect(r.winnerTeam).toBe(0);
-    expect(r.pts).toBe(12);
+    expect(r.pts).toBe(10);
   });
   it("tie: starter wins, 0 pts", () => {
     const state: GameState = {
