@@ -244,7 +244,7 @@ describe("applyMove - DOMINÓ scoring", () => {
       targetScore: 100,
       scores: [0, 0],
       roundIndex: 0,
-      hands: { n: [[1, 2], [3, 4]], s: [] },
+      hands: { n: [[3, 4]], s: [[1, 2]] },
       board: [[5, 5], [5, 3], [3, 1]],
       boneyard: [],
       currentTurn: "s",
@@ -255,7 +255,7 @@ describe("applyMove - DOMINÓ scoring", () => {
       lastCalloutPayload: null,
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
-      lastPlayedBy: "s",
+      lastPlayedBy: "n",
     };
     const result = applyMove(state, "s", {
       type: "play",
