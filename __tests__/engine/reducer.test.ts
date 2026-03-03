@@ -310,12 +310,10 @@ describe("applyMove - TRANCAO scoring", () => {
 
 describe("scoring - isCapicua", () => {
   it("returns true when both ends match and tile is not double/blank", () => {
-    const { isCapicua } = require("@/lib/engine/scoring");
     const board: [number, number][] = [[4, 5], [5, 3], [3, 4]];
     expect(isCapicua(board, [4, 3])).toBe(true);
   });
   it("returns false for double", () => {
-    const { isCapicua } = require("@/lib/engine/scoring");
     const board: [number, number][] = [[3, 3]];
     expect(isCapicua(board, [3, 3])).toBe(false);
   });
