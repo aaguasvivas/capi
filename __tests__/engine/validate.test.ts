@@ -11,8 +11,8 @@ const baseState: GameState = {
   scores: [0, 0],
   roundIndex: 0,
   hands: {
-    n: [[1, 2], [3, 4]],
-    s: [[5, 5], [5, 1]],
+    n: [[1, 2]],
+    s: [[5, 5], [5, 1], [3, 4]],
     e: [],
     w: [],
   },
@@ -42,9 +42,10 @@ describe("validateMove", () => {
   it("rejects play on wrong end", () => {
     const err = validateMove(baseState, "s", {
       type: "play",
-      tile: [5, 5],
+      tile: [3, 4],
       end: "left",
     });
+    expect(err).not.toBeNull();
     expect(err).toContain("match");
   });
 
