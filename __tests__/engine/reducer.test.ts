@@ -5,29 +5,33 @@ import {
   startNewRound,
 } from "@/lib/engine/reducer";
 import type { GameState, Seat } from "@/lib/engine/types";
-import { handPips, teamPips } from "@/lib/engine/scoring";
+import { handPips, teamPips, isCapicua } from "@/lib/engine/scoring";
 
 describe("createInitialState", () => {
-  it("deals 7 tiles to each player in 1v1", () => {
+  it("starter has 6 tiles, other(s) have 7 in 1v1", () => {
     const state = createInitialState({
       mode: "turn_based",
       theme: "barberia",
       is2v2: false,
     });
-    expect(state.hands.n).toHaveLength(7);
-    expect(state.hands.s).toHaveLength(7);
+    const starterCount = state.hands[state.starterThisRound].length;
+    const other = state.starterThisRound === "n" ? "s" : "n";
+    expect(starterCount).toBe(6);
+    expect(state.hands[other]).toHaveLength(7);
   });
 
-  it("deals 7 tiles to each player in 2v2", () => {
+  it("starter has 6 tiles, others have 7 in 2v2", () => {
     const state = createInitialState({
       mode: "turn_based",
       theme: "barberia",
       is2v2: true,
     });
-    expect(state.hands.n).toHaveLength(7);
-    expect(state.hands.e).toHaveLength(7);
-    expect(state.hands.s).toHaveLength(7);
-    expect(state.hands.w).toHaveLength(7);
+    const starterCount = state.hands[state.starterThisRound].length;
+    expect(starterCount).toBe(6);
+    const others = (["n", "e", "s", "w"] as const).filter((s) => s !== state.starterThisRound);
+    for (const seat of others) {
+      expect(state.hands[seat]).toHaveLength(7);
+    }
   });
 
   it("boneyard has correct remainder", () => {
@@ -66,28 +70,61 @@ describe("applyMove - validation", () => {
       theme: "barberia",
       is2v2: false,
     });
-    const result = applyMove(state, "n", { type: "pass" });
+    const notCurrent = state.currentTurn === "n" ? "s" : "n";
+    const result = applyMove(state, notCurrent, { type: "pass" });
     expect(result.success).toBe(false);
     expect(result.error).toContain("turn");
   });
 
   it("rejects pass when legal play exists", () => {
-    const state = createInitialState({
+    const state: GameState = {
+      phase: "playing",
       mode: "turn_based",
       theme: "barberia",
       is2v2: false,
-    });
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [[3, 3], [3, 4]], e: [], w: [] },
+      board: [[3, 5]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
     const result = applyMove(state, "s", { type: "pass" });
     expect(result.success).toBe(false);
     expect(result.error).toContain("play");
   });
 
   it("rejects play with tile not in hand", () => {
-    const state = createInitialState({
+    const state: GameState = {
+      phase: "playing",
       mode: "turn_based",
       theme: "barberia",
       is2v2: false,
-    });
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[6, 6]], s: [[1, 2], [2, 3]], e: [], w: [] },
+      board: [[4, 4]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
     const result = applyMove(state, "s", {
       type: "play",
       tile: [6, 6],
@@ -100,19 +137,30 @@ describe("applyMove - validation", () => {
 
 describe("applyMove - play and pass", () => {
   it("accepts legal play", () => {
-    const state = createInitialState({
+    const state: GameState = {
+      phase: "playing",
       mode: "turn_based",
       theme: "barberia",
       is2v2: false,
-    });
-    const starterTile = state.board[0];
-    const matchPip = starterTile[0] === starterTile[1] ? starterTile[0] : starterTile[1];
-    const hand = state.hands.s;
-    const matchingTile = hand.find((t) => t[0] === matchPip || t[1] === matchPip);
-    if (!matchingTile) return;
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [[3, 3], [3, 4], [4, 5], [5, 6], [6, 6], [0, 1], [1, 2]], e: [], w: [] },
+      board: [[3, 5]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
     const result = applyMove(state, "s", {
       type: "play",
-      tile: matchingTile,
+      tile: [3, 4],
       end: "right",
     });
     expect(result.success).toBe(true);
@@ -121,24 +169,34 @@ describe("applyMove - play and pass", () => {
   });
 
   it("resets consecutivePasses on play", () => {
-    let state = createInitialState({
+    const state: GameState = {
+      phase: "playing",
       mode: "turn_based",
       theme: "barberia",
       is2v2: false,
-    });
-    const starterTile = state.board[0];
-    const matchPip = starterTile[0];
-    const sHand = state.hands.s;
-    const matchingTile = sHand.find((t) => t[0] === matchPip || t[1] === matchPip);
-    if (!matchingTile) return;
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [[3, 3], [3, 4]], e: [], w: [] },
+      board: [[3, 5]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 1,
+      passesSinceLastPlay: 1,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
     const r1 = applyMove(state, "s", {
       type: "play",
-      tile: matchingTile,
+      tile: [3, 4],
       end: "right",
     });
     expect(r1.success).toBe(true);
-    state = r1.newState;
-    expect(state.consecutivePasses).toBe(0);
+    expect(r1.newState.consecutivePasses).toBe(0);
   });
 });
 
@@ -186,7 +244,7 @@ describe("applyMove - DOMINÓ scoring", () => {
       targetScore: 100,
       scores: [0, 0],
       roundIndex: 0,
-      hands: { n: [[1, 2], [3, 4]], s: [] },
+      hands: { n: [[3, 4]], s: [[1, 2]] },
       board: [[5, 5], [5, 3], [3, 1]],
       boneyard: [],
       currentTurn: "s",
@@ -197,7 +255,7 @@ describe("applyMove - DOMINÓ scoring", () => {
       lastCalloutPayload: null,
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
-      lastPlayedBy: "s",
+      lastPlayedBy: "n",
     };
     const result = applyMove(state, "s", {
       type: "play",
@@ -252,12 +310,10 @@ describe("applyMove - TRANCAO scoring", () => {
 
 describe("scoring - isCapicua", () => {
   it("returns true when both ends match and tile is not double/blank", () => {
-    const { isCapicua } = require("@/lib/engine/scoring");
     const board: [number, number][] = [[4, 5], [5, 3], [3, 4]];
     expect(isCapicua(board, [4, 3])).toBe(true);
   });
   it("returns false for double", () => {
-    const { isCapicua } = require("@/lib/engine/scoring");
     const board: [number, number][] = [[3, 3]];
     expect(isCapicua(board, [3, 3])).toBe(false);
   });
