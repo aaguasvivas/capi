@@ -9,7 +9,6 @@ import {
   scoreDomino,
   scoreTrancao,
   isCapicua,
-  handPips,
   teamPips,
   CAPICUA_BONUS,
   VEINTICINCO_BONUS,
@@ -162,8 +161,7 @@ export function createInitialState(params: {
 function endRoundWithDomino(
   state: GameState,
   winningTeam: 0 | 1,
-  lastTile: Tile,
-  lastPlayedBy: Seat
+  lastTile: Tile
 ): GameState {
   let pts = scoreDomino(state, winningTeam);
   let callout: MoveResult["callout"] = "domino";
@@ -277,8 +275,7 @@ export function applyMove(
       const newState = endRoundWithDomino(
         { ...state, hands: { ...state.hands, [seat]: newHand }, board: newBoard },
         winningTeam,
-        intent.tile,
-        seat
+        intent.tile
       );
       return {
         success: true,
@@ -297,6 +294,25 @@ export function applyMove(
       consecutivePasses: 0,
       passesSinceLastPlay: 0,
       lastPlayedBy: seat,
+    };
+    return { success: true, newState };
+  }
+
+  if (intent.type === "draw") {
+    const hand = state.hands[seat] ?? [];
+    const newBoneyard = [...state.boneyard];
+    const newHand = [...hand];
+
+    while (newBoneyard.length > 0) {
+      const drawn = newBoneyard.pop()!;
+      newHand.push(drawn);
+      if (hasLegalPlay(newHand, state.board)) break;
+    }
+
+    const newState: GameState = {
+      ...state,
+      hands: { ...state.hands, [seat]: newHand },
+      boneyard: newBoneyard,
     };
     return { success: true, newState };
   }

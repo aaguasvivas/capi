@@ -63,9 +63,18 @@ export function validateMove(
     const matchesRight = tileMatchesEnd(intent.tile, right);
     if (intent.end === "left" && !matchesLeft) return "Tile does not match left end";
     if (intent.end === "right" && !matchesRight) return "Tile does not match right end";
-    if (intent.end === "left" && intent.end === "right") {
-      // both ends - either is fine if tile matches both
-      if (!matchesLeft && !matchesRight) return "Tile matches neither end";
+    return null;
+  }
+
+  if (intent.type === "draw") {
+    if (state.is2v2) {
+      return "Draw is not allowed in 2v2 (no boneyard)";
+    }
+    if (state.boneyard.length === 0) {
+      return "Boneyard is empty";
+    }
+    if (hasLegalPlay(hand, state.board)) {
+      return "Must play if you have a legal move";
     }
     return null;
   }
@@ -73,6 +82,9 @@ export function validateMove(
   if (intent.type === "pass") {
     if (hasLegalPlay(hand, state.board)) {
       return "Must play if you have a legal move";
+    }
+    if (!state.is2v2 && state.boneyard.length > 0) {
+      return "Must draw from the boneyard first";
     }
     return null;
   }
