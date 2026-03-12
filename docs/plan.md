@@ -340,12 +340,30 @@ function applyMove(
 
 ### Milestone 4: Callouts + Polish
 
-**Goal**: Full-screen skippable callouts, sound toggle, theme selector.
+**Goal**: Full-screen skippable callouts, sound toggle, theme selector, and gameplay/UI polish.
 
+#### Callouts & Sound
 - `CalloutOverlay` component: DOMINÓ, TRANCAO, CAPICÚA, VEINTICINCO
 - Sound effects (mp3) + toggle (localStorage)
 - Theme tokens: barberia, colmado, patio (subtle textures/accent colors)
 - Game creation: theme picker
+
+#### Gameplay Feel
+- Draw animation: reveal tiles one at a time with ~300ms delay instead of all at once
+- Draw feedback: show "Drew N tiles" message so opponent understands what happened
+- Tile placement animation: slide tile onto the board
+- Turn indicator: clear visual pulse/highlight when it's your turn
+
+#### Visual / UI
+- Board layout: wrap/bend the chain at edges like a real domino table
+- Tile design: dot pips instead of numbers, divider line, rounded corners
+- Opponent hand: show face-down tile backs instead of just a text count
+- Mobile responsiveness: hand and board scaling on smaller screens
+
+#### Game Flow
+- Round transition: "Next Round" button after round_over
+- Game over screen: celebratory finish with final stats
+- Sound effects: tile slam, draw sound, callout jingles
 
 **Files**: `src/components/game/CalloutOverlay.tsx`, `public/sounds/`, `tailwind.config.ts`, CSS variables
 

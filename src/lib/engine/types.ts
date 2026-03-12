@@ -39,7 +39,7 @@ export interface GameState {
 }
 
 export interface MoveIntent {
-  type: "play" | "pass";
+  type: "play" | "pass" | "draw";
   tile?: Tile;
   end?: "left" | "right";
 }
@@ -52,18 +52,17 @@ export interface MoveResult {
   calloutPayload?: Record<string, unknown>;
 }
 
-const SEATS: Seat[] = ["n", "e", "s", "w"];
 const SEAT_ORDER: Seat[] = ["n", "e", "s", "w"];
 
 export function getNextSeat(seat: Seat, is2v2: boolean): Seat {
-  const order = is2v2 ? SEAT_ORDER : (["n", "s"] as const);
+  const order: Seat[] = is2v2 ? SEAT_ORDER : ["n", "s"];
   const idx = order.indexOf(seat);
   const nextIdx = (idx + 1) % order.length;
   return order[nextIdx];
 }
 
 export function getSeatsForGame(is2v2: boolean): Seat[] {
-  return is2v2 ? SEATS : ["n", "s"];
+  return is2v2 ? ["n", "e", "s", "w"] : ["n", "s"];
 }
 
 export function getTeam(seat: Seat, is2v2: boolean): 0 | 1 {

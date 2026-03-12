@@ -54,16 +54,79 @@ describe("validateMove", () => {
     expect(err).toContain("play");
   });
 
-  it("accepts pass when no legal play", () => {
+  it("accepts pass when no legal play and boneyard empty", () => {
     const state: GameState = {
       ...baseState,
       hands: {
         ...baseState.hands,
         s: [[1, 1], [2, 2]],
       },
+      boneyard: [],
     };
     const err = validateMove(state, "s", { type: "pass" });
     expect(err).toBeNull();
+  });
+
+  it("rejects pass when boneyard has tiles (1v1)", () => {
+    const state: GameState = {
+      ...baseState,
+      hands: {
+        ...baseState.hands,
+        s: [[1, 1], [2, 2]],
+      },
+      boneyard: [[0, 0]],
+    };
+    const err = validateMove(state, "s", { type: "pass" });
+    expect(err).toContain("draw");
+  });
+
+  it("accepts draw when no legal play and boneyard has tiles", () => {
+    const state: GameState = {
+      ...baseState,
+      hands: {
+        ...baseState.hands,
+        s: [[1, 1], [2, 2]],
+      },
+      boneyard: [[0, 0], [4, 4]],
+    };
+    const err = validateMove(state, "s", { type: "draw" });
+    expect(err).toBeNull();
+  });
+
+  it("rejects draw when boneyard is empty", () => {
+    const state: GameState = {
+      ...baseState,
+      hands: {
+        ...baseState.hands,
+        s: [[1, 1], [2, 2]],
+      },
+      boneyard: [],
+    };
+    const err = validateMove(state, "s", { type: "draw" });
+    expect(err).toContain("empty");
+  });
+
+  it("rejects draw when legal play exists", () => {
+    const state: GameState = {
+      ...baseState,
+      boneyard: [[0, 0]],
+    };
+    const err = validateMove(state, "s", { type: "draw" });
+    expect(err).toContain("play");
+  });
+
+  it("rejects draw in 2v2 mode", () => {
+    const state: GameState = {
+      ...baseState,
+      is2v2: true,
+      hands: {
+        ...baseState.hands,
+        s: [[1, 1], [2, 2]],
+      },
+      boneyard: [[0, 0]],
+    };
+    const err = validateMove(state, "s", { type: "draw" });
+    expect(err).toContain("2v2");
   });
 });
 
