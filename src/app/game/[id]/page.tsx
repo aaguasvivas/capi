@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useGameState } from "@/hooks/useGameState";
+import { useRealtimeGame } from "@/hooks/useRealtimeGame";
 import Board from "@/components/game/Board";
 import Hand from "@/components/game/Hand";
 import ScorePanel from "@/components/game/ScorePanel";
@@ -47,7 +47,7 @@ export default function GamePage() {
     lastCalloutPayload,
     submitMove,
     clearCallout,
-  } = useGameState(id, session);
+  } = useRealtimeGame(id, session);
 
   function handlePlay(tile: Tile, end: "left" | "right") {
     submitMove({ type: "play", tile, end });
