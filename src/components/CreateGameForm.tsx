@@ -4,13 +4,45 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const AVATAR_COLORS = [
-  "#6366f1", "#ec4899", "#f59e0b", "#10b981", "#3b82f6", "#ef4444",
+  "#6366f1",
+  "#ec4899",
+  "#f59e0b",
+  "#10b981",
+  "#3b82f6",
+  "#ef4444",
 ];
+
+const THEMES = [
+  {
+    id: "barberia" as const,
+    label: "Barbería",
+    color: "#145228",
+    accent: "#c0392b",
+    desc: "La clásica",
+  },
+  {
+    id: "colmado" as const,
+    label: "Colmado",
+    color: "#3a2a1a",
+    accent: "#d4a017",
+    desc: "Del barrio",
+  },
+  {
+    id: "patio" as const,
+    label: "Patio",
+    color: "#7a7268",
+    accent: "#c4693d",
+    desc: "Al aire libre",
+  },
+];
+
+type ThemeId = "barberia" | "colmado" | "patio";
 
 export default function CreateGameForm() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
+  const [theme, setTheme] = useState<ThemeId>("barberia");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -24,7 +56,7 @@ export default function CreateGameForm() {
       const res = await fetch("/api/games", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), avatarColor }),
+        body: JSON.stringify({ nickname: nickname.trim(), avatarColor, theme }),
       });
 
       const data = await res.json();
@@ -34,7 +66,6 @@ export default function CreateGameForm() {
         return;
       }
 
-      // Store session in localStorage
       localStorage.setItem(
         `capi_session_${data.gameId}`,
         JSON.stringify({
@@ -53,10 +84,10 @@ export default function CreateGameForm() {
   }
 
   return (
-    <form onSubmit={handleCreate} className="space-y-4">
+    <form onSubmit={handleCreate} className="space-y-5">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Your nickname
+          Tu nombre
         </label>
         <input
           type="text"
@@ -70,7 +101,7 @@ export default function CreateGameForm() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Your color
+          Tu color
         </label>
         <div className="flex gap-2">
           {AVATAR_COLORS.map((c) => (
@@ -79,10 +110,43 @@ export default function CreateGameForm() {
               type="button"
               onClick={() => setAvatarColor(c)}
               className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                avatarColor === c ? "border-gray-900 scale-110" : "border-transparent"
+                avatarColor === c
+                  ? "border-gray-900 scale-110"
+                  : "border-transparent"
               }`}
               style={{ backgroundColor: c }}
             />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Mesa
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {THEMES.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTheme(t.id)}
+              className={`py-3 px-2 rounded-xl border-2 transition-all text-center ${
+                theme === t.id
+                  ? "border-gray-900 shadow-md"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <div
+                className="w-full h-8 rounded-lg mb-1.5"
+                style={{
+                  background: `linear-gradient(135deg, ${t.color}, ${t.accent})`,
+                }}
+              />
+              <span className="text-xs font-semibold text-gray-800 block">
+                {t.label}
+              </span>
+              <span className="text-[10px] text-gray-400">{t.desc}</span>
+            </button>
           ))}
         </div>
       </div>
@@ -94,7 +158,7 @@ export default function CreateGameForm() {
         disabled={loading || !nickname.trim()}
         className="w-full bg-gray-900 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-700 transition-colors"
       >
-        {loading ? "Creating…" : "Create game"}
+        {loading ? "Creando…" : "Crear partida"}
       </button>
     </form>
   );

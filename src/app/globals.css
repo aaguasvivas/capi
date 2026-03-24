@@ -1,3 +1,230 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Barbería ─────────────────────────────────────────────
+   The barbershop in Villa Mella. Green felt table under a
+   hanging lamp. Mirrors on cream walls. Barber pole stripes.
+   The regulars argue over whose turn it is.
+   ──────────────────────────────────────────────────────── */
+:root,
+[data-theme="barberia"] {
+  --board-bg: #145228;
+  --board-felt: #2e8a4e;
+  --page-bg: #f5f0e8;
+  --score-bg: #2a1210;
+  --score-text: #f5f0e8;
+  --accent: #c0392b;
+  --accent-light: #e74c3c;
+  --hand-bg: #ebe4d4;
+}
+
+/* ── Colmado ──────────────────────────────────────────────
+   The corner store on your block. Beat-up brown folding table
+   between Presidente crates. Yellow walls, shelf lines,
+   fluorescent buzz overhead. Alguien pide una fría.
+   ──────────────────────────────────────────────────────── */
+[data-theme="colmado"] {
+  --board-bg: #3a2a1a;
+  --board-felt: #4a3828;
+  --page-bg: #f5e6c8;
+  --score-bg: #4a3520;
+  --score-text: #f5e6c8;
+  --accent: #d4a017;
+  --accent-light: #f0c040;
+  --hand-bg: #f0dcc0;
+}
+
+/* ── Patio ────────────────────────────────────────────────
+   Your tía's backyard. Concrete table under the zinc roof.
+   Afternoon sun, warm breeze, mango tree shade.
+   Someone's colmadón is playing bachata next door.
+   ──────────────────────────────────────────────────────── */
+[data-theme="patio"] {
+  --board-bg: #7a7268;
+  --board-felt: #8a8278;
+  --page-bg: #e8d5c0;
+  --score-bg: #5a4a3a;
+  --score-text: #f0ebe3;
+  --accent: #c4693d;
+  --accent-light: #d4845a;
+  --hand-bg: #e0ceb8;
+}
+
+/* ── Page background patterns ─────────────────────────── */
+
+/* Barbería: barber-pole diagonal stripes on cream walls */
+[data-theme="barberia"].theme-pattern {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 14px,
+    rgba(192, 57, 43, 0.10) 14px,
+    rgba(192, 57, 43, 0.10) 16px,
+    transparent 16px,
+    transparent 30px,
+    rgba(41, 82, 163, 0.07) 30px,
+    rgba(41, 82, 163, 0.07) 32px
+  );
+}
+
+/* Colmado: vertical shelf slats on yellow walls */
+[data-theme="colmado"].theme-pattern {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 22px,
+    rgba(74, 53, 32, 0.13) 22px,
+    rgba(74, 53, 32, 0.13) 23px
+  );
+}
+
+/* Patio: floor tile grid on sandy walls */
+[data-theme="patio"].theme-pattern {
+  background-image:
+    linear-gradient(rgba(120, 70, 30, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 70, 30, 0.10) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ── Board surface textures (with built-in vignette lighting) ── */
+
+/* Barbería: green felt under hanging lamp — bright pool of light, dark edges */
+[data-theme="barberia"] .theme-felt {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    #2e8a4e 0%,
+    #1a5c2e 50%,
+    #0e3a1a 100%
+  );
+}
+
+/* Colmado: worn brown table — warm fluorescent glow, dark corners */
+[data-theme="colmado"] .theme-felt {
+  background-color: #2a1e12;
+  background-image:
+    radial-gradient(
+      ellipse at 50% 45%,
+      rgba(255, 200, 100, 0.10) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 35%,
+      rgba(0, 0, 0, 0.30) 100%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.07) 3px,
+      rgba(0, 0, 0, 0.07) 4px,
+      transparent 4px,
+      transparent 11px,
+      rgba(0, 0, 0, 0.04) 11px,
+      rgba(0, 0, 0, 0.04) 12px
+    );
+}
+
+/* Patio: concrete under afternoon sun — golden warmth, natural shadow */
+[data-theme="patio"] .theme-felt {
+  background-color: #6e6660;
+  background-image:
+    radial-gradient(
+      ellipse at 55% 45%,
+      rgba(255, 220, 150, 0.06) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 30%,
+      rgba(0, 0, 0, 0.25) 100%
+    ),
+    linear-gradient(rgba(0, 0, 0, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.10) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
+}
+
+/* ── Light temperature overlays ───────────────────────── */
+
+/* Barbería: cool fluorescent tube tint */
+[data-theme="barberia"] .theme-light {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(180, 200, 240, 0.03) 0%,
+    rgba(5, 10, 25, 0.12) 100%
+  );
+}
+
+/* Colmado: warm buzzy fluorescent tint */
+[data-theme="colmado"] .theme-light {
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgba(255, 220, 140, 0.04) 0%,
+    rgba(20, 12, 3, 0.15) 100%
+  );
+}
+
+/* Patio: golden afternoon sun tint */
+[data-theme="patio"] .theme-light {
+  background: radial-gradient(
+    ellipse at 55% 40%,
+    rgba(255, 235, 180, 0.05) 0%,
+    rgba(25, 20, 10, 0.10) 100%
+  );
+}
+
+/* ── Hand area textures ───────────────────────────────── */
+
+/* Barbería: felt bleeds to the table edge */
+[data-theme="barberia"] .theme-hand-texture {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(20, 82, 40, 0.06) 0%,
+    transparent 50%
+  );
+}
+
+/* Colmado: scratched wood grain continues */
+[data-theme="colmado"] .theme-hand-texture {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 5px,
+    rgba(60, 40, 20, 0.04) 5px,
+    rgba(60, 40, 20, 0.04) 6px
+  );
+}
+
+/* Patio: rough concrete surface continues */
+[data-theme="patio"] .theme-hand-texture {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ── Mobile responsiveness ────────────────────────────── */
+
+@media (max-width: 400px) {
+  .theme-pattern {
+    font-size: 14px;
+  }
+}
+
+/* Safe area for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .min-h-screen {
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+/* ── Utilities ────────────────────────────────────────── */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
