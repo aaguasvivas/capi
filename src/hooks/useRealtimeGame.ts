@@ -25,6 +25,22 @@ interface MoveIntentPayload {
   end?: "left" | "right";
 }
 
+export interface ChatMessage {
+  id: string;
+  playerId: string;
+  seat: string;
+  type: "quick_chat" | "emote";
+  payload: string;
+  isMe: boolean;
+}
+
+interface ChatBroadcastPayload {
+  playerId: string;
+  seat: string;
+  type: "quick_chat" | "emote";
+  payload: string;
+}
+
 function tileEqual(a: Tile, b: Tile): boolean {
   return (
     (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])
@@ -69,11 +85,17 @@ export function useRealtimeGame(
     string,
     unknown
   > | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const versionRef = useRef(stateVersion);
   versionRef.current = stateVersion;
 
   const preOptimisticRef = useRef<GameState | null>(null);
+
+  // Ref to the broadcast channel so sendChat can access it without recreating
+  const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
+    null
+  );
 
   const fetchGame = useCallback(async () => {
     try {
@@ -103,6 +125,7 @@ export function useRealtimeGame(
     fetchGame();
   }, [fetchGame]);
 
+  // Postgres Changes — game state
   useEffect(() => {
     const channel = supabase
       .channel(`game-${gameId}`)
@@ -139,6 +162,7 @@ export function useRealtimeGame(
     };
   }, [gameId, fetchGame]);
 
+  // Postgres Changes — players joining
   useEffect(() => {
     const channel = supabase
       .channel(`players-${gameId}`)
@@ -160,6 +184,44 @@ export function useRealtimeGame(
       supabase.removeChannel(channel);
     };
   }, [gameId, fetchGame]);
+
+  // Broadcast channel — ephemeral chat delivery
+  useEffect(() => {
+    const channel = supabase
+      .channel(`chat-${gameId}`, {
+        config: { broadcast: { self: false } },
+      })
+      .on(
+        "broadcast",
+        { event: "chat" },
+        ({ payload }: { payload: ChatBroadcastPayload }) => {
+          if (!payload?.playerId) return;
+
+          const msg: ChatMessage = {
+            id: `${Date.now()}-${Math.random()}`,
+            playerId: payload.playerId,
+            seat: payload.seat,
+            type: payload.type,
+            payload: payload.payload,
+            isMe: payload.playerId === session?.playerId,
+          };
+
+          setChatMessages((prev) => {
+            // Keep at most 3 newest messages
+            const next = [...prev, msg];
+            return next.slice(-3);
+          });
+        }
+      )
+      .subscribe();
+
+    chatChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      chatChannelRef.current = null;
+    };
+  }, [gameId, session?.playerId]);
 
   const submitMove = useCallback(
     async (intent: MoveIntentPayload) => {
@@ -240,9 +302,53 @@ export function useRealtimeGame(
     [gameId, session, fetchGame, gameState]
   );
 
+  const sendChat = useCallback(
+    async (type: "quick_chat" | "emote", payload: string) => {
+      if (!session) return;
+
+      const broadcastPayload: ChatBroadcastPayload = {
+        playerId: session.playerId,
+        seat: session.seat,
+        type,
+        payload,
+      };
+
+      // Add to local state immediately (sender sees their own message)
+      const msg: ChatMessage = {
+        id: `${Date.now()}-${Math.random()}`,
+        ...broadcastPayload,
+        isMe: true,
+      };
+      setChatMessages((prev) => [...prev, msg].slice(-3));
+
+      // Broadcast to the other player instantly (ephemeral)
+      chatChannelRef.current?.send({
+        type: "broadcast",
+        event: "chat",
+        payload: broadcastPayload,
+      });
+
+      // Persist for audit — fire and forget
+      fetch(`/api/games/${gameId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerId: session.playerId,
+          type,
+          payload,
+        }),
+      }).catch(() => {});
+    },
+    [gameId, session]
+  );
+
   const clearCallout = useCallback(() => {
     setLastCallout(null);
     setLastCalloutPayload(null);
+  }, []);
+
+  const dismissChat = useCallback((id: string) => {
+    setChatMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
   return {
@@ -253,7 +359,10 @@ export function useRealtimeGame(
     error,
     lastCallout,
     lastCalloutPayload,
+    chatMessages,
     submitMove,
+    sendChat,
     clearCallout,
+    dismissChat,
   };
 }

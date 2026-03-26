@@ -3,16 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useRealtimeGame } from "@/hooks/useRealtimeGame";
+import type { ChatMessage } from "@/hooks/useRealtimeGame";
 import Board from "@/components/game/Board";
 import Hand from "@/components/game/Hand";
 import ScorePanel from "@/components/game/ScorePanel";
 import CalloutOverlay from "@/components/game/CalloutOverlay";
 import TileDisplay from "@/components/game/TileDisplay";
+import QuickChat from "@/components/game/QuickChat";
 import type { Tile } from "@/lib/engine/types";
 import {
   playSlam,
   playDraw as playDrawSound,
   playCallout,
+  playChatReceive,
   isMuted,
   setMuted,
   loadMuteState,
@@ -31,6 +34,10 @@ interface Toast {
   phase: "in" | "out";
 }
 
+interface ChatBubble extends ChatMessage {
+  phase: "in" | "out";
+}
+
 let toastId = 0;
 
 export default function GamePage() {
@@ -41,6 +48,12 @@ export default function GamePage() {
   const [muted, setMutedState] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
+  const [chatBubbles, setChatBubbles] = useState<ChatBubble[]>([]);
+
+  // Track which chat message IDs we've already displayed
+  const seenChatIdsRef = useRef<Set<string>>(new Set());
+  // Timer refs per bubble for cleanup
+  const bubbleTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Refs for detecting changes
   const prevBoardLenRef = useRef(0);
@@ -71,7 +84,9 @@ export default function GamePage() {
     error,
     lastCallout,
     lastCalloutPayload,
+    chatMessages,
     submitMove,
+    sendChat,
     clearCallout,
   } = useRealtimeGame(id, session);
 
@@ -86,6 +101,48 @@ export default function GamePage() {
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== tid));
     }, 2300);
+  }, []);
+
+  // Spawn chat bubbles from incoming chatMessages
+  useEffect(() => {
+    for (const msg of chatMessages) {
+      if (seenChatIdsRef.current.has(msg.id)) continue;
+      seenChatIdsRef.current.add(msg.id);
+
+      // Play notification for opponent messages
+      if (!msg.isMe) {
+        playChatReceive();
+      }
+
+      const bubble: ChatBubble = { ...msg, phase: "in" };
+
+      setChatBubbles((prev) => {
+        // Keep at most 3 bubbles; drop oldest if needed
+        const next = [...prev, bubble].slice(-3);
+        return next;
+      });
+
+      // Switch to fade-out after 2.5s
+      const fadeTimer = setTimeout(() => {
+        setChatBubbles((prev) =>
+          prev.map((b) => (b.id === msg.id ? { ...b, phase: "out" } : b))
+        );
+        // Remove after animation completes
+        const removeTimer = setTimeout(() => {
+          setChatBubbles((prev) => prev.filter((b) => b.id !== msg.id));
+          bubbleTimersRef.current.delete(msg.id);
+        }, 350);
+        bubbleTimersRef.current.set(`${msg.id}-rm`, removeTimer);
+      }, 2500);
+      bubbleTimersRef.current.set(msg.id, fadeTimer);
+    }
+  }, [chatMessages]);
+
+  // Cleanup bubble timers on unmount
+  useEffect(() => {
+    return () => {
+      bubbleTimersRef.current.forEach((t) => clearTimeout(t));
+    };
   }, []);
 
   function handlePlay(tile: Tile, end: "left" | "right") {
@@ -263,6 +320,10 @@ export default function GamePage() {
         : null;
   const iWonRound = roundWinnerTeam === myTeam;
 
+  // Split bubbles by sender position for layout
+  const myBubbles = chatBubbles.filter((b) => b.isMe);
+  const oppBubbles = chatBubbles.filter((b) => !b.isMe);
+
   return (
     <div
       data-theme={gameState.theme}
@@ -322,6 +383,38 @@ export default function GamePage() {
           >
             {muted ? "🔇" : "🔊"}
           </button>
+
+          {/* QuickChat toggle — floats on board bottom-left */}
+          {!isGameEnded && (
+            <div className="absolute bottom-2 left-2 z-[3]">
+              <QuickChat
+                onSend={sendChat}
+                disabled={false}
+              />
+            </div>
+          )}
+
+          {/* My chat bubbles — above QuickChat button, left side */}
+          <div className="absolute bottom-12 left-2 z-[4] flex flex-col-reverse gap-1.5 items-start max-w-[180px]">
+            {myBubbles.map((b) => (
+              <ChatBubbleDisplay
+                key={b.id}
+                bubble={b}
+                accentColor={myPlayer?.avatar_color ?? "#6366f1"}
+              />
+            ))}
+          </div>
+
+          {/* Opponent chat bubbles — near opponent hand, left side */}
+          <div className="absolute top-14 left-2 z-[4] flex flex-col gap-1.5 items-start max-w-[180px]">
+            {oppBubbles.map((b) => (
+              <ChatBubbleDisplay
+                key={b.id}
+                bubble={b}
+                accentColor={oppPlayer?.avatar_color ?? "#999"}
+              />
+            ))}
+          </div>
 
           {/* Location watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
@@ -531,6 +624,47 @@ export default function GamePage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Chat Bubble Display ──────────────────────────────────────────────────────
+
+interface ChatBubbleDisplayProps {
+  bubble: ChatBubble;
+  accentColor: string;
+}
+
+function ChatBubbleDisplay({ bubble, accentColor }: ChatBubbleDisplayProps) {
+  const isEmote = bubble.type === "emote";
+  const animClass =
+    bubble.phase === "in"
+      ? isEmote
+        ? "animate-emote-pop"
+        : "animate-chat-bubble-in"
+      : "animate-chat-bubble-out";
+
+  if (isEmote) {
+    return (
+      <div className={`text-3xl leading-none select-none ${animClass}`}>
+        {bubble.payload}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`
+        px-3 py-1.5 rounded-2xl text-white text-sm font-bold
+        shadow-lg max-w-full break-words leading-tight
+        ${animClass}
+      `}
+      style={{
+        backgroundColor: accentColor,
+        boxShadow: `0 2px 12px ${accentColor}55`,
+      }}
+    >
+      {bubble.payload}
     </div>
   );
 }

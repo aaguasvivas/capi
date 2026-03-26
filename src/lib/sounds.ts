@@ -141,6 +141,39 @@ export function playDraw() {
   }
 }
 
+export function playChatReceive() {
+  if (_muted) return;
+  try {
+    const c = getCtx();
+    const t = c.currentTime;
+    // Two-tone "pop" — high soft click followed by a gentle resonant tone
+    const osc1 = c.createOscillator();
+    const gain1 = c.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(880, t);
+    osc1.frequency.exponentialRampToValueAtTime(660, t + 0.06);
+    gain1.gain.setValueAtTime(0.15, t);
+    gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    osc1.connect(gain1);
+    gain1.connect(c.destination);
+    osc1.start(t);
+    osc1.stop(t + 0.08);
+
+    const osc2 = c.createOscillator();
+    const gain2 = c.createGain();
+    osc2.type = "triangle";
+    osc2.frequency.setValueAtTime(440, t + 0.05);
+    gain2.gain.setValueAtTime(0.08, t + 0.05);
+    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    osc2.connect(gain2);
+    gain2.connect(c.destination);
+    osc2.start(t + 0.05);
+    osc2.stop(t + 0.2);
+  } catch {
+    /* silent fail */
+  }
+}
+
 export function playCallout() {
   if (_muted) return;
   try {
