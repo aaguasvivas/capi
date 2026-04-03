@@ -104,6 +104,10 @@ export interface Strings {
 
   // Errors
   errorStartRound: string;
+
+  // Target score
+  score100: string;
+  score200: string;
 }
 
 export const es: Strings = {
@@ -195,6 +199,9 @@ export const es: Strings = {
   opponentDrew: (n) => `Oponente jaló ${n} ficha${n !== 1 ? "s" : ""}`,
 
   errorStartRound: "Error al iniciar ronda",
+
+  score100: "100 puntos",
+  score200: "200 puntos",
 };
 
 export const en: Strings = {
@@ -286,6 +293,9 @@ export const en: Strings = {
   opponentDrew: (n) => `They drew ${n} tile${n !== 1 ? "s" : ""}`,
 
   errorStartRound: "Couldn't start the round",
+
+  score100: "100 pts",
+  score200: "200 pts",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

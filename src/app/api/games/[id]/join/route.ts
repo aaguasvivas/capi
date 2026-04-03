@@ -90,6 +90,7 @@ export async function POST(
       mode: game.mode,
       theme: game.theme,
       is2v2,
+      targetScore: game.settings?.targetScore ?? 100,
     });
 
     const playersByState: Record<Seat, PlayerInfo | null> = { n: null, e: null, s: null, w: null };

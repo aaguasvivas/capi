@@ -22,6 +22,7 @@ export default function CreateGameForm() {
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [theme, setTheme] = useState<ThemeId>("barberia");
   const [is2v2, setIs2v2] = useState(false);
+  const [targetScore, setTargetScore] = useState<100 | 200>(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -41,7 +42,7 @@ export default function CreateGameForm() {
       const res = await fetch("/api/games", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), avatarColor, theme, is2v2 }),
+        body: JSON.stringify({ nickname: nickname.trim(), avatarColor, theme, is2v2, targetScore }),
       });
 
       const data = await res.json();
@@ -165,6 +166,36 @@ export default function CreateGameForm() {
             <span className="text-lg block">👥 vs 👥</span>
             <span className="text-xs font-semibold text-gray-800 block mt-1">2v2</span>
             <span className="text-[10px] text-gray-400">{s.conTuFrente}</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          {s.firstTo}
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setTargetScore(100)}
+            className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
+              targetScore === 100
+                ? "border-gray-900 shadow-md bg-gray-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span className="text-xs font-semibold text-gray-800 block">{s.score100}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTargetScore(200)}
+            className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
+              targetScore === 200
+                ? "border-gray-900 shadow-md bg-gray-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span className="text-xs font-semibold text-gray-800 block">{s.score200}</span>
           </button>
         </div>
       </div>

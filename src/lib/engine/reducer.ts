@@ -89,8 +89,9 @@ export function createInitialState(params: {
   mode: GameState["mode"];
   theme: GameState["theme"];
   is2v2: boolean;
+  targetScore?: number;
 }): GameState {
-  const { mode, theme, is2v2 } = params;
+  const { mode, theme, is2v2, targetScore = 100 } = params;
   const seats = getSeatsForGame(is2v2);
   const shuffled = shuffle(ALL_TILES);
   const hands: Record<Seat, Tile[]> = {
@@ -141,7 +142,7 @@ export function createInitialState(params: {
     mode,
     theme,
     is2v2,
-    targetScore: 100,
+    targetScore,
     scores: [0, 0],
     roundIndex: 0,
     hands,
