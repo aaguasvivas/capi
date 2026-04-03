@@ -114,10 +114,8 @@ export function useRealtimeGame(
         setGameSettings(data.game.settings);
       }
       setError(null);
-      if (gs?.lastCallout) {
-        setLastCallout(gs.lastCallout);
-        setLastCalloutPayload(gs.lastCalloutPayload ?? null);
-      }
+      setLastCallout(gs?.lastCallout ?? null);
+      setLastCalloutPayload(gs?.lastCalloutPayload ?? null);
     } catch {
       setError("Connection error");
     } finally {
@@ -149,10 +147,8 @@ export function useRealtimeGame(
             preOptimisticRef.current = null;
             setGameState(gs);
             setStateVersion(sv);
-            if (gs?.lastCallout) {
-              setLastCallout(gs.lastCallout);
-              setLastCalloutPayload(gs.lastCalloutPayload ?? null);
-            }
+            setLastCallout(gs?.lastCallout ?? null);
+            setLastCalloutPayload(gs?.lastCalloutPayload ?? null);
           }
           if (updated.status === "playing" && !gs) {
             fetchGame();
@@ -369,5 +365,6 @@ export function useRealtimeGame(
     sendChat,
     clearCallout,
     dismissChat,
+    refetch: fetchGame,
   };
 }

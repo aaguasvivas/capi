@@ -101,6 +101,7 @@ export default function GamePage() {
     submitMove,
     sendChat,
     clearCallout,
+    refetch,
   } = useRealtimeGame(id, session);
 
   const showToast = useCallback((message: string) => {
@@ -193,6 +194,8 @@ export default function GamePage() {
       if (!res.ok) {
         const data = await res.json();
         showToast(data.error ?? s.errorStartRound);
+      } else {
+        await refetch();
       }
     } catch {
       showToast(s.connectionError);
