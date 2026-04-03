@@ -15,7 +15,7 @@ function generateInviteCode(): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nickname, avatarColor = "#6366f1", mode = "turn_based", theme = "barberia" } = body;
+    const { nickname, avatarColor = "#6366f1", mode = "turn_based", theme = "barberia", is2v2 = false } = body;
 
     if (!nickname || typeof nickname !== "string" || nickname.trim().length === 0) {
       return NextResponse.json({ error: "Nickname is required" }, { status: 400 });
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         theme,
         status: "waiting",
         state_version: 0,
-        settings: { targetScore: 100, is2v2: false },
+        settings: { targetScore: 100, is2v2: !!is2v2 },
       })
       .select()
       .single();

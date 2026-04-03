@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/lib/i18n/context";
 
 const AVATAR_COLORS = [
   "#ec4899", "#6366f1", "#f59e0b", "#10b981", "#3b82f6", "#ef4444",
@@ -13,12 +14,13 @@ interface Props {
 
 export default function JoinGameForm({ prefillCode = "" }: Props) {
   const router = useRouter();
+  const { s } = useI18n();
   const [inviteCode, setInviteCode] = useState("");
 
-  // Sync when prefillCode arrives asynchronously (from ?join= URL lookup)
   useEffect(() => {
     if (prefillCode) setInviteCode(prefillCode.toUpperCase());
   }, [prefillCode]);
+
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [loading, setLoading] = useState(false);
@@ -31,10 +33,9 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
     setError("");
 
     try {
-      // Look up game by invite code
       const lookupRes = await fetch(`/api/games/by-code/${inviteCode.trim().toUpperCase()}`);
       if (!lookupRes.ok) {
-        setError("Game not found — check the invite code");
+        setError(s.gameNotFound);
         return;
       }
       const { gameId } = await lookupRes.json();
@@ -48,7 +49,7 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
       const data = await joinRes.json();
 
       if (!joinRes.ok) {
-        setError(data.error ?? "Failed to join game");
+        setError(data.error ?? s.failedJoin);
         return;
       }
 
@@ -63,7 +64,7 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
 
       router.push(`/game/${gameId}`);
     } catch {
-      setError("Network error — try again");
+      setError(s.networkError);
     } finally {
       setLoading(false);
     }
@@ -72,8 +73,8 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
   return (
     <form onSubmit={handleJoin} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Invite code
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+          {s.inviteCode}
         </label>
         <input
           type="text"
@@ -81,36 +82,36 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
           onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
           maxLength={6}
           placeholder="XXXXXX"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-400 transition-all bg-gray-50/50 tracking-[0.3em] text-center"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Your nickname
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+          {s.yourName}
         </label>
         <input
           type="text"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           maxLength={20}
-          placeholder="e.g. ElTiburon"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder={s.joinNamePlaceholder}
+          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-400 transition-all bg-gray-50/50"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Your color
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          {s.yourColor}
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-2.5">
           {AVATAR_COLORS.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setAvatarColor(c)}
-              className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                avatarColor === c ? "border-gray-900 scale-110" : "border-transparent"
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
+                avatarColor === c ? "border-gray-900 scale-110 shadow-md" : "border-transparent hover:scale-105"
               }`}
               style={{ backgroundColor: c }}
             />
@@ -118,14 +119,14 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
 
       <button
         type="submit"
         disabled={loading || !nickname.trim() || inviteCode.length !== 6}
-        className="w-full bg-gray-900 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-700 transition-colors"
+        className="w-full bg-gray-900 text-white rounded-xl py-3 text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
       >
-        {loading ? "Joining…" : "Join game"}
+        {loading ? s.joining : s.joinAction}
       </button>
     </form>
   );

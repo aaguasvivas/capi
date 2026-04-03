@@ -219,6 +219,20 @@
   }
 }
 
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevent overscroll / bounce on iOS */
+html, body {
+  overscroll-behavior: none;
+}
+
 /* ── Utilities ────────────────────────────────────────── */
 
 .scrollbar-hide {
@@ -227,4 +241,16 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Prevent text selection on game elements */
+.select-game-none {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }

@@ -1,34 +1,33 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n/context";
 
 interface QuickChatProps {
   onSend: (type: "quick_chat" | "emote", payload: string) => void;
   disabled?: boolean;
 }
 
-const PHRASES: { label: string; value: string }[] = [
-  { label: "¡Dale!", value: "¡Dale!" },
-  { label: "¡Tranquilo!", value: "¡Tranquilo!" },
-  { label: "¡Aguanta!", value: "¡Aguanta!" },
-  { label: "¡Eso e'!", value: "¡Eso e'!" },
-  { label: "¡Vamo' allá!", value: "¡Vamo' allá!" },
-  { label: "¡Qué lo qué!", value: "¡Qué lo qué!" },
+const PHRASES_ES = [
+  "¡Dale!", "¡Tranquilo!", "¡Aguanta!",
+  "¡Eso e'!", "¡Vamo' allá!", "¡Qué lo qué!",
 ];
 
-const EMOTES: { label: string; value: string }[] = [
-  { label: "🔥", value: "🔥" },
-  { label: "😂", value: "😂" },
-  { label: "😤", value: "😤" },
-  { label: "💀", value: "💀" },
-  { label: "👑", value: "👑" },
+const PHRASES_EN = [
+  "Let's go!", "Chill out!", "Hold up!",
+  "That's crazy!", "We outside!", "Say less!",
 ];
+
+const EMOTES = ["🔥", "😂", "😤", "💀", "👑"];
 
 export default function QuickChat({ onSend, disabled }: QuickChatProps) {
+  const { lang, s } = useI18n();
   const [open, setOpen] = useState(false);
   const [tapped, setTapped] = useState<string | null>(null);
   const inactivityRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const phrases = lang === "en" ? PHRASES_EN : PHRASES_ES;
 
   const resetInactivity = useCallback(() => {
     if (inactivityRef.current) clearTimeout(inactivityRef.current);
@@ -42,7 +41,6 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
     };
   }, [open, resetInactivity]);
 
-  // Close tray when clicking outside
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -67,48 +65,43 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Tray — expands upward */}
       {open && (
         <div className="absolute bottom-full mb-2 left-0 w-[220px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 animate-chat-tray-in">
-          {/* Dark panel with subtle texture feel */}
           <div className="bg-[#1a1208]/95 backdrop-blur-sm p-3 space-y-3">
-            {/* Emotes row */}
             <div className="flex items-center justify-between">
               {EMOTES.map((e) => (
                 <button
-                  key={e.value}
-                  onClick={() => handleSend("emote", e.value)}
+                  key={e}
+                  onClick={() => handleSend("emote", e)}
                   className={`text-xl leading-none w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150 select-none
-                    ${tapped === e.value
+                    ${tapped === e
                       ? "scale-75 bg-white/20"
                       : "scale-100 hover:bg-white/10 active:scale-75"
                     }
                   `}
-                  aria-label={`Emote ${e.label}`}
+                  aria-label={`Emote ${e}`}
                 >
-                  {e.label}
+                  {e}
                 </button>
               ))}
             </div>
 
-            {/* Divider */}
             <div className="h-px bg-white/10" />
 
-            {/* Phrases */}
             <div className="flex flex-col gap-1.5">
-              {PHRASES.map((p) => (
+              {phrases.map((p) => (
                 <button
-                  key={p.value}
-                  onClick={() => handleSend("quick_chat", p.value)}
+                  key={p}
+                  onClick={() => handleSend("quick_chat", p)}
                   className={`text-left text-sm font-bold px-3 py-1.5 rounded-xl transition-all duration-150 select-none
                     text-amber-200
-                    ${tapped === p.value
+                    ${tapped === p
                       ? "scale-95 bg-amber-500/30"
                       : "scale-100 hover:bg-white/10 active:scale-95"
                     }
                   `}
                 >
-                  {p.label}
+                  {p}
                 </button>
               ))}
             </div>
@@ -116,7 +109,6 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
         </div>
       )}
 
-      {/* Toggle button */}
       <button
         onClick={() => {
           if (!disabled) setOpen((prev) => !prev);
@@ -129,8 +121,8 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
           }
           ${disabled ? "opacity-40 cursor-not-allowed" : ""}
         `}
-        title={open ? "Cerrar" : "Chat rápido"}
-        aria-label="Chat rápido"
+        title={open ? s.closeTray : s.quickChat}
+        aria-label={s.quickChat}
       >
         💬
       </button>

@@ -9,6 +9,7 @@ import {
   scoreDomino,
   scoreTrancao,
   isCapicua,
+  handPips,
   teamPips,
   CAPICUA_BONUS,
   VEINTICINCO_BONUS,
@@ -367,21 +368,76 @@ export function applyMove(
   return { success: false, newState: state, error: "Invalid intent" };
 }
 
+/**
+ * Determine which seat won the round and should start next.
+ * DOMINÓ/CAPICÚA/VEINTICINCO → the player who last played.
+ * TRANCAO → the player with fewest individual pips on the winning team.
+ */
+function getRoundWinningSeat(state: GameState): Seat {
+  const callout = state.lastCallout;
+
+  if (callout === "domino" || callout === "capicua" || callout === "veinticinco") {
+    return state.lastPlayedBy ?? state.starterThisRound;
+  }
+
+  if (callout === "trancao") {
+    const winnerTeam = (state.lastCalloutPayload?.winnerTeam as number) ?? 0;
+    const seats = getSeatsForGame(state.is2v2);
+    let bestSeat: Seat = seats[0];
+    let bestPips = Infinity;
+    for (const seat of seats) {
+      if (getTeam(seat, state.is2v2) === winnerTeam) {
+        const pips = handPips(state.hands[seat] ?? []);
+        if (pips < bestPips) {
+          bestPips = pips;
+          bestSeat = seat;
+        }
+      }
+    }
+    return bestSeat;
+  }
+
+  return state.starterThisRound;
+}
+
+/**
+ * Start a new round. The winner of the previous round goes first
+ * with free choice (no auto-play). Board starts empty.
+ */
 export function startNewRound(
   state: GameState,
   existingPlayers: Record<Seat, GameState["players"][Seat]>
 ): GameState {
-  const fresh = createInitialState({
+  const starter = getRoundWinningSeat(state);
+  const seats = getSeatsForGame(state.is2v2);
+  const shuffled = shuffle(ALL_TILES);
+  const hands: Record<Seat, Tile[]> = { n: [], e: [], s: [], w: [] };
+  let idx = 0;
+  for (const seat of seats) {
+    hands[seat] = shuffled.slice(idx, idx + 7);
+    idx += 7;
+  }
+  const boneyard = shuffled.slice(idx);
+
+  return {
+    phase: "playing",
     mode: state.mode,
     theme: state.theme,
     is2v2: state.is2v2,
-  });
-  return {
-    ...fresh,
+    targetScore: state.targetScore,
     scores: state.scores,
     roundIndex: state.roundIndex + 1,
-    phase: "playing",
+    hands,
+    board: [],
+    boneyard,
+    currentTurn: starter,
+    consecutivePasses: 0,
+    passesSinceLastPlay: 0,
+    starterThisRound: starter,
+    lastCallout: null,
+    lastCalloutPayload: null,
     players: existingPlayers,
     winnerTeam: null,
+    lastPlayedBy: null,
   };
 }

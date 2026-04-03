@@ -4,18 +4,40 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import CreateGameForm from "@/components/CreateGameForm";
 import JoinGameForm from "@/components/JoinGameForm";
+import { useI18n } from "@/lib/i18n/context";
+import type { Lang } from "@/lib/i18n/strings";
+
+function LangToggle() {
+  const { lang, setLang } = useI18n();
+  return (
+    <div className="flex items-center bg-white/80 backdrop-blur rounded-full p-0.5 border border-gray-200 shadow-sm">
+      {(["es", "en"] as Lang[]).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${
+            lang === l
+              ? "bg-gray-900 text-white shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          {l === "es" ? "ES" : "EN"}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const joinId = searchParams.get("join");
   const [tab, setTab] = useState<"create" | "join">(joinId ? "join" : "create");
+  const { s } = useI18n();
 
-  // If there's a ?join= param, look up the invite code
   const [prefillCode, setPrefillCode] = useState("");
 
   useEffect(() => {
     if (!joinId) return;
-    // joinId might be a gameId — look up its invite code
     fetch(`/api/games/${joinId}`)
       .then((r) => r.json())
       .then((data) => {
@@ -28,37 +50,45 @@ function HomeContent() {
   }, [joinId]);
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-b from-[#f5f0e8] via-[#f0ebe3] to-[#e8d5c0] flex items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
-        <div className="text-center space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-gray-900">Capi</h1>
-          <p className="text-sm text-gray-500">Dominican Dominoes</p>
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-3">
+            <LangToggle />
+          </div>
+          <h1 className="text-5xl font-black tracking-tight text-gray-900 drop-shadow-sm">
+            Capi
+          </h1>
+          <p className="text-sm text-gray-500 font-medium">{s.tagline}</p>
+          <div className="flex justify-center gap-1 text-2xl opacity-60 select-none">
+            🁣 🁫 🁳 🂃
+          </div>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/80 overflow-hidden">
           {/* Tabs */}
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setTab("create")}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3.5 text-sm font-bold transition-colors ${
                 tab === "create"
                   ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-500 hover:text-gray-700"
+                  : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              Create game
+              {s.createGame}
             </button>
             <button
               onClick={() => setTab("join")}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3.5 text-sm font-bold transition-colors ${
                 tab === "join"
                   ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-500 hover:text-gray-700"
+                  : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              Join game
+              {s.joinGame}
             </button>
           </div>
 
@@ -72,8 +102,8 @@ function HomeContent() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400">
-          No account needed. Just pick a name and play.
+        <p className="text-center text-xs text-gray-400 font-medium">
+          {s.noAccount}
         </p>
       </div>
     </main>

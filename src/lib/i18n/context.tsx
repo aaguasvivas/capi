@@ -1,0 +1,53 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { dictionaries, type Lang, type Strings } from "./strings";
+
+interface I18nCtx {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  s: Strings;
+}
+
+const I18nContext = createContext<I18nCtx>({
+  lang: "es",
+  setLang: () => {},
+  s: dictionaries.es,
+});
+
+const STORAGE_KEY = "capi_lang";
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangRaw] = useState<Lang>("es");
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
+    if (stored === "en" || stored === "es") {
+      setLangRaw(stored);
+    }
+  }, []);
+
+  const setLang = useCallback((l: Lang) => {
+    setLangRaw(l);
+    localStorage.setItem(STORAGE_KEY, l);
+  }, []);
+
+  const s = dictionaries[lang];
+
+  return (
+    <I18nContext.Provider value={{ lang, setLang, s }}>
+      {children}
+    </I18nContext.Provider>
+  );
+}
+
+export function useI18n() {
+  return useContext(I18nContext);
+}

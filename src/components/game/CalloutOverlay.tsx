@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "@/lib/i18n/context";
 
 interface CalloutOverlayProps {
   callout: string;
@@ -58,6 +59,7 @@ export default function CalloutOverlay({
   payload,
   onDismiss,
 }: CalloutOverlayProps) {
+  const { s } = useI18n();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -73,14 +75,12 @@ export default function CalloutOverlay({
       className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer"
       onClick={onDismiss}
     >
-      {/* Backdrop */}
       <div
         className={`absolute inset-0 bg-black/75 transition-opacity duration-300 ${
           mounted ? "opacity-100" : "opacity-0"
         }`}
       />
 
-      {/* Card */}
       <div
         className={`
           relative bg-gradient-to-b ${config.bg}
@@ -104,22 +104,22 @@ export default function CalloutOverlay({
           >
             {typeof payload.pipsAwarded === "number" &&
               payload.pipsAwarded > 0 && (
-                <p>+{payload.pipsAwarded} puntos</p>
+                <p>+{payload.pipsAwarded} {s.points}</p>
               )}
             {typeof payload.capicuaBonus === "number" && (
-              <p>+{payload.capicuaBonus} bonus Capicúa</p>
+              <p>+{payload.capicuaBonus} {s.capicuaBonus}</p>
             )}
             {typeof payload.veinticincoBonus === "number" && (
-              <p>+{payload.veinticincoBonus} bonus</p>
+              <p>+{payload.veinticincoBonus} {s.bonus}</p>
             )}
             {typeof payload.pts === "number" && payload.pts > 0 && (
-              <p>+{payload.pts} puntos</p>
+              <p>+{payload.pts} {s.points}</p>
             )}
           </div>
         )}
 
         <p className={`mt-8 text-sm ${config.subTextColor} animate-pulse`}>
-          Toca para continuar
+          {s.tapToContinue}
         </p>
       </div>
     </div>

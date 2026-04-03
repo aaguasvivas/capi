@@ -468,3 +468,374 @@ describe("scoring - isCapicua", () => {
     expect(isCapicua([[3, 3] as [3,3]], [3, 3] as [3,3])).toBe(false);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 2v2 (Con Tu Frente) Tests
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function make2v2State(overrides: Partial<GameState> = {}): GameState {
+  return {
+    phase: "playing",
+    mode: "turn_based",
+    theme: "barberia",
+    is2v2: true,
+    targetScore: 100,
+    scores: [0, 0],
+    roundIndex: 0,
+    hands: {
+      n: [[1, 2], [2, 3]],
+      e: [[4, 5], [5, 6]],
+      s: [[3, 4], [6, 1]],
+      w: [[2, 2], [0, 1]],
+    },
+    board: [[3, 5]],
+    boneyard: [],
+    currentTurn: "n",
+    consecutivePasses: 0,
+    passesSinceLastPlay: 0,
+    starterThisRound: "n",
+    lastCallout: null,
+    lastCalloutPayload: null,
+    players: { n: null, e: null, s: null, w: null },
+    winnerTeam: null,
+    lastPlayedBy: "n",
+    ...overrides,
+  };
+}
+
+describe("2v2 - createInitialState", () => {
+  it("deals 7 tiles to each of 4 players (starter has 6)", () => {
+    const state = createInitialState({ mode: "live", theme: "colmado", is2v2: true });
+    const seats = ["n", "e", "s", "w"] as const;
+    const starter = state.starterThisRound;
+    for (const s of seats) {
+      expect(state.hands[s].length).toBe(s === starter ? 6 : 7);
+    }
+  });
+
+  it("has empty boneyard in 2v2 (28 tiles = 4×7)", () => {
+    const state = createInitialState({ mode: "live", theme: "barberia", is2v2: true });
+    const totalInHands = (["n", "e", "s", "w"] as const).reduce(
+      (sum, s) => sum + state.hands[s].length, 0
+    );
+    expect(totalInHands + state.board.length).toBe(28);
+    expect(state.boneyard).toHaveLength(0);
+  });
+
+  it("board starts with one tile (starter's highest double/tile)", () => {
+    const state = createInitialState({ mode: "live", theme: "patio", is2v2: true });
+    expect(state.board).toHaveLength(1);
+  });
+});
+
+describe("2v2 - turn order", () => {
+  it("follows N → E → S → W cycle", () => {
+    const state = make2v2State({
+      currentTurn: "n",
+      hands: {
+        n: [[3, 4], [1, 1]],
+        e: [[5, 6], [2, 2]],
+        s: [[4, 5], [6, 6]],
+        w: [[1, 2], [3, 3]],
+      },
+      board: [[3, 5]],
+    });
+
+    const r1 = applyMove(state, "n", { type: "play", tile: [3, 4], end: "left" });
+    expect(r1.success).toBe(true);
+    expect(r1.newState.currentTurn).toBe("e");
+
+    const r2 = applyMove(r1.newState, "e", { type: "play", tile: [5, 6], end: "right" });
+    expect(r2.success).toBe(true);
+    expect(r2.newState.currentTurn).toBe("s");
+
+    const r3 = applyMove(r2.newState, "s", { type: "play", tile: [4, 5], end: "left" });
+    expect(r3.success).toBe(true);
+    expect(r3.newState.currentTurn).toBe("w");
+  });
+
+  it("rejects out-of-turn moves in 2v2", () => {
+    const state = make2v2State({ currentTurn: "e" });
+    const result = applyMove(state, "n", { type: "play", tile: [1, 2], end: "left" });
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("turn");
+  });
+});
+
+describe("2v2 - TRANCAO", () => {
+  it("triggers TRANCAO after 4 consecutive passes", () => {
+    const state = make2v2State({
+      currentTurn: "w",
+      consecutivePasses: 3,
+      passesSinceLastPlay: 3,
+      hands: {
+        n: [[6, 6]],
+        e: [[5, 5]],
+        s: [[4, 4]],
+        w: [[1, 1]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "w", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("trancao");
+    expect(result.newState.phase).toBe("round_over");
+  });
+
+  it("does NOT trigger TRANCAO after only 3 passes in 2v2", () => {
+    const state = make2v2State({
+      currentTurn: "s",
+      consecutivePasses: 2,
+      passesSinceLastPlay: 2,
+      hands: {
+        n: [[6, 6]],
+        e: [[5, 5]],
+        s: [[4, 4]],
+        w: [[1, 1]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "s", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.consecutivePasses).toBe(3);
+  });
+
+  it("scores TRANCAO with team pip totals (N+S vs E+W) — tie goes to starter", () => {
+    // Team 0 (N+S): [6,6] + [1,1] = 12+2 = 14
+    // Team 1 (E+W): [5,5] + [4,4] = 10+8 = 18 ... nah, let's make tie
+    // Team 0 (N+S): [6,6] + [1,1] = 14, Team 1 (E+W): [5,5] + [2,2] = 14
+    // W has [2,2], board left=3, right=0 → no match → pass OK
+    const state = make2v2State({
+      currentTurn: "w",
+      consecutivePasses: 3,
+      passesSinceLastPlay: 3,
+      starterThisRound: "e",
+      hands: {
+        n: [[6, 6]],
+        e: [[5, 5]],
+        s: [[1, 1]],
+        w: [[2, 2]],
+      },
+      board: [[3, 0]],
+    });
+    const result = applyMove(state, "w", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.newState.lastCallout).toBe("trancao");
+    // Tie → starter (e, team 1) wins with 0 pts
+    expect(result.newState.scores).toEqual([0, 0]);
+  });
+
+  it("scores TRANCAO to lower pip team in 2v2", () => {
+    // Team 0 (N+S): [1,1] + [1,2] = 2+3 = 5
+    // Team 1 (E+W): [6,6] + [5,5] = 12+10 = 22
+    // Diff = 17 → team 0 wins
+    const state = make2v2State({
+      currentTurn: "w",
+      consecutivePasses: 3,
+      passesSinceLastPlay: 3,
+      hands: {
+        n: [[1, 1]],
+        e: [[6, 6]],
+        s: [[1, 2]],
+        w: [[5, 5]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "w", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.newState.scores[0]).toBe(17);
+    expect(result.newState.scores[1]).toBe(0);
+  });
+});
+
+describe("2v2 - VEINTICINCO", () => {
+  it("triggers VEINTICINCO when 3 others pass after a play", () => {
+    // N played last → E, S, W all pass → next turn is N → VEINTICINCO for N
+    const state = make2v2State({
+      currentTurn: "w",
+      consecutivePasses: 2,
+      passesSinceLastPlay: 2,
+      lastPlayedBy: "n",
+      hands: {
+        n: [[1, 2]],
+        e: [[4, 4]],
+        s: [[6, 6]],
+        w: [[0, 0]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "w", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("veinticinco");
+    expect(result.newState.phase).toBe("round_over");
+    // N (team 0) wins: 25 + opponent pips (E+W = 4+4+0+0 = 8)
+    const oppPips = handPips([[4, 4]]) + handPips([[0, 0]]);
+    expect(result.newState.scores[0]).toBe(25 + oppPips);
+  });
+
+  it("does NOT trigger VEINTICINCO after only 2 passes in 2v2", () => {
+    const state = make2v2State({
+      currentTurn: "s",
+      consecutivePasses: 1,
+      passesSinceLastPlay: 1,
+      lastPlayedBy: "n",
+      hands: {
+        n: [[1, 2]],
+        e: [[4, 4]],
+        s: [[6, 6]],
+        w: [[0, 0]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "s", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.consecutivePasses).toBe(2);
+  });
+
+  it("awards VEINTICINCO to team 1 when E plays and N,S,W pass", () => {
+    // E played last, then S, W, N all pass (3 passes)
+    const state = make2v2State({
+      currentTurn: "n",
+      consecutivePasses: 2,
+      passesSinceLastPlay: 2,
+      lastPlayedBy: "e",
+      hands: {
+        n: [[6, 6]],
+        e: [[1, 2]],
+        s: [[4, 4]],
+        w: [[0, 0]],
+      },
+      board: [[3, 2]],
+    });
+    const result = applyMove(state, "n", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("veinticinco");
+    // E is team 1 → team 1 wins
+    // Opp pips = team 0 = N+S = 12+8 = 20
+    expect(result.newState.scores[1]).toBe(25 + 20);
+  });
+});
+
+describe("2v2 - DOMINÓ scoring", () => {
+  it("awards opponent TEAM pips (both players) on DOMINÓ", () => {
+    // S (team 0) goes out. Team 1 pips = E hand + W hand
+    // Board: [4,3] → left=4, right=3. S plays [3,1] on right → board ends [4,...,1]
+    // Not capicúa because left=4 ≠ right=1
+    const state = make2v2State({
+      currentTurn: "s",
+      hands: {
+        n: [[1, 1]],
+        e: [[6, 5]],
+        s: [[3, 1]],
+        w: [[4, 3]],
+      },
+      board: [[4, 3]],
+    });
+    const result = applyMove(state, "s", { type: "play", tile: [3, 1], end: "right" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("domino");
+    // Team 0 wins: opponent team 1 pips = E(11) + W(7) = 18
+    expect(result.newState.scores[0]).toBe(18);
+  });
+
+  it("awards to team 1 when E goes out", () => {
+    const state = make2v2State({
+      currentTurn: "e",
+      hands: {
+        n: [[6, 6]],
+        e: [[5, 2]],
+        s: [[4, 4]],
+        w: [[3, 3]],
+      },
+      board: [[3, 5]],
+    });
+    const result = applyMove(state, "e", { type: "play", tile: [5, 2], end: "right" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("domino");
+    // Team 1 wins: opponent team 0 pips = N(12) + S(8) = 20
+    expect(result.newState.scores[1]).toBe(20);
+  });
+});
+
+describe("2v2 - draw rejection", () => {
+  it("rejects draw intent in 2v2", () => {
+    const state = make2v2State({
+      currentTurn: "n",
+      hands: {
+        n: [[1, 1]],
+        e: [[2, 2]],
+        s: [[4, 4]],
+        w: [[6, 6]],
+      },
+      board: [[3, 5]],
+      boneyard: [[0, 0]],
+    });
+    const result = applyMove(state, "n", { type: "draw" });
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("2v2");
+  });
+});
+
+describe("2v2 - pass allowed without boneyard check", () => {
+  it("allows pass in 2v2 even though boneyard is empty (no boneyard gate)", () => {
+    const state = make2v2State({
+      currentTurn: "n",
+      hands: {
+        n: [[1, 1]],
+        e: [[2, 2]],
+        s: [[4, 4]],
+        w: [[6, 6]],
+      },
+      board: [[3, 5]],
+      boneyard: [],
+    });
+    const result = applyMove(state, "n", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.newState.currentTurn).toBe("e");
+  });
+});
+
+describe("2v2 - game to 100", () => {
+  it("finishes game when team score reaches target", () => {
+    const state = make2v2State({
+      scores: [95, 50],
+      currentTurn: "s",
+      hands: {
+        n: [[1, 1]],
+        e: [[6, 6]],
+        s: [[5, 3]],
+        w: [[5, 5]],
+      },
+      board: [[3, 5]],
+    });
+    const result = applyMove(state, "s", { type: "play", tile: [5, 3], end: "right" });
+    expect(result.success).toBe(true);
+    // Team 1 pips = E(12) + W(10) = 22 → team 0 score = 95 + 22 = 117 ≥ 100
+    expect(result.newState.phase).toBe("finished");
+    expect(result.newState.winnerTeam).toBe(0);
+  });
+});
+
+describe("2v2 - play resets consecutivePasses", () => {
+  it("resets passes counter on play in 2v2", () => {
+    const state = make2v2State({
+      currentTurn: "s",
+      consecutivePasses: 2,
+      passesSinceLastPlay: 2,
+      hands: {
+        n: [[1, 1]],
+        e: [[2, 2]],
+        s: [[3, 4], [6, 6]],
+        w: [[4, 4]],
+      },
+      board: [[3, 5]],
+    });
+    const result = applyMove(state, "s", { type: "play", tile: [3, 4], end: "left" });
+    expect(result.success).toBe(true);
+    expect(result.newState.consecutivePasses).toBe(0);
+    expect(result.newState.passesSinceLastPlay).toBe(0);
+    expect(result.newState.lastPlayedBy).toBe("s");
+  });
+});

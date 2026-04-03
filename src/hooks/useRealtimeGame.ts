@@ -80,6 +80,7 @@ export function useRealtimeGame(
   const [stateVersion, setStateVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
   const [lastCalloutPayload, setLastCalloutPayload] = useState<Record<
     string,
@@ -109,6 +110,9 @@ export function useRealtimeGame(
       setGameState(gs);
       setStateVersion(data.game.state_version);
       setPlayers(data.players);
+      if (data.game.settings) {
+        setGameSettings(data.game.settings);
+      }
       setError(null);
       if (gs?.lastCallout) {
         setLastCallout(gs.lastCallout);
@@ -353,6 +357,7 @@ export function useRealtimeGame(
 
   return {
     gameState,
+    gameSettings,
     players,
     stateVersion,
     loading,

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { createInitialState } from "@/lib/engine/reducer";
-import type { GameState, PlayerInfo } from "@/lib/engine/types";
+import type { GameState, PlayerInfo, Seat } from "@/lib/engine/types";
+import { getTeam } from "@/lib/engine/types";
 
 export async function POST(
   req: NextRequest,
@@ -17,7 +18,6 @@ export async function POST(
 
     const db = createServerClient();
 
-    // Load the game
     const { data: game, error: gameError } = await db
       .from("games")
       .select("*")
@@ -32,7 +32,9 @@ export async function POST(
       return NextResponse.json({ error: "Game already started" }, { status: 409 });
     }
 
-    // Load existing players
+    const is2v2: boolean = game.settings?.is2v2 ?? false;
+    const maxPlayers = is2v2 ? 4 : 2;
+
     const { data: existingPlayers } = await db
       .from("players")
       .select("*")
@@ -42,16 +44,23 @@ export async function POST(
       return NextResponse.json({ error: "Game has no host" }, { status: 400 });
     }
 
-    if (existingPlayers.length >= 2) {
+    if (existingPlayers.length >= maxPlayers) {
       return NextResponse.json({ error: "Game is full" }, { status: 409 });
     }
 
-    // Creator is seat "n", joiner gets seat "s"
+    // Assign next seat deterministically: 1v1 → n,s; 2v2 → n,e,s,w
+    const seatOrder: Seat[] = is2v2 ? ["n", "e", "s", "w"] : ["n", "s"];
+    const takenSeats = new Set(existingPlayers.map((p) => p.seat));
+    const nextSeat = seatOrder.find((s) => !takenSeats.has(s));
+    if (!nextSeat) {
+      return NextResponse.json({ error: "Game is full" }, { status: 409 });
+    }
+
     const { data: newPlayer, error: playerError } = await db
       .from("players")
       .insert({
         game_id: params.id,
-        seat: "s",
+        seat: nextSeat,
         nickname: nickname.trim(),
         avatar_color: avatarColor,
       })
@@ -65,38 +74,40 @@ export async function POST(
 
     const allPlayers = [...existingPlayers, newPlayer];
 
-    // Build the initial game state now that we have 2 players
+    // Start the game only when all seats are filled
+    if (allPlayers.length < maxPlayers) {
+      return NextResponse.json({
+        playerId: newPlayer.id,
+        seat: nextSeat,
+        gameId: params.id,
+        waiting: true,
+        playersJoined: allPlayers.length,
+        playersNeeded: maxPlayers,
+      });
+    }
+
     const initialState = createInitialState({
       mode: game.mode,
       theme: game.theme,
-      is2v2: game.settings?.is2v2 ?? false,
+      is2v2,
     });
 
-    // Embed player info into the game state
-    const hostPlayer = allPlayers.find((p) => p.seat === "n")!;
-    const joinPlayer = newPlayer;
+    const playersByState: Record<Seat, PlayerInfo | null> = { n: null, e: null, s: null, w: null };
+    for (const p of allPlayers) {
+      const seat = p.seat as Seat;
+      playersByState[seat] = {
+        seat,
+        nickname: p.nickname,
+        avatarColor: p.avatar_color,
+        team: getTeam(seat, is2v2),
+      };
+    }
 
     const stateWithPlayers: GameState = {
       ...initialState,
-      players: {
-        n: {
-          seat: "n",
-          nickname: hostPlayer.nickname,
-          avatarColor: hostPlayer.avatar_color,
-          team: 0,
-        } as PlayerInfo,
-        s: {
-          seat: "s",
-          nickname: joinPlayer.nickname,
-          avatarColor: joinPlayer.avatar_color,
-          team: 1,
-        } as PlayerInfo,
-        e: null,
-        w: null,
-      },
+      players: playersByState,
     };
 
-    // Update game to playing status with initial state
     const { error: updateError } = await db
       .from("games")
       .update({
@@ -114,7 +125,7 @@ export async function POST(
 
     return NextResponse.json({
       playerId: newPlayer.id,
-      seat: "s",
+      seat: nextSeat,
       gameId: params.id,
     });
   } catch (err) {

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Tile } from "@/lib/engine/types";
 import TileDisplay from "./TileDisplay";
+import { useI18n } from "@/lib/i18n/context";
 
 interface Props {
   tiles: Tile[];
@@ -29,6 +30,7 @@ export default function Hand({
   onPass,
   onDraw,
 }: Props) {
+  const { s } = useI18n();
   const [selected, setSelected] = useState<Tile | null>(null);
   const prevCountRef = useRef(tiles.length);
   const [newTileCount, setNewTileCount] = useState(0);
@@ -79,7 +81,6 @@ export default function Hand({
 
   return (
     <div className="space-y-3">
-      {/* End selection buttons */}
       {isMyTurn && selected && (
         <div className="flex items-center justify-center gap-3 animate-slide-up">
           <button
@@ -87,7 +88,7 @@ export default function Hand({
             disabled={!matchesLeft}
             className="px-4 py-2 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold disabled:opacity-30 hover:brightness-110 transition-all active:scale-95"
           >
-            ← Izquierda
+            {s.leftEnd}
           </button>
           <button
             onClick={() => setSelected(null)}
@@ -100,12 +101,11 @@ export default function Hand({
             disabled={!matchesRight}
             className="px-4 py-2 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold disabled:opacity-30 hover:brightness-110 transition-all active:scale-95"
           >
-            Derecha →
+            {s.rightEnd}
           </button>
         </div>
       )}
 
-      {/* Tiles */}
       <div className="flex flex-wrap gap-1.5 justify-center">
         {tiles.map((tile, i) => {
           const isPlayable =
@@ -146,34 +146,31 @@ export default function Hand({
         })}
       </div>
 
-      {/* Draw from boneyard */}
       {isMyTurn && !selected && !hasLegalPlay && boneyardCount > 0 && (
         <div className="flex justify-center pt-1">
           <button
             onClick={onDraw}
             className="px-6 py-2.5 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
           >
-            Jalar ({boneyardCount})
+            {s.draw(boneyardCount)}
           </button>
         </div>
       )}
 
-      {/* Pass */}
       {isMyTurn && !selected && !hasLegalPlay && boneyardCount === 0 && (
         <div className="flex justify-center pt-1">
           <button
             onClick={onPass}
             className="px-6 py-2.5 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
           >
-            Pasar
+            {s.pass}
           </button>
         </div>
       )}
 
-      {/* Waiting for opponent */}
       {!isMyTurn && (
         <p className="text-center text-sm text-gray-500 pt-1 select-none">
-          Esperando al oponente…
+          {s.waitingTurn}
         </p>
       )}
     </div>
