@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       attempts++;
     }
 
-    // Create the game row (no game_state yet — starts when 2nd player joins)
+    // Create the game row (no game_state yet - starts when 2nd player joins)
     const { data: game, error: gameError } = await db
       .from("games")
       .insert({

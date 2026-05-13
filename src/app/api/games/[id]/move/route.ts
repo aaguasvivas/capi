@@ -40,7 +40,7 @@ export async function POST(
     // Verify the client's state_version matches; if not, they are stale
     if (game.state_version !== stateVersion) {
       return NextResponse.json(
-        { error: "State is stale — refetch", stale: true },
+        { error: "State is stale - refetch", stale: true },
         { status: 409 }
       );
     }
@@ -90,9 +90,9 @@ export async function POST(
       .single();
 
     if (updateError || !updated) {
-      // Another request beat us — the client should refetch
+      // Another request beat us - the client should refetch
       return NextResponse.json(
-        { error: "State conflict — refetch", stale: true },
+        { error: "State conflict - refetch", stale: true },
         { status: 409 }
       );
     }

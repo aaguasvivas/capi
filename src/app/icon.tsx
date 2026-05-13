@@ -15,15 +15,37 @@ export default async function Icon() {
           alignItems: "center",
           justifyContent: "center",
           background: "#0a0a0a",
-          color: "#f5f0e8",
-          fontSize: 44,
-          fontWeight: 900,
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          letterSpacing: "-0.06em",
           borderRadius: 14,
+          position: "relative",
         }}
       >
-        C
+        <div
+          style={{
+            fontSize: 46,
+            fontWeight: 900,
+            color: "#f5f0e8",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            letterSpacing: "-0.06em",
+            lineHeight: 1,
+            display: "flex",
+            marginTop: -2,
+          }}
+        >
+          C
+        </div>
+        {/* Gold pip accent */}
+        <div
+          style={{
+            position: "absolute",
+            top: 11,
+            right: 13,
+            width: 8,
+            height: 8,
+            borderRadius: 8,
+            background: "#c9a961",
+            display: "flex",
+          }}
+        />
       </div>
     ),
     { ...size }

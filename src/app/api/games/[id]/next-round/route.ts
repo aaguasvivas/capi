@@ -42,7 +42,7 @@ export async function POST(
 
     if (game.state_version !== stateVersion) {
       return NextResponse.json(
-        { error: "State is stale — refetch", stale: true },
+        { error: "State is stale - refetch", stale: true },
         { status: 409 }
       );
     }
@@ -69,7 +69,7 @@ export async function POST(
 
     if (updateError || !updated) {
       return NextResponse.json(
-        { error: "State conflict — refetch", stale: true },
+        { error: "State conflict - refetch", stale: true },
         { status: 409 }
       );
     }

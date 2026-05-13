@@ -89,7 +89,7 @@
 
 /* ── Board surface textures (with built-in vignette lighting) ── */
 
-/* Barbería: green felt under hanging lamp — bright pool of light, dark edges */
+/* Barbería: green felt under hanging lamp - bright pool of light, dark edges */
 [data-theme="barberia"] .theme-felt {
   background: radial-gradient(
     ellipse at 50% 40%,
@@ -99,7 +99,7 @@
   );
 }
 
-/* Colmado: worn brown table — warm fluorescent glow, dark corners */
+/* Colmado: worn brown table - warm fluorescent glow, dark corners */
 [data-theme="colmado"] .theme-felt {
   background-color: #2a1e12;
   background-image:
@@ -126,7 +126,7 @@
     );
 }
 
-/* Patio: concrete under afternoon sun — golden warmth, natural shadow */
+/* Patio: concrete under afternoon sun - golden warmth, natural shadow */
 [data-theme="patio"] .theme-felt {
   background-color: #6e6660;
   background-image:

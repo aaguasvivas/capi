@@ -60,8 +60,18 @@ function HomeContent() {
           <h1 className="text-5xl font-black tracking-tight text-gray-900 drop-shadow-sm">
             Capi
           </h1>
-          <p className="text-sm text-gray-500 font-medium">{s.tagline}</p>
-          <div className="flex justify-center gap-1 text-2xl opacity-60 select-none">
+          <div
+            aria-hidden
+            className="mx-auto h-[3px] w-12 rounded-full"
+            style={{ background: "#b8860b" }}
+          />
+          <p className="text-[11px] font-bold tracking-[0.22em] text-gray-500 uppercase pt-1">
+            {s.tagline}
+          </p>
+          <p className="text-base italic text-gray-700 font-medium pt-1">
+            Como en el patio.
+          </p>
+          <div className="flex justify-center gap-1 text-xl opacity-40 select-none pt-1">
             🁣 🁫 🁳 🂃
           </div>
         </div>

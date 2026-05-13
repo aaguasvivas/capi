@@ -127,7 +127,7 @@ export function useRealtimeGame(
     fetchGame();
   }, [fetchGame]);
 
-  // Postgres Changes — game state
+  // Postgres Changes - game state
   useEffect(() => {
     const channel = supabase
       .channel(`game-${gameId}`)
@@ -162,7 +162,7 @@ export function useRealtimeGame(
     };
   }, [gameId, fetchGame]);
 
-  // Postgres Changes — players joining
+  // Postgres Changes - players joining
   useEffect(() => {
     const channel = supabase
       .channel(`players-${gameId}`)
@@ -185,7 +185,7 @@ export function useRealtimeGame(
     };
   }, [gameId, fetchGame]);
 
-  // Broadcast channel — ephemeral chat delivery
+  // Broadcast channel - ephemeral chat delivery
   useEffect(() => {
     const channel = supabase
       .channel(`chat-${gameId}`, {
@@ -227,7 +227,7 @@ export function useRealtimeGame(
     async (intent: MoveIntentPayload) => {
       if (!session) return;
 
-      // Optimistic update for play moves — instant visual feedback
+      // Optimistic update for play moves - instant visual feedback
       if (
         intent.type === "play" &&
         intent.tile &&
@@ -328,7 +328,7 @@ export function useRealtimeGame(
         payload: broadcastPayload,
       });
 
-      // Persist for audit — fire and forget
+      // Persist for audit - fire and forget
       fetch(`/api/games/${gameId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

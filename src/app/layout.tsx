@@ -6,9 +6,9 @@ import { I18nProvider } from "@/lib/i18n/context";
 const inter = Inter({ subsets: ["latin"] });
 
 const SITE_URL = "https://playcapi.com";
-const TITLE = "Capi — Dominican Dominoes";
+const TITLE = "Capi · Dominican Dominoes";
 const DESCRIPTION =
-  "Dominican Dominoes online. Play 1v1 or 2v2 (con tu frente) — authentic rules, no account, share a link to invite.";
+  "Dominó dominicano online. 1v1 o 2v2, con tu frente. Authentic rules, no account, share a link to invite.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

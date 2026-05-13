@@ -146,7 +146,7 @@ export function playChatReceive() {
   try {
     const c = getCtx();
     const t = c.currentTime;
-    // Two-tone "pop" — high soft click followed by a gentle resonant tone
+    // Two-tone "pop" - high soft click followed by a gentle resonant tone
     const osc1 = c.createOscillator();
     const gain1 = c.createGain();
     osc1.type = "sine";

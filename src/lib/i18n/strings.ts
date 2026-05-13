@@ -279,7 +279,7 @@ export const en: Strings = {
   loading: "Loading…",
   backToHome: "Back to home",
   networkError: "Connection error",
-  gameNotFound: "Can't find that game — check the code",
+  gameNotFound: "Can't find that game - check the code",
   failedCreate: "Couldn't start the game",
   failedJoin: "Couldn't join",
   connectionError: "Connection dropped",

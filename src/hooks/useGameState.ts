@@ -97,7 +97,7 @@ export function useGameState(
         const data = await res.json();
 
         if (res.status === 409 && data.stale) {
-          // State is stale — refetch immediately
+          // State is stale - refetch immediately
           await fetchGame();
           return;
         }

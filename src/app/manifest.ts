@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Capi — Dominican Dominoes",
+    name: "Capi · Dominican Dominoes",
     short_name: "Capi",
     description: "Dominican Dominoes online. 1v1 or 2v2, con tu frente.",
     start_url: "/",

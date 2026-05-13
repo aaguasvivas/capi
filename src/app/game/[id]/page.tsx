@@ -214,7 +214,7 @@ export default function GamePage() {
     prevBoardLenRef.current = boardLen;
   }, [gameState?.board.length, gameState]);
 
-  // Detect opponent drawing tiles to show toast (1v1 only — no boneyard in 2v2)
+  // Detect opponent drawing tiles to show toast (1v1 only - no boneyard in 2v2)
   useEffect(() => {
     if (!gameState || !session || gameState.is2v2) return;
     const oppSeat = session.seat === "n" ? "s" : "n";
@@ -286,7 +286,7 @@ export default function GamePage() {
           </h2>
           {is2v2Waiting && (
             <p className="text-xs text-indigo-600 font-semibold">
-              2v2 — {s.conTuFrente}
+              2v2 - {s.conTuFrente}
             </p>
           )}
 
@@ -472,7 +472,7 @@ export default function GamePage() {
           {/* Light temperature + vignette overlay */}
           <div className="absolute inset-0 theme-light pointer-events-none z-[1]" />
 
-          {/* Mute toggle — floats on board bottom-right */}
+          {/* Mute toggle - floats on board bottom-right */}
           <button
             onClick={toggleMute}
             className="absolute bottom-2 right-2 z-[3] w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
@@ -481,7 +481,7 @@ export default function GamePage() {
             {muted ? "🔇" : "🔊"}
           </button>
 
-          {/* QuickChat toggle — floats on board bottom-left */}
+          {/* QuickChat toggle - floats on board bottom-left */}
           {!isGameEnded && (
             <div className="absolute bottom-2 left-2 z-[3]">
               <QuickChat
@@ -491,7 +491,7 @@ export default function GamePage() {
             </div>
           )}
 
-          {/* My chat bubbles — above QuickChat button, left side */}
+          {/* My chat bubbles - above QuickChat button, left side */}
           <div className="absolute bottom-12 left-2 z-[4] flex flex-col-reverse gap-1.5 items-start max-w-[180px]">
             {myBubbles.map((b) => (
               <ChatBubbleDisplay
@@ -502,7 +502,7 @@ export default function GamePage() {
             ))}
           </div>
 
-          {/* Opponent chat bubbles — near top hand */}
+          {/* Opponent chat bubbles - near top hand */}
           <div className="absolute top-14 left-2 z-[4] flex flex-col gap-1.5 items-start max-w-[180px]">
             {oppBubbles.map((b) => {
               const sender = players.find((p) => p.seat === b.seat);
@@ -544,7 +544,7 @@ export default function GamePage() {
                   <span className="text-white/60 text-xs font-medium truncate">
                     {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
                     {is2v2 && <span className="opacity-60 ml-1">{s.partnerTag}</span>}
-                    {" — "}
+                    {" - "}
                     {s.tileCount(topHand.length)}
                   </span>
                 </div>
@@ -643,7 +643,7 @@ export default function GamePage() {
                         ? myTeam === 0
                           ? String(payload.team0Pips)
                           : String(payload.team1Pips)
-                        : "—"}{" "}
+                        : "-"}{" "}
                       {s.pips}
                     </span>
                   </div>
@@ -654,7 +654,7 @@ export default function GamePage() {
                         ? oppTeam === 0
                           ? String(payload.team0Pips)
                           : String(payload.team1Pips)
-                        : "—"}{" "}
+                        : "-"}{" "}
                       {s.pips}
                     </span>
                   </div>
