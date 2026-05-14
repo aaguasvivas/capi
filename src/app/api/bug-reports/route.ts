@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
-const REPORT_EMAIL = "adelson@coachable.dev";
+const REPORT_TO = "adelsonaguasvivas@gmail.com";
+const REPORT_CC = "aaguasvivas907@gmail.com";
 const RESEND_FROM = "Capi Bug Reports <onboarding@resend.dev>"; // works without domain verification
 
 const MAX_MESSAGE_LEN = 4000;
@@ -78,7 +79,8 @@ export async function POST(req: NextRequest) {
         const resend = new Resend(resendKey);
         await resend.emails.send({
           from: RESEND_FROM,
-          to: REPORT_EMAIL,
+          to: REPORT_TO,
+          cc: REPORT_CC,
           subject: emailSubject(trimmed, body.gameId ?? null),
           text: formatEmailBody(report),
         });
