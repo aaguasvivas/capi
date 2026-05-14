@@ -4,7 +4,13 @@ import { Resend } from "resend";
 
 const REPORT_TO = "adelsonaguasvivas@gmail.com";
 const REPORT_CC = "aaguasvivas907@gmail.com";
-const RESEND_FROM = "Capi Bug Reports <onboarding@resend.dev>"; // works without domain verification
+
+// RESEND_FROM_EMAIL lets us swap the sender (e.g. from the sandbox
+// onboarding@resend.dev to bugs@playcapi.com once the domain is verified)
+// without redeploying code. Falls back to the sandbox if unset.
+const RESEND_FROM =
+  process.env.RESEND_FROM_EMAIL ??
+  "Capi Bug Reports <onboarding@resend.dev>";
 
 const MAX_MESSAGE_LEN = 4000;
 
