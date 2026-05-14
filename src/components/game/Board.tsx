@@ -9,152 +9,176 @@ interface Props {
   board: Tile[];
 }
 
-const TW = 36;
-const TH = 72;
+// Tile dimensions in upright orientation (must match TileDisplay's `small` size: w-9 h-[72px])
+const TW = 36; // short side (width upright)
+const TH = 72; // long side (height upright)
 
 interface Placed {
   tile: Tile;
-  x: number;
-  y: number;
-  rot: number;
+  x: number; // canvas-space center, after centering + scaling
+  y: number; // canvas-space center, after centering + scaling
+  rot: number; // 0, 90, or -90 deg
   scale: number;
 }
 
-interface RowDef {
-  tileIndices: number[];
-  turnIdx: number | null;
-  dir: 1 | -1;
-}
-
-function buildRows(board: Tile[], rowW: number): RowDef[] {
-  const GAP = 2;
-  const isDbl = (t: Tile) => t[0] === t[1];
-  const rows: RowDef[] = [];
-  let i = 0;
-  let dir: 1 | -1 = 1;
-
-  while (i < board.length) {
-    const row: RowDef = { tileIndices: [], turnIdx: null, dir };
-    let w = 0;
-
-    while (i < board.length) {
-      const adv = isDbl(board[i]) ? TW : TH;
-      const need = row.tileIndices.length > 0 ? adv + GAP : adv;
-      if (w + need > rowW && row.tileIndices.length > 0) break;
-      w += need;
-      row.tileIndices.push(i);
-      i++;
-    }
-
-    if (i < board.length) {
-      row.turnIdx = i;
-      i++;
-      dir = (dir === 1 ? -1 : 1) as 1 | -1;
-    }
-
-    rows.push(row);
-  }
-
-  return rows;
-}
-
+/**
+ * Lay tiles along a deterministic S-curve path that never overlaps itself.
+ *
+ *   ROW LAYOUT
+ *   Each "row" is a horizontal lane of tiles. A row tile is rendered
+ *   horizontally (rotated ±90°), so its rendered height = TW.
+ *
+ *   CORNER / TURN TILE
+ *   When a row fills, the very next tile becomes the "corner" — placed
+ *   vertically (rot=0, rendered height = TH) bridging two consecutive rows.
+ *   The direction of the next row flips (LTR → RTL or vice-versa).
+ *
+ *   ROW SPACING
+ *   ROW_STEP is the vertical distance between successive row centerlines.
+ *   It must accommodate:
+ *     half a horizontal tile (TW/2)
+ *   + GAP
+ *   + full vertical corner tile (TH)
+ *   + GAP
+ *   + half a horizontal tile (TW/2)
+ *   = TW + TH + 2·GAP
+ *   This is the fix for the prior overlap bug where ROW_STEP was set to
+ *   TH + 12 = 84, causing the corner tile to crash into both adjacent rows.
+ *
+ *   PRE-ALLOCATION
+ *   Tile positions are computed in a single forward pass; each tile's
+ *   coordinates depend only on the tiles before it. The whole chain is
+ *   then translated to center within the canvas, and scaled down only if
+ *   the bounding box exceeds the canvas.
+ */
 function layout(board: Tile[], cw: number, ch: number): Placed[] {
-  if (!board.length || cw < 80) return [];
+  if (!board.length || cw < 100 || ch < 60) return [];
 
-  const GAP = 2;
-  const EDGE = 10;
-  const TURN_COL = TW + 4;
   const isDbl = (t: Tile) => t[0] === t[1];
+  const tileLen = (t: Tile) => (isDbl(t) ? TW : TH);
 
-  const totalAdv = board.reduce(
-    (s, t) => s + (isDbl(t) ? TW : TH) + GAP,
-    -GAP
-  );
+  const GAP = 4;
+  const EDGE = 16;
+  const ROW_STEP = TW + TH + 2 * GAP; // 116
 
-  if (totalAdv <= cw - EDGE * 2) {
-    let x = (cw - totalAdv) / 2;
+  // ─── Single-row attempt ─────────────────────────────────────────────────
+  const chainLen =
+    board.reduce((s, t) => s + tileLen(t), 0) + (board.length - 1) * GAP;
+
+  if (chainLen <= cw - 2 * EDGE) {
+    const startX = (cw - chainLen) / 2;
     const y = ch / 2;
-    return board.map((tile) => {
-      const a = isDbl(tile) ? TW : TH;
-      const p: Placed = {
+    const placed: Placed[] = [];
+    let x = startX;
+    for (const tile of board) {
+      const len = tileLen(tile);
+      placed.push({
         tile,
-        x: x + a / 2,
+        x: x + len / 2,
         y,
         rot: isDbl(tile) ? 0 : -90,
         scale: 1,
-      };
-      x += a + GAP;
-      return p;
-    });
+      });
+      x += len + GAP;
+    }
+    return placed;
   }
 
-  const rowW = cw - EDGE * 2 - TURN_COL * 2;
-  if (rowW < TH) return [];
+  // ─── Multi-row S-curve ─────────────────────────────────────────────────
+  // A row must hold at least one horizontal tile (TH) plus room reserved
+  // at the far end for a corner (GAP + TW). If not, we still attempt a
+  // single line — it'll be scaled down to fit at the end.
+  const canSnake = cw - 2 * EDGE >= TH + GAP + TW;
 
-  const rows = buildRows(board, rowW);
+  const placed: Placed[] = [];
 
-  const ROW_STEP = TH + 12;
+  if (!canSnake) {
+    // Fallback: lay out as a single horizontal line; final scaling shrinks it.
+    let x = 0;
+    const y = 0;
+    for (const tile of board) {
+      const len = tileLen(tile);
+      placed.push({
+        tile,
+        x: x + len / 2,
+        y,
+        rot: isDbl(tile) ? 0 : -90,
+        scale: 1,
+      });
+      x += len + GAP;
+    }
+  } else {
+    let i = 0;
+    let row = 0;
+    let dir: 1 | -1 = 1; // 1 = left→right, -1 = right→left
 
-  const out: Placed[] = [];
+    while (i < board.length) {
+      const rowY = row * ROW_STEP; // center y of this row
 
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-    const rowY = r * ROW_STEP;
+      // Leading edge cursor: for LTR, this is the LEFT edge of next tile.
+      // For RTL, this is the RIGHT edge of next tile.
+      let cursor = dir === 1 ? EDGE : cw - EDGE;
+      let placedInRow = 0;
 
-    if (row.dir === 1) {
-      let x = EDGE + TURN_COL;
-      for (const idx of row.tileIndices) {
-        const adv = isDbl(board[idx]) ? TW : TH;
-        out.push({
-          tile: board[idx],
-          x: x + adv / 2,
+      // Lay tiles in this row until next one wouldn't fit (with corner reserve)
+      while (i < board.length) {
+        const tile = board[i];
+        const len = tileLen(tile);
+        const hasMoreAfter = i < board.length - 1;
+        const reserve = hasMoreAfter ? GAP + TW : 0; // space for corner + gap
+
+        let fits: boolean;
+        if (dir === 1) {
+          fits = cursor + len + reserve <= cw - EDGE;
+        } else {
+          fits = cursor - len - reserve >= EDGE;
+        }
+
+        if (!fits && placedInRow > 0) break;
+
+        const cx = dir === 1 ? cursor + len / 2 : cursor - len / 2;
+        placed.push({
+          tile,
+          x: cx,
           y: rowY,
-          rot: isDbl(board[idx]) ? 0 : -90,
+          rot: isDbl(tile) ? 0 : dir === 1 ? -90 : 90,
           scale: 1,
         });
-        x += adv + GAP;
+
+        if (dir === 1) cursor += len + GAP;
+        else cursor -= len + GAP;
+        placedInRow++;
+        i++;
       }
-      if (row.turnIdx !== null) {
-        out.push({
-          tile: board[row.turnIdx],
-          x: cw - EDGE - TW / 2,
-          y: rowY + ROW_STEP / 2,
+
+      if (i < board.length) {
+        // Place corner tile: vertical, bridging this row and the next
+        const tile = board[i];
+        const cornerX = dir === 1 ? cursor + TW / 2 : cursor - TW / 2;
+        const cornerY = rowY + ROW_STEP / 2;
+        placed.push({
+          tile,
+          x: cornerX,
+          y: cornerY,
           rot: 0,
           scale: 1,
         });
-      }
-    } else {
-      let x = cw - EDGE - TURN_COL;
-      for (const idx of row.tileIndices) {
-        const adv = isDbl(board[idx]) ? TW : TH;
-        out.push({
-          tile: board[idx],
-          x: x - adv / 2,
-          y: rowY,
-          rot: isDbl(board[idx]) ? 0 : 90,
-          scale: 1,
-        });
-        x -= adv + GAP;
-      }
-      if (row.turnIdx !== null) {
-        out.push({
-          tile: board[row.turnIdx],
-          x: EDGE + TW / 2,
-          y: rowY + ROW_STEP / 2,
-          rot: 0,
-          scale: 1,
-        });
+        i++;
+        row++;
+        dir = (dir === 1 ? -1 : 1) as 1 | -1;
       }
     }
   }
 
-  if (!out.length) return [];
+  if (!placed.length) return [];
 
-  let minX = Infinity,
-    maxX = -Infinity,
-    minY = Infinity,
-    maxY = -Infinity;
-  for (const p of out) {
+  // ─── Center bounding box + scale to fit ─────────────────────────────────
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const p of placed) {
     const halfW = p.rot === 0 ? TW / 2 : TH / 2;
     const halfH = p.rot === 0 ? TH / 2 : TW / 2;
     minX = Math.min(minX, p.x - halfW);
@@ -166,28 +190,24 @@ function layout(board: Tile[], cw: number, ch: number): Placed[] {
   const bboxW = maxX - minX;
   const bboxH = maxY - minY;
 
-  const padH = 12;
-  const padV = 12;
-  const availW = cw - padH * 2;
-  const availH = ch - padV * 2;
+  const PAD = 14;
+  const availW = Math.max(1, cw - 2 * PAD);
+  const availH = Math.max(1, ch - 2 * PAD);
 
-  let scale = 1;
-  if (availW > 0 && availH > 0) {
-    const sx = availW / bboxW;
-    const sy = availH / bboxH;
-    scale = Math.min(1, sx, sy);
-  }
+  const sx = availW / bboxW;
+  const sy = availH / bboxH;
+  const scale = Math.min(1, sx, sy);
 
   const bboxCx = (minX + maxX) / 2;
   const bboxCy = (minY + maxY) / 2;
 
-  for (const p of out) {
+  for (const p of placed) {
     p.x = cw / 2 + (p.x - bboxCx) * scale;
     p.y = ch / 2 + (p.y - bboxCy) * scale;
     p.scale = scale;
   }
 
-  return out;
+  return placed;
 }
 
 export default function Board({ board }: Props) {
@@ -210,7 +230,10 @@ export default function Board({ board }: Props) {
     board.length > 0 && size.w > 0 ? layout(board, size.w, size.h) : [];
 
   return (
-    <div ref={ref} className="flex-1 min-h-0 w-full relative overflow-hidden z-0">
+    <div
+      ref={ref}
+      className="flex-1 min-h-0 w-full relative overflow-hidden z-0"
+    >
       {board.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center text-white/30 text-sm italic select-none">
           {s.emptyTable}
@@ -219,7 +242,7 @@ export default function Board({ board }: Props) {
       {tiles.map((p, i) => (
         <div
           key={i}
-          className="absolute"
+          className="absolute transition-transform duration-200 ease-out"
           style={{
             left: p.x,
             top: p.y,
