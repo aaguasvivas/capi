@@ -45,25 +45,27 @@ export async function POST(req: NextRequest) {
 
     const trimmed = body.message.trim();
 
-    const db = createServerClient();
-    const { data: report, error: insertError } = await db
-      .from("bug_reports")
-      .insert({
-        game_id: body.gameId ?? null,
-        player_id: body.playerId ?? null,
-        message: trimmed,
-        user_agent: body.userAgent ?? null,
-        url: body.url ?? null,
-        viewport_w: body.viewportW ?? null,
-        viewport_h: body.viewportH ?? null,
-        language: body.language ?? null,
-        game_state: body.gameState ?? null,
-        state_version: body.stateVersion ?? null,
-      })
-      .select()
-      .single();
+    // Build the row we want in the DB AND in the email. We intentionally
+    // do not ask Supabase to .select() it back — anon only has INSERT,
+    // not SELECT, on bug_reports for privacy reasons. Asking PostgREST to
+    // return the row would 401.
+    const row = {
+      game_id: body.gameId ?? null,
+      player_id: body.playerId ?? null,
+      message: trimmed,
+      user_agent: body.userAgent ?? null,
+      url: body.url ?? null,
+      viewport_w: body.viewportW ?? null,
+      viewport_h: body.viewportH ?? null,
+      language: body.language ?? null,
+      game_state: body.gameState ?? null,
+      state_version: body.stateVersion ?? null,
+    };
 
-    if (insertError || !report) {
+    const db = createServerClient();
+    const { error: insertError } = await db.from("bug_reports").insert(row);
+
+    if (insertError) {
       console.error("Failed to insert bug report:", insertError);
       return NextResponse.json(
         { error: "Failed to save report" },
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
           to: REPORT_TO,
           cc: REPORT_CC,
           subject: emailSubject(trimmed, body.gameId ?? null),
-          text: formatEmailBody(report),
+          text: formatEmailBody(row),
         });
       } catch (e) {
         console.error("Resend email failed:", e);
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
       console.warn("RESEND_API_KEY missing - bug report saved but no email sent");
     }
 
-    return NextResponse.json({ success: true, reportId: report.id });
+    return NextResponse.json({ success: true });
   } catch (err) {
     console.error("POST /api/bug-reports error:", err);
     return NextResponse.json(
@@ -107,28 +109,27 @@ function emailSubject(message: string, gameId: string | null): string {
   return `Capi bug (${tag}): ${snippet}${message.length > 60 ? "..." : ""}`;
 }
 
-function formatEmailBody(report: Record<string, unknown>): string {
-  const stateJson = report.game_state
-    ? JSON.stringify(report.game_state, null, 2)
+function formatEmailBody(row: Record<string, unknown>): string {
+  const stateJson = row.game_state
+    ? JSON.stringify(row.game_state, null, 2)
     : "(no game state attached)";
 
   return [
     "New bug report from playcapi.com",
     "=".repeat(40),
     "",
-    `When:        ${report.created_at}`,
-    `Report ID:   ${report.id}`,
-    `Game ID:     ${report.game_id ?? "(not in game)"}`,
-    `Player ID:   ${report.player_id ?? "(no player)"}`,
-    `URL:         ${report.url ?? "(unknown)"}`,
-    `User Agent:  ${report.user_agent ?? "(unknown)"}`,
-    `Viewport:    ${report.viewport_w ?? "?"}x${report.viewport_h ?? "?"}`,
-    `Language:    ${report.language ?? "(unknown)"}`,
-    `State ver:   ${report.state_version ?? "(unknown)"}`,
+    `When:        ${new Date().toISOString()}`,
+    `Game ID:     ${row.game_id ?? "(not in game)"}`,
+    `Player ID:   ${row.player_id ?? "(no player)"}`,
+    `URL:         ${row.url ?? "(unknown)"}`,
+    `User Agent:  ${row.user_agent ?? "(unknown)"}`,
+    `Viewport:    ${row.viewport_w ?? "?"}x${row.viewport_h ?? "?"}`,
+    `Language:    ${row.language ?? "(unknown)"}`,
+    `State ver:   ${row.state_version ?? "(unknown)"}`,
     "",
     "Message:",
     "-".repeat(40),
-    String(report.message ?? ""),
+    String(row.message ?? ""),
     "",
     "Game state:",
     "-".repeat(40),
