@@ -22,8 +22,12 @@ alter table public.bug_reports enable row level security;
 
 -- Public inserts are fine: anyone playing the game can submit a report.
 -- We rely on app-level rate limiting + the API route to validate payloads.
+-- Note: `TO anon, authenticated` is explicit on purpose — relying on the
+-- default `PUBLIC` role can be flaky depending on Supabase's role grants.
 create policy "bug_reports: public insert"
-  on public.bug_reports for insert
+  on public.bug_reports
+  for insert
+  to anon, authenticated
   with check (true);
 
 -- Reads are not granted by RLS - reports are read via the service role
