@@ -108,6 +108,17 @@ export interface Strings {
   // Target score
   score100: string;
   score200: string;
+
+  // Bug reports
+  reportBug: string;
+  reportBugTitle: string;
+  reportBugPrompt: string;
+  reportBugPlaceholder: string;
+  reportBugSend: string;
+  reportBugSending: string;
+  reportBugSent: string;
+  reportBugCancel: string;
+  reportBugFailed: string;
 }
 
 export const es: Strings = {
@@ -202,6 +213,17 @@ export const es: Strings = {
 
   score100: "100 puntos",
   score200: "200 puntos",
+
+  reportBug: "Reportar bug",
+  reportBugTitle: "¿Algo salió mal?",
+  reportBugPrompt:
+    "Cuéntame qué pasó. Mando el estado del juego conmigo para reproducirlo.",
+  reportBugPlaceholder: "Ej: Mis fichas desaparecieron después de pasar…",
+  reportBugSend: "Enviar",
+  reportBugSending: "Enviando…",
+  reportBugSent: "¡Gracias! Reporte recibido.",
+  reportBugCancel: "Cancelar",
+  reportBugFailed: "No se pudo enviar. Intenta de nuevo.",
 };
 
 export const en: Strings = {
@@ -296,6 +318,17 @@ export const en: Strings = {
 
   score100: "100 pts",
   score200: "200 pts",
+
+  reportBug: "Report bug",
+  reportBugTitle: "Something off?",
+  reportBugSent: "Thanks - got it.",
+  reportBugPrompt:
+    "Tell me what happened. I send the game state along so I can repro it.",
+  reportBugPlaceholder: "e.g. My tiles disappeared after I passed…",
+  reportBugSend: "Send",
+  reportBugSending: "Sending…",
+  reportBugCancel: "Cancel",
+  reportBugFailed: "Couldn't send. Try again.",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

@@ -50,6 +50,14 @@ export default function Hand({
     prevCountRef.current = tiles.length;
   }, [tiles.length]);
 
+  // Clear any stale tile selection when it's no longer my turn or a new
+  // round starts with an empty board.
+  useEffect(() => {
+    if (!isMyTurn || boardLeftEnd === -1) {
+      setSelected(null);
+    }
+  }, [isMyTurn, boardLeftEnd]);
+
   const hasLegalPlay =
     boardLeftEnd === -1
       ? tiles.length > 0
@@ -61,6 +69,13 @@ export default function Hand({
 
   function handleTileClick(tile: Tile) {
     if (!isMyTurn) return;
+    // Empty board (e.g., round 2+ first move): play immediately, no
+    // left/right end choice is meaningful when there are no ends yet.
+    if (boardLeftEnd === -1) {
+      onPlay(tile, "left");
+      setSelected(null);
+      return;
+    }
     setSelected((prev) =>
       prev && prev[0] === tile[0] && prev[1] === tile[1] ? null : tile
     );

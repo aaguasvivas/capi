@@ -10,6 +10,7 @@ import ScorePanel from "@/components/game/ScorePanel";
 import CalloutOverlay from "@/components/game/CalloutOverlay";
 import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
+import BugReportButton from "@/components/game/BugReportButton";
 import type { Tile, Seat } from "@/lib/engine/types";
 import { useI18n } from "@/lib/i18n/context";
 import {
@@ -472,14 +473,22 @@ export default function GamePage() {
           {/* Light temperature + vignette overlay */}
           <div className="absolute inset-0 theme-light pointer-events-none z-[1]" />
 
-          {/* Mute toggle - floats on board bottom-right */}
-          <button
-            onClick={toggleMute}
-            className="absolute bottom-2 right-2 z-[3] w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
-            title={muted ? s.enableSound : s.muteSound}
-          >
-            {muted ? "🔇" : "🔊"}
-          </button>
+          {/* Bottom-right utility cluster: bug report + mute */}
+          <div className="absolute bottom-2 right-2 z-[3] flex items-center gap-1.5">
+            <BugReportButton
+              gameId={id}
+              playerId={session?.playerId}
+              gameState={gameState}
+              stateVersion={stateVersion}
+            />
+            <button
+              onClick={toggleMute}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
+              title={muted ? s.enableSound : s.muteSound}
+            >
+              {muted ? "🔇" : "🔊"}
+            </button>
+          </div>
 
           {/* QuickChat toggle - floats on board bottom-left */}
           {!isGameEnded && (
