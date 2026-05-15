@@ -12,6 +12,7 @@ import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
 import type { Tile, Seat } from "@/lib/engine/types";
+import { getTeam } from "@/lib/engine/types";
 import { useI18n } from "@/lib/i18n/context";
 import {
   playSlam,
@@ -397,8 +398,10 @@ export default function GamePage() {
   const isFinished = gameState.phase === "finished";
   const isGameEnded = isRoundOver || isFinished;
 
-  const myTeam = mySeat === "n" || mySeat === "s" ? 0 : 1;
-  const oppTeam = myTeam === 0 ? 1 : 0;
+  // Use the engine's helper so 1v1 and 2v2 are handled correctly.
+  // In 1v1 N=team0, S=team1 (opponents). In 2v2 N+S=team0 vs E+W=team1.
+  const myTeam = getTeam(mySeat, is2v2);
+  const oppTeam: 0 | 1 = myTeam === 0 ? 1 : 0;
 
   const payload = gameState.lastCalloutPayload ?? lastCalloutPayload;
   const roundWinnerTeam =
