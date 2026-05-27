@@ -22,11 +22,24 @@ export function teamPips(state: GameState, team: 0 | 1): number {
 }
 
 /**
- * DOMINÓ: winner gets opponent(s) remaining pips
+ * DOMINÓ: winner scores ALL remaining pips on the table — the opposing
+ * team's hands AND the winner's teammate's hand (in 2v2). The winner's own
+ * hand is empty by definition (they just went out), so summing every hand
+ * gives the correct total.
+ *
+ * In 1v1 there is no teammate, so this collapses to "opp pips" and matches
+ * the simpler reading. The `winningTeam` parameter is kept for API
+ * stability — it is no longer needed for the calculation itself.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function scoreDomino(state: GameState, winningTeam: 0 | 1): number {
-  const oppTeam = winningTeam === 0 ? 1 : 0;
-  return teamPips(state, oppTeam);
+  const seats = state.is2v2
+    ? (["n", "e", "s", "w"] as const)
+    : (["n", "s"] as const);
+  return seats.reduce(
+    (sum, seat) => sum + handPips(state.hands[seat] ?? []),
+    0
+  );
 }
 
 /**

@@ -199,36 +199,6 @@ function endRoundWithDomino(
   };
 }
 
-function endRoundWithVeinticinco(
-  state: GameState,
-  winningTeam: 0 | 1
-): GameState {
-  const pts = VEINTICINCO_BONUS + scoreDomino(state, winningTeam);
-  const newScores: [number, number] = [
-    state.scores[0] + (winningTeam === 0 ? pts : 0),
-    state.scores[1] + (winningTeam === 1 ? pts : 0),
-  ];
-  const winner =
-    newScores[0] >= state.targetScore || newScores[1] >= state.targetScore
-      ? (newScores[0] >= state.targetScore ? 0 : 1)
-      : null;
-
-  return {
-    ...state,
-    phase: winner !== null ? "finished" : "round_over",
-    scores: newScores,
-    winnerTeam: winner,
-    lastCallout: "veinticinco",
-    lastCalloutPayload: {
-      winningTeam,
-      veinticincoBonus: VEINTICINCO_BONUS,
-      pipsAwarded: scoreDomino(state, winningTeam),
-      team0Pips: teamPips(state, 0),
-      team1Pips: teamPips(state, 1),
-    },
-  };
-}
-
 function endRoundWithTrancao(state: GameState): GameState {
   const { winnerTeam, pts } = scoreTrancao(state);
   const newScores: [number, number] = [
@@ -296,6 +266,9 @@ export function applyMove(
       consecutivePasses: 0,
       passesSinceLastPlay: 0,
       lastPlayedBy: seat,
+      // Clear any mid-round VEINTICINCO callout once play resumes.
+      lastCallout: null,
+      lastCalloutPayload: null,
     };
     return { success: true, newState };
   }
@@ -315,6 +288,10 @@ export function applyMove(
       ...state,
       hands: { ...state.hands, [seat]: newHand },
       boneyard: newBoneyard,
+      // Clear any mid-round VEINTICINCO callout — drawing is the active player
+      // responding to the round, the prior callout has been observed.
+      lastCallout: null,
+      lastCalloutPayload: null,
     };
     return { success: true, newState };
   }
@@ -324,7 +301,57 @@ export function applyMove(
     const newPassesSincePlay = state.passesSinceLastPlay + 1;
     const passThreshold = state.is2v2 ? 4 : 2;
     const veinticincoThreshold = state.is2v2 ? 3 : 1;
+    const nextTurn = getNextSeat(seat, state.is2v2);
 
+    // VEINTICINCO ("pase corrido"): the cycle of forced passes returns to
+    // `lastPlayedBy`. Award +25 to their team as a MID-ROUND bonus — the
+    // round does NOT end. `lastPlayedBy` gets the next turn and must play
+    // (or pass, which can stack into a TRANCAO below). VEINTICINCO can fire
+    // multiple times in one round if the same player keeps forcing
+    // pass-arounds with subsequent plays.
+    if (
+      state.lastPlayedBy !== null &&
+      nextTurn === state.lastPlayedBy &&
+      newPassesSincePlay === veinticincoThreshold
+    ) {
+      const winningTeam = getTeam(state.lastPlayedBy, state.is2v2);
+      const newScores: [number, number] = [
+        state.scores[0] + (winningTeam === 0 ? VEINTICINCO_BONUS : 0),
+        state.scores[1] + (winningTeam === 1 ? VEINTICINCO_BONUS : 0),
+      ];
+      const winner =
+        newScores[0] >= state.targetScore || newScores[1] >= state.targetScore
+          ? (newScores[0] >= state.targetScore ? 0 : 1)
+          : null;
+      const payload: Record<string, unknown> = {
+        winningTeam,
+        veinticincoBonus: VEINTICINCO_BONUS,
+        team0Pips: teamPips(state, 0),
+        team1Pips: teamPips(state, 1),
+      };
+      const newState: GameState = {
+        ...state,
+        scores: newScores,
+        currentTurn: nextTurn, // = lastPlayedBy, who must now play or pass
+        consecutivePasses: newConsecutive,
+        passesSinceLastPlay: newPassesSincePlay,
+        lastCallout: "veinticinco",
+        lastCalloutPayload: payload,
+        winnerTeam: winner,
+        phase: winner !== null ? "finished" : "playing",
+      };
+      return {
+        success: true,
+        newState,
+        callout: "veinticinco",
+        calloutPayload: payload,
+      };
+    }
+
+    // TRANCAO: pass threshold reached — the board is truly locked because
+    // nobody (including `lastPlayedBy`, whose pass got us here) can play.
+    // The +25 from any preceding VEINTICINCO is already banked in state.scores;
+    // TRANCAO adds pip-diff scoring on top.
     if (newConsecutive >= passThreshold) {
       const newState = endRoundWithTrancao({
         ...state,
@@ -338,30 +365,15 @@ export function applyMove(
       };
     }
 
-    const nextTurn = getNextSeat(seat, state.is2v2);
-    if (
-      state.lastPlayedBy !== null &&
-      nextTurn === state.lastPlayedBy &&
-      newPassesSincePlay === veinticincoThreshold
-    ) {
-      const winningTeam = getTeam(state.lastPlayedBy, state.is2v2);
-      const newState = endRoundWithVeinticinco(
-        { ...state, consecutivePasses: newConsecutive },
-        winningTeam
-      );
-      return {
-        success: true,
-        newState,
-        callout: "veinticinco",
-        calloutPayload: newState.lastCalloutPayload ?? undefined,
-      };
-    }
-
+    // Normal pass: advance turn, no end-of-round event. Clear any prior
+    // mid-round callout so it doesn't linger across the round.
     const newState: GameState = {
       ...state,
       currentTurn: nextTurn,
       consecutivePasses: newConsecutive,
       passesSinceLastPlay: newPassesSincePlay,
+      lastCallout: null,
+      lastCalloutPayload: null,
     };
     return { success: true, newState };
   }

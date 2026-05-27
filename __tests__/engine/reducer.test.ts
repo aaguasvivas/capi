@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   createInitialState,
   applyMove,
+  startNewRound,
 } from "@/lib/engine/reducer";
 import type { GameState } from "@/lib/engine/types";
 import { handPips, isCapicua } from "@/lib/engine/scoring";
@@ -309,10 +310,10 @@ describe("applyMove - TRANCAO scoring", () => {
 });
 
 describe("applyMove - VEINTICINCO", () => {
-  it("triggers VEINTICINCO in 1v1 when opponent passes after your play", () => {
-    // N plays, leaving the board with right end = 2
-    // S has no matching tiles → S passes → VEINTICINCO for N (team 0)
-    const stateAfterNPlay: GameState = {
+  it("triggers VEINTICINCO in 1v1 when opponent passes after your play (mid-round +25, round continues)", () => {
+    // N plays, leaving the board with right end = 2. S has no matching tiles
+    // → S passes → VEINTICINCO bonus to N's team (mid-round), turn returns to N.
+    const state: GameState = {
       phase: "playing",
       mode: "turn_based",
       theme: "barberia",
@@ -322,7 +323,7 @@ describe("applyMove - VEINTICINCO", () => {
       roundIndex: 0,
       hands: {
         n: [[4, 5]],
-        s: [[1, 1], [2, 2], [3, 3]],
+        s: [[1, 1], [3, 3], [4, 4]], // no match for ends 6 / 2
         e: [],
         w: [],
       },
@@ -338,23 +339,13 @@ describe("applyMove - VEINTICINCO", () => {
       winnerTeam: null,
       lastPlayedBy: "n",
     };
-    // S cannot match left end (6) or right end (2) with [1,1],[2,2],[3,3]
-    // Wait — [2,2] matches right end 2. Use tiles that don't match.
-    const state: GameState = {
-      ...stateAfterNPlay,
-      hands: {
-        ...stateAfterNPlay.hands,
-        s: [[1, 1], [3, 3], [4, 4]],
-      },
-    };
     const result = applyMove(state, "s", { type: "pass" });
     expect(result.success).toBe(true);
     expect(result.newState.lastCallout).toBe("veinticinco");
-    expect(result.newState.phase).toBe("round_over");
-    // N (team 0) wins: 25 bonus + opponent pips
-    const opponentPips = handPips([[1, 1]]) + handPips([[3, 3]]) + handPips([[4, 4]]);
-    const expectedScore = 25 + opponentPips;
-    expect(result.newState.scores[0]).toBe(expectedScore);
+    // Mid-round bonus — round continues, only +25 is banked (no opp pips here).
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.scores[0]).toBe(25);
+    expect(result.newState.currentTurn).toBe("n"); // lastPlayedBy returns to play
   });
 });
 
@@ -650,8 +641,9 @@ describe("2v2 - TRANCAO", () => {
 });
 
 describe("2v2 - VEINTICINCO", () => {
-  it("triggers VEINTICINCO when 3 others pass after a play", () => {
-    // N played last → E, S, W all pass → next turn is N → VEINTICINCO for N
+  it("triggers VEINTICINCO when 3 others pass after a play (mid-round +25, round continues)", () => {
+    // N played last → E, S, W all pass → next turn is N → +25 bonus to team 0,
+    // round continues with currentTurn = N.
     const state = make2v2State({
       currentTurn: "w",
       consecutivePasses: 2,
@@ -668,10 +660,9 @@ describe("2v2 - VEINTICINCO", () => {
     const result = applyMove(state, "w", { type: "pass" });
     expect(result.success).toBe(true);
     expect(result.callout).toBe("veinticinco");
-    expect(result.newState.phase).toBe("round_over");
-    // N (team 0) wins: 25 + opponent pips (E+W = 4+4+0+0 = 8)
-    const oppPips = handPips([[4, 4]]) + handPips([[0, 0]]);
-    expect(result.newState.scores[0]).toBe(25 + oppPips);
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.scores[0]).toBe(25);
+    expect(result.newState.currentTurn).toBe("n"); // back to lastPlayedBy
   });
 
   it("does NOT trigger VEINTICINCO after only 2 passes in 2v2", () => {
@@ -694,8 +685,8 @@ describe("2v2 - VEINTICINCO", () => {
     expect(result.newState.consecutivePasses).toBe(2);
   });
 
-  it("awards VEINTICINCO to team 1 when E plays and N,S,W pass", () => {
-    // E played last, then S, W, N all pass (3 passes)
+  it("awards VEINTICINCO to team 1 when E plays and N,S,W pass (mid-round +25)", () => {
+    // E played last, then S, W, N pass — cycle returns to E → +25 to team 1.
     const state = make2v2State({
       currentTurn: "n",
       consecutivePasses: 2,
@@ -712,50 +703,49 @@ describe("2v2 - VEINTICINCO", () => {
     const result = applyMove(state, "n", { type: "pass" });
     expect(result.success).toBe(true);
     expect(result.callout).toBe("veinticinco");
-    // E is team 1 → team 1 wins
-    // Opp pips = team 0 = N+S = 12+8 = 20
-    expect(result.newState.scores[1]).toBe(25 + 20);
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.scores[1]).toBe(25);
+    expect(result.newState.currentTurn).toBe("e");
   });
 });
 
 describe("2v2 - DOMINÓ scoring", () => {
-  it("awards opponent TEAM pips (both players) on DOMINÓ", () => {
-    // S (team 0) goes out. Team 1 pips = E hand + W hand
-    // Board: [4,3] → left=4, right=3. S plays [3,1] on right → board ends [4,...,1]
-    // Not capicúa because left=4 ≠ right=1
+  it("awards ALL remaining pips on the table (opps + winner's teammate) on DOMINÓ", () => {
+    // S (team 0) goes out playing [3,1]. After the play S has 0 pips.
+    // Winning team banks every other hand: N (teammate) + E + W.
     const state = make2v2State({
       currentTurn: "s",
       hands: {
-        n: [[1, 1]],
-        e: [[6, 5]],
-        s: [[3, 1]],
-        w: [[4, 3]],
+        n: [[1, 1]], // 2  (winner's teammate)
+        e: [[6, 5]], // 11
+        s: [[3, 1]], // 0 after play
+        w: [[4, 3]], // 7
       },
       board: [[4, 3]],
     });
     const result = applyMove(state, "s", { type: "play", tile: [3, 1], end: "right" });
     expect(result.success).toBe(true);
     expect(result.callout).toBe("domino");
-    // Team 0 wins: opponent team 1 pips = E(11) + W(7) = 18
-    expect(result.newState.scores[0]).toBe(18);
+    // 2 + 11 + 7 = 20
+    expect(result.newState.scores[0]).toBe(20);
   });
 
-  it("awards to team 1 when E goes out", () => {
+  it("awards to team 1 when E goes out — N (opp) + S (opp) + W (teammate) all banked", () => {
     const state = make2v2State({
       currentTurn: "e",
       hands: {
-        n: [[6, 6]],
-        e: [[5, 2]],
-        s: [[4, 4]],
-        w: [[3, 3]],
+        n: [[6, 6]], // 12
+        e: [[5, 2]], // 0 after play
+        s: [[4, 4]], // 8
+        w: [[3, 3]], // 6  (winner's teammate)
       },
       board: [[3, 5]],
     });
     const result = applyMove(state, "e", { type: "play", tile: [5, 2], end: "right" });
     expect(result.success).toBe(true);
     expect(result.callout).toBe("domino");
-    // Team 1 wins: opponent team 0 pips = N(12) + S(8) = 20
-    expect(result.newState.scores[1]).toBe(20);
+    // 12 + 8 + 6 = 26
+    expect(result.newState.scores[1]).toBe(26);
   });
 });
 
@@ -837,5 +827,873 @@ describe("2v2 - play resets consecutivePasses", () => {
     expect(result.newState.consecutivePasses).toBe(0);
     expect(result.newState.passesSinceLastPlay).toBe(0);
     expect(result.newState.lastPlayedBy).toBe("s");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Audit batch B — cascade-pass behavior, draw mechanics, round transitions, phase
+// gates, and the rule-stacking corner cases. Added per the dominoes-rules audit
+// (2026-05-27).
+//
+// Dominican rule model encoded here:
+//
+//   VEINTICINCO ("pase corrido"): when the cycle of forced passes returns to
+//   `lastPlayedBy`, +25 is awarded to their team MID-ROUND. The round continues
+//   — `lastPlayedBy` gets the next turn and must play or pass.
+//
+//   TRANCAO: the board is truly locked. Reached when `lastPlayedBy` cannot play
+//   either, so their own pass pushes the cumulative pass count to the threshold
+//   (1v1: 2; 2v2: 4). Pip-diff scoring runs on top of any already-banked
+//   VEINTICINCO bonus from earlier in the same round.
+//
+//   Stacking: VEINTICINCO can fire multiple times per round (each forced
+//   pass-around adds another +25). It can also coexist with DOMINÓ / CAPICÚA on
+//   the closing play — all bonuses bank into the same score column.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe("audit/B — 1v1 cascade pass behavior", () => {
+  it("opponent's first pass after a play triggers VEINTICINCO mid-round (round continues)", () => {
+    // After N plays, lastPlayedBy=N, currentTurn=S, counters=0.
+    // S has no matching tiles, boneyard is empty → S passes.
+    // Cycle returns to N at passesSinceLastPlay=1 (== threshold for 1v1)
+    //   → +25 to team 0, round stays in "playing", N gets the next turn.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 2], [3, 4]],
+        s: [[1, 1], [2, 2]], // neither matches board ends 4/6
+        e: [],
+        w: [],
+      },
+      board: [[4, 6]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const result = applyMove(state, "s", { type: "pass" });
+    expect(result.success).toBe(true);
+    expect(result.callout).toBe("veinticinco");
+    expect(result.newState.phase).toBe("playing");
+    expect(result.newState.scores[0]).toBe(25);
+    expect(result.newState.currentTurn).toBe("n");
+  });
+
+  it("opponent cannot pass while boneyard has tiles (must draw first)", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 2]],
+        s: [[1, 1], [2, 2]],
+        e: [],
+        w: [],
+      },
+      board: [[4, 6]],
+      boneyard: [[3, 3]],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const result = applyMove(state, "s", { type: "pass" });
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("draw");
+  });
+});
+
+describe("audit/B — 2v2 cascade pass behavior", () => {
+  it("third opponent pass after a play triggers VEINTICINCO mid-round (round continues)", () => {
+    // N plays. E,S,W each lack a 6. Three consecutive passes return to N
+    // → +25 to team 0, round stays "playing", N gets the next turn.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[6, 0]],
+        e: [[1, 1], [2, 2]],
+        s: [[3, 3], [4, 4]],
+        w: [[5, 5]],
+      },
+      board: [[6, 6]], // both ends 6 — no one else has a 6
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r1 = applyMove(state, "e", { type: "pass" });
+    expect(r1.success).toBe(true);
+    expect(r1.newState.phase).toBe("playing");
+    expect(r1.newState.consecutivePasses).toBe(1);
+
+    const r2 = applyMove(r1.newState, "s", { type: "pass" });
+    expect(r2.success).toBe(true);
+    expect(r2.newState.phase).toBe("playing");
+    expect(r2.newState.consecutivePasses).toBe(2);
+
+    const r3 = applyMove(r2.newState, "w", { type: "pass" });
+    expect(r3.success).toBe(true);
+    expect(r3.callout).toBe("veinticinco");
+    expect(r3.newState.phase).toBe("playing");
+    expect(r3.newState.scores[0]).toBe(25);
+    expect(r3.newState.currentTurn).toBe("n");
+  });
+
+  it("VEINTICINCO triggers for any seat as last-player (cycle always returns at pass 3)", () => {
+    // E played last. S,W,N pass in order → cycle returns to E.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 1]],
+        e: [[3, 4]],
+        s: [[2, 2]],
+        w: [[5, 5]],
+      },
+      board: [[6, 0]], // ends 6,0 — none of [1,1],[2,2],[5,5] match
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "e",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "e",
+    };
+    const r1 = applyMove(state, "s", { type: "pass" });
+    const r2 = applyMove(r1.newState, "w", { type: "pass" });
+    const r3 = applyMove(r2.newState, "n", { type: "pass" });
+    expect(r3.callout).toBe("veinticinco");
+    expect(r3.newState.phase).toBe("playing");
+    expect(r3.newState.scores[1]).toBe(25);
+    expect(r3.newState.currentTurn).toBe("e");
+  });
+});
+
+describe("audit/B — draw mechanics", () => {
+  it("draw stops at first playable tile; turn does not advance", () => {
+    // Board ends 3 and 5. Boneyard popped from end: [5,6] first → matches end 5 → stop.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[6, 6]], s: [[1, 1]], e: [], w: [] },
+      board: [[3, 5]],
+      boneyard: [[2, 2], [4, 4], [5, 6]],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r = applyMove(state, "s", { type: "draw" });
+    expect(r.success).toBe(true);
+    expect(r.newState.hands.s).toHaveLength(2); // [1,1] + [5,6]
+    expect(r.newState.boneyard).toHaveLength(2); // [2,2], [4,4] remain
+    expect(r.newState.currentTurn).toBe("s");
+  });
+
+  it("draw exhausts boneyard without finding a match; subsequent pass is allowed", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[6, 6]], s: [[1, 1]], e: [], w: [] },
+      board: [[3, 5]],
+      boneyard: [[2, 2], [4, 4]], // neither matches 3 or 5
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const drew = applyMove(state, "s", { type: "draw" });
+    expect(drew.success).toBe(true);
+    expect(drew.newState.hands.s).toHaveLength(3);
+    expect(drew.newState.boneyard).toHaveLength(0);
+    expect(drew.newState.currentTurn).toBe("s");
+
+    // Now pass is allowed (boneyard empty + no legal play)
+    const passed = applyMove(drew.newState, "s", { type: "pass" });
+    expect(passed.success).toBe(true);
+    // (this then triggers VEINTICINCO per the cascade behavior above)
+    expect(passed.callout).toBe("veinticinco");
+  });
+});
+
+describe("audit/B — game-end transitions", () => {
+  it("DOMINÓ crossing target finishes the game (phase=finished, winnerTeam set)", () => {
+    // Scores [85,50]. N about to play [1,2] on board [[5,2]]'s right end.
+    // S holds [3,4]+[5,6] = 7+11 = 18. New N score = 85+18 = 103.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [85, 50],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [[3, 4], [5, 6]], e: [], w: [] },
+      board: [[5, 2]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "s",
+    };
+    const r = applyMove(state, "n", { type: "play", tile: [1, 2], end: "right" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("domino");
+    expect(r.newState.phase).toBe("finished");
+    expect(r.newState.winnerTeam).toBe(0);
+    expect(r.newState.scores[0]).toBe(85 + handPips([[3, 4], [5, 6]]));
+  });
+
+  it("CAPICÚA at game-winning DOMINÓ awards bonus AND finishes game", () => {
+    // Board [[2,6],[6,5]] left=2 right=5. N plays [2,5] on right →
+    // newBoard=[[2,6],[6,5],[5,2]] new ends both 2 → capicúa.
+    // Scores [70,50]. Opp pips = [3,4]+[6,6] = 7+12 = 19. Bonus +25. Final = 70+44 = 114.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [70, 50],
+      roundIndex: 0,
+      hands: { n: [[2, 5]], s: [[3, 4], [6, 6]], e: [], w: [] },
+      board: [[2, 6], [6, 5]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "s",
+    };
+    const r = applyMove(state, "n", { type: "play", tile: [2, 5], end: "right" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("capicua");
+    expect(r.newState.phase).toBe("finished");
+    expect(r.newState.winnerTeam).toBe(0);
+    expect(r.newState.scores[0]).toBe(70 + 19 + 25);
+    // Sanity: isCapicua on the resulting board agrees
+    expect(isCapicua(r.newState.board, [2, 5])).toBe(true);
+  });
+});
+
+describe("audit/B — startNewRound", () => {
+  it("resets pass counters and callout, increments roundIndex, preserves scores", () => {
+    const ended: GameState = {
+      phase: "round_over",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [30, 12],
+      roundIndex: 0,
+      hands: { n: [], s: [[1, 2]], e: [], w: [] },
+      board: [[3, 3]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "s",
+      lastCallout: "domino",
+      lastCalloutPayload: { winningTeam: 0 },
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const next = startNewRound(ended, ended.players);
+    expect(next.phase).toBe("playing");
+    expect(next.roundIndex).toBe(1);
+    expect(next.scores).toEqual([30, 12]);
+    expect(next.consecutivePasses).toBe(0);
+    expect(next.passesSinceLastPlay).toBe(0);
+    expect(next.lastCallout).toBeNull();
+    expect(next.lastCalloutPayload).toBeNull();
+    expect(next.winnerTeam).toBeNull();
+    expect(next.lastPlayedBy).toBeNull();
+    expect(next.board).toEqual([]); // empty board, no auto-play in subsequent rounds
+    // Hands re-dealt from a full set
+    const total =
+      next.hands.n.length + next.hands.s.length + next.boneyard.length;
+    expect(total).toBe(28);
+  });
+
+  it("round-2 starter is the DOMINÓ winner (last player to play)", () => {
+    const ended: GameState = {
+      phase: "round_over",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [10, 30],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [], e: [], w: [] },
+      board: [[3, 3]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: "domino",
+      lastCalloutPayload: { winningTeam: 1 },
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "s",
+    };
+    const next = startNewRound(ended, ended.players);
+    expect(next.currentTurn).toBe("s");
+    expect(next.starterThisRound).toBe("s");
+  });
+
+  it("after TRANCAO, round-2 starter is the lowest-pip seat on the winning team (2v2)", () => {
+    // TRANCAO won by team 0 (N+S). N has 2 pips, S has 7 → N starts.
+    const ended: GameState = {
+      phase: "round_over",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [10, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 1]], // 2 pips
+        e: [[5, 5]],
+        s: [[3, 4]], // 7 pips
+        w: [[6, 6]],
+      },
+      board: [[3, 2]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 4,
+      passesSinceLastPlay: 4,
+      starterThisRound: "e",
+      lastCallout: "trancao",
+      lastCalloutPayload: { winnerTeam: 0 },
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "e",
+    };
+    const next = startNewRound(ended, ended.players);
+    expect(next.currentTurn).toBe("n");
+    expect(next.starterThisRound).toBe("n");
+  });
+});
+
+describe("audit/B — TRANCAO scoring (manufactured states — see batch header)", () => {
+  it("1v1 TRANCAO scoring on tie: starter's team wins 0 points", () => {
+    // Both teams have 5 pips. Starter is S (team 1). On tie, team 1 wins 0 pts.
+    // NOTE: this state is unreachable via normal play; we manufacture it to exercise
+    // the TRANCAO scoring code. We bypass the VEINTICINCO check by using
+    // lastPlayedBy=null (the only state where VEINTICINCO does not fire on the
+    // returning seat) so that the pass-threshold TRANCAO branch is taken.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[2, 3]], s: [[2, 3]], e: [], w: [] }, // both 5 pips
+      board: [[6, 6]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 1,
+      passesSinceLastPlay: 1,
+      starterThisRound: "s",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: null,
+    };
+    const r = applyMove(state, "s", { type: "pass" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("trancao");
+    expect(r.newState.scores).toEqual([0, 0]);
+    const payload = r.newState.lastCalloutPayload as Record<string, unknown>;
+    // Starter S → team 1 wins the tie
+    expect(payload.winnerTeam).toBe(1);
+  });
+});
+
+describe("audit/B — VEINTICINCO + TRANCAO stacking (true game lock)", () => {
+  it("1v1: forcer's own pass after the +25 triggers TRANCAO; pip-diff stacks on top", () => {
+    // N played, S has no match → S passes → VEINTICINCO (+25 to team 0).
+    // currentTurn returns to N, but N also has no match → N passes →
+    // consecutivePasses reaches 2 → TRANCAO. Pip-diff scoring adds on top.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[6, 6]], // 12 pips, no match for ends 3/5
+        s: [[1, 1]], // 2 pips, no match
+        e: [],
+        w: [],
+      },
+      board: [[3, 5]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    // First pass: VEINTICINCO mid-round
+    const r1 = applyMove(state, "s", { type: "pass" });
+    expect(r1.success).toBe(true);
+    expect(r1.callout).toBe("veinticinco");
+    expect(r1.newState.phase).toBe("playing");
+    expect(r1.newState.scores[0]).toBe(25);
+    expect(r1.newState.currentTurn).toBe("n");
+
+    // Second pass (by N who also can't play): TRANCAO
+    const r2 = applyMove(r1.newState, "n", { type: "pass" });
+    expect(r2.success).toBe(true);
+    expect(r2.callout).toBe("trancao");
+    expect(r2.newState.phase).toBe("round_over");
+    // Pip-diff: team 0 = 12, team 1 = 2 → team 1 wins diff = 10
+    expect(r2.newState.scores[0]).toBe(25); // VEINTICINCO bonus banked
+    expect(r2.newState.scores[1]).toBe(10); // TRANCAO pip-diff to team 1
+  });
+
+  it("2v2: forcer's own pass after the +25 triggers TRANCAO; pip-diff stacks on top", () => {
+    // N played [6,6], everyone else lacks a 6. E,S,W pass → VEINTICINCO (+25
+    // to team 0). N also has no 6 → passes → TRANCAO. Lower-pip team wins
+    // the pip-diff; +25 stays.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        // Team 0: N=[1,2]=3, S=[3,3]+[4,4]=14 → total 17
+        n: [[1, 2]],
+        s: [[3, 3], [4, 4]],
+        // Team 1: E=[1,1]+[2,2]=6, W=[5,5]=10 → total 16 (lower)
+        e: [[1, 1], [2, 2]],
+        w: [[5, 5]],
+      },
+      board: [[6, 6]], // both ends 6 — nobody has another 6
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r1 = applyMove(state, "e", { type: "pass" });
+    const r2 = applyMove(r1.newState, "s", { type: "pass" });
+    const r3 = applyMove(r2.newState, "w", { type: "pass" });
+    expect(r3.callout).toBe("veinticinco");
+    expect(r3.newState.scores[0]).toBe(25);
+    expect(r3.newState.currentTurn).toBe("n");
+
+    // N now must pass too (no 6 in hand) → fourth pass → TRANCAO
+    const r4 = applyMove(r3.newState, "n", { type: "pass" });
+    expect(r4.callout).toBe("trancao");
+    expect(r4.newState.phase).toBe("round_over");
+    // VEINTICINCO bonus still banked, TRANCAO adds pip-diff to lower team
+    expect(r4.newState.scores[0]).toBe(25);
+    expect(r4.newState.scores[1]).toBe(1); // |17 − 16|
+  });
+});
+
+describe("audit/B — VEINTICINCO stacking (multiple bonuses in one round)", () => {
+  it("2v2: same player can earn VEINTICINCO twice in one round (50 total)", () => {
+    // N forces a pass-around with their first play → +25.
+    // N plays a second tile that also forces a pass-around → +25 again.
+    // After this sequence, scores[0] = 50.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 200,
+      scores: [0, 0],
+      roundIndex: 0,
+      // N's plays after the existing [6,6] will keep both ends in the 3..6 range.
+      // E/S/W are intentionally stocked with only blanks/ones/twos so they can't match.
+      hands: {
+        n: [[6, 3], [6, 5]],
+        e: [[1, 1], [2, 2]],
+        s: [[0, 0]],
+        w: [[0, 1]],
+      },
+      board: [[6, 6]],
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    // First cycle: E,S,W pass → VEINTICINCO #1
+    const v1 = applyMove(
+      applyMove(applyMove(state, "e", { type: "pass" }).newState, "s", {
+        type: "pass",
+      }).newState,
+      "w",
+      { type: "pass" }
+    );
+    expect(v1.callout).toBe("veinticinco");
+    expect(v1.newState.scores[0]).toBe(25);
+    expect(v1.newState.currentTurn).toBe("n");
+    expect(v1.newState.lastCallout).toBe("veinticinco");
+
+    // N plays [6,3] on left → board ends become 3, 6. Callout clears.
+    const p1 = applyMove(v1.newState, "n", {
+      type: "play",
+      tile: [6, 3],
+      end: "left",
+    });
+    expect(p1.success).toBe(true);
+    expect(p1.newState.lastCallout).toBeNull();
+    expect(p1.newState.scores[0]).toBe(25); // bonus still banked
+
+    // Second cycle: ends 3,6 — E/S/W still cannot match (only blanks/ones/twos)
+    const v2 = applyMove(
+      applyMove(applyMove(p1.newState, "e", { type: "pass" }).newState, "s", {
+        type: "pass",
+      }).newState,
+      "w",
+      { type: "pass" }
+    );
+    expect(v2.callout).toBe("veinticinco");
+    expect(v2.newState.scores[0]).toBe(50); // stacked
+    expect(v2.newState.currentTurn).toBe("n");
+  });
+});
+
+describe("audit/B — VEINTICINCO + DOMINÓ / CAPICÚA stacking", () => {
+  it("VEINTICINCO bonus stays banked when forcer goes out on the next play (DOMINÓ)", () => {
+    // After E,S,W pass, N gets +25 then plays last tile to DOMINÓ.
+    // Final score = 25 (VEINTICINCO) + opp pips (DOMINÓ).
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 200,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[6, 5]], // last tile, matches the 6 end after VEINTICINCO
+        e: [[1, 1], [2, 2]],
+        s: [[3, 3]],
+        w: [[0, 0]],
+      },
+      board: [[6, 6]],
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    // Force the pass-around: E, S, W
+    const v = applyMove(
+      applyMove(applyMove(state, "e", { type: "pass" }).newState, "s", {
+        type: "pass",
+      }).newState,
+      "w",
+      { type: "pass" }
+    );
+    expect(v.callout).toBe("veinticinco");
+    expect(v.newState.scores[0]).toBe(25);
+
+    // N plays last tile → DOMINÓ (not capicúa: new ends are 5 and 6)
+    const out = applyMove(v.newState, "n", {
+      type: "play",
+      tile: [6, 5],
+      end: "left",
+    });
+    expect(out.success).toBe(true);
+    expect(out.callout).toBe("domino");
+    expect(out.newState.phase).toBe("round_over");
+    // Opp pips: E=2+4=6, W=0 → 6. Team 0 final = 25 + 6 = 31.
+    expect(out.newState.scores[0]).toBe(25 + handPips([[1, 1], [2, 2]]) + handPips([[3, 3]]) + handPips([[0, 0]]));
+  });
+
+  it("max stack: VEINTICINCO + DOMINÓ + CAPICÚA all bank into the same column", () => {
+    // E,S,W pass → +25. Then N plays last tile [3,5] on left of board
+    // [[3,4],[4,5]] → new board [[5,3],[3,4],[4,5]] with both ends = 5 → CAPICÚA DOMINÓ.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 200,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[3, 5]],
+        e: [[1, 1]],
+        s: [[6, 6]], // 6 pips don't match ends 3 or 5
+        w: [[2, 2]],
+      },
+      board: [[3, 4], [4, 5]],
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const v = applyMove(
+      applyMove(applyMove(state, "e", { type: "pass" }).newState, "s", {
+        type: "pass",
+      }).newState,
+      "w",
+      { type: "pass" }
+    );
+    expect(v.callout).toBe("veinticinco");
+    expect(v.newState.scores[0]).toBe(25);
+
+    const out = applyMove(v.newState, "n", {
+      type: "play",
+      tile: [3, 5],
+      end: "left",
+    });
+    expect(out.success).toBe(true);
+    expect(out.callout).toBe("capicua");
+    expect(out.newState.phase).toBe("round_over");
+    // 25 (VEINTICINCO) + opp pips + 25 (CAPICÚA)
+    // Opp pips: E=2, S=12, W=4 → 18
+    expect(out.newState.scores[0]).toBe(25 + 18 + 25);
+  });
+});
+
+describe("audit/B — VEINTICINCO at target score", () => {
+  it("+25 that crosses targetScore ends the game (phase=finished)", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [80, 50],
+      roundIndex: 3,
+      hands: {
+        n: [[6, 6]],
+        s: [[1, 1]],
+        e: [],
+        w: [],
+      },
+      board: [[3, 5]],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r = applyMove(state, "s", { type: "pass" });
+    expect(r.callout).toBe("veinticinco");
+    expect(r.newState.scores[0]).toBe(105);
+    expect(r.newState.phase).toBe("finished");
+    expect(r.newState.winnerTeam).toBe(0);
+  });
+});
+
+describe("audit/B — VEINTICINCO callout clears on next move", () => {
+  it("forcer's next play clears the VEINTICINCO callout from state", () => {
+    // After VEINTICINCO, lastCallout is "veinticinco". The next play by
+    // anyone (the forcer themselves, here) should reset lastCallout so the
+    // UI doesn't keep showing the overlay across the rest of the round.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 200,
+      scores: [25, 0], // already +25 from a prior VEINTICINCO in this round
+      roundIndex: 0,
+      hands: {
+        n: [[6, 3], [6, 5]],
+        e: [[1, 1]],
+        s: [[2, 2]],
+        w: [[0, 0]],
+      },
+      board: [[6, 6]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 3,
+      passesSinceLastPlay: 3,
+      starterThisRound: "n",
+      lastCallout: "veinticinco",
+      lastCalloutPayload: { winningTeam: 0, veinticincoBonus: 25 },
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r = applyMove(state, "n", {
+      type: "play",
+      tile: [6, 3],
+      end: "left",
+    });
+    expect(r.success).toBe(true);
+    expect(r.newState.lastCallout).toBeNull();
+    expect(r.newState.lastCalloutPayload).toBeNull();
+    // Counters reset, lastPlayedBy stays N (just played again)
+    expect(r.newState.consecutivePasses).toBe(0);
+    expect(r.newState.passesSinceLastPlay).toBe(0);
+    expect(r.newState.lastPlayedBy).toBe("n");
+  });
+});
+
+describe("audit/B — validateMove phase gates", () => {
+  it("rejects play during round_over", () => {
+    const state: GameState = {
+      phase: "round_over",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [10, 0],
+      roundIndex: 0,
+      hands: { n: [[1, 2]], s: [], e: [], w: [] },
+      board: [[3, 3]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: "domino",
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "s",
+    };
+    const r = applyMove(state, "n", { type: "play", tile: [1, 2], end: "left" });
+    expect(r.success).toBe(false);
+    expect(r.error).toContain("not in play");
+  });
+
+  it("rejects play during finished", () => {
+    const state: GameState = {
+      phase: "finished",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [110, 50],
+      roundIndex: 2,
+      hands: { n: [[1, 2]], s: [], e: [], w: [] },
+      board: [[3, 3]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: "domino",
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: 0,
+      lastPlayedBy: "s",
+    };
+    const r = applyMove(state, "n", { type: "play", tile: [1, 2], end: "left" });
+    expect(r.success).toBe(false);
+    expect(r.error).toContain("not in play");
   });
 });

@@ -205,7 +205,9 @@ describe("2v2 - teamPips", () => {
 });
 
 describe("2v2 - scoreDomino", () => {
-  it("returns opponent team total pips", () => {
+  it("returns the sum of ALL remaining hands (opps + winner's teammate)", () => {
+    // Winner N went out (hand empty). Per Dominican rules the winner's team
+    // banks every remaining pip on the table — both opps AND the teammate.
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -215,10 +217,10 @@ describe("2v2 - scoreDomino", () => {
       scores: [0, 0],
       roundIndex: 0,
       hands: {
-        n: [],
-        e: [[3, 4], [5, 5]],
-        s: [[1, 2]],
-        w: [[6, 6]],
+        n: [], // winner, went out
+        e: [[3, 4], [5, 5]], // 7 + 10 = 17
+        s: [[1, 2]], // 3 (winner's teammate)
+        w: [[6, 6]], // 12
       },
       board: [],
       boneyard: [],
@@ -232,8 +234,8 @@ describe("2v2 - scoreDomino", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    // Team 0 (N+S) wins: opponent team 1 = E(17) + W(12) = 29
-    expect(scoreDomino(state, 0)).toBe(29);
+    // 17 + 3 + 12 = 32
+    expect(scoreDomino(state, 0)).toBe(32);
   });
 });
 
