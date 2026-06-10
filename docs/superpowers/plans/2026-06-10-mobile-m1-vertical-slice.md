@@ -195,6 +195,12 @@ In `apps/web/package.json`: change `"name": "capi"` → `"name": "@capi/web"`. A
 ```json
     "@capi/engine": "*",
 ```
+
+In `apps/web/next.config.js`, add `transpilePackages` to the base config (the engine ships raw TS source; Next.js does not transpile workspace packages by default):
+```js
+const nextConfig = { transpilePackages: ["@capi/engine", "@capi/i18n"] };
+```
+(`@capi/i18n` is created in A5; listing it now is harmless and saves a second edit.)
 Remove the now-misplaced root `"test"` script's reliance on the old test dir — the web `package.json` keeps `"test": "vitest run"` (it will find no tests now; that's fine, engine tests live in the engine package). Leave other scripts (`dev`, `build`, `start`, `lint`) unchanged.
 
 - [ ] **Step 3: Re-point web imports of the engine + boardLayout**
