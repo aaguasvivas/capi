@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@capi/engine": "*",
+    "@capi/i18n": "*",
     "@sentry/nextjs": "^10.53.1",
     "@supabase/supabase-js": "^2.47.0",
     "next": "^14.2.35",

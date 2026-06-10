@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import CreateGameForm from "@/components/CreateGameForm";
 import JoinGameForm from "@/components/JoinGameForm";
 import { useI18n } from "@/lib/i18n/context";
-import type { Lang } from "@/lib/i18n/strings";
+import type { Lang } from "@capi/i18n";
 
 function LangToggle() {
   const { lang, setLang } = useI18n();

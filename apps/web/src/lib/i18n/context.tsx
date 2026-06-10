@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { dictionaries, type Lang, type Strings } from "./strings";
+import { dictionaries, type Lang, type Strings } from "@capi/i18n";
 
 interface I18nCtx {
   lang: Lang;
