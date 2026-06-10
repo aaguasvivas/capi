@@ -1247,6 +1247,115 @@ describe("audit/B — startNewRound", () => {
   });
 });
 
+describe("audit/B — round winner leads next round (via applyMove, not fixtures)", () => {
+  it("1v1: the seat that goes out on DOMINÓ starts the next round", () => {
+    // Regression: the wentOut branch previously omitted lastPlayedBy, so the
+    // PREVIOUS player (n) leaked through as next-round starter instead of the
+    // winner (s). This drives the win through applyMove — the path that the
+    // hand-set fixtures below never exercised.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[3, 4]], s: [[1, 2]], e: [], w: [] },
+      board: [[5, 5], [5, 3], [3, 1]], // left end 5, right end 1
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n", // the previous player — must NOT leak through
+    };
+    const r = applyMove(state, "s", { type: "play", tile: [1, 2], end: "right" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("domino");
+    expect(r.newState.lastPlayedBy).toBe("s");
+
+    const next = startNewRound(r.newState, r.newState.players);
+    expect(next.starterThisRound).toBe("s");
+    expect(next.currentTurn).toBe("s");
+  });
+
+  it("2v2: the seat that goes out on DOMINÓ starts the next round", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[6, 6]],
+        e: [[5, 2]], // goes out
+        s: [[4, 4]],
+        w: [[3, 3]],
+      },
+      board: [[3, 5]], // right end 5
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "n",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    const r = applyMove(state, "e", { type: "play", tile: [5, 2], end: "right" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("domino");
+    expect(r.newState.lastPlayedBy).toBe("e");
+
+    const next = startNewRound(r.newState, r.newState.players);
+    expect(next.starterThisRound).toBe("e");
+    expect(next.currentTurn).toBe("e");
+  });
+
+  it("CAPICÚA winner (via applyMove) starts the next round", () => {
+    // Board [[2,6],[6,5]] left=2 right=5; N plays [2,5] on right →
+    // ends become 2 and 2 → capicúa DOMINÓ. N must start next round.
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: { n: [[2, 5]], s: [[3, 4]], e: [], w: [] },
+      board: [[2, 6], [6, 5]],
+      boneyard: [],
+      currentTurn: "n",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "s",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "s",
+    };
+    const r = applyMove(state, "n", { type: "play", tile: [2, 5], end: "right" });
+    expect(r.success).toBe(true);
+    expect(r.callout).toBe("capicua");
+    expect(r.newState.lastPlayedBy).toBe("n");
+
+    const next = startNewRound(r.newState, r.newState.players);
+    expect(next.starterThisRound).toBe("n");
+    expect(next.currentTurn).toBe("n");
+  });
+});
+
 describe("audit/B — TRANCAO scoring (manufactured states — see batch header)", () => {
   it("1v1 TRANCAO scoring on tie: starter's team wins 0 points", () => {
     // Both teams have 5 pips. Starter is S (team 1). On tie, team 1 wins 0 pts.

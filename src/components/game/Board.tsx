@@ -16,12 +16,21 @@ const TW = 36; // short side
 const TH = 72; // long side
 const GAP = 6; // between adjacent tiles (in row, and around corners)
 const EDGE = 28; // padding inside the inner content div
-// Vertical distance between successive row centerlines. The tallest thing
-// on any row line is a vertical tile centered on it (a double mid-row, or
-// the corner tile) extending TH/2 above and below. Two such tiles on
-// adjacent rows need TH/2 + GAP + TH/2 = TH + GAP between centerlines.
-// Plain horizontal tiles (TW/2 half-height) get extra breathing room.
-const ROW_STEP = TH + GAP;
+// Vertical distance between successive row centerlines.
+//
+// The turning tile at a corner is a single vertical domino (TH tall). For the
+// snake to read as ONE connected chain, that tile has to physically bridge the
+// row it leaves and the row it enters — its top half overlapping the upper row,
+// its bottom half overlapping the lower row. That's only possible when rows are
+// closer together than the tile is long (ROW_STEP < TH); any larger and the
+// corner tile floats in a gap it can't span.
+//
+// We set the pitch to clear the one thing that protrudes furthest: a crosswise
+// double mid-row reaches TH/2 below its line; the next row's horizontal tiles
+// reach TW/2 above theirs. ROW_STEP = TH/2 + TW/2 + GAP leaves exactly GAP
+// between them — tight, but never overlapping — and keeps ROW_STEP (60) well
+// under TH (72) so the corner tile bridges with room to spare.
+const ROW_STEP = TH / 2 + TW / 2 + GAP;
 
 interface Placed {
   tile: Tile;
@@ -87,19 +96,20 @@ function layoutBoard(board: Tile[], availW: number): LayoutResult {
         : cursor - len - reserve >= 0;
 
     if (!fitsInRow && placedInRow > 0) {
-      // This tile bridges the chain into the next row. Place it vertically
-      // at the row trailing edge, centered ON the row line — exactly like a
-      // crosswise double — so it sits flush with its row neighbors instead
-      // of floating in the gap between rows.
+      // Turn the corner with a vertical tile, centered on the MIDLINE between
+      // this row and the next so its body bridges both — top half meets the
+      // last tile of this row, bottom half meets the first tile of the next.
+      // This is how a real domino train rounds a corner; the chain stays
+      // visually unbroken instead of leaving a void at the turn.
       const cornerX = dir === 1 ? cursor + TW / 2 : cursor - TW / 2;
-      const cornerY = row * ROW_STEP;
+      const cornerY = row * ROW_STEP + ROW_STEP / 2;
       placements.push({ tile, x: cornerX, y: cornerY, rot: 0 });
 
       row++;
       dir = (dir === 1 ? -1 : 1) as 1 | -1;
       placedInRow = 0;
-      // The next row starts one gap inward from the corner's inner edge so
-      // the chain visually steps down and around it.
+      // Next row resumes one gap inward from the corner, flowing back the
+      // other way directly beneath it.
       cursor = dir === 1 ? cornerX + TW / 2 + GAP : cornerX - TW / 2 - GAP;
       continue;
     }

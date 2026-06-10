@@ -244,8 +244,17 @@ export function applyMove(
     const winningTeam = getTeam(seat, state.is2v2);
 
     if (wentOut) {
+      // Record who went out BEFORE ending the round: getRoundWinningSeat reads
+      // lastPlayedBy to decide who leads the next round (the DOMINÓ/CAPICÚA
+      // winner). Without this the field keeps the *previous* player's seat and
+      // the loser would start next round.
       const newState = endRoundWithDomino(
-        { ...state, hands: { ...state.hands, [seat]: newHand }, board: newBoard },
+        {
+          ...state,
+          hands: { ...state.hands, [seat]: newHand },
+          board: newBoard,
+          lastPlayedBy: seat,
+        },
         winningTeam,
         intent.tile
       );
