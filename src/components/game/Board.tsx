@@ -16,14 +16,12 @@ const TW = 36; // short side
 const TH = 72; // long side
 const GAP = 6; // between adjacent tiles (in row, and around corners)
 const EDGE = 28; // padding inside the inner content div
-// Vertical distance between successive row centerlines.
-// Must work even when the tile bordering the corner is a DOUBLE in the
-// current row AND the first tile of the next row is also a double — both
-// extend TH/2 above and below their centerline (vs TW/2 for horizontals).
-// Worst-case spacing:
-//   double's half-height (TH/2) + gap + corner-tile (TH) + gap + double's half-height (TH/2)
-//   = TH + TH + 2·GAP = 156
-const ROW_STEP = TH + TH + 2 * GAP;
+// Vertical distance between successive row centerlines. The tallest thing
+// on any row line is a vertical tile centered on it (a double mid-row, or
+// the corner tile) extending TH/2 above and below. Two such tiles on
+// adjacent rows need TH/2 + GAP + TH/2 = TH + GAP between centerlines.
+// Plain horizontal tiles (TW/2 half-height) get extra breathing room.
+const ROW_STEP = TH + GAP;
 
 interface Placed {
   tile: Tile;
@@ -90,21 +88,19 @@ function layoutBoard(board: Tile[], availW: number): LayoutResult {
 
     if (!fitsInRow && placedInRow > 0) {
       // This tile bridges the chain into the next row. Place it vertically
-      // at the row trailing edge, then flip direction and continue with the
-      // next tile starting the new row.
+      // at the row trailing edge, centered ON the row line — exactly like a
+      // crosswise double — so it sits flush with its row neighbors instead
+      // of floating in the gap between rows.
       const cornerX = dir === 1 ? cursor + TW / 2 : cursor - TW / 2;
-      const cornerY = row * ROW_STEP + ROW_STEP / 2;
+      const cornerY = row * ROW_STEP;
       placements.push({ tile, x: cornerX, y: cornerY, rot: 0 });
 
       row++;
       dir = (dir === 1 ? -1 : 1) as 1 | -1;
       placedInRow = 0;
-      // New row's leading edge aligns with the corner's centerline so the
-      // visual flow continues smoothly from the corner into the row below.
-      cursor = dir === 1 ? cornerX - TW / 2 + TW + GAP : cornerX + TW / 2 - TW - GAP;
-      // Clamp so we never start a row mid-canvas if the corner happened far
-      // in from the edge — keep behavior identical to "anchor at row edge."
-      // (This usually no-ops; only the geometry of the corner placement.)
+      // The next row starts one gap inward from the corner's inner edge so
+      // the chain visually steps down and around it.
+      cursor = dir === 1 ? cornerX + TW / 2 + GAP : cornerX - TW / 2 - GAP;
       continue;
     }
 
@@ -155,6 +151,7 @@ export default function Board({ board }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const lastBoardLenRef = useRef(0);
+  const prevFirstTileRef = useRef<Tile | null>(null);
 
   // Observe the scroll container's size so layout recalculates on resize.
   useEffect(() => {
@@ -182,22 +179,43 @@ export default function Board({ board }: Props) {
   const xOffset = (innerW - layout.contentW) / 2;
   const yOffset = (innerH - layout.contentH) / 2;
 
+  // The chain grows at either end: a tile played on the left end lands at
+  // index 0, on the right end at the last index. Detect which end grew by
+  // comparing the first tile against the previous render, and remember it
+  // so the last-move highlight survives unrelated re-renders.
+  const newestIndexRef = useRef(-1);
+  const prevLen = lastBoardLenRef.current;
+  const grew = board.length > prevLen;
+  if (grew) {
+    const prevFirst = prevFirstTileRef.current;
+    newestIndexRef.current =
+      prevLen > 0 &&
+      prevFirst &&
+      (board[0][0] !== prevFirst[0] || board[0][1] !== prevFirst[1])
+        ? 0
+        : board.length - 1;
+  } else if (board.length < prevLen) {
+    newestIndexRef.current = -1; // round reset
+  }
+  const newestIndex = newestIndexRef.current;
+
+  useEffect(() => {
+    lastBoardLenRef.current = board.length;
+    prevFirstTileRef.current = board.length > 0 ? board[0] : null;
+  }, [board]);
+
   // Auto-scroll to keep the latest played tile in view. Only fires when the
   // tile count grows — not on resize, not on round resets.
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el || layout.placements.length === 0) return;
-    const prevLen = lastBoardLenRef.current;
-    const currLen = layout.placements.length;
-    lastBoardLenRef.current = currLen;
-    if (currLen <= prevLen) return; // round reset or no change
+    if (!el || layout.placements.length === 0 || !grew) return;
 
     // If the whole chain fits in the viewport, no scroll needed.
     if (layout.contentW <= size.w && layout.contentH <= size.h) return;
 
-    const last = layout.placements[currLen - 1];
-    const targetLeft = last.x + xOffset - el.clientWidth / 2;
-    const targetTop = last.y + yOffset - el.clientHeight / 2;
+    const target = layout.placements[newestIndex] ?? layout.placements[layout.placements.length - 1];
+    const targetLeft = target.x + xOffset - el.clientWidth / 2;
+    const targetTop = target.y + yOffset - el.clientHeight / 2;
     el.scrollTo({
       left: Math.max(0, targetLeft),
       top: Math.max(0, targetTop),
@@ -224,20 +242,39 @@ export default function Board({ board }: Props) {
           height: innerH,
         }}
       >
-        {layout.placements.map((p, i) => (
-          <div
-            key={i}
-            className="absolute"
-            style={{
-              left: p.x + xOffset,
-              top: p.y + yOffset,
-              transform: `translate(-50%, -50%) rotate(${p.rot}deg)`,
-              willChange: "transform",
-            }}
-          >
-            <TileDisplay tile={p.tile} small />
-          </div>
-        ))}
+        {layout.placements.map((p, i) => {
+          const isNewest = i === newestIndex;
+          return (
+            <div
+              // Re-key the newest tile per play so its slam animation
+              // re-triggers even when the same index grows twice in a row
+              // (two consecutive plays on the same end).
+              key={isNewest ? `n-${i}-${board.length}` : `t-${i}`}
+              className="absolute"
+              style={{
+                left: p.x + xOffset,
+                top: p.y + yOffset,
+                transform: `translate(-50%, -50%) rotate(${p.rot}deg)`,
+                willChange: "transform",
+              }}
+            >
+              <div
+                className={isNewest && grew ? "animate-tile-slam" : ""}
+                style={
+                  isNewest
+                    ? {
+                        borderRadius: "0.5rem",
+                        boxShadow:
+                          "0 0 0 2px rgba(251,191,36,0.55), 0 0 14px rgba(251,191,36,0.3)",
+                      }
+                    : undefined
+                }
+              >
+                <TileDisplay tile={p.tile} small />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

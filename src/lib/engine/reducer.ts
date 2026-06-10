@@ -217,7 +217,7 @@ function endRoundWithTrancao(state: GameState): GameState {
     winnerTeam: winner,
     lastCallout: "trancao",
     lastCalloutPayload: {
-      winnerTeam,
+      winningTeam: winnerTeam,
       pts,
       team0Pips: teamPips(state, 0),
       team1Pips: teamPips(state, 1),
@@ -394,12 +394,12 @@ function getRoundWinningSeat(state: GameState): Seat {
   }
 
   if (callout === "trancao") {
-    const winnerTeam = (state.lastCalloutPayload?.winnerTeam as number) ?? 0;
+    const winningTeam = (state.lastCalloutPayload?.winningTeam as number) ?? 0;
     const seats = getSeatsForGame(state.is2v2);
     let bestSeat: Seat = seats[0];
     let bestPips = Infinity;
     for (const seat of seats) {
-      if (getTeam(seat, state.is2v2) === winnerTeam) {
+      if (getTeam(seat, state.is2v2) === winningTeam) {
         const pips = handPips(state.hands[seat] ?? []);
         if (pips < bestPips) {
           bestPips = pips;

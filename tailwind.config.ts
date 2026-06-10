@@ -26,6 +26,7 @@ const config: Config = {
         "fade-in": "fade-in 0.3s ease-out forwards",
         "slide-up": "slide-up 0.3s ease-out forwards",
         "tile-enter": "tile-enter 0.35s ease-out both",
+        "tile-slam": "tile-slam 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both",
         "turn-glow": "turn-glow 2s ease-in-out infinite",
         "score-pop": "score-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "confetti": "confetti 1s ease-out forwards",
@@ -62,6 +63,11 @@ const config: Config = {
         "tile-enter": {
           "0%": { transform: "translateY(-20px) scale(0.8)", opacity: "0" },
           "100%": { transform: "translateY(0) scale(1)", opacity: "1" },
+        },
+        "tile-slam": {
+          "0%": { transform: "scale(1.35)", opacity: "0.4" },
+          "60%": { transform: "scale(0.96)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
         "turn-glow": {
           "0%, 100%": { boxShadow: "inset 0 0 0 0 transparent" },

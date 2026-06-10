@@ -1236,7 +1236,7 @@ describe("audit/B — startNewRound", () => {
       passesSinceLastPlay: 4,
       starterThisRound: "e",
       lastCallout: "trancao",
-      lastCalloutPayload: { winnerTeam: 0 },
+      lastCalloutPayload: { winningTeam: 0 },
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
       lastPlayedBy: "e",
@@ -1281,7 +1281,7 @@ describe("audit/B — TRANCAO scoring (manufactured states — see batch header)
     expect(r.newState.scores).toEqual([0, 0]);
     const payload = r.newState.lastCalloutPayload as Record<string, unknown>;
     // Starter S → team 1 wins the tie
-    expect(payload.winnerTeam).toBe(1);
+    expect(payload.winningTeam).toBe(1);
   });
 });
 

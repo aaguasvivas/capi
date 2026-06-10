@@ -138,7 +138,7 @@ export default function Hand({
 
           return (
             <div
-              key={i}
+              key={`${tile[0]}-${tile[1]}`}
               className={isNewTile ? "animate-tile-enter" : ""}
               style={
                 isNewTile

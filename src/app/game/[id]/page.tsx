@@ -194,8 +194,14 @@ export default function GamePage() {
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        showToast(data.error ?? s.errorStartRound);
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 409) {
+          // Another player already started the round (or our snapshot is
+          // stale) — that's success from the user's perspective, just sync.
+          await refetch();
+        } else {
+          showToast(data.error ?? s.errorStartRound);
+        }
       } else {
         await refetch();
       }
@@ -407,9 +413,7 @@ export default function GamePage() {
   const roundWinnerTeam =
     payload && typeof payload.winningTeam === "number"
       ? payload.winningTeam
-      : typeof payload?.winnerTeam === "number"
-        ? payload.winnerTeam
-        : null;
+      : null;
   const iWonRound = roundWinnerTeam === myTeam;
 
   // Team names for overlays
@@ -424,19 +428,35 @@ export default function GamePage() {
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
 
+  // VEINTICINCO awarded mid-round (round keeps playing) shows as a passing
+  // banner so it never blocks the forcer's next move. Round-ending callouts
+  // (DOMINÓ, CAPICÚA, TRANCAO — or a +25 that wins the game) keep the
+  // full-screen overlay.
+  const isMidRoundCallout =
+    lastCallout === "veinticinco" && gameState.phase === "playing";
+  const bannerTeamName =
+    roundWinnerTeam === null
+      ? null
+      : roundWinnerTeam === myTeam
+        ? myTeamName
+        : oppTeamName;
+
   return (
     <div
       data-theme={gameState.theme}
       className="min-h-screen min-h-[100dvh] flex flex-col bg-theme-page theme-pattern select-game-none"
     >
-      {/* Callout overlay */}
-      {lastCallout && (
-        <CalloutOverlay
-          callout={lastCallout}
-          payload={lastCalloutPayload}
-          onDismiss={clearCallout}
-        />
-      )}
+      {/* Callout: mid-round bonus banner vs round-ending overlay */}
+      {lastCallout &&
+        (isMidRoundCallout ? (
+          <VeinticincoBanner teamName={bannerTeamName} onDone={clearCallout} />
+        ) : (
+          <CalloutOverlay
+            callout={lastCallout}
+            payload={lastCalloutPayload}
+            onDismiss={clearCallout}
+          />
+        ))}
 
       {/* Toasts */}
       <div className="fixed top-16 left-1/2 -translate-x-1/2 z-40 flex flex-col gap-2 items-center pointer-events-none">
@@ -789,6 +809,9 @@ export default function GamePage() {
                 ? "border-t-2 border-[var(--accent)] animate-turn-glow"
                 : "border-t border-black/10"
             }`}
+            style={{
+              paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+            }}
           >
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -812,6 +835,49 @@ export default function GamePage() {
             />
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Mid-round VEINTICINCO banner ────────────────────────────────────────────
+// Non-blocking, auto-dismissing. The round continues underneath — the forcer
+// needs the board free to play their next tile.
+
+function VeinticincoBanner({
+  teamName,
+  onDone,
+}: {
+  teamName: string | null;
+  onDone: () => void;
+}) {
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setLeaving(true), 2300);
+    const doneTimer = setTimeout(onDone, 2650);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [onDone]);
+
+  return (
+    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+      <div
+        className={`px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-700 border border-purple-400/70 shadow-2xl flex items-center gap-2.5 ${
+          leaving ? "animate-toast-out" : "animate-toast-in"
+        }`}
+      >
+        <span className="text-2xl drop-shadow">💥</span>
+        <div className="text-white">
+          <p className="font-black leading-tight tracking-tight">
+            ¡VEINTICINCO!
+          </p>
+          <p className="text-xs text-purple-100/90 font-semibold leading-tight">
+            +25{teamName ? ` · ${teamName}` : ""}
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -33,6 +33,21 @@ export async function POST(
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
+    // Only players in this game may advance the round
+    const { data: player, error: playerError } = await db
+      .from("players")
+      .select("id")
+      .eq("id", playerId)
+      .eq("game_id", params.id)
+      .single();
+
+    if (playerError || !player) {
+      return NextResponse.json(
+        { error: "Player not in this game" },
+        { status: 403 }
+      );
+    }
+
     if (game.status !== "round_over") {
       return NextResponse.json(
         { error: "Game is not in round_over state" },

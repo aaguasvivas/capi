@@ -93,10 +93,60 @@ export function useRealtimeGame(
 
   const preOptimisticRef = useRef<GameState | null>(null);
 
+  // A move POST currently awaiting its response. Blocks duplicate
+  // submissions (double-clicks / button mashing) — the server's optimistic
+  // lock would reject them anyway, but this avoids the churn and the
+  // confusing error flash.
+  const moveInFlightRef = useRef(false);
+
+  // Callouts are keyed by the state_version that produced them so a callout
+  // the user already dismissed never resurrects on refetch. The DB keeps
+  // `lastCallout` inside game_state until the next move clears it, so
+  // without this guard any fetchGame() re-shows a dismissed overlay.
+  const calloutVersionRef = useRef(0);
+  const dismissedCalloutVersionRef = useRef(0);
+
+  // Auto-clear timer for transient move-rejection errors
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Ref to the broadcast channel so sendChat can access it without recreating
   const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
     null
   );
+
+  const surfaceCallout = useCallback(
+    (
+      callout: string | null | undefined,
+      payload: Record<string, unknown> | null | undefined,
+      version: number
+    ) => {
+      if (!callout) {
+        setLastCallout(null);
+        setLastCalloutPayload(null);
+        return;
+      }
+      if (version <= dismissedCalloutVersionRef.current) return;
+      calloutVersionRef.current = version;
+      setLastCallout(callout);
+      setLastCalloutPayload(payload ?? null);
+    },
+    []
+  );
+
+  const showTransientError = useCallback((message: string) => {
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    setError(message);
+    errorTimerRef.current = setTimeout(() => {
+      setError(null);
+      errorTimerRef.current = null;
+    }, 3500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    };
+  }, []);
 
   const fetchGame = useCallback(async () => {
     try {
@@ -114,14 +164,17 @@ export function useRealtimeGame(
         setGameSettings(data.game.settings);
       }
       setError(null);
-      setLastCallout(gs?.lastCallout ?? null);
-      setLastCalloutPayload(gs?.lastCalloutPayload ?? null);
+      surfaceCallout(
+        gs?.lastCallout,
+        gs?.lastCalloutPayload,
+        data.game.state_version
+      );
     } catch {
       setError("Connection error");
     } finally {
       setLoading(false);
     }
-  }, [gameId]);
+  }, [gameId, surfaceCallout]);
 
   useEffect(() => {
     fetchGame();
@@ -147,8 +200,7 @@ export function useRealtimeGame(
             preOptimisticRef.current = null;
             setGameState(gs);
             setStateVersion(sv);
-            setLastCallout(gs?.lastCallout ?? null);
-            setLastCalloutPayload(gs?.lastCalloutPayload ?? null);
+            surfaceCallout(gs?.lastCallout, gs?.lastCalloutPayload, sv);
           }
           if (updated.status === "playing" && !gs) {
             fetchGame();
@@ -160,7 +212,7 @@ export function useRealtimeGame(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [gameId, fetchGame]);
+  }, [gameId, fetchGame, surfaceCallout]);
 
   // Postgres Changes - players joining
   useEffect(() => {
@@ -226,6 +278,8 @@ export function useRealtimeGame(
   const submitMove = useCallback(
     async (intent: MoveIntentPayload) => {
       if (!session) return;
+      if (moveInFlightRef.current) return;
+      moveInFlightRef.current = true;
 
       // Optimistic update for play moves - instant visual feedback
       if (
@@ -278,7 +332,7 @@ export function useRealtimeGame(
             setGameState(preOptimisticRef.current);
             preOptimisticRef.current = null;
           }
-          setError(data.error ?? "Move failed");
+          showTransientError(data.error ?? "Move failed");
           return;
         }
 
@@ -288,18 +342,23 @@ export function useRealtimeGame(
         setError(null);
 
         if (data.callout) {
-          setLastCallout(data.callout);
-          setLastCalloutPayload(data.calloutPayload ?? null);
+          surfaceCallout(
+            data.callout,
+            data.calloutPayload ?? null,
+            data.stateVersion
+          );
         }
       } catch {
         if (preOptimisticRef.current) {
           setGameState(preOptimisticRef.current);
           preOptimisticRef.current = null;
         }
-        setError("Connection error");
+        showTransientError("Connection error");
+      } finally {
+        moveInFlightRef.current = false;
       }
     },
-    [gameId, session, fetchGame, gameState]
+    [gameId, session, fetchGame, gameState, surfaceCallout, showTransientError]
   );
 
   const sendChat = useCallback(
@@ -343,6 +402,12 @@ export function useRealtimeGame(
   );
 
   const clearCallout = useCallback(() => {
+    // Record the dismissal so a refetch of the same state version doesn't
+    // resurrect the overlay (the DB keeps lastCallout until the next move).
+    dismissedCalloutVersionRef.current = Math.max(
+      dismissedCalloutVersionRef.current,
+      calloutVersionRef.current
+    );
     setLastCallout(null);
     setLastCalloutPayload(null);
   }, []);

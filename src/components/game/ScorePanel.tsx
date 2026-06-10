@@ -1,6 +1,35 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/context";
+
+/**
+ * Score number that pops when its value changes — makes mid-round bonuses
+ * (VEINTICINCO +25) visible even if the banner is missed.
+ */
+function ScoreValue({ score }: { score: number }) {
+  const [pop, setPop] = useState(false);
+  const prevRef = useRef(score);
+
+  useEffect(() => {
+    if (score !== prevRef.current) {
+      prevRef.current = score;
+      setPop(true);
+      const t = setTimeout(() => setPop(false), 650);
+      return () => clearTimeout(t);
+    }
+  }, [score]);
+
+  return (
+    <p
+      className={`text-xl font-black leading-tight tabular-nums ${
+        pop ? "animate-score-pop" : ""
+      }`}
+    >
+      {score}
+    </p>
+  );
+}
 
 interface Props {
   scores: [number, number];
@@ -134,9 +163,7 @@ function TeamScore({
             <span className="opacity-40 ml-1 text-[9px]">{youTag}</span>
           )}
         </p>
-        <p className="text-xl font-black leading-tight tabular-nums">
-          {score}
-        </p>
+        <ScoreValue score={score} />
       </div>
     </div>
   );
@@ -182,9 +209,7 @@ function PlayerScore({
             <span className="opacity-40 ml-1 text-[10px]">{youTag}</span>
           )}
         </p>
-        <p className="text-xl font-black leading-tight tabular-nums">
-          {score}
-        </p>
+        <ScoreValue score={score} />
       </div>
     </div>
   );
