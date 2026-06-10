@@ -1,4 +1,4 @@
-import type { Tile } from "@/lib/engine/types";
+import type { Tile } from "./types";
 
 // Tile + spacing dimensions for the board chain, in layout px. Two tiers:
 // the full-size desktop/tablet set and a crisp compact set for narrow phones,
