@@ -187,7 +187,7 @@ git mv package.json apps/web/package.json
 git mv package-lock.json apps/web/package-lock.json
 ```
 
-Note: `supabase/` (migrations), `docs/`, `README.md`, `.gitignore`, `.nvmrc`, `.env.local` stay at the repo root. `__tests__/` is now empty (engine tests moved) — remove it: `rmdir __tests__/engine __tests__/components __tests__ 2>/dev/null || true`.
+Note: `supabase/` (migrations), `docs/`, `README.md`, `.gitignore`, `.nvmrc` stay at the repo root. **Move `.env.local` → `apps/web/.env.local`** (`mv .env.local apps/web/.env.local` — it's gitignored, so plain `mv`, not `git mv`): Next.js only loads env files from its own project directory, so leaving it at the root would break local dev (Gate 3). `__tests__/` is now empty (engine tests moved) — remove it: `rmdir __tests__/engine __tests__/components __tests__ 2>/dev/null || true`.
 
 - [ ] **Step 2: Rename the web package and add the engine dependency**
 
