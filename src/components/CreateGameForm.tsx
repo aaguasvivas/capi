@@ -37,29 +37,29 @@ function ModeGlyph({ mode }: { mode: "1v1" | "2v2" }) {
         stroke="#1a5c2e"
         strokeWidth="1.5"
       />
-      {/* a domino resting on the felt */}
-      <g transform="rotate(-8 32 22)">
+      {/* a domino lying casually on the felt — at 40px render size less is
+          more: a clean tile with its divider reads as a domino; pips at this
+          scale just read as eyes. The slight tilt keeps it from looking like
+          a face on the table. */}
+      <g transform="rotate(-14 32 22)">
         <rect
-          x="27.5"
-          y="17"
-          width="9"
-          height="10"
-          rx="1.4"
+          x="23.5"
+          y="18.5"
+          width="17"
+          height="7.5"
+          rx="1.6"
           fill="#FBF8ED"
           stroke="#b8a882"
-          strokeWidth="0.8"
+          strokeWidth="0.9"
         />
         <line
-          x1="28"
-          y1="22"
-          x2="36"
-          y2="22"
+          x1="32"
+          y1="19.3"
+          x2="32"
+          y2="25.2"
           stroke="#b8a882"
-          strokeWidth="0.7"
+          strokeWidth="0.9"
         />
-        <circle cx="32" cy="19.5" r="0.9" fill="#1a1a1a" />
-        <circle cx="30.4" cy="24.5" r="0.9" fill="#1a1a1a" />
-        <circle cx="33.6" cy="24.5" r="0.9" fill="#1a1a1a" />
       </g>
       {/* seats */}
       <circle cx="32" cy="4.5" r="3.6" fill={seatDark} />
