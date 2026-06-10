@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { createInitialState } from "@/lib/engine/reducer";
-import type { GameState } from "@/lib/engine/types";
+import { createInitialState } from "@capi/engine";
+import type { GameState } from "@capi/engine";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

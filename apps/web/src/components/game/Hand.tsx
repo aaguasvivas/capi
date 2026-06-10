@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import type { Tile } from "@/lib/engine/types";
+import type { Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "@/lib/i18n/context";
 

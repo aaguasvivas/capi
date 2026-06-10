@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = { transpilePackages: ["@capi/engine", "@capi/i18n"] };
 
 const { withSentryConfig } = require("@sentry/nextjs");
 

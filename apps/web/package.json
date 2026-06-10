@@ -1,5 +1,5 @@
 {
-  "name": "capi",
+  "name": "@capi/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@capi/engine": "*",
     "@sentry/nextjs": "^10.53.1",
     "@supabase/supabase-js": "^2.47.0",
     "next": "^14.2.35",

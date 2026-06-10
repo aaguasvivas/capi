@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import type { GameState, Tile, Seat } from "@/lib/engine/types";
-import { getNextSeat } from "@/lib/engine/types";
+import type { GameState, Tile, Seat } from "@capi/engine";
+import { getNextSeat } from "@capi/engine";
 
 interface PlayerSession {
   playerId: string;

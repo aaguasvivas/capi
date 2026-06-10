@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { createInitialState } from "@/lib/engine/reducer";
-import type { GameState, PlayerInfo, Seat } from "@/lib/engine/types";
-import { getTeam } from "@/lib/engine/types";
+import { createInitialState, getTeam } from "@capi/engine";
+import type { GameState, PlayerInfo, Seat } from "@capi/engine";
 
 export async function POST(
   req: NextRequest,

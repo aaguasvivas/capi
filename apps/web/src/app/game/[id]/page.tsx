@@ -11,8 +11,8 @@ import CalloutOverlay from "@/components/game/CalloutOverlay";
 import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
-import type { Tile, Seat } from "@/lib/engine/types";
-import { getTeam } from "@/lib/engine/types";
+import type { Tile, Seat } from "@capi/engine";
+import { getTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
 import {
   playSlam,

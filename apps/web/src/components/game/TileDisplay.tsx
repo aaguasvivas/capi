@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import type { Tile } from "@/lib/engine/types";
+import type { Tile } from "@capi/engine";
 
 interface Props {
   tile: Tile;

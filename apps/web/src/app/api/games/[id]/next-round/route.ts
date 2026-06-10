@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { startNewRound } from "@/lib/engine/reducer";
-import type { GameState, Seat } from "@/lib/engine/types";
+import { startNewRound } from "@capi/engine";
+import type { GameState, Seat } from "@capi/engine";
 
 export async function POST(
   req: NextRequest,

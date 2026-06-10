@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import type { Tile } from "@/lib/engine/types";
+import type { Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "@/lib/i18n/context";
-import { layoutBoard, dimsForWidth } from "./boardLayout";
+import { layoutBoard, dimsForWidth } from "@capi/engine";
 
 interface Props {
   board: Tile[];

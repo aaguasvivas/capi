@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { applyMove } from "@/lib/engine/reducer";
-import type { GameState, Seat, MoveIntent } from "@/lib/engine/types";
+import { applyMove } from "@capi/engine";
+import type { GameState, Seat, MoveIntent } from "@capi/engine";
 
 export async function POST(
   req: NextRequest,
