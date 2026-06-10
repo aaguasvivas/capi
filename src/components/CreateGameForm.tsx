@@ -15,6 +15,65 @@ const AVATAR_COLORS = [
 
 type ThemeId = "barberia" | "colmado" | "patio";
 
+/**
+ * Bird's-eye table glyph for the mode cards: a felt table with a domino on
+ * it and seat dots around it. 1v1 seats face each other; 2v2 shades the two
+ * teams differently (N-S dark vs E-W light), which quietly explains
+ * "con tu frente" — your partner sits across from you.
+ */
+function ModeGlyph({ mode }: { mode: "1v1" | "2v2" }) {
+  const seatDark = "#1f2937";
+  const seatLight = "#9ca3af";
+  return (
+    <svg viewBox="0 0 64 44" className="h-10 mx-auto block" aria-hidden>
+      {/* table */}
+      <rect
+        x="14"
+        y="9"
+        width="36"
+        height="26"
+        rx="6"
+        fill="#2e8a4e"
+        stroke="#1a5c2e"
+        strokeWidth="1.5"
+      />
+      {/* a domino resting on the felt */}
+      <g transform="rotate(-8 32 22)">
+        <rect
+          x="27.5"
+          y="17"
+          width="9"
+          height="10"
+          rx="1.4"
+          fill="#FBF8ED"
+          stroke="#b8a882"
+          strokeWidth="0.8"
+        />
+        <line
+          x1="28"
+          y1="22"
+          x2="36"
+          y2="22"
+          stroke="#b8a882"
+          strokeWidth="0.7"
+        />
+        <circle cx="32" cy="19.5" r="0.9" fill="#1a1a1a" />
+        <circle cx="30.4" cy="24.5" r="0.9" fill="#1a1a1a" />
+        <circle cx="33.6" cy="24.5" r="0.9" fill="#1a1a1a" />
+      </g>
+      {/* seats */}
+      <circle cx="32" cy="4.5" r="3.6" fill={seatDark} />
+      <circle cx="32" cy="39.5" r="3.6" fill={seatDark} />
+      {mode === "2v2" && (
+        <>
+          <circle cx="7.5" cy="22" r="3.6" fill={seatLight} />
+          <circle cx="56.5" cy="22" r="3.6" fill={seatLight} />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function CreateGameForm() {
   const router = useRouter();
   const { s } = useI18n();
@@ -151,8 +210,8 @@ export default function CreateGameForm() {
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <span className="text-lg block">👤 vs 👤</span>
-            <span className="text-xs font-semibold text-gray-800 block mt-1">1v1</span>
+            <ModeGlyph mode="1v1" />
+            <span className="text-xs font-semibold text-gray-800 block mt-1.5">1v1</span>
           </button>
           <button
             type="button"
@@ -163,8 +222,8 @@ export default function CreateGameForm() {
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <span className="text-lg block">👥 vs 👥</span>
-            <span className="text-xs font-semibold text-gray-800 block mt-1">2v2</span>
+            <ModeGlyph mode="2v2" />
+            <span className="text-xs font-semibold text-gray-800 block mt-1.5">2v2</span>
             <span className="text-[10px] text-gray-400">{s.conTuFrente}</span>
           </button>
         </div>
