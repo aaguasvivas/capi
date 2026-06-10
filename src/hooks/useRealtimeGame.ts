@@ -81,6 +81,7 @@ export function useRealtimeGame(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
   const [lastCalloutPayload, setLastCalloutPayload] = useState<Record<
     string,
@@ -162,6 +163,9 @@ export function useRealtimeGame(
       setPlayers(data.players);
       if (data.game.settings) {
         setGameSettings(data.game.settings);
+      }
+      if (data.game.invite_code) {
+        setInviteCode(data.game.invite_code as string);
       }
       setError(null);
       surfaceCallout(
@@ -419,6 +423,7 @@ export function useRealtimeGame(
   return {
     gameState,
     gameSettings,
+    inviteCode,
     players,
     stateVersion,
     loading,

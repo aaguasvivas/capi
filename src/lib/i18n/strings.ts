@@ -30,6 +30,9 @@ export interface Strings {
   preparing: string;
   shareLink: string;
   copied: string;
+  copyLink: string;
+  orShareCode: string;
+  codeCopied: string;
   autoRefresh: string;
   conTuFrente: string;
 
@@ -147,6 +150,9 @@ export const es: Strings = {
   preparing: "Preparando…",
   shareLink: "Comparte este enlace:",
   copied: "¡Copiado!",
+  copyLink: "Copiar enlace",
+  orShareCode: "o comparte el código",
+  codeCopied: "¡Código copiado!",
   autoRefresh: "La página se actualizará cuando se unan.",
   conTuFrente: "Con tu frente",
 
@@ -252,6 +258,9 @@ export const en: Strings = {
   preparing: "Hold on…",
   shareLink: "Send them the link:",
   copied: "Copied!",
+  copyLink: "Copy link",
+  orShareCode: "or share the code",
+  codeCopied: "Code copied!",
   autoRefresh: "Page updates when they pull up.",
   conTuFrente: "With your partner",
 

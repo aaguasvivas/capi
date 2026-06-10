@@ -58,6 +58,7 @@ export default function GamePage() {
   const { s } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
   const [muted, setMutedState] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
@@ -93,6 +94,7 @@ export default function GamePage() {
   const {
     gameState,
     gameSettings,
+    inviteCode,
     players,
     stateVersion,
     loading,
@@ -347,23 +349,67 @@ export default function GamePage() {
             </div>
           )}
 
-          <p className="text-sm text-gray-500">{s.shareLink}</p>
+          {/* Primary action: copy the deep link */}
           <button
             onClick={async () => {
               const inviteUrl = `${window.location.origin}?join=${id}`;
-              await navigator.clipboard.writeText(inviteUrl);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
+              try {
+                await navigator.clipboard.writeText(inviteUrl);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              } catch {
+                /* clipboard blocked — code chip below is the fallback */
+              }
             }}
-            className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm font-mono text-gray-700 hover:bg-gray-200 transition-colors active:scale-[0.98]"
+            className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+              copied
+                ? "bg-green-500 text-white"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
           >
-            {copied
-              ? s.copied
-              : `${window.location.origin}?join=${id}`}
+            {copied ? (
+              <>
+                <span aria-hidden>✓</span>
+                {s.copied}
+              </>
+            ) : (
+              <>
+                <span aria-hidden>🔗</span>
+                {s.copyLink}
+              </>
+            )}
           </button>
-          <p className="text-xs text-gray-400">
-            {s.autoRefresh}
-          </p>
+
+          {/* Secondary: the short code, for typing in by hand */}
+          {inviteCode && (
+            <div className="space-y-1.5">
+              <p className="text-xs text-gray-400">{s.orShareCode}</p>
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(inviteCode);
+                    setCodeCopied(true);
+                    setTimeout(() => setCodeCopied(false), 2000);
+                  } catch {
+                    /* no-op */
+                  }
+                }}
+                className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
+                title={s.copyLink}
+              >
+                <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
+                  {inviteCode}
+                </span>
+              </button>
+              {codeCopied && (
+                <p className="text-xs text-green-600 font-semibold">
+                  {s.codeCopied}
+                </p>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs text-gray-400">{s.autoRefresh}</p>
         </div>
       </div>
     );

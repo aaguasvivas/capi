@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { Tile } from "@/lib/engine/types";
 
 interface Props {
@@ -26,12 +27,32 @@ const PIP_POSITIONS: Record<number, [number, number][]> = {
   6: [[30, 22], [70, 22], [30, 50], [70, 50], [30, 78], [70, 78]],
 };
 
+// A unique id per PipHalf instance so multiple tiles' gradient defs don't
+// collide in the DOM.
+let pipGradientSeq = 0;
+
 function PipHalf({ pips }: { pips: number }) {
   const positions = PIP_POSITIONS[pips] ?? [];
+  // Stable per-instance id across re-renders.
+  const gradId = useRef(`pip-${pipGradientSeq++}`).current;
   return (
     <svg viewBox="0 0 100 100" className="w-full h-full block">
+      <defs>
+        {/* Drilled-pip look: a dished well that's darkest just off-center
+            (where a real drilled hole shadows) with a faint lit rim, so pips
+            read as carved into the tile rather than printed on it. */}
+        <radialGradient id={gradId} cx="38%" cy="34%" r="75%">
+          <stop offset="0%" stopColor="#3a3a3a" />
+          <stop offset="45%" stopColor="#1c1c1c" />
+          <stop offset="100%" stopColor="#050505" />
+        </radialGradient>
+      </defs>
       {positions.map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r={10} fill="#1a1a1a" />
+        <g key={i}>
+          {/* faint lit rim below/right of the well */}
+          <circle cx={cx} cy={cy} r={10} fill="#000" opacity={0.18} />
+          <circle cx={cx} cy={cy} r={9.2} fill={`url(#${gradId})`} />
+        </g>
       ))}
     </svg>
   );
