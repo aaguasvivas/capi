@@ -6,8 +6,8 @@ import {
   scoreDomino,
   scoreTrancao,
   isCapicua,
-} from "@/lib/engine/scoring";
-import type { GameState } from "@/lib/engine/types";
+} from "../src/scoring";
+import type { GameState } from "../src/types";
 
 describe("tilePips", () => {
   it("sums both pips", () => {

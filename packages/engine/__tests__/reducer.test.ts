@@ -3,9 +3,9 @@ import {
   createInitialState,
   applyMove,
   startNewRound,
-} from "@/lib/engine/reducer";
-import type { GameState } from "@/lib/engine/types";
-import { handPips, isCapicua } from "@/lib/engine/scoring";
+} from "../src/reducer";
+import type { GameState } from "../src/types";
+import { handPips, isCapicua } from "../src/scoring";
 
 describe("createInitialState", () => {
   it("starter has 6 tiles, other(s) have 7 in 1v1", () => {

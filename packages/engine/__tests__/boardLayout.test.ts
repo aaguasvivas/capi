@@ -8,8 +8,8 @@ import {
   VGAP,
   type Placed,
   type TileDims,
-} from "@/components/game/boardLayout";
-import type { Tile } from "@/lib/engine/types";
+} from "../src/boardLayout";
+import type { Tile } from "../src/types";
 
 // Both tile tiers must be overlap-free.
 const TIERS: TileDims[] = [DEFAULT_DIMS, COMPACT_DIMS];

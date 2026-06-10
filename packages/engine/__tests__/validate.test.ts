@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { validateMove, hasLegalPlay } from "@/lib/engine/validate";
-import type { GameState } from "@/lib/engine/types";
+import { validateMove, hasLegalPlay } from "../src/validate";
+import type { GameState } from "../src/types";
 
 const baseState: GameState = {
   phase: "playing",
