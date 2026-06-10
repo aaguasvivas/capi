@@ -1,0 +1,12 @@
+{
+  "name": "capi-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["packages/*", "apps/web"],
+  "scripts": {
+    "test": "npm test --workspace @capi/engine",
+    "test:web": "npm test --workspace @capi/web",
+    "dev:web": "npm run dev --workspace @capi/web",
+    "build:web": "npm run build --workspace @capi/web"
+  }
+}
