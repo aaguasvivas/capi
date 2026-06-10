@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import type { Tile } from "@/lib/engine/types";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "@/lib/i18n/context";
-import { layoutBoard } from "./boardLayout";
+import { layoutBoard, dimsForWidth } from "./boardLayout";
 
 interface Props {
   board: Tile[];
@@ -29,9 +29,12 @@ export default function Board({ board }: Props) {
     return () => ro.disconnect();
   }, []);
 
+  // Compact tiles on narrow screens so more fit per row and the chain stays
+  // short; full size on tablet/desktop.
+  const dims = dimsForWidth(size.w);
   const layout =
     board.length > 0 && size.w > 0
-      ? layoutBoard(board, size.w)
+      ? layoutBoard(board, size.w, dims)
       : { placements: [], contentW: 0, contentH: 0 };
 
   // The inner content div is at least the size of the visible viewport, so
@@ -134,7 +137,7 @@ export default function Board({ board }: Props) {
                     : undefined
                 }
               >
-                <TileDisplay tile={p.tile} small />
+                <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
               </div>
             </div>
           );

@@ -1,26 +1,41 @@
 import type { Tile } from "@/lib/engine/types";
 
-// Tile dimensions when rendered at TileDisplay's `small` size (w-9 h-[72px]).
-// All math below assumes the tile is in its natural standing-upright pose;
-// rotation is applied via CSS transform around the tile center.
-export const TW = 36; // short side
-export const TH = 72; // long side
-export const GAP = 6; // between adjacent tiles within a row, and around corners
-export const EDGE = 28; // padding inside the inner content div
-// Clear air kept between the tiles of one row and the next. Rows are NOT
-// spaced by a fixed pitch — a fixed pitch can't satisfy every case at once:
-// a crosswise double reaches TH/2 (36) from its line while a horizontal tile
-// reaches only TW/2 (18), so the gap a double needs is double what a plain
-// tile needs. A single pitch tuned for plain rows lets two stacked doubles
-// overlap; one tuned for doubles leaves plain rows looking sparse.
-//
-// Instead each row's vertical half-extent is measured from its actual tiles
-// (TH/2 if it holds any crosswise double, else TW/2) and consecutive rows are
-// spaced so exactly VGAP of air sits between their nearest edges — uniform
-// clearance everywhere, doubles or not, so nothing can overlap. VGAP is set so
-// an ordinary all-horizontal row pair sits at the spacing the table is tuned
-// for (18 + 24 + 18 = 60).
-export const VGAP = 24;
+// Tile + spacing dimensions for the board chain, in layout px. Two tiers:
+// the full-size desktop/tablet set and a crisp compact set for narrow phones,
+// where smaller tiles fit more per row and keep the snake from scrolling far.
+// (All values stay integers so tiles render sharp — we shrink the tile, we
+// don't CSS-scale it.)
+export interface TileDims {
+  TW: number; // short side
+  TH: number; // long side
+  GAP: number; // between adjacent tiles within a row, and around corners
+  EDGE: number; // padding inside the inner content div
+  // Clear air kept between the tiles of one row and the next — see note below.
+  VGAP: number;
+}
+
+export const DEFAULT_DIMS: TileDims = { TW: 36, TH: 72, GAP: 6, EDGE: 28, VGAP: 24 };
+export const COMPACT_DIMS: TileDims = { TW: 28, TH: 56, GAP: 5, EDGE: 18, VGAP: 18 };
+
+// Container widths below this use the compact tile set.
+export const COMPACT_MAX_WIDTH = 460;
+
+export function dimsForWidth(availW: number): TileDims {
+  return availW < COMPACT_MAX_WIDTH ? COMPACT_DIMS : DEFAULT_DIMS;
+}
+
+// Back-compat default constants (used by tests and any caller that wants the
+// full-size numbers without threading dims through).
+export const { TW, TH, GAP, EDGE, VGAP } = DEFAULT_DIMS;
+
+// Why row spacing is content-aware rather than a fixed pitch:
+// a crosswise double reaches TH/2 from its line while a horizontal tile reaches
+// only TW/2, so the gap a double needs is double what a plain tile needs. A
+// single pitch tuned for plain rows lets two stacked doubles overlap; one tuned
+// for doubles leaves plain rows looking sparse. Instead each row's vertical
+// half-extent is measured from its actual tiles (TH/2 if it holds any double,
+// else TW/2) and consecutive rows are spaced so exactly VGAP of air sits
+// between their nearest edges — uniform clearance everywhere, nothing overlaps.
 
 export interface Placed {
   tile: Tile;
@@ -38,7 +53,8 @@ export interface LayoutResult {
 /**
  * Fixed-size tiles, scroll when the chain overflows.
  *
- * Tiles never scale. The chain is laid along a deterministic S-curve:
+ * Tiles never scale mid-layout. The chain is laid along a deterministic
+ * S-curve:
  *   row 0 goes left → right
  *   the next tile that won't fit + corner-reserve becomes the corner
  *     (placed vertically, bridging row 0 and row 1)
@@ -50,9 +66,14 @@ export interface LayoutResult {
  * group is shifted+centered within the visible canvas; when content exceeds
  * canvas, the scroll container handles it and we auto-pan to the latest play.
  */
-export function layoutBoard(board: Tile[], availW: number): LayoutResult {
+export function layoutBoard(
+  board: Tile[],
+  availW: number,
+  dims: TileDims = DEFAULT_DIMS
+): LayoutResult {
   const empty: LayoutResult = { placements: [], contentW: 0, contentH: 0 };
-  if (!board.length || availW < 200) return empty;
+  const { TW, TH, GAP, EDGE, VGAP } = dims;
+  if (!board.length || availW < TH * 2) return empty;
 
   const isDbl = (t: Tile) => t[0] === t[1];
   const tileLen = (t: Tile) => (isDbl(t) ? TW : TH);
@@ -168,9 +189,7 @@ export function layoutBoard(board: Tile[], availW: number): LayoutResult {
   let minY = Infinity;
   let maxY = -Infinity;
   for (const p of placements) {
-    const isVert = p.rot === 0;
-    const halfW = isVert ? TW / 2 : TH / 2;
-    const halfH = isVert ? TH / 2 : TW / 2;
+    const { halfW, halfH } = tileHalfExtents(p, dims);
     if (p.x - halfW < minX) minX = p.x - halfW;
     if (p.x + halfW > maxX) maxX = p.x + halfW;
     if (p.y - halfH < minY) minY = p.y - halfH;
@@ -190,10 +209,13 @@ export function layoutBoard(board: Tile[], availW: number): LayoutResult {
 }
 
 /** Half-width/half-height of a placed tile's axis-aligned bounding box. */
-export function tileHalfExtents(p: Placed): { halfW: number; halfH: number } {
+export function tileHalfExtents(
+  p: Placed,
+  dims: TileDims = DEFAULT_DIMS
+): { halfW: number; halfH: number } {
   const isVert = p.rot === 0;
   return {
-    halfW: isVert ? TW / 2 : TH / 2,
-    halfH: isVert ? TH / 2 : TW / 2,
+    halfW: isVert ? dims.TW / 2 : dims.TH / 2,
+    halfH: isVert ? dims.TH / 2 : dims.TW / 2,
   };
 }

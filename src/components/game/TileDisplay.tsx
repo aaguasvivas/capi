@@ -9,6 +9,11 @@ interface Props {
   small?: boolean;
   faceDown?: boolean;
   highlight?: boolean;
+  // Explicit pixel size (board tiles). Overrides the small/large presets so
+  // the board can render a crisp compact tile on narrow screens. Pips scale
+  // automatically (SVG viewBox).
+  w?: number;
+  h?: number;
 }
 
 const PIP_POSITIONS: Record<number, [number, number][]> = {
@@ -39,13 +44,22 @@ export default function TileDisplay({
   small = false,
   faceDown = false,
   highlight = false,
+  w,
+  h,
 }: Props) {
   const isDouble = tile[0] === tile[1];
-  const sizeClasses = small ? "w-9 h-[72px]" : "w-11 h-[88px]";
+  const explicitSize = w !== undefined && h !== undefined;
+  const sizeClasses = explicitSize
+    ? ""
+    : small
+      ? "w-9 h-[72px]"
+      : "w-11 h-[88px]";
+  const sizeStyle = explicitSize ? { width: w, height: h } : undefined;
 
   if (faceDown) {
     return (
       <div
+        style={sizeStyle}
         className={`
           ${sizeClasses} rounded-lg
           bg-gradient-to-br from-[#1e3a5f] via-[#1a3355] to-[#152a4a]
@@ -84,6 +98,7 @@ export default function TileDisplay({
     <button
       onClick={onClick}
       disabled={!onClick}
+      style={sizeStyle}
       className={`
         ${sizeClasses} rounded-lg flex flex-col items-center justify-center
         relative select-none transition-all duration-150

@@ -2,18 +2,23 @@ import { describe, it, expect } from "vitest";
 import {
   layoutBoard,
   tileHalfExtents,
+  DEFAULT_DIMS,
+  COMPACT_DIMS,
   TW,
   VGAP,
   type Placed,
+  type TileDims,
 } from "@/components/game/boardLayout";
 import type { Tile } from "@/lib/engine/types";
 
-// Axis-aligned overlap test between two placed tiles. Returns the overlap
-// area's min dimension (>0 means they intersect), with a tiny epsilon so
+// Both tile tiers must be overlap-free.
+const TIERS: TileDims[] = [DEFAULT_DIMS, COMPACT_DIMS];
+
+// Axis-aligned overlap test between two placed tiles, with a tiny epsilon so
 // edge-to-edge touching is not counted as overlap.
-function overlap(a: Placed, b: Placed): boolean {
-  const ea = tileHalfExtents(a);
-  const eb = tileHalfExtents(b);
+function overlap(a: Placed, b: Placed, dims: TileDims): boolean {
+  const ea = tileHalfExtents(a, dims);
+  const eb = tileHalfExtents(b, dims);
   const dx = Math.abs(a.x - b.x);
   const dy = Math.abs(a.y - b.y);
   const EPS = 0.01;
@@ -21,18 +26,21 @@ function overlap(a: Placed, b: Placed): boolean {
 }
 
 function assertNoOverlaps(board: Tile[], availW: number) {
-  const { placements } = layoutBoard(board, availW);
-  expect(placements.length).toBe(board.length);
-  for (let i = 0; i < placements.length; i++) {
-    for (let j = i + 1; j < placements.length; j++) {
-      if (overlap(placements[i], placements[j])) {
-        throw new Error(
-          `tiles ${i} and ${j} overlap at width ${availW}: ` +
-            JSON.stringify(placements[i]) +
-            " vs " +
-            JSON.stringify(placements[j]) +
-            ` (board=${JSON.stringify(board)})`
-        );
+  for (const dims of TIERS) {
+    const { placements } = layoutBoard(board, availW, dims);
+    expect(placements.length).toBe(board.length);
+    for (let i = 0; i < placements.length; i++) {
+      for (let j = i + 1; j < placements.length; j++) {
+        if (overlap(placements[i], placements[j], dims)) {
+          throw new Error(
+            `tiles ${i} and ${j} overlap at width ${availW} ` +
+              `(tile ${dims.TW}x${dims.TH}): ` +
+              JSON.stringify(placements[i]) +
+              " vs " +
+              JSON.stringify(placements[j]) +
+              ` (board=${JSON.stringify(board)})`
+          );
+        }
       }
     }
   }
