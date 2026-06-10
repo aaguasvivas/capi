@@ -770,14 +770,15 @@ export default function GamePage() {
                   onClick={async () => {
                     if (!session) return;
                     setRematchLoading(true);
+                    let navigating = false;
                     try {
                       const res = await fetch(`/api/games/${id}/rematch`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ playerId: session.playerId }),
                       });
-                      const data = await res.json();
-                      if (data.gameId) {
+                      const data = await res.json().catch(() => ({}));
+                      if (res.ok && data.gameId) {
                         localStorage.setItem(
                           `capi_session_${data.gameId}`,
                           JSON.stringify({
@@ -786,10 +787,17 @@ export default function GamePage() {
                             gameId: data.gameId,
                           })
                         );
+                        navigating = true;
                         router.push(`/game/${data.gameId}`);
+                      } else {
+                        showToast(data.error ?? s.connectionError);
                       }
                     } catch {
-                      setRematchLoading(false);
+                      showToast(s.connectionError);
+                    } finally {
+                      // Keep the button disabled while navigating away;
+                      // re-enable it on any failure so the user can retry.
+                      if (!navigating) setRematchLoading(false);
                     }
                   }}
                   className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
