@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Pressable,
   Text,
   View,
@@ -14,10 +15,14 @@ import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import type { Tile, Seat } from "@capi/engine";
 import { getTeam } from "@capi/engine";
-import { useRealtimeGame } from "../../hooks/useRealtimeGame";
+import {
+  useRealtimeGame,
+  type ChatMessage,
+} from "../../hooks/useRealtimeGame";
 import Board from "../../components/Board";
 import BugReportButton from "../../components/BugReportButton";
 import Hand from "../../components/Hand";
+import QuickChat from "../../components/QuickChat";
 import ScorePanel from "../../components/ScorePanel";
 import TileDisplay from "../../components/TileDisplay";
 import CalloutOverlay, {
@@ -29,12 +34,17 @@ import {
   isMuted,
   loadMuteState,
   playCallout,
+  playChatReceive,
   playDraw,
   playSlam,
   preloadSounds,
   setMuted,
 } from "../../lib/sounds";
 import { API_BASE, THEME } from "../../theme";
+
+interface ChatBubbleItem extends ChatMessage {
+  phase: "in" | "out";
+}
 
 export default function GameScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -48,9 +58,16 @@ export default function GameScreen() {
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
+  const [chatBubbles, setChatBubbles] = useState<ChatBubbleItem[]>([]);
 
   // Detect opponent's plays (board grew without our local move) to play slam.
   const prevBoardLenRef = useRef(0);
+  // Chat message IDs already turned into bubbles.
+  const seenChatIdsRef = useRef<Set<string>>(new Set());
+  // Timers per bubble so unmount can cancel them.
+  const bubbleTimersRef = useRef<
+    Map<string, ReturnType<typeof setTimeout>>
+  >(new Map());
 
   useEffect(() => {
     let active = true;
@@ -86,8 +103,11 @@ export default function GameScreen() {
     error,
     lastCallout,
     lastCalloutPayload,
+    chatMessages,
     submitMove,
+    sendChat,
     clearCallout,
+    dismissChat,
     refetch,
   } = useRealtimeGame(id, session);
 
@@ -105,7 +125,48 @@ export default function GameScreen() {
   useEffect(() => {
     if (lastCallout) playCallout();
   }, [lastCallout]);
-  // playChatReceive wired in B4 with chat bubbles
+
+  // Spawn chat bubbles from incoming chatMessages.
+  useEffect(() => {
+    for (const msg of chatMessages) {
+      if (seenChatIdsRef.current.has(msg.id)) continue;
+      seenChatIdsRef.current.add(msg.id);
+
+      // Play notification for opponent messages.
+      if (!msg.isMe) {
+        playChatReceive();
+      }
+
+      const bubble: ChatBubbleItem = { ...msg, phase: "in" };
+
+      // Keep at most 3 bubbles; drop oldest if needed.
+      setChatBubbles((prev) => [...prev, bubble].slice(-3));
+
+      // Switch to fade-out after 2.5s.
+      const fadeTimer = setTimeout(() => {
+        setChatBubbles((prev) =>
+          prev.map((b) => (b.id === msg.id ? { ...b, phase: "out" } : b))
+        );
+        // Remove after the fade animation completes.
+        const removeTimer = setTimeout(() => {
+          setChatBubbles((prev) => prev.filter((b) => b.id !== msg.id));
+          bubbleTimersRef.current.delete(msg.id);
+          bubbleTimersRef.current.delete(`${msg.id}-rm`);
+          dismissChat(msg.id);
+        }, 350);
+        bubbleTimersRef.current.set(`${msg.id}-rm`, removeTimer);
+      }, 2500);
+      bubbleTimersRef.current.set(msg.id, fadeTimer);
+    }
+  }, [chatMessages, dismissChat]);
+
+  // Cleanup bubble timers on unmount.
+  useEffect(() => {
+    const timers = bubbleTimersRef.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, []);
 
   const handlePlay = useCallback(
     (tile: Tile, end: "left" | "right") => {
@@ -421,6 +482,9 @@ export default function GameScreen() {
   const myPlayer = players.find((p) => p.seat === mySeat);
   const oppPlayer = players.find((p) => p.seat === oppSeat);
 
+  const myBubbles = chatBubbles.filter((b) => b.isMe);
+  const oppBubbles = chatBubbles.filter((b) => !b.isMe);
+
   const isRoundOver = gameState.phase === "round_over";
   const isFinished = gameState.phase === "finished";
   const isGameEnded = isRoundOver || isFinished;
@@ -514,6 +578,63 @@ export default function GameScreen() {
             gameState={gameState}
             stateVersion={stateVersion}
           />
+        </View>
+
+        {/* QuickChat toggle — floats bottom-left of the felt */}
+        {!isGameEnded ? (
+          <View
+            style={{ position: "absolute", left: 8, bottom: 8, zIndex: 3 }}
+          >
+            <QuickChat onSend={sendChat} />
+          </View>
+        ) : null}
+
+        {/* My chat bubbles — above the QuickChat button */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 8,
+            bottom: 48,
+            zIndex: 4,
+            flexDirection: "column-reverse",
+            gap: 6,
+            alignItems: "flex-start",
+            maxWidth: 180,
+          }}
+        >
+          {myBubbles.map((b) => (
+            <ChatBubble
+              key={b.id}
+              bubble={b}
+              accentColor={myPlayer?.avatar_color ?? "#666"}
+            />
+          ))}
+        </View>
+
+        {/* Opponent chat bubbles — under the opponent hand row */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 8,
+            top: 64,
+            zIndex: 4,
+            gap: 6,
+            alignItems: "flex-start",
+            maxWidth: 180,
+          }}
+        >
+          {oppBubbles.map((b) => {
+            const sender = players.find((p) => p.seat === b.seat);
+            return (
+              <ChatBubble
+                key={b.id}
+                bubble={b}
+                accentColor={sender?.avatar_color ?? "#666"}
+              />
+            );
+          })}
         </View>
 
         {/* Opponent hand row (face-down) */}
@@ -764,6 +885,80 @@ export default function GameScreen() {
         </View>
       ) : null}
     </View>
+  );
+}
+
+function ChatBubble({
+  bubble,
+  accentColor,
+}: {
+  bubble: ChatBubbleItem;
+  accentColor: string;
+}) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(6)).current;
+
+  useEffect(() => {
+    if (bubble.phase === "in") {
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Finishes inside the 350ms removal window of the spawn effect.
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [bubble.phase, opacity, translateY]);
+
+  if (bubble.type === "emote") {
+    return (
+      <Animated.Text
+        style={{ fontSize: 30, opacity, transform: [{ translateY }] }}
+      >
+        {bubble.payload}
+      </Animated.Text>
+    );
+  }
+
+  return (
+    <Animated.View
+      style={{
+        opacity,
+        transform: [{ translateY }],
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        backgroundColor: accentColor,
+        shadowColor: accentColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        elevation: 3,
+      }}
+    >
+      <Text
+        style={{
+          color: "#fff",
+          fontSize: 13,
+          fontWeight: "700",
+          lineHeight: 17,
+        }}
+      >
+        {bubble.payload}
+      </Text>
+    </Animated.View>
   );
 }
 
