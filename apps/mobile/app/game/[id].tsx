@@ -12,7 +12,6 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
-import { Audio } from "expo-av";
 import type { Tile, Seat } from "@capi/engine";
 import { getTeam } from "@capi/engine";
 import { useRealtimeGame } from "../../hooks/useRealtimeGame";
@@ -26,36 +25,16 @@ import CalloutOverlay, {
 } from "../../components/CalloutOverlay";
 import { getSession, saveSession, type PlayerSession } from "../../lib/session";
 import { useI18n } from "../../lib/i18n";
+import {
+  isMuted,
+  loadMuteState,
+  playCallout,
+  playDraw,
+  playSlam,
+  preloadSounds,
+  setMuted,
+} from "../../lib/sounds";
 import { API_BASE, THEME } from "../../theme";
-
-// ── Best-effort slam sound via expo-av. Loaded lazily; any failure is
-// swallowed so haptics remains the source of truth for feedback.
-let slamSound: Audio.Sound | null = null;
-let slamLoadFailed = false;
-
-async function ensureSlam() {
-  if (slamSound || slamLoadFailed) return;
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/slam.mp3")
-    );
-    slamSound = sound;
-  } catch {
-    slamLoadFailed = true;
-  }
-}
-
-function playSlam() {
-  if (slamLoadFailed) return;
-  (async () => {
-    try {
-      await ensureSlam();
-      await slamSound?.replayAsync();
-    } catch {
-      /* best effort */
-    }
-  })();
-}
 
 export default function GameScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -68,6 +47,7 @@ export default function GameScreen() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
+  const [muted, setMutedState] = useState(isMuted());
 
   // Detect opponent's plays (board grew without our local move) to play slam.
   const prevBoardLenRef = useRef(0);
@@ -84,13 +64,15 @@ export default function GameScreen() {
     };
   }, [id]);
 
-  // Configure audio to play even in silent mode; best-effort preload.
+  // Load the persisted mute preference, then warm the sound instances.
   useEffect(() => {
-    Audio.setAudioModeAsync({ playsInSilentModeIOS: true }).catch(() => {});
-    ensureSlam();
+    let active = true;
+    loadMuteState().then(() => {
+      if (active) setMutedState(isMuted());
+    });
+    preloadSounds();
     return () => {
-      slamSound?.unloadAsync().catch(() => {});
-      slamSound = null;
+      active = false;
     };
   }, []);
 
@@ -119,6 +101,12 @@ export default function GameScreen() {
     prevBoardLenRef.current = len;
   }, [gameState]);
 
+  // Callout fanfare — fires for the mid-round banner and the overlay alike.
+  useEffect(() => {
+    if (lastCallout) playCallout();
+  }, [lastCallout]);
+  // playChatReceive wired in B4 with chat bubbles
+
   const handlePlay = useCallback(
     (tile: Tile, end: "left" | "right") => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
@@ -133,8 +121,15 @@ export default function GameScreen() {
   }, [submitMove]);
 
   const handleDraw = useCallback(() => {
+    playDraw();
     submitMove({ type: "draw" });
   }, [submitMove]);
+
+  function toggleMute() {
+    const next = !muted;
+    setMutedState(next);
+    setMuted(next);
+  }
 
   async function handleNextRound() {
     if (!session || !gameState) return;
@@ -487,7 +482,7 @@ export default function GameScreen() {
 
       {/* Felt game area */}
       <View style={{ flex: 1, backgroundColor: THEME.feltMid }}>
-        {/* Bottom-right utility cluster: bug report (mute joins later) */}
+        {/* Bottom-right utility cluster: mute + bug report */}
         <View
           style={{
             position: "absolute",
@@ -499,6 +494,20 @@ export default function GameScreen() {
             gap: 6,
           }}
         >
+          <Pressable
+            onPress={toggleMute}
+            accessibilityLabel={muted ? s.enableSound : s.muteSound}
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          >
+            <Text style={{ fontSize: 15 }}>{muted ? "🔇" : "🔊"}</Text>
+          </Pressable>
           <BugReportButton
             gameId={id}
             playerId={session?.playerId}
