@@ -11,6 +11,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import type { Tile, Seat } from "@capi/engine";
@@ -40,7 +41,7 @@ import {
   preloadSounds,
   setMuted,
 } from "../../lib/sounds";
-import { API_BASE, THEME } from "../../theme";
+import { API_BASE, getTheme, THEME } from "../../theme";
 
 interface ChatBubbleItem extends ChatMessage {
   phase: "in" | "out";
@@ -470,6 +471,7 @@ export default function GameScreen() {
   }
 
   // ── Active / round-over / finished ──
+  const palette = getTheme(gameState.theme);
   const mySeat = (session?.seat ?? "n") as Seat;
   const oppSeat: Seat = mySeat === "n" ? "s" : "n";
   const myHand = gameState.hands[mySeat] ?? [];
@@ -514,9 +516,11 @@ export default function GameScreen() {
       : oppTeamName;
 
   return (
-    <View style={{ flex: 1, backgroundColor: THEME.feltMid }}>
+    <View style={{ flex: 1, backgroundColor: palette.feltMid }}>
       {/* Score bar (top, respects notch) */}
-      <View style={{ paddingTop: insets.top, backgroundColor: THEME.scoreBg }}>
+      <View
+        style={{ paddingTop: insets.top, backgroundColor: palette.scoreBg }}
+      >
         <ScorePanel
           scores={gameState.scores}
           targetScore={gameState.targetScore}
@@ -524,6 +528,8 @@ export default function GameScreen() {
           currentTurn={gameState.currentTurn}
           mySeat={mySeat}
           is2v2={false}
+          bg={palette.scoreBg}
+          textColor={palette.scoreText}
         />
       </View>
 
@@ -544,8 +550,41 @@ export default function GameScreen() {
         </View>
       ) : null}
 
-      {/* Felt game area */}
-      <View style={{ flex: 1, backgroundColor: THEME.feltMid }}>
+      {/* Felt game area — vertical gradient approximates the web's radial
+          light pool (center glow fading to dark edges) */}
+      <LinearGradient
+        colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
+        locations={[0, 0.55, 1]}
+        style={{ flex: 1 }}
+      >
+        {/* Table watermark — behind the board and all floating UI */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: "rgba(255,255,255,0.05)",
+              fontSize: 22,
+              fontWeight: "900",
+              letterSpacing: 4,
+              transform: [{ rotate: "-2deg" }],
+              textAlign: "center",
+            }}
+          >
+            {palette.watermark}
+          </Text>
+        </View>
+
         {/* Bottom-right utility cluster: mute + bug report */}
         <View
           style={{
@@ -722,9 +761,11 @@ export default function GameScreen() {
         {/* ── Round Over overlay ── */}
         {isRoundOver && !lastCallout ? (
           <View style={overlayBackdrop}>
-            <View style={overlayCard}>
+            <View
+              style={[overlayCard, { backgroundColor: palette.scoreBg }]}
+            >
               <Text style={{ fontSize: 48 }}>{iWonRound ? "🎉" : "😤"}</Text>
-              <Text style={overlayTitle}>
+              <Text style={[overlayTitle, { color: palette.scoreText }]}>
                 {iWonRound ? s.wonRound : s.lostRound}
               </Text>
 
@@ -734,11 +775,13 @@ export default function GameScreen() {
                   name={myTeamName}
                   value={pipFor(payload, myTeam)}
                   suffix={s.pips}
+                  color={palette.scoreText}
                 />
                 <PipRow
                   name={oppTeamName}
                   value={pipFor(payload, oppTeam)}
                   suffix={s.pips}
+                  color={palette.scoreText}
                 />
               </View>
 
@@ -751,9 +794,15 @@ export default function GameScreen() {
                   gap: 16,
                 }}
               >
-                <Text style={bigScore}>{gameState.scores[myTeam]}</Text>
-                <Text style={{ color: THEME.scoreText, opacity: 0.5 }}>–</Text>
-                <Text style={bigScore}>{gameState.scores[oppTeam]}</Text>
+                <Text style={[bigScore, { color: palette.scoreText }]}>
+                  {gameState.scores[myTeam]}
+                </Text>
+                <Text style={{ color: palette.scoreText, opacity: 0.5 }}>
+                  –
+                </Text>
+                <Text style={[bigScore, { color: palette.scoreText }]}>
+                  {gameState.scores[oppTeam]}
+                </Text>
               </View>
 
               <Pressable
@@ -761,6 +810,7 @@ export default function GameScreen() {
                 disabled={nextRoundLoading}
                 style={{
                   ...overlayButton,
+                  backgroundColor: palette.accent,
                   opacity: nextRoundLoading ? 0.5 : 1,
                 }}
               >
@@ -777,17 +827,24 @@ export default function GameScreen() {
         {/* ── Game Over overlay ── */}
         {isFinished && !lastCallout ? (
           <View style={overlayBackdrop}>
-            <View style={overlayCard}>
+            <View
+              style={[overlayCard, { backgroundColor: palette.scoreBg }]}
+            >
               <Text style={{ fontSize: 56 }}>
                 {gameState.winnerTeam === myTeam ? "🏆" : "💪"}
               </Text>
-              <Text style={[overlayTitle, { fontSize: 28 }]}>
+              <Text
+                style={[
+                  overlayTitle,
+                  { fontSize: 28, color: palette.scoreText },
+                ]}
+              >
                 {gameState.winnerTeam === myTeam ? s.won : s.lost}
               </Text>
               <Text
                 style={{
                   fontSize: 13,
-                  color: THEME.scoreText,
+                  color: palette.scoreText,
                   opacity: 0.6,
                   textAlign: "center",
                 }}
@@ -800,6 +857,7 @@ export default function GameScreen() {
                   name={myTeamName}
                   value={String(gameState.scores[myTeam])}
                   big
+                  color={palette.scoreText}
                 />
                 <View
                   style={{
@@ -811,6 +869,7 @@ export default function GameScreen() {
                   name={oppTeamName}
                   value={String(gameState.scores[oppTeam])}
                   big
+                  color={palette.scoreText}
                 />
               </View>
 
@@ -819,6 +878,7 @@ export default function GameScreen() {
                 disabled={rematchLoading}
                 style={{
                   ...overlayButton,
+                  backgroundColor: palette.accent,
                   opacity: rematchLoading ? 0.6 : 1,
                 }}
               >
@@ -831,18 +891,18 @@ export default function GameScreen() {
             </View>
           </View>
         ) : null}
-      </View>
+      </LinearGradient>
 
       {/* My hand (bottom, respects home indicator) */}
       {!isGameEnded ? (
         <View
           style={{
-            backgroundColor: THEME.handBg,
+            backgroundColor: palette.handBg,
             paddingHorizontal: 12,
             paddingTop: 12,
             paddingBottom: Math.max(12, insets.bottom),
             borderTopWidth: isMyTurn ? 2 : 1,
-            borderTopColor: isMyTurn ? THEME.accent : "rgba(0,0,0,0.1)",
+            borderTopColor: isMyTurn ? palette.accent : "rgba(0,0,0,0.1)",
           }}
         >
           <View
@@ -866,7 +926,11 @@ export default function GameScreen() {
             </Text>
             {isMyTurn ? (
               <Text
-                style={{ fontSize: 12, fontWeight: "700", color: THEME.accent }}
+                style={{
+                  fontSize: 12,
+                  fontWeight: "700",
+                  color: palette.accent,
+                }}
               >
                 {s.yourTurn}
               </Text>
@@ -975,11 +1039,13 @@ function PipRow({
   value,
   suffix,
   big,
+  color = THEME.scoreText,
 }: {
   name: string;
   value: string;
   suffix?: string;
   big?: boolean;
+  color?: string;
 }) {
   return (
     <View
@@ -991,7 +1057,7 @@ function PipRow({
     >
       <Text
         style={{
-          color: THEME.scoreText,
+          color,
           fontSize: big ? 14 : 13,
           flexShrink: 1,
           marginRight: 8,
@@ -1002,7 +1068,7 @@ function PipRow({
       </Text>
       <Text
         style={{
-          color: THEME.scoreText,
+          color,
           fontWeight: big ? "900" : "700",
           fontSize: big ? 22 : 13,
           fontVariant: ["tabular-nums"],

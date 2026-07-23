@@ -10,13 +10,25 @@ interface Props {
   currentTurn: string;
   mySeat: string;
   is2v2?: boolean;
+  /** Panel background — themed per table; defaults to the static barberia THEME. */
+  bg?: string;
+  /** Text color for names/scores — themed per table. */
+  textColor?: string;
 }
 
 /**
  * Score number that pops when its value changes — makes mid-round bonuses
  * (VEINTICINCO +25) visible even if the banner is missed.
  */
-function ScoreValue({ score, align }: { score: number; align?: "left" | "right" }) {
+function ScoreValue({
+  score,
+  align,
+  color = THEME.scoreText,
+}: {
+  score: number;
+  align?: "left" | "right";
+  color?: string;
+}) {
   const prevRef = useRef(score);
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -43,7 +55,7 @@ function ScoreValue({ score, align }: { score: number; align?: "left" | "right" 
       style={{
         fontSize: 20,
         fontWeight: "900",
-        color: THEME.scoreText,
+        color,
         textAlign: align === "right" ? "right" : "left",
         transform: [{ scale }],
       }}
@@ -60,6 +72,8 @@ export default function ScorePanel({
   currentTurn,
   mySeat,
   is2v2 = false,
+  bg = THEME.scoreBg,
+  textColor = THEME.scoreText,
 }: Props) {
   const { s } = useI18n();
 
@@ -79,15 +93,20 @@ export default function ScorePanel({
     const team1Active = team1Seats.includes(currentTurn);
 
     return (
-      <View style={panelStyle}>
+      <View style={[panelStyle, { backgroundColor: bg }]}>
         <TeamScore
           teamPlayers={team0Players}
           score={scores[0]}
           isActive={team0Active}
           isMyTeam={myTeam === 0}
           youTag={s.youTag}
+          textColor={textColor}
         />
-        <TargetLabel firstTo={s.firstTo} targetScore={targetScore} />
+        <TargetLabel
+          firstTo={s.firstTo}
+          targetScore={targetScore}
+          color={textColor}
+        />
         <TeamScore
           teamPlayers={team1Players}
           score={scores[1]}
@@ -95,6 +114,7 @@ export default function ScorePanel({
           isMyTeam={myTeam === 1}
           youTag={s.youTag}
           align="right"
+          textColor={textColor}
         />
       </View>
     );
@@ -104,15 +124,21 @@ export default function ScorePanel({
   const south = players.find((p) => p.seat === "s");
 
   return (
-    <View style={panelStyle}>
+    <View style={[panelStyle, { backgroundColor: bg }]}>
       <PlayerScore
         player={north}
         score={scores[0]}
         isActive={currentTurn === "n"}
         isMe={mySeat === "n"}
         youTag={s.youTag}
+        textColor={textColor}
+        dotBorderColor={bg}
       />
-      <TargetLabel firstTo={s.firstTo} targetScore={targetScore} />
+      <TargetLabel
+        firstTo={s.firstTo}
+        targetScore={targetScore}
+        color={textColor}
+      />
       <PlayerScore
         player={south}
         score={scores[1]}
@@ -120,6 +146,8 @@ export default function ScorePanel({
         isMe={mySeat === "s"}
         youTag={s.youTag}
         align="right"
+        textColor={textColor}
+        dotBorderColor={bg}
       />
     </View>
   );
@@ -137,9 +165,11 @@ const panelStyle = {
 function TargetLabel({
   firstTo,
   targetScore,
+  color = THEME.scoreText,
 }: {
   firstTo: string;
   targetScore: number;
+  color?: string;
 }) {
   return (
     <View style={{ alignItems: "center" }}>
@@ -149,19 +179,23 @@ function TargetLabel({
           textTransform: "uppercase",
           letterSpacing: 2,
           opacity: 0.5,
-          color: THEME.scoreText,
+          color,
         }}
       >
         {firstTo}
       </Text>
-      <Text style={{ fontSize: 18, fontWeight: "900", color: THEME.scoreText }}>
+      <Text style={{ fontSize: 18, fontWeight: "900", color }}>
         {targetScore}
       </Text>
     </View>
   );
 }
 
-function ActiveDot() {
+function ActiveDot({
+  borderColor = THEME.scoreBg,
+}: {
+  borderColor?: string;
+}) {
   return (
     <View
       style={{
@@ -173,7 +207,7 @@ function ActiveDot() {
         borderRadius: 5,
         backgroundColor: "#4ade80",
         borderWidth: 2,
-        borderColor: THEME.scoreBg,
+        borderColor,
       }}
     />
   );
@@ -213,6 +247,8 @@ function PlayerScore({
   isMe,
   youTag,
   align = "left",
+  textColor = THEME.scoreText,
+  dotBorderColor = THEME.scoreBg,
 }: {
   player?: { nickname: string; avatar_color: string };
   score: number;
@@ -220,6 +256,8 @@ function PlayerScore({
   isMe: boolean;
   youTag: string;
   align?: "left" | "right";
+  textColor?: string;
+  dotBorderColor?: string;
 }) {
   const initial = player?.nickname?.[0]?.toUpperCase() ?? "?";
   return (
@@ -233,17 +271,17 @@ function PlayerScore({
     >
       <View>
         <Avatar color={player?.avatar_color} initial={initial} />
-        {isActive && <ActiveDot />}
+        {isActive && <ActiveDot borderColor={dotBorderColor} />}
       </View>
 
       <View style={{ alignItems: align === "right" ? "flex-end" : "flex-start" }}>
-        <Text style={{ fontSize: 12, fontWeight: "500", color: THEME.scoreText }}>
+        <Text style={{ fontSize: 12, fontWeight: "500", color: textColor }}>
           {player?.nickname ?? "…"}
           {isMe ? (
             <Text style={{ opacity: 0.4, fontSize: 10 }}> {youTag}</Text>
           ) : null}
         </Text>
-        <ScoreValue score={score} align={align} />
+        <ScoreValue score={score} align={align} color={textColor} />
       </View>
     </View>
   );
@@ -256,6 +294,7 @@ function TeamScore({
   isMyTeam,
   youTag,
   align = "left",
+  textColor = THEME.scoreText,
 }: {
   teamPlayers: Array<{ nickname: string; avatar_color: string }>;
   score: number;
@@ -263,6 +302,7 @@ function TeamScore({
   isMyTeam: boolean;
   youTag: string;
   align?: "left" | "right";
+  textColor?: string;
 }) {
   return (
     <View
@@ -286,13 +326,13 @@ function TeamScore({
       </View>
 
       <View style={{ alignItems: align === "right" ? "flex-end" : "flex-start" }}>
-        <Text style={{ fontSize: 10, fontWeight: "500", color: THEME.scoreText }}>
+        <Text style={{ fontSize: 10, fontWeight: "500", color: textColor }}>
           {teamPlayers.map((p) => p.nickname).join(" & ")}
           {isMyTeam ? (
             <Text style={{ opacity: 0.4, fontSize: 9 }}> {youTag}</Text>
           ) : null}
         </Text>
-        <ScoreValue score={score} align={align} />
+        <ScoreValue score={score} align={align} color={textColor} />
       </View>
     </View>
   );
