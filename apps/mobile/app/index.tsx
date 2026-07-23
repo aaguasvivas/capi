@@ -12,6 +12,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import ModeGlyph from "../components/ModeGlyph";
 import { useI18n } from "../lib/i18n";
 import { saveSession } from "../lib/session";
 import { API_BASE, THEME } from "../theme";
@@ -28,14 +29,36 @@ const AVATAR_COLORS = [
   "#ef4444",
 ];
 
+type ThemeId = "barberia" | "colmado" | "patio";
+
+const TABLE_THEMES: {
+  id: ThemeId;
+  label: string;
+  color: string;
+  accent: string;
+}[] = [
+  { id: "barberia", label: "Barbería", color: "#145228", accent: "#c0392b" },
+  { id: "colmado", label: "Colmado", color: "#3a2a1a", accent: "#d4a017" },
+  { id: "patio", label: "Patio", color: "#7a7268", accent: "#c4693d" },
+];
+
 export default function Index() {
   const { lang, setLang, s } = useI18n();
   const insets = useSafeAreaInsets();
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
+  const [theme, setTheme] = useState<ThemeId>("barberia");
+  const [is2v2, setIs2v2] = useState(false);
+  const [targetScore, setTargetScore] = useState<100 | 200>(100);
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState<"create" | "join" | null>(null);
   const [error, setError] = useState("");
+
+  const themeDescs: Record<ThemeId, string> = {
+    barberia: s.themeClassic,
+    colmado: s.themeBarrio,
+    patio: s.themeOutdoors,
+  };
 
   async function handleCreate() {
     if (!nickname.trim() || loading) return;
@@ -49,9 +72,9 @@ export default function Index() {
           nickname: nickname.trim(),
           avatarColor,
           mode: "live",
-          theme: "barberia",
-          is2v2: false,
-          targetScore: 100,
+          theme,
+          is2v2,
+          targetScore,
         }),
       });
       const data = await res.json();
@@ -233,6 +256,125 @@ export default function Index() {
             </View>
           </View>
 
+          {/* Table theme */}
+          <View style={{ gap: 8 }}>
+            <Text style={labelStyle}>{s.table}</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {TABLE_THEMES.map((t) => (
+                <Pressable
+                  key={t.id}
+                  onPress={() => setTheme(t.id)}
+                  style={[
+                    cardStyle,
+                    {
+                      borderColor: theme === t.id ? THEME.scoreBg : "#e5e7eb",
+                      backgroundColor: theme === t.id ? "#f9fafb" : "#ffffff",
+                    },
+                  ]}
+                >
+                  {/* Swatch: RN has no CSS gradients, so approximate the
+                      web's diagonal two-color blend with a base color and a
+                      half-width accent overlay at 45% opacity. */}
+                  <View
+                    style={{
+                      alignSelf: "stretch",
+                      height: 32,
+                      borderRadius: 8,
+                      backgroundColor: t.color,
+                      overflow: "hidden",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: "50%",
+                        backgroundColor: t.accent,
+                        opacity: 0.45,
+                        borderTopRightRadius: 8,
+                        borderBottomRightRadius: 8,
+                      }}
+                    />
+                  </View>
+                  <Text style={cardTitleStyle}>{t.label}</Text>
+                  <Text style={cardDescStyle}>{themeDescs[t.id]}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* Mode */}
+          <View style={{ gap: 8 }}>
+            <Text style={labelStyle}>{s.mode}</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Pressable
+                onPress={() => setIs2v2(false)}
+                style={[
+                  cardStyle,
+                  {
+                    borderColor: !is2v2 ? THEME.scoreBg : "#e5e7eb",
+                    backgroundColor: !is2v2 ? "#f9fafb" : "#ffffff",
+                  },
+                ]}
+              >
+                <ModeGlyph mode="1v1" />
+                <Text style={[cardTitleStyle, { marginTop: 6 }]}>1v1</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setIs2v2(true)}
+                style={[
+                  cardStyle,
+                  {
+                    borderColor: is2v2 ? THEME.scoreBg : "#e5e7eb",
+                    backgroundColor: is2v2 ? "#f9fafb" : "#ffffff",
+                  },
+                ]}
+              >
+                <ModeGlyph mode="2v2" />
+                <Text style={[cardTitleStyle, { marginTop: 6 }]}>2v2</Text>
+                <Text style={cardDescStyle}>{s.conTuFrente}</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Target score */}
+          <View style={{ gap: 8 }}>
+            <Text style={labelStyle}>{s.firstTo}</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Pressable
+                onPress={() => setTargetScore(100)}
+                style={[
+                  cardStyle,
+                  {
+                    borderColor:
+                      targetScore === 100 ? THEME.scoreBg : "#e5e7eb",
+                    backgroundColor:
+                      targetScore === 100 ? "#f9fafb" : "#ffffff",
+                  },
+                ]}
+              >
+                <Text style={cardTitleStyle}>{s.score100}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setTargetScore(200)}
+                style={[
+                  cardStyle,
+                  {
+                    borderColor:
+                      targetScore === 200 ? THEME.scoreBg : "#e5e7eb",
+                    backgroundColor:
+                      targetScore === 200 ? "#f9fafb" : "#ffffff",
+                  },
+                ]}
+              >
+                <Text style={cardTitleStyle}>{s.score200}</Text>
+              </Pressable>
+            </View>
+          </View>
+
           {error ? (
             <Text style={{ color: "#dc2626", fontSize: 14, fontWeight: "500" }}>
               {error}
@@ -330,6 +472,30 @@ const labelStyle = {
   color: "#6b7280",
   textTransform: "uppercase" as const,
   letterSpacing: 1,
+};
+
+const cardStyle = {
+  flex: 1,
+  paddingVertical: 12,
+  paddingHorizontal: 8,
+  borderRadius: 14,
+  borderWidth: 2,
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+};
+
+const cardTitleStyle = {
+  fontSize: 12,
+  fontWeight: "700" as const,
+  color: "#1f2937",
+  textAlign: "center" as const,
+};
+
+const cardDescStyle = {
+  fontSize: 10,
+  color: "#9ca3af",
+  textAlign: "center" as const,
+  marginTop: 1,
 };
 
 const inputStyle = {
