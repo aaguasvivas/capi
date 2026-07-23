@@ -17,6 +17,7 @@ import type { Tile, Seat } from "@capi/engine";
 import { getTeam } from "@capi/engine";
 import { useRealtimeGame } from "../../hooks/useRealtimeGame";
 import Board from "../../components/Board";
+import BugReportButton from "../../components/BugReportButton";
 import Hand from "../../components/Hand";
 import ScorePanel from "../../components/ScorePanel";
 import TileDisplay from "../../components/TileDisplay";
@@ -486,6 +487,26 @@ export default function GameScreen() {
 
       {/* Felt game area */}
       <View style={{ flex: 1, backgroundColor: THEME.feltMid }}>
+        {/* Bottom-right utility cluster: bug report (mute joins later) */}
+        <View
+          style={{
+            position: "absolute",
+            right: 8,
+            bottom: 8,
+            zIndex: 3,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <BugReportButton
+            gameId={id}
+            playerId={session?.playerId}
+            gameState={gameState}
+            stateVersion={stateVersion}
+          />
+        </View>
+
         {/* Opponent hand row (face-down) */}
         {!isGameEnded ? (
           <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }}>

@@ -7,11 +7,17 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useI18n } from "../lib/i18n";
 import { saveSession } from "../lib/session";
 import { API_BASE, THEME } from "../theme";
+import type { Lang } from "@capi/i18n";
+
+const LANGS: Lang[] = ["es", "en"];
 
 const AVATAR_COLORS = [
   "#6366f1",
@@ -23,7 +29,8 @@ const AVATAR_COLORS = [
 ];
 
 export default function Index() {
-  const { s } = useI18n();
+  const { lang, setLang, s } = useI18n();
+  const insets = useSafeAreaInsets();
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [inviteCode, setInviteCode] = useState("");
@@ -103,12 +110,52 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
+      {/* Language toggle */}
+      <View
+        style={{
+          position: "absolute",
+          top: insets.top + 12,
+          right: 20,
+          zIndex: 10,
+          flexDirection: "row",
+          backgroundColor: "rgba(255,255,255,0.85)",
+          borderRadius: 999,
+          padding: 3,
+          borderWidth: 1,
+          borderColor: "#e5e7eb",
+        }}
+      >
+        {LANGS.map((l) => (
+          <Pressable
+            key={l}
+            onPress={() => setLang(l)}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 5,
+              borderRadius: 999,
+              backgroundColor: lang === l ? THEME.scoreBg : "transparent",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "800",
+                color: lang === l ? "#ffffff" : "#9ca3af",
+              }}
+            >
+              {l === "es" ? "ES" : "EN"}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "center",
           paddingHorizontal: 24,
-          paddingVertical: 32,
+          paddingTop: 64,
+          paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
       >
