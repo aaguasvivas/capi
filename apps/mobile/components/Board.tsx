@@ -1,11 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { ScrollView, View, Text, type LayoutChangeEvent } from "react-native";
-import {
-  layoutBoard,
-  dimsForWidth,
-  tileHalfExtents,
-  type Tile,
-} from "@capi/engine";
+import { layoutBoard, dimsForWidth, type Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "../lib/i18n";
 
@@ -134,13 +129,14 @@ export default function Board({ board }: Props) {
           <View style={{ width: innerW, height: innerH }}>
             {layout.placements.map((p, i) => {
               const isNewest = i === newestIndex;
-              // Web uses translate(-50%,-50%) (percent of the element's own
-              // box). RN transforms don't take percentages, so compute the
-              // tile's half-extents in PIXELS from its dims+rotation. We reuse
-              // the engine's tileHalfExtents so this can never drift from the
-              // layout math: vertical (rot 0) → halfW=TW/2, halfH=TH/2;
-              // horizontal (rot ±90) → halfW=TH/2, halfH=TW/2.
-              const { halfW, halfH } = tileHalfExtents(p, dims);
+              // Center the tile's UNROTATED TW×TH box on the engine's anchor
+              // (p.x, p.y) via left/top, then rotate — RN rotates a view about
+              // its own center, so the visual center stays exactly on the
+              // anchor for every rotation. (Do NOT translate by the rotated
+              // half-extents here: RN's translateX/Y move the unrotated box,
+              // which shifted every horizontal tile by (TW-TH)/2 and caused
+              // on-screen overlaps even though the engine coordinates were
+              // clean.)
               return (
                 <View
                   // Re-key the newest tile per play so any future entrance
@@ -148,15 +144,9 @@ export default function Board({ board }: Props) {
                   key={isNewest ? `n-${i}-${board.length}` : `t-${i}`}
                   style={{
                     position: "absolute",
-                    left: p.x + xOffset,
-                    top: p.y + yOffset,
-                    // translate first (center the tile on its anchor point),
-                    // then rotate about that center.
-                    transform: [
-                      { translateX: -halfW },
-                      { translateY: -halfH },
-                      { rotate: `${p.rot}deg` },
-                    ],
+                    left: p.x + xOffset - dims.TW / 2,
+                    top: p.y + yOffset - dims.TH / 2,
+                    transform: [{ rotate: `${p.rot}deg` }],
                   }}
                 >
                   <View
@@ -166,6 +156,10 @@ export default function Board({ board }: Props) {
                             borderRadius: 8,
                             borderWidth: 2,
                             borderColor: "#fbbf24",
+                            // The ring border grows this wrapper by 2px per
+                            // side; pull it back so the tile stays centered
+                            // on the engine anchor.
+                            margin: -2,
                           }
                         : undefined
                     }
