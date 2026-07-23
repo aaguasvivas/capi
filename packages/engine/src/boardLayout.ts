@@ -8,14 +8,14 @@ import type { Tile } from "./types";
 export interface TileDims {
   TW: number; // short side
   TH: number; // long side
-  GAP: number; // between adjacent tiles within a row, and around corners
+  GAP: number; // in-row spacing; 0 = flush edge-to-edge like a real table (tile borders form the seam)
   EDGE: number; // padding inside the inner content div
   // Clear air kept between the tiles of one row and the next — see note below.
   VGAP: number;
 }
 
-export const DEFAULT_DIMS: TileDims = { TW: 36, TH: 72, GAP: 6, EDGE: 28, VGAP: 24 };
-export const COMPACT_DIMS: TileDims = { TW: 28, TH: 56, GAP: 5, EDGE: 18, VGAP: 18 };
+export const DEFAULT_DIMS: TileDims = { TW: 36, TH: 72, GAP: 0, EDGE: 28, VGAP: 24 };
+export const COMPACT_DIMS: TileDims = { TW: 28, TH: 56, GAP: 0, EDGE: 18, VGAP: 18 };
 
 // Container widths below this use the compact tile set.
 export const COMPACT_MAX_WIDTH = 460;
