@@ -553,7 +553,7 @@ export default function GameScreen() {
 
         {/* Board */}
         <View style={{ flex: 1 }}>
-          <Board board={board} />
+          <Board board={board} endsGlow={isMyTurn} />
         </View>
 
         {/* ── Callout overlays ── */}

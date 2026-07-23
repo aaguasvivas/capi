@@ -673,7 +673,7 @@ export default function GamePage() {
 
               {/* Board (centered) */}
               <div className="flex-1 min-w-0 flex flex-col">
-                <Board board={board} />
+                <Board board={board} endsGlow={isMyTurn} />
               </div>
 
               {/* Right opponent */}
@@ -700,7 +700,7 @@ export default function GamePage() {
               </div>
             </div>
           ) : (
-            <Board board={board} />
+            <Board board={board} endsGlow={isMyTurn} />
           )}
 
           {/* ── Round Over overlay ── */}

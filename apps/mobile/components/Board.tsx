@@ -6,9 +6,11 @@ import { useI18n } from "../lib/i18n";
 
 interface Props {
   board: Tile[];
+  /** Emerald halo on the open ends (index 0 and last) while it's your turn. */
+  endsGlow?: boolean;
 }
 
-export default function Board({ board }: Props) {
+export default function Board({ board, endsGlow }: Props) {
   const { s } = useI18n();
   // Outer = horizontal axis, inner = vertical axis. RN ScrollView is
   // single-axis, so we nest a vertical ScrollView inside a horizontal one and
@@ -129,6 +131,11 @@ export default function Board({ board }: Props) {
           <View style={{ width: innerW, height: innerH }}>
             {layout.placements.map((p, i) => {
               const isNewest = i === newestIndex;
+              // Open ends of the serpentine chain are always index 0 and the
+              // last index (a 1-tile board is one tile that is both ends).
+              // Amber newest-ring wins when a tile is both newest and an end.
+              const isEnd =
+                !!endsGlow && (i === 0 || i === layout.placements.length - 1);
               // Center the tile's UNROTATED TW×TH box on the engine's anchor
               // (p.x, p.y) via left/top, then rotate — RN rotates a view about
               // its own center, so the visual center stays exactly on the
@@ -159,6 +166,15 @@ export default function Board({ board }: Props) {
                             // The ring border grows this wrapper by 2px per
                             // side; pull it back so the tile stays centered
                             // on the engine anchor.
+                            margin: -2,
+                          }
+                        : isEnd
+                        ? {
+                            borderRadius: 8,
+                            borderWidth: 2,
+                            borderColor: "#34d399",
+                            // Same margin trick as the amber ring so the
+                            // tile stays centered on the engine anchor.
                             margin: -2,
                           }
                         : undefined

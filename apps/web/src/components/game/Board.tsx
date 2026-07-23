@@ -8,9 +8,11 @@ import { layoutBoard, dimsForWidth } from "@capi/engine";
 
 interface Props {
   board: Tile[];
+  /** Emerald halo on the open ends (index 0 and last) while it's your turn. */
+  endsGlow?: boolean;
 }
 
-export default function Board({ board }: Props) {
+export default function Board({ board, endsGlow }: Props) {
   const { s } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -111,6 +113,11 @@ export default function Board({ board }: Props) {
       >
         {layout.placements.map((p, i) => {
           const isNewest = i === newestIndex;
+          // Open ends of the serpentine chain are always index 0 and the last
+          // index (a 1-tile board is one tile that is both ends). Amber
+          // newest-ring wins when a tile is both newest and an end.
+          const isEnd =
+            !!endsGlow && (i === 0 || i === layout.placements.length - 1);
           return (
             <div
               // Re-key the newest tile per play so its slam animation
@@ -134,7 +141,13 @@ export default function Board({ board }: Props) {
                         boxShadow:
                           "0 0 0 2px rgba(251,191,36,0.55), 0 0 14px rgba(251,191,36,0.3)",
                       }
-                    : undefined
+                    : isEnd
+                      ? {
+                          borderRadius: "0.5rem",
+                          boxShadow:
+                            "0 0 0 2px rgba(52,211,153,0.55), 0 0 12px rgba(52,211,153,0.35)",
+                        }
+                      : undefined
                 }
               >
                 <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
