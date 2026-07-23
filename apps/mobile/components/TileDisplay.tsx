@@ -192,7 +192,7 @@ export default function TileDisplay({
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => (pressed ? { opacity: 0.9 } : undefined)}>
+      <Pressable onPress={onPress}>
         {tileBody}
       </Pressable>
     );

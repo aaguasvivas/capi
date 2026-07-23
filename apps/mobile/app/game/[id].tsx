@@ -343,15 +343,14 @@ export default function GameScreen() {
             {/* Copy invite link */}
             <Pressable
               onPress={copyInviteLink}
-              style={({ pressed }) => ({
+              style={{
                 width: "100%",
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: copied ? "#22c55e" : THEME.scoreBg,
-                opacity: pressed ? 0.85 : 1,
-              })}
+              }}
             >
               <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
                 {copied ? `✓ ${s.copied}` : `🔗 ${s.copyLink}`}
@@ -366,15 +365,14 @@ export default function GameScreen() {
                 </Text>
                 <Pressable
                   onPress={copyCode}
-                  style={({ pressed }) => ({
+                  style={{
                     paddingHorizontal: 20,
                     paddingVertical: 8,
                     borderRadius: 12,
                     borderWidth: 1,
                     borderColor: "#e5e7eb",
                     backgroundColor: "#f9fafb",
-                    opacity: pressed ? 0.7 : 1,
-                  })}
+                  }}
                 >
                   <Text
                     style={{
@@ -610,10 +608,10 @@ export default function GameScreen() {
               <Pressable
                 onPress={handleNextRound}
                 disabled={nextRoundLoading}
-                style={({ pressed }) => ({
+                style={{
                   ...overlayButton,
-                  opacity: nextRoundLoading ? 0.5 : pressed ? 0.9 : 1,
-                })}
+                  opacity: nextRoundLoading ? 0.5 : 1,
+                }}
               >
                 {nextRoundLoading ? (
                   <ActivityIndicator color="#fff" />
@@ -668,10 +666,10 @@ export default function GameScreen() {
               <Pressable
                 onPress={handleRematch}
                 disabled={rematchLoading}
-                style={({ pressed }) => ({
+                style={{
                   ...overlayButton,
-                  opacity: rematchLoading ? 0.6 : pressed ? 0.9 : 1,
-                })}
+                  opacity: rematchLoading ? 0.6 : 1,
+                }}
               >
                 {rematchLoading ? (
                   <ActivityIndicator color="#fff" />

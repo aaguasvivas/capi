@@ -154,13 +154,12 @@ export default function Hand({
         <View style={{ flexDirection: "row", justifyContent: "center", paddingTop: 4 }}>
           <Pressable
             onPress={onDraw}
-            style={({ pressed }) => ({
+            style={{
               paddingHorizontal: 24,
               paddingVertical: 10,
               borderRadius: 12,
               backgroundColor: "#f59e0b",
-              opacity: pressed ? 0.85 : 1,
-            })}
+            }}
           >
             <Text style={{ fontSize: 14, color: "#fff", fontWeight: "700" }}>
               {s.draw(boneyardCount)}
@@ -173,14 +172,13 @@ export default function Hand({
         <View style={{ flexDirection: "row", justifyContent: "center", paddingTop: 4 }}>
           <Pressable
             onPress={onPass}
-            style={({ pressed }) => ({
+            style={{
               paddingHorizontal: 24,
               paddingVertical: 10,
               borderRadius: 12,
               borderWidth: 2,
               borderColor: THEME.accent,
-              opacity: pressed ? 0.7 : 1,
-            })}
+            }}
           >
             <Text style={{ fontSize: 14, color: THEME.accent, fontWeight: "700" }}>
               {s.pass}
@@ -218,13 +216,13 @@ function EndButton({
     <Pressable
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
+      style={{
         paddingHorizontal: 16,
         paddingVertical: 9,
         borderRadius: 12,
         backgroundColor: THEME.accent,
-        opacity: disabled ? 0.3 : pressed ? 0.85 : 1,
-      })}
+        opacity: disabled ? 0.3 : 1,
+      }}
     >
       <Text style={{ fontSize: 14, color: "#fff", fontWeight: "600" }}>
         {label}

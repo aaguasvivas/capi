@@ -196,13 +196,13 @@ export default function Index() {
           <Pressable
             onPress={handleCreate}
             disabled={!nickname.trim() || loading !== null}
-            style={({ pressed }) => ({
+            style={{
               backgroundColor: THEME.scoreBg,
               borderRadius: 14,
               paddingVertical: 14,
               alignItems: "center",
-              opacity: !nickname.trim() || loading !== null ? 0.4 : pressed ? 0.85 : 1,
-            })}
+              opacity: !nickname.trim() || loading !== null ? 0.4 : 1,
+            }}
           >
             {loading === "create" ? (
               <ActivityIndicator color="#fff" />
@@ -249,7 +249,7 @@ export default function Index() {
             disabled={
               !nickname.trim() || inviteCode.length !== 6 || loading !== null
             }
-            style={({ pressed }) => ({
+            style={{
               borderWidth: 2,
               borderColor: THEME.scoreBg,
               borderRadius: 14,
@@ -258,10 +258,8 @@ export default function Index() {
               opacity:
                 !nickname.trim() || inviteCode.length !== 6 || loading !== null
                   ? 0.4
-                  : pressed
-                  ? 0.7
                   : 1,
-            })}
+            }}
           >
             {loading === "join" ? (
               <ActivityIndicator color={THEME.scoreBg} />
