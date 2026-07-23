@@ -78,8 +78,8 @@ export default function ScorePanel({
   const { s } = useI18n();
 
   if (is2v2) {
-    // TODO 2v2 — M2 fully styles avatars/turn dots for teams. Minimal version
-    // for now: two team scores + target, mirroring the 1v1 layout.
+    // 2v2: N-S vs E-W team scores + target. The green dot marks whichever
+    // team currently holds the turn.
     const team0Seats = ["n", "s"];
     const team1Seats = ["e", "w"];
     const team0Players = team0Seats
@@ -101,6 +101,7 @@ export default function ScorePanel({
           isMyTeam={myTeam === 0}
           youTag={s.youTag}
           textColor={textColor}
+          dotBorderColor={bg}
         />
         <TargetLabel
           firstTo={s.firstTo}
@@ -115,6 +116,7 @@ export default function ScorePanel({
           youTag={s.youTag}
           align="right"
           textColor={textColor}
+          dotBorderColor={bg}
         />
       </View>
     );
@@ -295,6 +297,7 @@ function TeamScore({
   youTag,
   align = "left",
   textColor = THEME.scoreText,
+  dotBorderColor = THEME.scoreBg,
 }: {
   teamPlayers: Array<{ nickname: string; avatar_color: string }>;
   score: number;
@@ -303,6 +306,7 @@ function TeamScore({
   youTag: string;
   align?: "left" | "right";
   textColor?: string;
+  dotBorderColor?: string;
 }) {
   return (
     <View
@@ -313,16 +317,19 @@ function TeamScore({
         opacity: isActive ? 1 : 0.5,
       }}
     >
-      <View style={{ flexDirection: "row" }}>
-        {teamPlayers.map((p, i) => (
-          <View key={i} style={{ marginLeft: i === 0 ? 0 : -8 }}>
-            <Avatar
-              color={p.avatar_color}
-              initial={p.nickname?.[0]?.toUpperCase() ?? "?"}
-              size={28}
-            />
-          </View>
-        ))}
+      <View>
+        <View style={{ flexDirection: "row" }}>
+          {teamPlayers.map((p, i) => (
+            <View key={i} style={{ marginLeft: i === 0 ? 0 : -8 }}>
+              <Avatar
+                color={p.avatar_color}
+                initial={p.nickname?.[0]?.toUpperCase() ?? "?"}
+                size={28}
+              />
+            </View>
+          ))}
+        </View>
+        {isActive && <ActiveDot borderColor={dotBorderColor} />}
       </View>
 
       <View style={{ alignItems: align === "right" ? "flex-end" : "flex-start" }}>

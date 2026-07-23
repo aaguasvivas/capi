@@ -47,6 +47,25 @@ interface ChatBubbleItem extends ChatMessage {
   phase: "in" | "out";
 }
 
+// Seats around the table relative to mine: partner across, opponents on the
+// sides. Mirrors the web client so every player sees themselves at bottom.
+function getRelativeSeats(mySeat: Seat): {
+  top: Seat;
+  left: Seat;
+  right: Seat;
+} {
+  switch (mySeat) {
+    case "n":
+      return { top: "s", left: "w", right: "e" };
+    case "e":
+      return { top: "w", left: "n", right: "s" };
+    case "s":
+      return { top: "n", left: "e", right: "w" };
+    case "w":
+      return { top: "e", left: "s", right: "n" };
+  }
+}
+
 export default function GameScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { s } = useI18n();
@@ -306,12 +325,17 @@ export default function GameScreen() {
 
   // ── Waiting room ──
   if (!gameState || gameState.phase === "waiting") {
-    const seatOrder: Seat[] = ["n", "s"];
+    // gameState is null until the game starts, so the mode comes from settings.
+    const is2v2Waiting = gameSettings?.is2v2 ?? false;
+    const maxPlayers = is2v2Waiting ? 4 : 2;
+    const seatOrder: Seat[] = is2v2Waiting ? ["n", "e", "s", "w"] : ["n", "s"];
     const seatLabels: Record<string, string> = {
       n: s.seatNorth,
+      e: s.seatEast,
       s: s.seatSouth,
+      w: s.seatWest,
     };
-    const playersNeeded = 2 - players.length;
+    const playersNeeded = maxPlayers - players.length;
 
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
@@ -324,7 +348,7 @@ export default function GameScreen() {
           }}
         >
           <View style={waitingCard}>
-            <Text style={{ fontSize: 40 }}>🎲</Text>
+            <Text style={{ fontSize: 40 }}>{is2v2Waiting ? "👥" : "🎲"}</Text>
             <Text
               style={{
                 fontSize: 18,
@@ -337,9 +361,28 @@ export default function GameScreen() {
                 ? s.waitingForPlayers(playersNeeded)
                 : s.preparing}
             </Text>
+            {is2v2Waiting ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#4f46e5",
+                  fontWeight: "600",
+                  textAlign: "center",
+                }}
+              >
+                2v2 · {s.conTuFrente}
+              </Text>
+            ) : null}
 
-            {/* Seat slots */}
-            <View style={{ flexDirection: "row", gap: 8, width: "100%" }}>
+            {/* Seat slots — one row in 1v1, 2×2 grid in 2v2 */}
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 8,
+                width: "100%",
+              }}
+            >
               {seatOrder.map((seat) => {
                 const p = players.find((pl) => pl.seat === seat);
                 const isMe = p?.id === session?.playerId;
@@ -347,7 +390,8 @@ export default function GameScreen() {
                   <View
                     key={seat}
                     style={{
-                      flex: 1,
+                      flexBasis: "45%",
+                      flexGrow: 1,
                       paddingHorizontal: 12,
                       paddingVertical: 12,
                       borderRadius: 12,
@@ -397,6 +441,14 @@ export default function GameScreen() {
                 );
               })}
             </View>
+
+            {is2v2Waiting ? (
+              <Text
+                style={{ fontSize: 10, color: "#9ca3af", textAlign: "center" }}
+              >
+                N-S: {s.team1} · E-W: {s.team2}
+              </Text>
+            ) : null}
 
             {/* Copy invite link */}
             <Pressable
@@ -472,17 +524,31 @@ export default function GameScreen() {
 
   // ── Active / round-over / finished ──
   const palette = getTheme(gameState.theme);
+  const is2v2 = gameState.is2v2 ?? gameSettings?.is2v2 ?? false;
   const mySeat = (session?.seat ?? "n") as Seat;
-  const oppSeat: Seat = mySeat === "n" ? "s" : "n";
   const myHand = gameState.hands[mySeat] ?? [];
-  const oppHand = gameState.hands[oppSeat] ?? [];
   const isMyTurn = gameState.currentTurn === mySeat;
   const board = gameState.board;
   const boardLeftEnd = board.length > 0 ? board[0][0] : -1;
   const boardRightEnd = board.length > 0 ? board[board.length - 1][1] : -1;
 
+  // 1v1: single opponent across. 2v2: partner across, opponents on the sides.
+  const relSeats = is2v2 ? getRelativeSeats(mySeat) : null;
+  const topSeat: Seat = relSeats ? relSeats.top : mySeat === "n" ? "s" : "n";
+  const topHand = gameState.hands[topSeat] ?? [];
+  const leftSeat = relSeats?.left ?? null;
+  const rightSeat = relSeats?.right ?? null;
+  const leftHand = leftSeat ? gameState.hands[leftSeat] ?? [] : [];
+  const rightHand = rightSeat ? gameState.hands[rightSeat] ?? [] : [];
+
   const myPlayer = players.find((p) => p.seat === mySeat);
-  const oppPlayer = players.find((p) => p.seat === oppSeat);
+  const topPlayer = players.find((p) => p.seat === topSeat);
+  const leftPlayer = leftSeat
+    ? players.find((p) => p.seat === leftSeat)
+    : null;
+  const rightPlayer = rightSeat
+    ? players.find((p) => p.seat === rightSeat)
+    : null;
 
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
@@ -491,7 +557,7 @@ export default function GameScreen() {
   const isFinished = gameState.phase === "finished";
   const isGameEnded = isRoundOver || isFinished;
 
-  const myTeam = getTeam(mySeat, false);
+  const myTeam = getTeam(mySeat, is2v2);
   const oppTeam: 0 | 1 = myTeam === 0 ? 1 : 0;
 
   const payload = gameState.lastCalloutPayload ?? lastCalloutPayload;
@@ -501,8 +567,13 @@ export default function GameScreen() {
       : null;
   const iWonRound = roundWinnerTeam === myTeam;
 
-  const myTeamName = myPlayer?.nickname ?? s.youTag;
-  const oppTeamName = oppPlayer?.nickname ?? s.opponent;
+  // Overlay/banner labels: both nicknames in 2v2, single nickname in 1v1.
+  const myTeamName = is2v2
+    ? [myPlayer?.nickname, topPlayer?.nickname].filter(Boolean).join(" & ")
+    : myPlayer?.nickname ?? s.youTag;
+  const oppTeamName = is2v2
+    ? [leftPlayer?.nickname, rightPlayer?.nickname].filter(Boolean).join(" & ")
+    : topPlayer?.nickname ?? s.opponent;
 
   // Mid-round VEINTICINCO shows as a non-blocking banner so the forcer keeps
   // the board free for their next play. Round-ending callouts use the overlay.
@@ -527,7 +598,7 @@ export default function GameScreen() {
           players={players}
           currentTurn={gameState.currentTurn}
           mySeat={mySeat}
-          is2v2={false}
+          is2v2={is2v2}
           bg={palette.scoreBg}
           textColor={palette.scoreText}
         />
@@ -676,7 +747,7 @@ export default function GameScreen() {
           })}
         </View>
 
-        {/* Opponent hand row (face-down) */}
+        {/* Top hand row (face-down) — partner in 2v2, opponent in 1v1 */}
         {!isGameEnded ? (
           <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }}>
             <View
@@ -695,26 +766,33 @@ export default function GameScreen() {
                     width: 20,
                     height: 20,
                     borderRadius: 10,
-                    backgroundColor: oppPlayer?.avatar_color ?? "#999",
+                    backgroundColor: topPlayer?.avatar_color ?? "#999",
                     alignItems: "center",
                     justifyContent: "center",
-                    borderWidth: gameState.currentTurn === oppSeat ? 2 : 0,
+                    borderWidth: gameState.currentTurn === topSeat ? 2 : 0,
                     borderColor: "#4ade80",
                   }}
                 >
                   <Text
                     style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}
                   >
-                    {oppPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
+                    {topPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
                   </Text>
                 </View>
                 <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
-                  {oppPlayer?.nickname ?? s.opponent}
+                  {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
+                  {is2v2 ? (
+                    <Text style={{ color: "rgba(255,255,255,0.35)" }}>
+                      {" "}
+                      {s.partnerTag}
+                    </Text>
+                  ) : null}
                   {"  ·  "}
-                  {s.tileCount(oppHand.length)}
+                  {s.tileCount(topHand.length)}
                 </Text>
               </View>
-              {(gameState.boneyard?.length ?? 0) > 0 ? (
+              {/* Boneyard indicator — 1v1 only (2v2 deals all 28 tiles) */}
+              {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 ? (
                 <Text
                   style={{
                     color: "rgba(252,211,77,0.85)",
@@ -734,17 +812,37 @@ export default function GameScreen() {
                 overflow: "hidden",
               }}
             >
-              {oppHand.map((_, i) => (
+              {topHand.map((_, i) => (
                 <TileDisplay key={i} tile={[0, 0]} small faceDown />
               ))}
             </View>
           </View>
         ) : null}
 
-        {/* Board */}
-        <View style={{ flex: 1 }}>
-          <Board board={board} endsGlow={isMyTurn} />
-        </View>
+        {/* Board — flanked by opponent side rails in 2v2 */}
+        {is2v2 && !isGameEnded ? (
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            <SideRail
+              player={leftPlayer}
+              isActive={gameState.currentTurn === leftSeat}
+              tileCount={leftHand.length}
+              tilesLabel={s.tilesLabel}
+            />
+            <View style={{ flex: 1 }}>
+              <Board board={board} endsGlow={isMyTurn} />
+            </View>
+            <SideRail
+              player={rightPlayer}
+              isActive={gameState.currentTurn === rightSeat}
+              tileCount={rightHand.length}
+              tilesLabel={s.tilesLabel}
+            />
+          </View>
+        ) : (
+          <View style={{ flex: 1 }}>
+            <Board board={board} endsGlow={isMyTurn} />
+          </View>
+        )}
 
         {/* ── Callout overlays ── */}
         {lastCallout && isMidRoundCallout ? (
@@ -1023,6 +1121,95 @@ function ChatBubble({
         {bubble.payload}
       </Text>
     </Animated.View>
+  );
+}
+
+// Narrow column flanking the board in 2v2: opponent avatar (turn ring when
+// active), name, and a tile-count chip — their hand stays hidden.
+function SideRail({
+  player,
+  isActive,
+  tileCount,
+  tilesLabel,
+}: {
+  player?: { nickname: string; avatar_color: string } | null;
+  isActive: boolean;
+  tileCount: number;
+  tilesLabel: string;
+}) {
+  return (
+    <View
+      style={{
+        width: 52,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        paddingVertical: 8,
+        zIndex: 2,
+      }}
+    >
+      <View style={{ alignItems: "center", gap: 4 }}>
+        <View
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: player?.avatar_color ?? "#999",
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: isActive ? 2 : 0,
+            borderColor: "#4ade80",
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>
+            {player?.nickname?.[0]?.toUpperCase() ?? "?"}
+          </Text>
+        </View>
+        <Text
+          style={{
+            color: "rgba(255,255,255,0.7)",
+            fontSize: 9,
+            fontWeight: "500",
+            maxWidth: 50,
+            textAlign: "center",
+          }}
+          numberOfLines={1}
+        >
+          {player?.nickname ?? "?"}
+        </Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: "rgba(0,0,0,0.35)",
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 6,
+          alignItems: "center",
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.12)",
+        }}
+      >
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 16,
+            fontWeight: "900",
+            fontVariant: ["tabular-nums"],
+          }}
+        >
+          {tileCount}
+        </Text>
+        <Text
+          style={{
+            color: "rgba(255,255,255,0.5)",
+            fontSize: 8,
+            marginTop: 1,
+          }}
+        >
+          {tilesLabel}
+        </Text>
+      </View>
+    </View>
   );
 }
 
