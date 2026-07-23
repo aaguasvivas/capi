@@ -1,8 +1,62 @@
-import { useRef, useState, useEffect } from "react";
-import { ScrollView, View, Text, type LayoutChangeEvent } from "react-native";
+import { useRef, useState, useEffect, type ReactNode } from "react";
+import {
+  Animated,
+  ScrollView,
+  View,
+  Text,
+  type LayoutChangeEvent,
+  type ViewStyle,
+} from "react-native";
 import { layoutBoard, dimsForWidth, type Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "../lib/i18n";
+
+// Amber last-move ring. The border grows the wrapper by 2px per side; the
+// negative margin pulls it back so the tile stays centered on the engine
+// anchor.
+const NEWEST_RING: ViewStyle = {
+  borderRadius: 8,
+  borderWidth: 2,
+  borderColor: "#fbbf24",
+  margin: -2,
+};
+
+// Newest tile's inner wrapper: springs from oversized + faded down onto the
+// board on mount. The per-play re-key remounts it on every play, which
+// retriggers the animation naturally. It lives INSIDE the positioned+rotated
+// outer View, so the animated scale never interferes with the
+// position/rotation transform. Non-newest tiles keep plain Views.
+function NewestTile({
+  children,
+  ringStyle,
+}: {
+  children: ReactNode;
+  ringStyle: ViewStyle;
+}) {
+  const scale = useRef(new Animated.Value(1.25)).current;
+  const opacity = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [scale, opacity]);
+
+  return (
+    <Animated.View style={[ringStyle, { transform: [{ scale }], opacity }]}>
+      {children}
+    </Animated.View>
+  );
+}
 
 interface Props {
   board: Tile[];
@@ -156,32 +210,28 @@ export default function Board({ board, endsGlow }: Props) {
                     transform: [{ rotate: `${p.rot}deg` }],
                   }}
                 >
-                  <View
-                    style={
-                      isNewest
-                        ? {
-                            borderRadius: 8,
-                            borderWidth: 2,
-                            borderColor: "#fbbf24",
-                            // The ring border grows this wrapper by 2px per
-                            // side; pull it back so the tile stays centered
-                            // on the engine anchor.
-                            margin: -2,
-                          }
-                        : isEnd
-                        ? {
-                            borderRadius: 8,
-                            borderWidth: 2,
-                            borderColor: "#34d399",
-                            // Same margin trick as the amber ring so the
-                            // tile stays centered on the engine anchor.
-                            margin: -2,
-                          }
-                        : undefined
-                    }
-                  >
-                    <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
-                  </View>
+                  {isNewest ? (
+                    <NewestTile ringStyle={NEWEST_RING}>
+                      <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
+                    </NewestTile>
+                  ) : (
+                    <View
+                      style={
+                        isEnd
+                          ? {
+                              borderRadius: 8,
+                              borderWidth: 2,
+                              borderColor: "#34d399",
+                              // Same margin trick as the amber ring so the
+                              // tile stays centered on the engine anchor.
+                              margin: -2,
+                            }
+                          : undefined
+                      }
+                    >
+                      <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
+                    </View>
+                  )}
                 </View>
               );
             })}
