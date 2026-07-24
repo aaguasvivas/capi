@@ -1,117 +1,63 @@
 # Capi 🁣
 
-**Dominican Dominoes, online.** Play 1v1 or 2v2 (Con tu frente) with real-time multiplayer, authentic rules, and full Dominican flavor.
-
----
+**Dominican Dominoes, online.** Play 1v1 or 2v2 (con tu frente) in the browser at [playcapi.com](https://playcapi.com) or in the Capi app for iOS and Android. Real-time multiplayer, authentic rules, full Dominican flavor.
 
 ## What is Capi?
 
-Capi is a web-first Dominican dominoes game built for the culture. No account needed — pick a name, share a link, and run it. The rules are authentic: DOMINÓ, CAPICÚA, TRANCAO, VEINTICINCO. The feel is right: barbería, colmado, or patio. English or Dominican Spanish, your call.
+Capi is the Dominican dominoes game you grew up with, built for the culture. No account needed: pick a name, share a 6-letter code, and run it. The rules are authentic (DOMINÓ, CAPICÚA, TRANQUE, VEINTICINCO), the tables feel right (barbería, colmado, patio), and every seat is a real person. English or Dominican Spanish, your call.
 
 ## Features
 
-- **1v1 and 2v2 (Con tu frente)** — Play head-to-head or with a partner across from you (N-S vs E-W)
-- **Real-time multiplayer** — Powered by Supabase Realtime, moves sync instantly across all players
-- **Authentic Dominican rules** — DOMINÓ, CAPICÚA (+25 bonus), TRANCAO (4 consecutive passes in 2v2), VEINTICINCO (3 passes after your play)
-- **3 table themes** — Barbería Don Ramón, Colmado La Esquina, El Patio de Tía
-- **Target score** — Play to 100 or 200 points
-- **Quick Chat + Emotes** — ¡Dale!, ¡Eso e'!, ¡Qué lo qué!, 🔥, 💀 and more
-- **Sound design** — Authentic domino slam sound, callout audio
-- **Language toggle** — NY English and Dominican Spanish
-- **No sign-up** — Session stored locally, share a link to invite
+- **1v1 and 2v2 (con tu frente)**: head-to-head, or partners across the table (N-S vs E-W)
+- **Real-time multiplayer**: Supabase Realtime syncs moves instantly; app and browser players share the same table
+- **Authentic Dominican rules**, validated server-side so nobody can cheat
+- **3 table themes**: Barbería Don Ramón, Colmado La Esquina, El Patio de Tía
+- **Target score**: first to 100 or 200
+- **Quick chat + emotes**: ¡Dale!, ¡Eso e'!, ¡Qué lo qué!, 🔥, 💀 and more (predefined phrases only)
+- **Sound + haptics**: the tile slam you know, with a mute the table will thank you for
+- **Bilingual**: English and Dominican Spanish
+- **No sign-up**: session stored locally, share a code or link to invite
 
-## Tech Stack
+## The rules, as played
 
-| Layer | Tech |
+- **DOMINÓ**: play your last tile to win the round. Every pip still on the table counts for you, opponents and your own partner included.
+- **CAPICÚA**: close the round with a tile that matches both open ends. +25 bonus.
+- **TRANQUE**: the table locks with no legal moves. The side with fewer pips in hand wins the round.
+- **VEINTICINCO**: you play and every other player passes before your turn comes back. +25 on the spot, and the round keeps going. It stacks if you do it again.
+
+## Monorepo
+
+| Path | What it is |
 |---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Database | Supabase (Postgres + Realtime) |
-| Styling | Tailwind CSS |
-| Game Engine | Pure TypeScript reducer (zero dependencies) |
-| Tests | Vitest (62 tests) |
-| Deployment | Vercel |
+| `apps/web` | Next.js 14 site + API at playcapi.com (Vercel) |
+| `apps/mobile` | Expo app (SDK 52, React 18.3.1 pinned) for iOS and Android |
+| `packages/engine` | Pure TypeScript rules engine + board layout, zero dependencies |
+| `packages/i18n` | Typed ES/EN string dictionaries shared by both apps |
+| `docs/` | Release playbook, runbook, and store listing kit |
 
-## Getting Started
+The engine carries the test suite (99 Vitest tests), including a property suite that plays hundreds of random legal games per run to prove board tiles can never overlap at any screen width.
 
-### Prerequisites
+## Getting started
 
-- Node.js 18+
-- A [Supabase](https://supabase.com) project
-
-### Setup
-
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/your-username/capi.git
-   cd capi
-   npm install
-   ```
-
-2. **Set up environment variables**
-
-   Create `.env.local` at the project root:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-3. **Run the database migrations**
-
-   In your Supabase project → SQL Editor, run these files in order:
-   - `supabase/migrations/001_initial.sql`
-   - `supabase/migrations/002_chat_emotes.sql`
-
-4. **Start the dev server**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000)
-
-### Running Tests
+Prerequisites: Node 20 (`nvm use 20`), a [Supabase](https://supabase.com) project.
 
 ```bash
-npm test
+git clone https://github.com/aaguasvivas/capi.git
+cd capi
+npm install
 ```
 
-62 tests covering the game engine: turn order, scoring (DOMINÓ, CAPICÚA, TRANCAO, VEINTICINCO), 1v1 and 2v2 rules, edge cases.
+Environment: create `apps/web/.env.local` with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `apps/mobile/.env` with `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Run the SQL files in `supabase/migrations/` in order in your Supabase SQL editor.
 
-## How to Play
-
-1. One player creates a game, picks a theme and mode (1v1 or 2v2)
-2. Share the invite link with your opponent(s)
-3. Once all players join, the game starts automatically
-4. The player with the highest double goes first
-5. First team to reach the target score wins
-
-### Dominican Rules
-
-- **DOMINÓ** — Play your last tile and win the round. Score = opponent's total pips.
-- **CAPICÚA** — Win with a tile that matches both open ends of the board. +25 bonus.
-- **TRANCAO** — All players pass with no legal moves. Team with fewer pips wins.
-- **VEINTICINCO** — You play, then all other players pass before your turn returns. Your team gets 25 + opponent pips.
-
-## Project Structure
-
+```bash
+npm test                                 # engine suite, from the repo root
+cd apps/web && npm run dev               # web at http://localhost:3000
+cd apps/mobile && npx expo start         # mobile via Expo Go (Node 20 required)
 ```
-src/
-├── app/
-│   ├── api/games/          # REST API routes (create, join, move, next-round, rematch)
-│   ├── game/[id]/          # Game page
-│   └── page.tsx            # Landing page
-├── components/
-│   ├── game/               # Board, Hand, ScorePanel, CalloutOverlay, QuickChat, TileDisplay
-│   ├── CreateGameForm.tsx
-│   └── JoinGameForm.tsx
-├── hooks/
-│   └── useRealtimeGame.ts  # Supabase Realtime subscription + game state
-├── lib/
-│   ├── engine/             # Pure TS game engine (types, reducer, validate, scoring)
-│   ├── i18n/               # Language system (EN/ES strings + context)
-│   └── supabase/           # Supabase client helpers
-__tests__/
-└── engine/                 # Vitest unit tests for the game engine
-```
+
+## Shipping
+
+Store identity, EAS build profiles, and the submission runbook live in [docs/RELEASE.md](docs/RELEASE.md) and [docs/PLAYBOOK.md](docs/PLAYBOOK.md). Store copy (EN + ES) is in [docs/store-listing.md](docs/store-listing.md).
 
 ## License
 
