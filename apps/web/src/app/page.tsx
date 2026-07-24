@@ -72,8 +72,20 @@ function HomeContent() {
           <p className="text-base italic text-gray-700 font-medium pt-1">
             Como en el patio.
           </p>
-          <div className="flex justify-center gap-1 text-xl opacity-40 select-none pt-1">
-            🁣 🁫 🁳 🂃
+          {/* Unicode domino glyphs render as tofu on platforms without a
+              symbols font (Windows/Android), so these minis are inline SVG. */}
+          <div
+            aria-hidden
+            className="flex justify-center gap-1.5 opacity-40 select-none pt-1.5"
+          >
+            {[
+              [1, 3],
+              [2, 5],
+              [4, 6],
+              [6, 6],
+            ].map(([a, b], i) => (
+              <MiniTile key={i} top={a} bottom={b} />
+            ))}
           </div>
         </div>
 
@@ -137,6 +149,63 @@ function HomeContent() {
         </footer>
       </div>
     </main>
+  );
+}
+
+const MINI_PIPS: Record<number, Array<[number, number]>> = {
+  1: [[6, 6]],
+  2: [
+    [3, 3],
+    [9, 9],
+  ],
+  3: [
+    [3, 3],
+    [6, 6],
+    [9, 9],
+  ],
+  4: [
+    [3, 3],
+    [9, 3],
+    [3, 9],
+    [9, 9],
+  ],
+  5: [
+    [3, 3],
+    [9, 3],
+    [6, 6],
+    [3, 9],
+    [9, 9],
+  ],
+  6: [
+    [3, 3],
+    [3, 6],
+    [3, 9],
+    [9, 3],
+    [9, 6],
+    [9, 9],
+  ],
+};
+
+function MiniTile({ top, bottom }: { top: number; bottom: number }) {
+  return (
+    <svg width="13" height="25" viewBox="0 0 13 25">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="12"
+        height="24"
+        rx="2.5"
+        fill="#fafaf7"
+        stroke="#0a0a0a"
+      />
+      <line x1="2" y1="12.5" x2="11" y2="12.5" stroke="#0a0a0a" />
+      {MINI_PIPS[top].map(([cx, cy], i) => (
+        <circle key={`t${i}`} cx={(cx * 9) / 12 + 2} cy={(cy * 9) / 12 + 2} r="1.1" fill="#0a0a0a" />
+      ))}
+      {MINI_PIPS[bottom].map(([cx, cy], i) => (
+        <circle key={`b${i}`} cx={(cx * 9) / 12 + 2} cy={(cy * 9) / 12 + 13.5} r="1.1" fill="#0a0a0a" />
+      ))}
+    </svg>
   );
 }
 

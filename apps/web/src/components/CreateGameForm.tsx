@@ -15,53 +15,35 @@ const AVATAR_COLORS = [
 
 type ThemeId = "barberia" | "colmado" | "patio";
 
-/**
- * Bird's-eye table glyph for the mode cards: a felt table with a domino on
- * it and seat dots around it. 1v1 seats face each other; 2v2 shades the two
- * teams differently (N-S dark vs E-W light), which quietly explains
- * "con tu frente" — your partner sits across from you.
- */
 function ModeGlyph({ mode }: { mode: "1v1" | "2v2" }) {
   const seatDark = "#1f2937";
   const seatLight = "#9ca3af";
+  const ink = "#0a0a0a";
+  const pips = (cx: number) => (
+    <>
+      <circle cx={cx - 5} cy="17" r="1.9" fill={ink} />
+      <circle cx={cx} cy="22" r="1.9" fill={ink} />
+      <circle cx={cx + 5} cy="27" r="1.9" fill={ink} />
+    </>
+  );
   return (
     <svg viewBox="0 0 64 44" className="h-10 mx-auto block" aria-hidden>
-      {/* table */}
+      {/* one big, properly drawn domino (the table IS the game) with seats
+          around it; drawn straight and large so the pips stay crisp at card
+          size. 2v2 shades N-S vs E-W to whisper "con tu frente". */}
       <rect
-        x="14"
-        y="9"
-        width="36"
-        height="26"
-        rx="6"
-        fill="#2e8a4e"
-        stroke="#1a5c2e"
-        strokeWidth="1.5"
+        x="12"
+        y="12.5"
+        width="40"
+        height="19"
+        rx="3.5"
+        fill="#FBF8ED"
+        stroke={ink}
+        strokeWidth="1.6"
       />
-      {/* a domino lying casually on the felt — at 40px render size less is
-          more: a clean tile with its divider reads as a domino; pips at this
-          scale just read as eyes. The slight tilt keeps it from looking like
-          a face on the table. */}
-      <g transform="rotate(-14 32 22)">
-        <rect
-          x="23.5"
-          y="18.5"
-          width="17"
-          height="7.5"
-          rx="1.6"
-          fill="#FBF8ED"
-          stroke="#b8a882"
-          strokeWidth="0.9"
-        />
-        <line
-          x1="32"
-          y1="19.3"
-          x2="32"
-          y2="25.2"
-          stroke="#b8a882"
-          strokeWidth="0.9"
-        />
-      </g>
-      {/* seats */}
+      <line x1="32" y1="14.5" x2="32" y2="29.5" stroke={ink} strokeWidth="1.4" />
+      {pips(22)}
+      {pips(42)}
       <circle cx="32" cy="4.5" r="3.6" fill={seatDark} />
       <circle cx="32" cy="39.5" r="3.6" fill={seatDark} />
       {mode === "2v2" && (
