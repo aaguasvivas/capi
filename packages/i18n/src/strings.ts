@@ -122,6 +122,10 @@ export interface Strings {
   reportBugSent: string;
   reportBugCancel: string;
   reportBugFailed: string;
+
+  // Footer
+  footerPrivacy: string;
+  footerSupport: string;
 }
 
 export const es: Strings = {
@@ -230,6 +234,9 @@ export const es: Strings = {
   reportBugSent: "¡Gracias! Reporte recibido.",
   reportBugCancel: "Cancelar",
   reportBugFailed: "No se pudo enviar. Intenta de nuevo.",
+
+  footerPrivacy: "Privacidad",
+  footerSupport: "Soporte",
 };
 
 export const en: Strings = {
@@ -338,6 +345,9 @@ export const en: Strings = {
   reportBugSending: "Sending…",
   reportBugCancel: "Cancel",
   reportBugFailed: "Couldn't send. Try again.",
+
+  footerPrivacy: "Privacy",
+  footerSupport: "Support",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

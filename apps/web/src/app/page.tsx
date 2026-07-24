@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import CreateGameForm from "@/components/CreateGameForm";
 import JoinGameForm from "@/components/JoinGameForm";
@@ -115,6 +116,25 @@ function HomeContent() {
         <p className="text-center text-xs text-gray-400 font-medium">
           {s.noAccount}
         </p>
+
+        {/* Footer */}
+        <footer className="flex items-center justify-center gap-3 pt-1 text-[11px] font-medium text-gray-400">
+          <Link
+            href="/privacy"
+            className="hover:text-gray-600 transition-colors"
+          >
+            {s.footerPrivacy}
+          </Link>
+          <span aria-hidden className="text-gray-300">
+            ·
+          </span>
+          <Link
+            href="/support"
+            className="hover:text-gray-600 transition-colors"
+          >
+            {s.footerSupport}
+          </Link>
+        </footer>
       </div>
     </main>
   );
