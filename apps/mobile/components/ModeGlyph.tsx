@@ -2,50 +2,46 @@ import Svg, { Circle, G, Line, Rect } from "react-native-svg";
 
 const SEAT_DARK = "#1f2937";
 const SEAT_LIGHT = "#9ca3af";
+const TILE_FACE = "#FBF8ED";
+const INK = "#0a0a0a";
 
 /**
- * Bird's-eye table glyph for the mode cards: a felt table with a blank
- * tilted domino on it and seat dots around it. 1v1 seats face each other;
- * 2v2 shades the two teams differently (N-S dark vs E-W light), which
- * quietly explains "con tu frente" — your partner sits across from you.
- * Port of the web ModeGlyph (apps/web CreateGameForm) to react-native-svg.
+ * Mode-card glyph: one big, properly drawn domino (the table IS the game)
+ * with seat dots around it. 1v1 seats face each other across the tile; 2v2
+ * shades the two teams differently (N-S dark vs E-W light), which quietly
+ * explains "con tu frente" — your partner sits across from you.
+ * The tile is drawn straight and large so the pips stay crisp at card size
+ * (the old tiny tilted blank tile read as a smudge, not a domino).
+ * Mirror of the web ModeGlyph in apps/web CreateGameForm.
  */
+function ThreePips({ cx }: { cx: number }) {
+  return (
+    <>
+      <Circle cx={cx - 5} cy={17} r={1.9} fill={INK} />
+      <Circle cx={cx} cy={22} r={1.9} fill={INK} />
+      <Circle cx={cx + 5} cy={27} r={1.9} fill={INK} />
+    </>
+  );
+}
+
 export default function ModeGlyph({ mode }: { mode: "1v1" | "2v2" }) {
   return (
     <Svg width={58} height={40} viewBox="0 0 64 44">
-      {/* table */}
-      <Rect
-        x={14}
-        y={9}
-        width={36}
-        height={26}
-        rx={6}
-        fill="#2e8a4e"
-        stroke="#1a5c2e"
-        strokeWidth={1.5}
-      />
-      {/* a domino lying casually on the felt — at this render size a clean
-          blank tile with its divider reads as a domino; pips would read as
-          eyes. The slight tilt keeps it from looking like a face. */}
-      <G rotation={-14} origin="32, 22">
+      {/* the domino */}
+      <G>
         <Rect
-          x={23.5}
-          y={18.5}
-          width={17}
-          height={7.5}
-          rx={1.6}
-          fill="#FBF8ED"
-          stroke="#b8a882"
-          strokeWidth={0.9}
+          x={12}
+          y={12.5}
+          width={40}
+          height={19}
+          rx={3.5}
+          fill={TILE_FACE}
+          stroke={INK}
+          strokeWidth={1.6}
         />
-        <Line
-          x1={32}
-          y1={19.3}
-          x2={32}
-          y2={25.2}
-          stroke="#b8a882"
-          strokeWidth={0.9}
-        />
+        <Line x1={32} y1={14.5} x2={32} y2={29.5} stroke={INK} strokeWidth={1.4} />
+        <ThreePips cx={22} />
+        <ThreePips cx={42} />
       </G>
       {/* seats */}
       <Circle cx={32} cy={4.5} r={3.6} fill={SEAT_DARK} />

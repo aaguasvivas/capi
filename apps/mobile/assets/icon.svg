@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <radialGradient id="lift" cx="50%" cy="38%" r="80%">
-      <stop offset="0%" stop-color="#181410"/>
+    <radialGradient id="lift" cx="50%" cy="36%" r="80%">
+      <stop offset="0%" stop-color="#1b150f"/>
       <stop offset="100%" stop-color="#0a0a0a"/>
     </radialGradient>
-    <radialGradient id="glow" cx="78%" cy="16%" r="60%">
-      <stop offset="0%" stop-color="#FFC878" stop-opacity="0.20"/>
+    <radialGradient id="glow" cx="72%" cy="20%" r="62%">
+      <stop offset="0%" stop-color="#FFC878" stop-opacity="0.26"/>
       <stop offset="100%" stop-color="#FFC878" stop-opacity="0"/>
     </radialGradient></defs>
   <rect width="1024" height="1024" fill="url(#lift)"/>
        <rect width="1024" height="1024" fill="url(#glow)"/>
+       <rect x="44" y="44" width="936" height="936" rx="180" fill="none"
+           stroke="#c9a961" stroke-opacity="0.5" stroke-width="7"/>
   
-    <g transform="rotate(-8 512 512)">
-      <rect x="312" y="132" width="400" height="760" rx="52"
-        fill="#fafaf7" stroke="#0a0a0a" stroke-width="20"/>
-      <line x1="352" y1="512" x2="672" y2="512"
-        stroke="#0a0a0a" stroke-width="22" stroke-linecap="round"/>
-      <circle cx="512" cy="322" r="40" fill="#c9a961"/><circle cx="407" cy="217" r="40" fill="#0a0a0a"/><circle cx="407" cy="427" r="40" fill="#0a0a0a"/><circle cx="617" cy="217" r="40" fill="#0a0a0a"/><circle cx="617" cy="427" r="40" fill="#0a0a0a"/>
-      <circle cx="512" cy="702" r="40" fill="#c9a961"/><circle cx="407" cy="597" r="40" fill="#0a0a0a"/><circle cx="407" cy="807" r="40" fill="#0a0a0a"/><circle cx="617" cy="597" r="40" fill="#0a0a0a"/><circle cx="617" cy="807" r="40" fill="#0a0a0a"/>
+    <g transform="rotate(-8 512 522)">
+      <rect x="327.0" y="149.0" width="430" height="830" rx="73.1" fill="#000000" fill-opacity="0.38"/>
+      <rect x="297.0" y="107.0" width="430" height="830" rx="73.1"
+        fill="#FBF8ED" stroke="#0f0d0a" stroke-width="32.3"/>
+      <line x1="352.9" y1="522" x2="671.1" y2="522"
+        stroke="#0f0d0a" stroke-width="21.5" stroke-linecap="round"/>
+      <circle cx="408.8" cy="202.7" r="45.1" fill="#c0392b"/><circle cx="615.2" cy="202.7" r="45.1" fill="#c0392b"/><circle cx="512.0" cy="305.9" r="45.1" fill="#c0392b"/><circle cx="408.8" cy="409.1" r="45.1" fill="#c0392b"/><circle cx="615.2" cy="409.1" r="45.1" fill="#c0392b"/>
+      <circle cx="408.8" cy="634.9" r="45.1" fill="#c9a961"/><circle cx="615.2" cy="634.9" r="45.1" fill="#c9a961"/><circle cx="512.0" cy="738.1" r="45.1" fill="#c9a961"/><circle cx="408.8" cy="841.3" r="45.1" fill="#c9a961"/><circle cx="615.2" cy="841.3" r="45.1" fill="#c9a961"/>
     </g>
 </svg>
