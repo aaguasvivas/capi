@@ -1,21 +1,30 @@
 {
   "expo": {
-    "name": "capi",
+    "name": "Capi",
     "slug": "capi",
     "scheme": "capi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a0a"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "dev.capi.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "dev.capi.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#0a0a0a"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -24,6 +33,15 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "owner": "aaguasvivas",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "753117d3-469c-4876-964e-e174f3928bc5"
+      }
+    }
   }
 }
