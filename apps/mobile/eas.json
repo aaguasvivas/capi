@@ -22,6 +22,13 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6794404340",
+        "appName": "Capi: Dominican Dominoes",
+        "language": "en-US",
+        "sku": "capi-dominoes"
+      }
+    }
   }
 }
