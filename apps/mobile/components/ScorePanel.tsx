@@ -174,7 +174,7 @@ function TargetLabel({
   color?: string;
 }) {
   return (
-    <View style={{ alignItems: "center" }}>
+    <View style={{ alignItems: "center", flexShrink: 0, paddingHorizontal: 6 }}>
       <Text
         style={{
           fontSize: 10,
@@ -265,6 +265,9 @@ function PlayerScore({
   return (
     <View
       style={{
+        // Same half-width cap as TeamScore: long nicknames ellipsize instead
+        // of crowding the panel.
+        flex: 1,
         flexDirection: align === "right" ? "row-reverse" : "row",
         alignItems: "center",
         gap: 8,
@@ -276,8 +279,16 @@ function PlayerScore({
         {isActive && <ActiveDot borderColor={dotBorderColor} />}
       </View>
 
-      <View style={{ alignItems: align === "right" ? "flex-end" : "flex-start" }}>
-        <Text style={{ fontSize: 12, fontWeight: "500", color: textColor }}>
+      <View
+        style={{
+          alignItems: align === "right" ? "flex-end" : "flex-start",
+          flexShrink: 1,
+        }}
+      >
+        <Text
+          numberOfLines={1}
+          style={{ flexShrink: 1, fontSize: 12, fontWeight: "500", color: textColor }}
+        >
           {player?.nickname ?? "…"}
           {isMe ? (
             <Text style={{ opacity: 0.4, fontSize: 10 }}> {youTag}</Text>
@@ -311,6 +322,10 @@ function TeamScore({
   return (
     <View
       style={{
+        // flex: 1 caps each team at half the free width so long name pairs
+        // shrink (ellipsize) instead of shoving the far avatar off-screen at
+        // SE width — and keeps the center target truly centered.
+        flex: 1,
         flexDirection: align === "right" ? "row-reverse" : "row",
         alignItems: "center",
         gap: 8,
@@ -332,8 +347,16 @@ function TeamScore({
         {isActive && <ActiveDot borderColor={dotBorderColor} />}
       </View>
 
-      <View style={{ alignItems: align === "right" ? "flex-end" : "flex-start" }}>
-        <Text style={{ fontSize: 10, fontWeight: "500", color: textColor }}>
+      <View
+        style={{
+          alignItems: align === "right" ? "flex-end" : "flex-start",
+          flexShrink: 1,
+        }}
+      >
+        <Text
+          numberOfLines={1}
+          style={{ flexShrink: 1, fontSize: 10, fontWeight: "500", color: textColor }}
+        >
           {teamPlayers.map((p) => p.nickname).join(" & ")}
           {isMyTeam ? (
             <Text style={{ opacity: 0.4, fontSize: 9 }}> {youTag}</Text>
