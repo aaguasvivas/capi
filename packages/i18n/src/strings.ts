@@ -126,6 +126,10 @@ export interface Strings {
   // Footer
   footerPrivacy: string;
   footerSupport: string;
+
+  // Round-over award clarity
+  pipsInHand: string;
+  awardedTo: string;
 }
 
 export const es: Strings = {
@@ -237,6 +241,9 @@ export const es: Strings = {
 
   footerPrivacy: "Privacidad",
   footerSupport: "Soporte",
+
+  pipsInHand: "Puntos en mano",
+  awardedTo: "para",
 };
 
 export const en: Strings = {
@@ -348,6 +355,9 @@ export const en: Strings = {
 
   footerPrivacy: "Privacy",
   footerSupport: "Support",
+
+  pipsInHand: "Pips left in hand",
+  awardedTo: "to",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

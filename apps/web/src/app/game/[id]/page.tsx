@@ -470,6 +470,18 @@ export default function GamePage() {
     ? [leftPlayer?.nickname, rightPlayer?.nickname].filter(Boolean).join(" & ")
     : topPlayer?.nickname ?? s.opponent;
 
+  // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
+  // trancao carries pts) and who they went to — headlined in the round-over
+  // modal so the pips table can't be misread as the score.
+  const roundAward =
+    (typeof payload?.pipsAwarded === "number"
+      ? payload.pipsAwarded
+      : typeof payload?.pts === "number"
+        ? payload.pts
+        : 0) +
+    (typeof payload?.capicuaBonus === "number" ? payload.capicuaBonus : 0);
+  const roundWinnerName = iWonRound ? myTeamName : oppTeamName;
+
   // Split bubbles by sender position for layout
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
@@ -490,7 +502,7 @@ export default function GamePage() {
   return (
     <div
       data-theme={gameState.theme}
-      className="min-h-screen min-h-[100dvh] flex flex-col bg-theme-page theme-pattern select-game-none"
+      className="h-screen h-[100dvh] overflow-hidden flex flex-col bg-theme-page theme-pattern select-game-none"
     >
       {/* Callout: mid-round bonus banner vs round-ending overlay */}
       {lastCallout &&
@@ -712,8 +724,21 @@ export default function GamePage() {
                   {iWonRound ? s.wonRound : s.lostRound}
                 </h2>
 
+                {/* Points awarded — the headline. Without it the pips table
+                    below reads like a scoreboard and the loser's counted
+                    pips look like points credited to the loser. */}
+                <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
+                  +{roundAward}
+                  <span className="block text-xs font-bold opacity-70 mt-0.5">
+                    {s.awardedTo} {roundWinnerName}
+                  </span>
+                </p>
+
                 {/* Pip breakdown */}
                 <div className="bg-white/10 rounded-xl p-3 space-y-1 text-sm">
+                  <div className="text-[9px] uppercase tracking-widest opacity-50 text-center pb-1">
+                    {s.pipsInHand}
+                  </div>
                   <div className="flex justify-between">
                     <span className="truncate mr-2">{myTeamName}</span>
                     <span className="font-bold tabular-nums flex-shrink-0">
@@ -721,8 +746,7 @@ export default function GamePage() {
                         ? myTeam === 0
                           ? String(payload.team0Pips)
                           : String(payload.team1Pips)
-                        : "-"}{" "}
-                      {s.pips}
+                        : "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -732,8 +756,7 @@ export default function GamePage() {
                         ? oppTeam === 0
                           ? String(payload.team0Pips)
                           : String(payload.team1Pips)
-                        : "-"}{" "}
-                      {s.pips}
+                        : "-"}
                     </span>
                   </div>
                 </div>

@@ -575,6 +575,20 @@ export default function GameScreen() {
     ? [leftPlayer?.nickname, rightPlayer?.nickname].filter(Boolean).join(" & ")
     : topPlayer?.nickname ?? s.opponent;
 
+  // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
+  // trancao carries pts) and who they went to — headlined in the round-over
+  // modal so the pips table can't be misread as the score.
+  const roundAward =
+    (typeof payload?.pipsAwarded === "number"
+      ? (payload.pipsAwarded as number)
+      : typeof payload?.pts === "number"
+      ? (payload.pts as number)
+      : 0) +
+    (typeof payload?.capicuaBonus === "number"
+      ? (payload.capicuaBonus as number)
+      : 0);
+  const roundWinnerName = iWonRound ? myTeamName : oppTeamName;
+
   // Mid-round VEINTICINCO shows as a non-blocking banner so the forcer keeps
   // the board free for their next play. Round-ending callouts use the overlay.
   const isMidRoundCallout =
@@ -867,18 +881,54 @@ export default function GameScreen() {
                 {iWonRound ? s.wonRound : s.lostRound}
               </Text>
 
+              {/* Points awarded — the headline. Without it the pips table
+                  below reads like a scoreboard and the loser's counted pips
+                  look like points credited to the loser. */}
+              <View style={{ alignItems: "center" }}>
+                <Text
+                  style={{
+                    fontSize: 30,
+                    fontWeight: "900",
+                    color: palette.accent,
+                  }}
+                >
+                  +{roundAward}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: "700",
+                    color: palette.scoreText,
+                    opacity: 0.7,
+                  }}
+                >
+                  {s.awardedTo} {roundWinnerName}
+                </Text>
+              </View>
+
               {/* Pip breakdown */}
               <View style={overlayInner}>
+                <Text
+                  style={{
+                    fontSize: 9,
+                    letterSpacing: 2,
+                    textTransform: "uppercase",
+                    color: palette.scoreText,
+                    opacity: 0.5,
+                    textAlign: "center",
+                    marginBottom: 2,
+                  }}
+                >
+                  {s.pipsInHand}
+                </Text>
                 <PipRow
                   name={myTeamName}
                   value={pipFor(payload, myTeam)}
-                  suffix={s.pips}
                   color={palette.scoreText}
                 />
                 <PipRow
                   name={oppTeamName}
                   value={pipFor(payload, oppTeam)}
-                  suffix={s.pips}
                   color={palette.scoreText}
                 />
               </View>
