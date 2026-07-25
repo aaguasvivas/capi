@@ -16,42 +16,44 @@ const AVATAR_COLORS = [
 type ThemeId = "barberia" | "colmado" | "patio";
 
 function ModeGlyph({ mode }: { mode: "1v1" | "2v2" }) {
-  const seatDark = "#1f2937";
-  const seatLight = "#9ca3af";
-  const ink = "#0a0a0a";
-  const pips = (cx: number) => (
-    <>
-      <circle cx={cx - 5} cy="17" r="1.9" fill={ink} />
-      <circle cx={cx} cy="22" r="1.9" fill={ink} />
-      <circle cx={cx + 5} cy="27" r="1.9" fill={ink} />
-    </>
+  // Player avatars facing off: 1v1 is one bust vs one bust; 2v2 is an
+  // overlapped pair vs an overlapped pair (con tu frente), the same avatar
+  // stack language as the in-game team score bar.
+  const teamA = ["#6366f1", "#3b82f6"];
+  const teamB = ["#e74c3c", "#f39c12"];
+  const person = (cx: number, cy: number, r: number, color: string, key: string) => (
+    <g key={key}>
+      <circle cx={cx} cy={cy} r={r} fill={color} stroke="#ffffff" strokeWidth="1.6" />
+      <circle cx={cx} cy={cy - r * 0.22} r={r * 0.32} fill="#ffffff" />
+      <ellipse cx={cx} cy={cy + r * 0.5} rx={r * 0.5} ry={r * 0.3} fill="#ffffff" />
+    </g>
   );
   return (
     <svg viewBox="0 0 64 44" className="h-10 mx-auto block" aria-hidden>
-      {/* one big, properly drawn domino (the table IS the game) with seats
-          around it; drawn straight and large so the pips stay crisp at card
-          size. 2v2 shades N-S vs E-W to whisper "con tu frente". */}
-      <rect
-        x="12"
-        y="12.5"
-        width="40"
-        height="19"
-        rx="3.5"
-        fill="#FBF8ED"
-        stroke={ink}
-        strokeWidth="1.6"
-      />
-      <line x1="32" y1="14.5" x2="32" y2="29.5" stroke={ink} strokeWidth="1.4" />
-      {pips(22)}
-      {pips(42)}
-      <circle cx="32" cy="4.5" r="3.6" fill={seatDark} />
-      <circle cx="32" cy="39.5" r="3.6" fill={seatDark} />
-      {mode === "2v2" && (
+      {mode === "1v1" ? (
         <>
-          <circle cx="7.5" cy="22" r="3.6" fill={seatLight} />
-          <circle cx="56.5" cy="22" r="3.6" fill={seatLight} />
+          {person(17, 22, 9.5, teamA[0], "a")}
+          {person(47, 22, 9.5, teamB[0], "b")}
+        </>
+      ) : (
+        <>
+          {person(10, 22, 7.2, teamA[1], "a2")}
+          {person(19.5, 22, 7.2, teamA[0], "a1")}
+          {person(54, 22, 7.2, teamB[1], "b2")}
+          {person(44.5, 22, 7.2, teamB[0], "b1")}
         </>
       )}
+      <text
+        x="32"
+        y="24.5"
+        textAnchor="middle"
+        fontSize={mode === "1v1" ? 8.5 : 7}
+        fontWeight="bold"
+        fontStyle="italic"
+        fill="#9ca3af"
+      >
+        vs
+      </text>
     </svg>
   );
 }

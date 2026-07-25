@@ -20,11 +20,11 @@ function LangTag({ children }: { children: string }) {
 function Email() {
   return (
     <a
-      href="mailto:aaguasvivas907@gmail.com"
+      href="mailto:adelsonaguasvivas@gmail.com"
       className="font-semibold text-gray-800 underline decoration-2 underline-offset-2"
       style={{ textDecorationColor: GOLD }}
     >
-      aaguasvivas907@gmail.com
+      adelsonaguasvivas@gmail.com
     </a>
   );
 }

@@ -154,7 +154,7 @@ done
   - To run online games, the server stores: nickname, avatar color, game moves/scores, and quick-chat selections (predefined phrases only). Games are identified by random codes; data is not linked to your identity.
   - Optional bug reports include the game state and basic device info (OS, screen size, language) to fix issues.
   - Infrastructure: Supabase (database/realtime) and Vercel (hosting). No ads, no analytics SDKs, no tracking, no selling data.
-  - Contact: aaguasvivas907@gmail.com. Effective date 2026-07-24. Covers playcapi.com and the Capi mobile app.
+  - Contact: adelsonaguasvivas@gmail.com. Effective date 2026-07-24. Covers playcapi.com and the Capi mobile app.
   - Writing style: no em dashes anywhere.
 - [ ] **Step C2: `/support`** — short bilingual page: what Capi is, how to report a problem (in-app bug button or email), the contact email, link back to home and /privacy.
 - [ ] **Step C3: Footer links** on the landing page (Privacidad / Privacy, Soporte / Support per current language), unobtrusive, phone-size safe.
