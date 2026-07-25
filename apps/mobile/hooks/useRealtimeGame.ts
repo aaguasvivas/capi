@@ -249,12 +249,36 @@ export function useRealtimeGame(
     };
   }, [gameId, fetchGame]);
 
-  // Broadcast channel - ephemeral chat delivery
+  // Broadcast channel - ephemeral chat delivery + state fast-path.
+  // postgres_changes delivers the authoritative update but its fanout adds
+  // hundreds of ms; the mover already holds the server-confirmed state when
+  // the move POST returns, so it broadcasts it here and the other players
+  // apply it immediately. The version guard makes the later postgres event
+  // a no-op, and remains the fallback if a broadcast is missed.
   useEffect(() => {
     const channel = supabase
       .channel(`chat-${gameId}`, {
         config: { broadcast: { self: false } },
       })
+      .on(
+        "broadcast",
+        { event: "state" },
+        ({ payload }: { payload: Record<string, unknown> }) => {
+          if (!payload || typeof payload.stateVersion !== "number") return;
+          const sv = payload.stateVersion as number;
+          if (sv > versionRef.current) {
+            preOptimisticRef.current = null;
+            setGameState(payload.gameState as GameState);
+            setStateVersion(sv);
+            surfaceCallout(
+              payload.callout as string | null,
+              (payload.calloutPayload as Record<string, unknown> | null) ??
+                undefined,
+              sv
+            );
+          }
+        }
+      )
       .on(
         "broadcast",
         { event: "chat" },
@@ -285,7 +309,7 @@ export function useRealtimeGame(
       supabase.removeChannel(channel);
       chatChannelRef.current = null;
     };
-  }, [gameId, session?.playerId]);
+  }, [gameId, session?.playerId, surfaceCallout]);
 
   const submitMove = useCallback(
     async (intent: MoveIntentPayload) => {
@@ -360,6 +384,19 @@ export function useRealtimeGame(
             data.stateVersion
           );
         }
+
+        // State fast-path: hand the confirmed state to the other players
+        // directly — they'd otherwise wait on the postgres_changes fanout.
+        chatChannelRef.current?.send({
+          type: "broadcast",
+          event: "state",
+          payload: {
+            gameState: data.gameState,
+            stateVersion: data.stateVersion,
+            callout: data.callout ?? null,
+            calloutPayload: data.calloutPayload ?? null,
+          },
+        });
       } catch {
         if (preOptimisticRef.current) {
           setGameState(preOptimisticRef.current);

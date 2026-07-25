@@ -282,3 +282,19 @@ html, body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Board scroll container ───────────────────────────────
+   The game page is height-capped, so the board pane does the scrolling.
+   Hide its scrollbars: on macOS the overlay bars flash into the pane's
+   bottom-right corner every time a move grows the chain (auto-pan +
+   content resize), which reads as stray white lines at the border.
+   Wheel/trackpad/touch scrolling and the auto-pan keep working. */
+.board-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.board-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
