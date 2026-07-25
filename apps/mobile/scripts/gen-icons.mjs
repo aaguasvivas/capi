@@ -126,11 +126,23 @@ function cmarkMark(monochrome = false) {
     ${tile({ cx: 742, cy: 512, W: 150, H: 290, rot: -10, top: 1, bottom: 3, shadow: [16, 22], monochrome })}`;
 }
 
-const MARKS = { corner: cornerMark, slam: slamMark, cmark: cmarkMark };
-// El Slam: red crown, gold base — one capicúa tile mid-slam. Chosen over the
-// corner (joint geometry fights the frame) and the C monogram (reads brand,
-// not game). Regenerate alternatives with CAPI_ICON=corner|cmark.
-const DEFAULT_VARIANT = "slam";
+// "The Classic": the original quiet mark — cream tile, ink pips, gold
+// capicúa centers — with the depth pass (hard shadow, stronger presence)
+// that it was missing.
+function classicMark(monochrome = false) {
+  return tile({
+    cx: 512, cy: 516, W: 415, H: 790, rot: -8,
+    top: 5, bottom: 5,
+    centerGold: true,
+    shadow: [26, 36],
+    monochrome,
+  });
+}
+
+const MARKS = { classic: classicMark, corner: cornerMark, slam: slamMark, cmark: cmarkMark };
+// Adelson's pick: the classic ink-pips tile, polished. Alternatives regenerate
+// with CAPI_ICON=slam|corner|cmark. CAPI_RING=0 drops the gold frame.
+const DEFAULT_VARIANT = "classic";
 
 function svg({ variant, bg, scale = 1, monochrome = false, ring = true }) {
   const defs = `
@@ -143,7 +155,7 @@ function svg({ variant, bg, scale = 1, monochrome = false, ring = true }) {
       <stop offset="100%" stop-color="#FFC878" stop-opacity="0"/>
     </radialGradient>`;
   const frame =
-    bg && ring && variant !== "cmark"
+    bg && ring && process.env.CAPI_RING !== "0" && variant !== "cmark"
       ? `<rect x="44" y="44" width="${C_SIZE - 88}" height="${C_SIZE - 88}" rx="180" fill="none"
            stroke="${GOLD}" stroke-opacity="0.5" stroke-width="7"/>`
       : "";

@@ -14,13 +14,13 @@
        <rect x="44" y="44" width="936" height="936" rx="180" fill="none"
            stroke="#c9a961" stroke-opacity="0.5" stroke-width="7"/>
   
-    <g transform="rotate(-8 512 522)">
-      <rect x="327.0" y="149.0" width="430" height="830" rx="73.1" fill="#000000" fill-opacity="0.38"/>
-      <rect x="297.0" y="107.0" width="430" height="830" rx="73.1"
-        fill="#FBF8ED" stroke="#0f0d0a" stroke-width="32.3"/>
-      <line x1="352.9" y1="522" x2="671.1" y2="522"
-        stroke="#0f0d0a" stroke-width="21.5" stroke-linecap="round"/>
-      <circle cx="408.8" cy="202.7" r="45.1" fill="#c0392b"/><circle cx="615.2" cy="202.7" r="45.1" fill="#c0392b"/><circle cx="512.0" cy="305.9" r="45.1" fill="#c0392b"/><circle cx="408.8" cy="409.1" r="45.1" fill="#c0392b"/><circle cx="615.2" cy="409.1" r="45.1" fill="#c0392b"/>
-      <circle cx="408.8" cy="634.9" r="45.1" fill="#c9a961"/><circle cx="615.2" cy="634.9" r="45.1" fill="#c9a961"/><circle cx="512.0" cy="738.1" r="45.1" fill="#c9a961"/><circle cx="408.8" cy="841.3" r="45.1" fill="#c9a961"/><circle cx="615.2" cy="841.3" r="45.1" fill="#c9a961"/>
+    <g transform="rotate(-8 512 516)">
+      <rect x="330.5" y="157.0" width="415" height="790" rx="70.6" fill="#000000" fill-opacity="0.38"/>
+      <rect x="304.5" y="121.0" width="415" height="790" rx="70.6"
+        fill="#FBF8ED" stroke="#0f0d0a" stroke-width="31.1"/>
+      <line x1="358.4" y1="516" x2="665.5" y2="516"
+        stroke="#0f0d0a" stroke-width="20.8" stroke-linecap="round"/>
+      <circle cx="412.4" cy="210.6" r="43.6" fill="#0a0a0a"/><circle cx="611.6" cy="210.6" r="43.6" fill="#0a0a0a"/><circle cx="512.0" cy="310.2" r="43.6" fill="#c9a961"/><circle cx="412.4" cy="409.8" r="43.6" fill="#0a0a0a"/><circle cx="611.6" cy="409.8" r="43.6" fill="#0a0a0a"/>
+      <circle cx="412.4" cy="622.2" r="43.6" fill="#0a0a0a"/><circle cx="611.6" cy="622.2" r="43.6" fill="#0a0a0a"/><circle cx="512.0" cy="721.8" r="43.6" fill="#c9a961"/><circle cx="412.4" cy="821.4" r="43.6" fill="#0a0a0a"/><circle cx="611.6" cy="821.4" r="43.6" fill="#0a0a0a"/>
     </g>
 </svg>
