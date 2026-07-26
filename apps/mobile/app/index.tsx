@@ -181,6 +181,11 @@ export default function Index() {
           paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
+        // iOS: inset the scroll area by the keyboard height so a focused
+        // field (the join code lives at the very bottom) scrolls above the
+        // keyboard instead of being covered by it. Android resizes the
+        // window by default and needs nothing.
+        automaticallyAdjustKeyboardInsets
       >
         {/* Title */}
         <View style={{ alignItems: "center", marginBottom: 28 }}>
