@@ -11,12 +11,12 @@
 | Field | Value | Limit |
 |---|---|---|
 | **Name** | `Capi: Dominican Dominoes` | 24/30 |
-| **Subtitle** | `Capicúa online with friends` | 27/30 |
-| **Keywords** | `domino,dominos,multiplayer,kapicu,capicu,tranque,parejas,caribbean,latino,block,tiles,team,family` | 97/100 |
+| **Subtitle** | `Dominoes online with friends` | 28/30 |
+| **Keywords** | `domino,multiplayer,kapicu,capicu,capicua,tranque,parejas,caribbean,latino,block,tiles,team,family` | 97/100 |
 | **Promotional text** | `The real Dominican game, online with your people. Capicúa, tranque and parejas, the way the table plays it. Create a game, share a 6-letter code, play. Free, no account.` | 169/170 |
 | **Category** | Games > Board (primary). Optional secondary: Games > Casual. |
 
-> Keyword notes: comma-separated, no spaces, no word repeated from the name or subtitle (Apple indexes name + subtitle + keywords as one bag). `capicu`/`kapicu` are intentional phonetic spellings of how players type "capicúa" (the accented word itself is already indexed via the subtitle). `domino`/`dominos` are the singular and the common misspelling; the name already covers "dominoes". `tranque` and `parejas` in the EN field capture diaspora searches from English-language phones, same convention as Anota's kit. `block` targets "block dominoes" searches, the generic style Capi's rules belong to.
+> Keyword notes: comma-separated, no spaces, no word repeated from the name or subtitle (Apple indexes name + subtitle + keywords as one bag). The subtitle repeats "Dominoes" from the name on purpose: capicúa is the winning play, not what Dominicans call the game, so the subtitle must say dominoes for clarity even at a small ASO cost. `capicua`/`capicu`/`kapicu` cover the play's real spelling plus the phonetic forms players type. `domino` is the singular; the name already covers "dominoes" (the `dominos` misspelling was dropped to fit `capicua`). `tranque` and `parejas` in the EN field capture diaspora searches from English-language phones, same convention as Anota's kit. `block` targets "block dominoes" searches, the generic style Capi's rules belong to.
 
 **Description (EN):**
 ```
@@ -46,7 +46,7 @@ FAIR AND SQUARE
 • No account required, and gameplay is never linked to your identity
 • Fully bilingual Spanish and English with an authentic Dominican voice
 
-Whether you call it capicúa, dominó, bones or Sunday at your tía's, Capi brings the table to wherever your people are.
+Whether you call it dominó, bones or Sunday at your tía's, Capi brings the table to wherever your people are.
 
 Free. Download Capi and tell your people to pull up.
 ```
@@ -90,7 +90,7 @@ JUEGO LIMPIO
 • Sin cuenta, y la partida nunca se vincula con tu identidad
 • Totalmente bilingüe español e inglés con voz dominicana auténtica
 
-Llámalo capicúa, dominó o el domingo donde la tía: Capi pone la mesa donde estén los tuyos.
+Llámalo dominó o el domingo donde la tía: Capi pone la mesa donde estén los tuyos.
 
 Gratis. Descarga Capi y dile a tu gente que llegue.
 ```
@@ -173,7 +173,7 @@ JUEGO LIMPIO
 • Sin cuenta, y la partida nunca se vincula con tu identidad
 • Totalmente bilingüe español e inglés con voz dominicana auténtica
 
-Capi es dominó dominicano en línea: un juego de dominó multijugador con amigos, con capicúa, tranque, paso, parejas y juego en equipo, 1v1 y 2v2, códigos de invitación y juego cruzado con la web. Llámalo dominó, capicúa o el domingo donde la tía: Capi pone la mesa donde estén los tuyos.
+Capi es dominó dominicano en línea: un juego de dominó multijugador con amigos, con capicúa, tranque, paso, parejas y juego en equipo, 1v1 y 2v2, códigos de invitación y juego cruzado con la web. Llámalo dominó o el domingo donde la tía: Capi pone la mesa donde estén los tuyos.
 
 Gratis. Descarga Capi y dile a tu gente que llegue.
 ```
