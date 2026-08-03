@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useRealtimeGame } from "@/hooks/useRealtimeGame";
 import type { ChatMessage } from "@/hooks/useRealtimeGame";
 import Board from "@/components/game/Board";
@@ -14,6 +14,7 @@ import BugReportButton from "@/components/game/BugReportButton";
 import type { Tile, Seat } from "@capi/engine";
 import { getTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
+import { isImessageEmbed } from "@/lib/embed";
 import {
   playSlam,
   playDraw as playDrawSound,
@@ -52,9 +53,12 @@ function getRelativeSeats(mySeat: Seat): { top: Seat; left: Seat; right: Seat } 
 
 let toastId = 0;
 
-export default function GamePage() {
+function GameContent() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Embed mode hides share chrome because bubble taps replace invite links.
+  const embedded = isImessageEmbed(searchParams);
   const { s } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
@@ -349,64 +353,72 @@ export default function GamePage() {
             </div>
           )}
 
-          {/* Primary action: copy the deep link */}
-          <button
-            onClick={async () => {
-              const inviteUrl = `${window.location.origin}?join=${id}`;
-              try {
-                await navigator.clipboard.writeText(inviteUrl);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              } catch {
-                /* clipboard blocked — code chip below is the fallback */
-              }
-            }}
-            className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-              copied
-                ? "bg-green-500 text-white"
-                : "bg-gray-900 text-white hover:bg-gray-800"
-            }`}
-          >
-            {copied ? (
-              <>
-                <span aria-hidden>✓</span>
-                {s.copied}
-              </>
-            ) : (
-              <>
-                <span aria-hidden>🔗</span>
-                {s.copyLink}
-              </>
-            )}
-          </button>
-
-          {/* Secondary: the short code, for typing in by hand */}
-          {inviteCode && (
-            <div className="space-y-1.5">
-              <p className="text-xs text-gray-400">{s.orShareCode}</p>
+          {!embedded && (
+            <>
+              {/* Primary action: copy the deep link */}
               <button
                 onClick={async () => {
+                  const inviteUrl = `${window.location.origin}?join=${id}`;
                   try {
-                    await navigator.clipboard.writeText(inviteCode);
-                    setCodeCopied(true);
-                    setTimeout(() => setCodeCopied(false), 2000);
+                    await navigator.clipboard.writeText(inviteUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
                   } catch {
-                    /* no-op */
+                    /* clipboard blocked — code chip below is the fallback */
                   }
                 }}
-                className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
-                title={s.copyLink}
+                className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+                  copied
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-900 text-white hover:bg-gray-800"
+                }`}
               >
-                <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
-                  {inviteCode}
-                </span>
+                {copied ? (
+                  <>
+                    <span aria-hidden>✓</span>
+                    {s.copied}
+                  </>
+                ) : (
+                  <>
+                    <span aria-hidden>🔗</span>
+                    {s.copyLink}
+                  </>
+                )}
               </button>
-              {codeCopied && (
-                <p className="text-xs text-green-600 font-semibold">
-                  {s.codeCopied}
-                </p>
+            </>
+          )}
+
+          {!embedded && (
+            <>
+              {/* Secondary: the short code, for typing in by hand */}
+              {inviteCode && (
+                <div className="space-y-1.5">
+                  <p className="text-xs text-gray-400">{s.orShareCode}</p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(inviteCode);
+                        setCodeCopied(true);
+                        setTimeout(() => setCodeCopied(false), 2000);
+                      } catch {
+                        /* no-op */
+                      }
+                    }}
+                    className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
+                    title={s.copyLink}
+                  >
+                    <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
+                      {inviteCode}
+                    </span>
+                  </button>
+                  {codeCopied && (
+                    <p className="text-xs text-green-600 font-semibold">
+                      {s.codeCopied}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
+            </>
           )}
 
           <p className="text-xs text-gray-400">{s.autoRefresh}</p>
@@ -914,6 +926,14 @@ export default function GamePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GamePage() {
+  return (
+    <Suspense>
+      <GameContent />
+    </Suspense>
   );
 }
 
