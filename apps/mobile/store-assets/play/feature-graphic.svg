@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <radialGradient id="lift" cx="30%" cy="40%" r="90%">
+      <stop offset="0%" stop-color="#1b150f"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="80%" cy="14%" r="55%">
+      <stop offset="0%" stop-color="#FFC878" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#FFC878" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="500" fill="url(#lift)"/>
+  <rect width="1024" height="500" fill="url(#glow)"/>
+  
+    <g transform="rotate(-8 205 258)">
+      <rect x="118.0" y="86.0" width="200" height="380" rx="34.0" fill="#000000" fill-opacity="0.38"/>
+      <rect x="105.0" y="68.0" width="200" height="380" rx="34.0"
+        fill="#FBF8ED" stroke="#0f0d0a" stroke-width="15.0"/>
+      <line x1="131.0" y1="258" x2="279.0" y2="258"
+        stroke="#0f0d0a" stroke-width="10.0" stroke-linecap="round"/>
+      <circle cx="157.0" cy="111.0" r="21.0" fill="#0a0a0a"/><circle cx="253.0" cy="111.0" r="21.0" fill="#0a0a0a"/><circle cx="205.0" cy="159.0" r="21.0" fill="#c9a961"/><circle cx="157.0" cy="207.0" r="21.0" fill="#0a0a0a"/><circle cx="253.0" cy="207.0" r="21.0" fill="#0a0a0a"/>
+      <circle cx="157.0" cy="309.0" r="21.0" fill="#0a0a0a"/><circle cx="253.0" cy="309.0" r="21.0" fill="#0a0a0a"/><circle cx="205.0" cy="357.0" r="21.0" fill="#c9a961"/><circle cx="157.0" cy="405.0" r="21.0" fill="#0a0a0a"/><circle cx="253.0" cy="405.0" r="21.0" fill="#0a0a0a"/>
+    </g>
+  <text x="400" y="272" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="180" font-weight="800" fill="#FBF8ED">Capi</text>
+  <rect x="406" y="300" width="150" height="10" rx="5" fill="#c9a961"/>
+  <text x="400" y="368" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="36" font-weight="700" letter-spacing="9" fill="#c9a961">DOMINÓ DOMINICANO</text>
+  <text x="400" y="428" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+    font-size="30" font-style="italic" fill="#FBF8ED" fill-opacity="0.75">Como en el patio.</text>
+</svg>
