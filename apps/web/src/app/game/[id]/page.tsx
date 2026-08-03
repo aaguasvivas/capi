@@ -16,6 +16,7 @@ import { getTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
 import { isImessageEmbed } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
+import { postToExtension } from "@/lib/imessageBridge";
 import {
   playSlam,
   playDraw as playDrawSound,
@@ -176,6 +177,17 @@ function GameContent() {
   function handlePlay(tile: Tile, end: "left" | "right") {
     playSlam();
     submitMove({ type: "play", tile, end });
+    // gameState is guaranteed non-null here: handlePlay only fires from the
+    // Hand component, which only renders once the active-game branch below
+    // (past the loading/error/waiting early returns) has already computed
+    // myTeam/oppTeam, so this closure reuses those same score-bar variables.
+    if (gameState) {
+      postToExtension({
+        type: "moved",
+        myScore: gameState.scores[myTeam],
+        oppScore: gameState.scores[oppTeam],
+      });
+    }
   }
 
   function handlePass() {
@@ -254,6 +266,59 @@ function GameContent() {
       playCallout();
     }
   }, [lastCallout]);
+
+  // Notify the iMessage extension shell exactly once each time the
+  // round-over or game-over card becomes visible, so it can refresh the
+  // turn bubble. These mirror the isRoundOver/isFinished + !lastCallout
+  // conditions the overlays further down use to show those same cards.
+  // They're declared here, ahead of the loading/error/waiting early
+  // returns, because hooks must run unconditionally on every render; that
+  // means myTeam/oppTeam (computed only in the active-game branch below)
+  // aren't in scope yet, so each effect re-derives them locally with the
+  // same getTeam(seat, is2v2) + scores[team] expressions used below. The
+  // ref guards are what make each notification fire exactly once per
+  // occurrence: they block re-emits from unrelated re-renders (gameState
+  // gets a new object reference on every realtime sync) while the card
+  // stays up, then reset once the card goes away so the next round or
+  // rematch can notify again.
+  const roundOverVisible = gameState?.phase === "round_over" && !lastCallout;
+  const roundOverNotifiedRef = useRef(false);
+  useEffect(() => {
+    if (!roundOverVisible) {
+      roundOverNotifiedRef.current = false;
+      return;
+    }
+    if (roundOverNotifiedRef.current || !gameState) return;
+    roundOverNotifiedRef.current = true;
+    const mySeatNow = (session?.seat ?? "n") as Seat;
+    const myTeamNow = getTeam(mySeatNow, gameState.is2v2);
+    const oppTeamNow: 0 | 1 = myTeamNow === 0 ? 1 : 0;
+    postToExtension({
+      type: "roundOver",
+      myScore: gameState.scores[myTeamNow],
+      oppScore: gameState.scores[oppTeamNow],
+    });
+  }, [roundOverVisible, gameState, session]);
+
+  const gameOverVisible = gameState?.phase === "finished" && !lastCallout;
+  const gameOverNotifiedRef = useRef(false);
+  useEffect(() => {
+    if (!gameOverVisible) {
+      gameOverNotifiedRef.current = false;
+      return;
+    }
+    if (gameOverNotifiedRef.current || !gameState) return;
+    gameOverNotifiedRef.current = true;
+    const mySeatNow = (session?.seat ?? "n") as Seat;
+    const myTeamNow = getTeam(mySeatNow, gameState.is2v2);
+    const oppTeamNow: 0 | 1 = myTeamNow === 0 ? 1 : 0;
+    postToExtension({
+      type: "gameOver",
+      iWon: gameState.winnerTeam === myTeamNow,
+      myScore: gameState.scores[myTeamNow],
+      oppScore: gameState.scores[oppTeamNow],
+    });
+  }, [gameOverVisible, gameState, session]);
 
   // --- Loading state ---
   if (loading) {
