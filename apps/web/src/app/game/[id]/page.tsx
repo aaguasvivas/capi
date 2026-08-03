@@ -15,6 +15,7 @@ import type { Tile, Seat } from "@capi/engine";
 import { getTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
 import { isImessageEmbed } from "@/lib/embed";
+import { parseSessionFragment } from "@/lib/embedSession";
 import {
   playSlam,
   playDraw as playDrawSound,
@@ -85,6 +86,11 @@ function GameContent() {
   }, []);
 
   useEffect(() => {
+    const boot = parseSessionFragment(window.location.hash, id);
+    if (boot) {
+      localStorage.setItem(`capi_session_${id}`, JSON.stringify(boot));
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
     const raw = localStorage.getItem(`capi_session_${id}`);
     if (raw) {
       try {
