@@ -3,7 +3,7 @@
 // with a registered handler).
 export type BridgeEvent =
   | { type: "moved"; myScore: number; oppScore: number }
-  | { type: "roundOver"; myScore: number; oppScore: number }
+  | { type: "roundOver"; iWon: boolean; myScore: number; oppScore: number }
   | { type: "gameOver"; iWon: boolean; myScore: number; oppScore: number };
 
 export function postToExtension(event: BridgeEvent): void {

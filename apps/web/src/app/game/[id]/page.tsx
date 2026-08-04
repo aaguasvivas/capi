@@ -307,12 +307,21 @@ function GameContent() {
       session?.seat as Seat | undefined,
       gameState.is2v2
     );
+    // Same source the round-over modal uses for iWonRound further down:
+    // the callout payload's winningTeam, with the same gameState-first
+    // fallback to the standalone lastCalloutPayload.
+    const roundPayloadNow = gameState.lastCalloutPayload ?? lastCalloutPayload;
+    const roundWinnerTeamNow =
+      roundPayloadNow && typeof roundPayloadNow.winningTeam === "number"
+        ? roundPayloadNow.winningTeam
+        : null;
     postToExtension({
       type: "roundOver",
+      iWon: roundWinnerTeamNow === myTeamNow,
       myScore: gameState.scores[myTeamNow],
       oppScore: gameState.scores[oppTeamNow],
     });
-  }, [roundOverVisible, gameState, session]);
+  }, [roundOverVisible, gameState, session, lastCalloutPayload]);
 
   const gameOverVisible = gameState?.phase === "finished" && !lastCallout;
   const gameOverNotifiedRef = useRef(false);
