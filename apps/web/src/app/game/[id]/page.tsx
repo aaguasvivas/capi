@@ -221,7 +221,7 @@ function GameContent() {
         const data = await res.json().catch(() => ({}));
         if (res.status === 409) {
           // Another player already started the round (or our snapshot is
-          // stale) — that's success from the user's perspective, just sync.
+          // stale), which is success from the user's perspective, just sync.
           await refetch();
         } else {
           showToast(data.error ?? s.errorStartRound);
@@ -435,7 +435,7 @@ function GameContent() {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   } catch {
-                    /* clipboard blocked — code chip below is the fallback */
+                    /* clipboard blocked, the code chip below is the fallback */
                   }
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
@@ -554,7 +554,7 @@ function GameContent() {
     : topPlayer?.nickname ?? s.opponent;
 
   // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
-  // trancao carries pts) and who they went to — headlined in the round-over
+  // trancao carries pts) and who they went to, headlined in the round-over
   // modal so the pips table can't be misread as the score.
   const roundAward =
     (typeof payload?.pipsAwarded === "number"
@@ -571,7 +571,7 @@ function GameContent() {
 
   // VEINTICINCO awarded mid-round (round keeps playing) shows as a passing
   // banner so it never blocks the forcer's next move. Round-ending callouts
-  // (DOMINÓ, CAPICÚA, TRANCAO — or a +25 that wins the game) keep the
+  // (DOMINÓ, CAPICÚA, TRANCAO, or a +25 that wins the game) keep the
   // full-screen overlay.
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
@@ -807,7 +807,7 @@ function GameContent() {
                   {iWonRound ? s.wonRound : s.lostRound}
                 </h2>
 
-                {/* Points awarded — the headline. Without it the pips table
+                {/* Points awarded is the headline. Without it the pips table
                     below reads like a scoreboard and the loser's counted
                     pips look like points credited to the loser. */}
                 <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
@@ -1009,7 +1009,7 @@ export default function GamePage() {
 }
 
 // ─── Mid-round VEINTICINCO banner ────────────────────────────────────────────
-// Non-blocking, auto-dismissing. The round continues underneath — the forcer
+// Non-blocking, auto-dismissing. The round continues underneath; the forcer
 // needs the board free to play their next tile.
 
 function VeinticincoBanner({
