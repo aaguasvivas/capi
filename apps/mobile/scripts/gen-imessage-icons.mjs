@@ -74,3 +74,22 @@ const contents = {
 };
 writeFileSync(join(OUT, "Contents.json"), JSON.stringify(contents, null, 2));
 console.log("wrote Contents.json");
+
+// Bubble-card image: the MSMessageTemplateLayout image shown on sent/received
+// game bubbles (Task 7). Same tile mark, square canvas.
+const BUBBLE_OUT = fileURLToPath(
+  new URL("../targets/messages/Assets.xcassets/bubble-card.imageset/", import.meta.url)
+);
+mkdirSync(BUBBLE_OUT, { recursive: true });
+
+const bubbleDir = mkdtempSync(join(tmpdir(), "capi-imsg-bubble-"));
+const bubbleSvg = join(bubbleDir, "bubble-card.svg");
+writeFileSync(bubbleSvg, tileSvg(600, 600));
+execFileSync("rsvg-convert", ["-w", "600", "-h", "600", "-b", INK, bubbleSvg, "-o", join(BUBBLE_OUT, "bubble-card.png")]);
+console.log("wrote bubble-card.png");
+rmSync(bubbleDir, { recursive: true, force: true });
+
+const bubbleContentsJson =
+  '{ "images": [{ "idiom": "universal", "filename": "bubble-card.png", "scale": "2x" }], "info": { "version": 1, "author": "xcode" } }\n';
+writeFileSync(join(BUBBLE_OUT, "Contents.json"), bubbleContentsJson);
+console.log("wrote bubble-card Contents.json");
