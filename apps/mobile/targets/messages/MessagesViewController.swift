@@ -30,8 +30,13 @@ final class MessagesViewController: MSMessagesAppViewController {
         // After a create, conversation.selectedMessage is nil, so re-deriving
         // on the expand transition would bounce back to the create card: if
         // we already have a live session for the game in view, keep showing
-        // it instead of re-deriving from the conversation.
-        if let ref = currentRef, let session = CapiStore.session(for: ref.gameId) {
+        // it instead of re-deriving from the conversation. A tapped bubble
+        // for a different game must win over the current one, and
+        // compact-only expansion avoids fighting the user's collapse.
+        let tappedId = conversation.selectedMessage.flatMap { GameRef(from: $0) }?.gameId
+        if let ref = currentRef, tappedId == nil || tappedId == ref.gameId,
+           let session = CapiStore.session(for: ref.gameId) {
+            if presentationStyle == .compact { requestPresentationStyle(.expanded) }
             showGame(gameId: ref.gameId, session: session)
             return
         }
