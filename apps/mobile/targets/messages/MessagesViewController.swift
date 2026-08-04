@@ -10,6 +10,9 @@ final class MessagesViewController: MSMessagesAppViewController {
     // conversation.selectedMessage, which is nil right after a create).
     private var currentRef: GameRef?
     private var currentSession: MSSession?
+    // The gameId currently mounted in the view, so showGame is idempotent
+    // and render's early-return (below) doesn't rebuild the same webview.
+    private var currentGameId: String?
 
     // MARK: presentation routing
 
@@ -24,6 +27,14 @@ final class MessagesViewController: MSMessagesAppViewController {
     }
 
     private func render(for conversation: MSConversation) {
+        // After a create, conversation.selectedMessage is nil, so re-deriving
+        // on the expand transition would bounce back to the create card: if
+        // we already have a live session for the game in view, keep showing
+        // it instead of re-deriving from the conversation.
+        if let ref = currentRef, let session = CapiStore.session(for: ref.gameId) {
+            showGame(gameId: ref.gameId, session: session)
+            return
+        }
         clearChildren()
         if let message = conversation.selectedMessage, let game = GameRef(from: message) {
             // Tapped an existing Capi bubble.
@@ -49,10 +60,15 @@ final class MessagesViewController: MSMessagesAppViewController {
                 guard let self else { return }
                 do {
                     let r = try await CapiAPI.create(nickname: nickname, avatarColor: CapiStore.avatarColor, is2v2: is2v2)
-                    CapiStore.save(CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId))
+                    let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
+                    CapiStore.save(session)
                     self.insertInviteBubble(gameId: r.gameId, code: r.inviteCode, is2v2: is2v2)
-                    self.requestPresentationStyle(.expanded)
-                    self.showGame(gameId: r.gameId, session: CapiStore.session(for: r.gameId)!)
+                    // insert only stages the bubble in the compose field, so
+                    // collapse the extension and let the user hit send,
+                    // GamePigeon style; they tap the sent bubble to sit at
+                    // the table (their session is saved, so render routes
+                    // straight to the game).
+                    self.dismiss()
                 } catch { self.showJoinError(error) }
             }
         })
@@ -77,12 +93,15 @@ final class MessagesViewController: MSMessagesAppViewController {
     }
 
     private func showGame(gameId: String, session: CapiSession) {
+        if currentGameId == gameId { return }
+        clearChildren()
         let web = GameWebView(gameId: gameId, session: session)
         web.onBridgeEvent = { [weak self] event in self?.handleBridge(event, gameId: gameId) }
         web.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(web)
         pin(web)
         addOpenInCapiButton(gameId: gameId)
+        currentGameId = gameId
     }
 
     private func showJoinError(_ error: Error) {
@@ -95,7 +114,7 @@ final class MessagesViewController: MSMessagesAppViewController {
         let caption = is2v2 ? CapiStrings.invite2v2 : CapiStrings.invite1v1
         currentRef = GameRef(gameId: gameId, code: code)
         currentSession = MSSession()
-        send(caption: caption, sub: code, gameId: gameId, code: code, session: currentSession!)
+        send(caption: caption, sub: code, gameId: gameId, code: code, session: currentSession!, via: .stage)
     }
 
     private func handleBridge(_ event: [String: Any], gameId: String) {
@@ -106,14 +125,20 @@ final class MessagesViewController: MSMessagesAppViewController {
         let name = CapiStore.nickname
         let caption: String
         switch type {
-        case "moved": caption = CapiStrings.yourTurn(oppNamePlaceholder())
-        case "roundOver": caption = CapiStrings.roundWon(name)
-        case "gameOver": caption = CapiStrings.gameWon(name)
+        case "moved":
+            caption = CapiStrings.yourTurn(oppNamePlaceholder())
+        case "roundOver", "gameOver":
+            // Only the winner's client sends the terminal bubble, so both
+            // players' clients don't each post one; the local nickname
+            // above is therefore always the winner's own name here.
+            let iWon = event["iWon"] as? Bool ?? false
+            guard iWon else { return }
+            caption = type == "roundOver" ? CapiStrings.roundWon(name) : CapiStrings.gameWon(name)
         default: return
         }
         let session = currentSession ?? MSSession()
         currentSession = session
-        send(caption: caption, sub: "\(my) - \(opp)", gameId: game.gameId, code: game.code, session: session)
+        send(caption: caption, sub: "\(my) - \(opp)", gameId: game.gameId, code: game.code, session: session, via: .send)
     }
 
     private func oppNamePlaceholder() -> String {
@@ -122,7 +147,12 @@ final class MessagesViewController: MSMessagesAppViewController {
         return CapiStrings.es ? "te toca" : "you"
     }
 
-    private func send(caption: String, sub: String, gameId: String, code: String, session: MSSession) {
+    // Invites are staged with insert (the user reviews and taps send);
+    // milestone updates use send so both clients don't need a manual tap to
+    // keep the thread's bubble in sync with the live game.
+    private enum BubbleDelivery { case stage, send }
+
+    private func send(caption: String, sub: String, gameId: String, code: String, session: MSSession, via: BubbleDelivery) {
         guard let convo = activeConversation else { return }
         let layout = MSMessageTemplateLayout()
         layout.image = UIImage(named: "bubble-card")
@@ -132,7 +162,14 @@ final class MessagesViewController: MSMessagesAppViewController {
         message.layout = layout
         message.url = GameRef(gameId: gameId, code: code).url
         message.summaryText = caption
-        convo.insert(message)
+        switch via {
+        case .stage:
+            convo.insert(message)
+        case .send:
+            convo.send(message) { error in
+                if let error { NSLog("capi bubble send failed: \(error)") }
+            }
+        }
     }
 
     // MARK: plumbing
@@ -173,18 +210,25 @@ final class MessagesViewController: MSMessagesAppViewController {
     private func clearChildren() {
         children.forEach { $0.willMove(toParent: nil); $0.view.removeFromSuperview(); $0.removeFromParent() }
         view.subviews.forEach { $0.removeFromSuperview() }
+        currentGameId = nil
     }
 }
 
-// The bubble payload: gameId + code encoded in the message URL. The URL is
-// also the web fallback for taps on macOS or devices without Capi.
+// The bubble payload: gameId + code encoded in the message URL. The URL also
+// doubles as the web fallback for taps on macOS or devices without Capi: it
+// matches the web landing's own invite-link format
+// (https://playcapi.com/?join=<gameId>&code=<code>) so the tap lands right
+// on the join flow there.
 struct GameRef {
     let gameId: String
     let code: String
 
     var url: URL {
-        var c = URLComponents(string: "https://playcapi.com/game/\(gameId)")!
-        c.queryItems = [URLQueryItem(name: "code", value: code)]
+        var c = URLComponents(string: "https://playcapi.com/")!
+        c.queryItems = [
+            URLQueryItem(name: "join", value: gameId),
+            URLQueryItem(name: "code", value: code),
+        ]
         return c.url!
     }
 
@@ -193,10 +237,9 @@ struct GameRef {
     init?(from message: MSMessage) {
         guard let url = message.url,
               let comps = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              comps.host == "playcapi.com" else { return nil }
-        let parts = comps.path.split(separator: "/").map(String.init)
-        guard parts.count == 2, parts[0] == "game" else { return nil }
-        self.gameId = parts[1]
+              comps.host == "playcapi.com",
+              let gameId = comps.queryItems?.first(where: { $0.name == "join" })?.value else { return nil }
+        self.gameId = gameId
         self.code = comps.queryItems?.first(where: { $0.name == "code" })?.value ?? ""
     }
 }

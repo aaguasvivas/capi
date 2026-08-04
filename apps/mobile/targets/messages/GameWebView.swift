@@ -11,7 +11,9 @@ final class GameWebView: UIView, WKScriptMessageHandler {
     init(gameId: String, session: CapiSession) {
         super.init(frame: .zero)
         let config = WKWebViewConfiguration()
-        config.userContentController.add(self, name: "capi")
+        // The controller retains its handlers strongly, and a direct self
+        // would cycle through webView.configuration and leak every webview.
+        config.userContentController.add(WeakScriptMessageHandler(self), name: "capi")
         webView = WKWebView(frame: .zero, configuration: config)
         webView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
@@ -31,5 +33,13 @@ final class GameWebView: UIView, WKScriptMessageHandler {
 
     func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
         if let body = message.body as? [String: Any] { onBridgeEvent?(body) }
+    }
+}
+
+private final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var target: WKScriptMessageHandler?
+    init(_ target: WKScriptMessageHandler) { self.target = target }
+    func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
+        target?.userContentController(c, didReceive: m)
     }
 }
