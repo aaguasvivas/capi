@@ -12,7 +12,7 @@ import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
 import type { Tile, Seat } from "@capi/engine";
-import { getTeam } from "@capi/engine";
+import { getTeam, getOpponentTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
 import { isImessageEmbed } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
@@ -177,11 +177,16 @@ function GameContent() {
   function handlePlay(tile: Tile, end: "left" | "right") {
     playSlam();
     submitMove({ type: "play", tile, end });
-    // gameState is guaranteed non-null here: handlePlay only fires from the
+    // gameState should already be set here: handlePlay only fires from the
     // Hand component, which only renders once the active-game branch below
     // (past the loading/error/waiting early returns) has already computed
-    // myTeam/oppTeam, so this closure reuses those same score-bar variables.
-    if (gameState) {
+    // myTeam/oppTeam, so this closure reuses those same score-bar
+    // variables; the guard below just satisfies TypeScript's narrowing.
+    // Skip the emit if this play empties my hand: a hand-emptying play
+    // ends the round, so the roundOver/gameOver event should refresh the
+    // bubble instead, not a moved event wrongly claiming it's still
+    // someone's turn.
+    if (gameState && myHand.length > 1) {
       postToExtension({
         type: "moved",
         myScore: gameState.scores[myTeam],
@@ -274,13 +279,21 @@ function GameContent() {
   // They're declared here, ahead of the loading/error/waiting early
   // returns, because hooks must run unconditionally on every render; that
   // means myTeam/oppTeam (computed only in the active-game branch below)
-  // aren't in scope yet, so each effect re-derives them locally with the
-  // same getTeam(seat, is2v2) + scores[team] expressions used below. The
-  // ref guards are what make each notification fire exactly once per
-  // occurrence: they block re-emits from unrelated re-renders (gameState
-  // gets a new object reference on every realtime sync) while the card
-  // stays up, then reset once the card goes away so the next round or
-  // rematch can notify again.
+  // aren't in scope yet, so each effect re-derives them locally via
+  // deriveTeams below, the same getTeam/getOpponentTeam logic used for
+  // the score-bar consts further down. The ref guards are what make each
+  // notification fire exactly once per occurrence: they block re-emits
+  // from unrelated re-renders (gameState gets a new object reference on
+  // every realtime sync) while the card stays up, then reset once the
+  // card goes away so the next round or rematch can notify again.
+  function deriveTeams(
+    seat: Seat | undefined,
+    is2v2: boolean
+  ): { myTeam: 0 | 1; oppTeam: 0 | 1 } {
+    const myTeam = getTeam(seat ?? "n", is2v2);
+    return { myTeam, oppTeam: getOpponentTeam(myTeam) };
+  }
+
   const roundOverVisible = gameState?.phase === "round_over" && !lastCallout;
   const roundOverNotifiedRef = useRef(false);
   useEffect(() => {
@@ -290,9 +303,10 @@ function GameContent() {
     }
     if (roundOverNotifiedRef.current || !gameState) return;
     roundOverNotifiedRef.current = true;
-    const mySeatNow = (session?.seat ?? "n") as Seat;
-    const myTeamNow = getTeam(mySeatNow, gameState.is2v2);
-    const oppTeamNow: 0 | 1 = myTeamNow === 0 ? 1 : 0;
+    const { myTeam: myTeamNow, oppTeam: oppTeamNow } = deriveTeams(
+      session?.seat as Seat | undefined,
+      gameState.is2v2
+    );
     postToExtension({
       type: "roundOver",
       myScore: gameState.scores[myTeamNow],
@@ -309,9 +323,10 @@ function GameContent() {
     }
     if (gameOverNotifiedRef.current || !gameState) return;
     gameOverNotifiedRef.current = true;
-    const mySeatNow = (session?.seat ?? "n") as Seat;
-    const myTeamNow = getTeam(mySeatNow, gameState.is2v2);
-    const oppTeamNow: 0 | 1 = myTeamNow === 0 ? 1 : 0;
+    const { myTeam: myTeamNow, oppTeam: oppTeamNow } = deriveTeams(
+      session?.seat as Seat | undefined,
+      gameState.is2v2
+    );
     postToExtension({
       type: "gameOver",
       iWon: gameState.winnerTeam === myTeamNow,
@@ -536,7 +551,7 @@ function GameContent() {
   // Use the engine's helper so 1v1 and 2v2 are handled correctly.
   // In 1v1 N=team0, S=team1 (opponents). In 2v2 N+S=team0 vs E+W=team1.
   const myTeam = getTeam(mySeat, is2v2);
-  const oppTeam: 0 | 1 = myTeam === 0 ? 1 : 0;
+  const oppTeam = getOpponentTeam(myTeam);
 
   const payload = gameState.lastCalloutPayload ?? lastCalloutPayload;
   const roundWinnerTeam =
