@@ -146,8 +146,11 @@ final class MessagesViewController: MSMessagesAppViewController {
         send(caption: caption, sub: "\(my) - \(opp)", gameId: game.gameId, code: game.code, session: session, via: .send)
         // iOS stages extension sends for user confirmation; collapsing
         // makes the staged bubble visible so the turn notification is one
-        // tap away, and the live table stays one bubble-tap away.
-        requestPresentationStyle(.compact)
+        // tap away, and the live table stays one bubble-tap away. Deferring
+        // makes Messages honor the request after the current transaction,
+        // since a synchronous call here lands mid-transaction (during the
+        // webview's touch handling) and gets silently ignored.
+        DispatchQueue.main.async { [weak self] in self?.requestPresentationStyle(.compact) }
     }
 
     // Invites are staged with insert (the user reviews and taps send);
