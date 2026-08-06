@@ -131,7 +131,7 @@ final class MessagesViewController: MSMessagesAppViewController {
         let caption: String
         switch type {
         case "moved":
-            caption = CapiStrings.yourTurn(oppNamePlaceholder())
+            caption = CapiStrings.yourTurnGeneric
         case "roundOver", "gameOver":
             // Only the winner's client sends the terminal bubble, so both
             // players' clients don't each post one; the local nickname
@@ -144,12 +144,10 @@ final class MessagesViewController: MSMessagesAppViewController {
         let session = currentSession ?? MSSession()
         currentSession = session
         send(caption: caption, sub: "\(my) - \(opp)", gameId: game.gameId, code: game.code, session: session, via: .send)
-    }
-
-    private func oppNamePlaceholder() -> String {
-        // Participant display names are not exposed to extensions; the caption
-        // reads naturally without one in ES and EN.
-        return CapiStrings.es ? "te toca" : "you"
+        // iOS stages extension sends for user confirmation; collapsing
+        // makes the staged bubble visible so the turn notification is one
+        // tap away, and the live table stays one bubble-tap away.
+        requestPresentationStyle(.compact)
     }
 
     // Invites are staged with insert (the user reviews and taps send);
