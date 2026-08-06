@@ -12,7 +12,7 @@ Dominican dominoes online: 1v1 or 2v2, real-time multiplayer. Live at https://pl
 - Web dev: `npm run dev:web`
 - Web build: `npm run build:web`
 - Mobile: `npm run start:mobile`
-- Tests: `npm test` (engine suite incl. fuzz invariants; the web workspace has no test files yet)
+- Tests: `npm test` (engine suite incl. fuzz invariants) and `npx vitest run` in apps/web (embed session suite)
 
 ## Languages
 EN/ES with Dominican flavor. Shared strings live only in packages/i18n; do not hardcode strings in apps.

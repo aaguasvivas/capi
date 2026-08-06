@@ -109,7 +109,11 @@ final class MessagesViewController: MSMessagesAppViewController {
                     self.requestPresentationStyle(.expanded)
                     self.showGame(gameId: game.gameId, session: session)
                 } catch CapiAPI.Failure.server(let msg) {
-                    self.host(JoinCard(status: msg.contains("full") ? CapiStrings.tableFull : msg) { _ in })
+                    // The two known 409 reasons from the join route, localized; anything else surfaces raw.
+                    let status = msg == "Game is full" ? CapiStrings.tableFull
+                        : msg == "Game already started" ? CapiStrings.gameStarted
+                        : msg
+                    self.host(JoinCard(status: status) { _ in })
                 } catch { self.showJoinError(error) }
             }
         })
@@ -218,7 +222,8 @@ final class MessagesViewController: MSMessagesAppViewController {
         btn.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(btn)
         NSLayoutConstraint.activate([
-            btn.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 6),
+            // 64: sits below the embedded page's score bar.
+            btn.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 64),
             btn.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
         ])
     }

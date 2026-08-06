@@ -14,8 +14,9 @@ import BugReportButton from "@/components/game/BugReportButton";
 import type { Tile, Seat } from "@capi/engine";
 import { getTeam, getOpponentTeam } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
-import { isImessageEmbed } from "@/lib/embed";
+import { isImessageEmbed, embedLang } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
+import type { EmbedSession as Session } from "@/lib/embedSession";
 import { postToExtension } from "@/lib/imessageBridge";
 import {
   playSlam,
@@ -27,12 +28,6 @@ import {
   loadMuteState,
   preloadSounds,
 } from "@/lib/sounds";
-
-interface Session {
-  playerId: string;
-  seat: string;
-  gameId: string;
-}
 
 interface Toast {
   id: number;
@@ -61,7 +56,7 @@ function GameContent() {
   const searchParams = useSearchParams();
   // Embed mode hides share chrome because bubble taps replace invite links.
   const embedded = isImessageEmbed(searchParams);
-  const { s } = useI18n();
+  const { s, lang, setLang } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
@@ -101,6 +96,19 @@ function GameContent() {
       }
     }
   }, [id, router]);
+
+  // The extension passes the device language via ?lang=; adopt it once on
+  // mount so the native drawer chrome and this embedded table agree. Guarded
+  // by a ref (not just the dependency array) so it never re-fires later from
+  // an in-page language switch.
+  const langSyncedRef = useRef(false);
+  useEffect(() => {
+    if (langSyncedRef.current) return;
+    langSyncedRef.current = true;
+    if (!embedded) return;
+    const wanted = embedLang(searchParams);
+    if (wanted && wanted !== lang) setLang(wanted);
+  }, [embedded, searchParams, lang, setLang]);
 
   const {
     gameState,

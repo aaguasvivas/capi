@@ -1,3 +1,9 @@
+// NOTE: apps/mobile/targets/messages/CapiStrings.swift duplicates the iMessage
+// bubble captions (yourTurnGeneric/roundWon/gameWon/invites/join/create/
+// tableFull/gameStarted/openInCapi/yourName). Bubbles render without JS, so
+// they cannot read this file. If you change tone or wording here, update
+// CapiStrings.swift to match.
+
 export type Lang = "es" | "en";
 
 export interface Strings {

@@ -24,8 +24,8 @@ function withMessagesTarget(config) {
     const proj = config.modResults;
     const projRoot = config.modRequest.platformProjectRoot;
 
-    if (proj.pbxTargetByName(TARGET)) return config; // idempotent re-runs
-
+    // Sources refresh on every prebuild; only the pbxproj wiring below is
+    // idempotent-guarded.
     // 1. Copy sources + plist + entitlements + assets into ios/CapiMessages/
     const dest = path.join(projRoot, TARGET);
     fs.mkdirSync(dest, { recursive: true });
@@ -33,6 +33,8 @@ function withMessagesTarget(config) {
       fs.copyFileSync(path.join(SRC_DIR, f), path.join(dest, f));
     }
     fs.cpSync(path.join(SRC_DIR, "Assets.xcassets"), path.join(dest, "Assets.xcassets"), { recursive: true });
+
+    if (proj.pbxTargetByName(TARGET)) return config; // idempotent re-runs
 
     // 2. Create the target (also creates product + appex embed wiring group)
     //

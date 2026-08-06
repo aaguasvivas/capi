@@ -24,7 +24,10 @@ final class GameWebView: UIView, WKScriptMessageHandler {
             webView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         var comps = URLComponents(url: CapiAPI.base.appendingPathComponent("/game/\(gameId)"), resolvingAgainstBaseURL: false)!
-        comps.queryItems = [URLQueryItem(name: "embed", value: "imessage")]
+        comps.queryItems = [
+            URLQueryItem(name: "embed", value: "imessage"),
+            URLQueryItem(name: "lang", value: CapiStrings.es ? "es" : "en"),
+        ]
         comps.fragment = "s=\(session.playerId).\(session.seat)"
         webView.load(URLRequest(url: comps.url!))
     }
