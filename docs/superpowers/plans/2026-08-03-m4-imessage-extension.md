@@ -1104,7 +1104,7 @@ git commit -m "Docs: 1.1 iMessage release notes and review-note guidance"
 - `MSMessage.url` doubles as the desktop/no-app fallback (opens the web game), which the spec listed as App Store install prompt only; strictly better, no spec change needed.
 - Caption for "moved" avoids opponent display names (Messages does not expose them to extensions); spec's example captions carried names of the mover, which the roundWon/gameWon captions still do.
 - Open in Capi uses the existing `capi://` scheme instead of the spec's universal link (the app declares no associatedDomains today); same handoff, zero new config.
-- The plugin hardcodes `MARKETING_VERSION 1.1.0` for the extension target; future version bumps must update it alongside app.json (called out here so it is not missed at 1.2).
+- Superseded (final review): the plugin no longer hardcodes versions; it reads `config.version` and `config.ios.buildNumber` from the resolved Expo config so the appex stays version-locked to the container app, including EAS remote build numbers. Bumps happen in app.json only.
 - Controller keeps `currentRef`/`currentSession` state because `conversation.selectedMessage` is nil immediately after a create; without it the creator's bubble refreshes would no-op (caught in self-review).
 - The bridge payload is `{type, myScore, oppScore}`, plus `iWon` on terminal events. Captions are chosen natively in `CapiStrings`, not passed from the web as a `captionKey`.
 - `moved` emits on server-confirmed plays and passes, while the phase is still playing. Terminal phases emit through the winner-gated roundOver/gameOver effects instead, so a losing iMessage player never posts a bubble.
