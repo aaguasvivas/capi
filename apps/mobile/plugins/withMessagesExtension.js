@@ -34,7 +34,14 @@ function withMessagesTarget(config) {
     }
     fs.cpSync(path.join(SRC_DIR, "Assets.xcassets"), path.join(dest, "Assets.xcassets"), { recursive: true });
 
-    if (proj.pbxTargetByName(TARGET)) return config; // idempotent re-runs
+    if (proj.pbxTargetByName(TARGET)) {
+      // Idempotent re-runs skip the pbxproj wiring, but version settings must
+      // refresh so a local prebuild after an app.json bump keeps the appex
+      // version-locked to the container (EAS always prebuilds fresh; this is
+      // for local archives).
+      applyExtensionBuildSettings(proj, config);
+      return config;
+    }
 
     // 2. Create the target (also creates product + appex embed wiring group)
     //
@@ -118,31 +125,36 @@ function withMessagesTarget(config) {
     }
 
     // 4. Build settings for the extension target
-    const configurations = proj.pbxXCBuildConfigurationSection();
-    for (const key of Object.keys(configurations)) {
-      const entry = configurations[key];
-      if (typeof entry === "object" && entry.buildSettings &&
-          entry.buildSettings.PRODUCT_NAME === `"${TARGET}"`) {
-        Object.assign(entry.buildSettings, {
-          PRODUCT_BUNDLE_IDENTIFIER: BUNDLE_ID,
-          SWIFT_VERSION: "5.0",
-          IPHONEOS_DEPLOYMENT_TARGET: "15.1",
-          TARGETED_DEVICE_FAMILY: `"1"`,
-          INFOPLIST_FILE: `${TARGET}/Info.plist`,
-          CODE_SIGN_ENTITLEMENTS: `${TARGET}/CapiMessages.entitlements`,
-          GENERATE_INFOPLIST_FILE: "NO",
-          // EAS injects the remote build number into the config on its
-          // workers; reading it here keeps the appex version-locked to the
-          // container app forever.
-          CURRENT_PROJECT_VERSION: String(config.ios?.buildNumber ?? "1"),
-          MARKETING_VERSION: config.version ?? "1.1.0",
-          ASSETCATALOG_COMPILER_APPICON_NAME: `"iMessage App Icon"`,
-          SKIP_INSTALL: "YES",
-        });
-      }
-    }
+    applyExtensionBuildSettings(proj, config);
     return config;
   });
+}
+
+function applyExtensionBuildSettings(proj, config) {
+  const configurations = proj.pbxXCBuildConfigurationSection();
+  for (const key of Object.keys(configurations)) {
+    const entry = configurations[key];
+    if (typeof entry === "object" && entry.buildSettings &&
+        entry.buildSettings.PRODUCT_NAME === `"${TARGET}"`) {
+      Object.assign(entry.buildSettings, {
+        PRODUCT_BUNDLE_IDENTIFIER: BUNDLE_ID,
+        SWIFT_VERSION: "5.0",
+        IPHONEOS_DEPLOYMENT_TARGET: "15.1",
+        TARGETED_DEVICE_FAMILY: `"1"`,
+        INFOPLIST_FILE: `${TARGET}/Info.plist`,
+        CODE_SIGN_ENTITLEMENTS: `${TARGET}/CapiMessages.entitlements`,
+        GENERATE_INFOPLIST_FILE: "NO",
+        // EAS injects the remote build number into the config on its
+        // workers; reading it here keeps the appex version-locked to the
+        // container app forever. Version precedence mirrors Expo's own
+        // (ios.version wins over version).
+        CURRENT_PROJECT_VERSION: String(config.ios?.buildNumber ?? "1"),
+        MARKETING_VERSION: config.ios?.version ?? config.version ?? "1.1.0",
+        ASSETCATALOG_COMPILER_APPICON_NAME: `"iMessage App Icon"`,
+        SKIP_INSTALL: "YES",
+      });
+    }
+  }
 }
 
 function withAppGroup(config) {
