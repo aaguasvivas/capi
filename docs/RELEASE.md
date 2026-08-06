@@ -28,6 +28,9 @@ cd ~/Desktop/personal/capi/apps/mobile && source ~/.nvm/nvm.sh && nvm use 20
 eas build --platform ios --profile production   # EAS-managed certs for dev.capi.app
 eas submit --platform ios                       # uploads to App Store Connect + TestFlight
 ```
+
+Version 1.1 ships a Messages extension (CapiMessages, bundle id dev.capi.app.messages) as a companion play surface that uses the same server, same predefined-only chat rules, and no new data collection. For App Review, the extension is not a separate game but an additional client to the existing multiplayer game. Reviewers can test from the Messages sandbox on simulator or device by creating a game from the app drawer and joining as player 2 from a browser at playcapi.com.
+
 Then in App Store Connect (appstoreconnect.apple.com):
 1. Open the app record (eas submit creates it, or create it: name "Capi: Dominican Dominoes", bundle id dev.capi.app).
 2. Add `ascAppId` to apps/mobile/eas.json now that the record exists, so future submits are non-interactive:

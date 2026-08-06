@@ -210,3 +210,15 @@ Capi 1.0, the first hand. Real Dominican dominoes with your people: capicúa, tr
 ```
 Capi 1.0, la primera mano. Dominó dominicano de verdad con tu gente: capicúa, tranque, paso y parejas, 1v1 o 2v2, códigos de 6 letras, tres mesas con sabor, sonido de ficha, chat rápido, y español e inglés completos. Gratis y sin cuenta.
 ```
+
+## Version 1.1 "What's New" (release notes)
+
+**English:**
+```
+Capi now lives in iMessage. Start a game right from your group chat: the invite is a bubble, turns update in the thread, and if you both stay at the table you watch every tile land live. 1v1 or 2v2 con tu frente.
+```
+
+**Español:**
+```
+Capi ahora vive en iMessage. Empieza la partida desde el chat: la invitación es una burbuja, los turnos se actualizan en el hilo, y si se quedan en la mesa ven caer cada ficha en vivo. 1v1 o 2v2 con tu frente.
+```
