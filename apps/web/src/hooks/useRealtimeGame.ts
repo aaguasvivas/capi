@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { GameState, Tile, Seat } from "@capi/engine";
-import { getNextSeat } from "@capi/engine";
+import { getNextSeat, getTeam, getOpponentTeam } from "@capi/engine";
+import { postToExtension } from "@/lib/imessageBridge";
 
 interface PlayerSession {
   playerId: string;
@@ -95,7 +96,7 @@ export function useRealtimeGame(
   const preOptimisticRef = useRef<GameState | null>(null);
 
   // A move POST currently awaiting its response. Blocks duplicate
-  // submissions (double-clicks / button mashing) — the server's optimistic
+  // submissions (double-clicks / button mashing). The server's optimistic
   // lock would reject them anyway, but this avoids the churn and the
   // confusing error flash.
   const moveInFlightRef = useRef(false);
@@ -378,7 +379,7 @@ export function useRealtimeGame(
         }
 
         // State fast-path: hand the confirmed state to the other players
-        // directly — they'd otherwise wait on the postgres_changes fanout.
+        // directly, since they'd otherwise wait on the postgres_changes fanout.
         chatChannelRef.current?.send({
           type: "broadcast",
           event: "state",
@@ -389,6 +390,22 @@ export function useRealtimeGame(
             calloutPayload: data.calloutPayload ?? null,
           },
         });
+
+        // Emit on server-confirmed turn changes only (plays and passes);
+        // terminal phases are covered by the roundOver/gameOver effects, and
+        // rejected moves must not post a bubble.
+        if (
+          (intent.type === "play" || intent.type === "pass") &&
+          data.gameState.phase === "playing"
+        ) {
+          const myTeam = getTeam(session.seat as Seat, data.gameState.is2v2);
+          const oppTeam = getOpponentTeam(myTeam);
+          postToExtension({
+            type: "moved",
+            myScore: data.gameState.scores[myTeam],
+            oppScore: data.gameState.scores[oppTeam],
+          });
+        }
       } catch {
         if (preOptimisticRef.current) {
           setGameState(preOptimisticRef.current);

@@ -78,45 +78,76 @@ final class MessagesViewController: MSMessagesAppViewController {
 
     private func showCreate(conversation: MSConversation) {
         let allow2v2 = conversation.remoteParticipantIdentifiers.count >= 2
-        host(CreateCard(allow2v2: allow2v2) { [weak self] nickname, is2v2 in
-            Task { @MainActor in
-                guard let self else { return }
-                do {
-                    let r = try await CapiAPI.create(nickname: nickname, avatarColor: CapiStore.avatarColor, is2v2: is2v2)
-                    let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
-                    CapiStore.save(session)
-                    self.insertInviteBubble(gameId: r.gameId, code: r.inviteCode, is2v2: is2v2)
-                    // insert only stages the bubble in the compose field, so
-                    // collapse the extension and let the user hit send,
-                    // GamePigeon style; they tap the sent bubble to sit at
-                    // the table (their session is saved, so render routes
-                    // straight to the game).
-                    self.dismiss()
-                } catch { self.showJoinError(error) }
-            }
+        showCreateCard(allow2v2: allow2v2, status: nil)
+    }
+
+    // Re-hostable so a failed create can show the same card again with an
+    // honest status line instead of a dead end; both the first attempt and
+    // every retry wire onCreate to attemptCreate, so the button always works.
+    private func showCreateCard(allow2v2: Bool, status: String?) {
+        host(CreateCard(allow2v2: allow2v2, status: status) { [weak self] nickname, is2v2 in
+            self?.attemptCreate(nickname: nickname, is2v2: is2v2, allow2v2: allow2v2)
         })
     }
 
-    private func showJoin(game: GameRef) {
-        host(JoinCard(status: nil) { [weak self] nickname in
-            Task { @MainActor in
-                guard let self else { return }
-                do {
-                    let r = try await CapiAPI.join(gameId: game.gameId, nickname: nickname, avatarColor: CapiStore.avatarColor)
-                    let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
-                    CapiStore.save(session)
-                    self.currentRef = game
-                    self.requestPresentationStyle(.expanded)
-                    self.showGame(gameId: game.gameId, session: session)
-                } catch CapiAPI.Failure.server(let msg) {
-                    // The two known 409 reasons from the join route, localized; anything else surfaces raw.
-                    let status = msg == "Game is full" ? CapiStrings.tableFull
-                        : msg == "Game already started" ? CapiStrings.gameStarted
-                        : msg
-                    self.host(JoinCard(status: status) { _ in })
-                } catch { self.showJoinError(error) }
+    private func attemptCreate(nickname: String, is2v2: Bool, allow2v2: Bool) {
+        Task { @MainActor in
+            do {
+                let r = try await CapiAPI.create(nickname: nickname, avatarColor: CapiStore.avatarColor, is2v2: is2v2)
+                let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
+                CapiStore.save(session)
+                self.insertInviteBubble(gameId: r.gameId, code: r.inviteCode, is2v2: is2v2)
+                // insert only stages the bubble in the compose field, so
+                // collapse the extension and let the user hit send,
+                // GamePigeon style; they tap the sent bubble to sit at
+                // the table (their session is saved, so render routes
+                // straight to the game).
+                self.dismiss()
+            } catch CapiAPI.Failure.server(let msg) {
+                // Same two known 409 strings showJoin maps, in case create()
+                // ever returns them too; anything else surfaces raw.
+                let status = msg == "Game is full" ? CapiStrings.tableFull
+                    : msg == "Game already started" ? CapiStrings.gameStarted
+                    : msg
+                self.showCreateCard(allow2v2: allow2v2, status: status)
+            } catch {
+                self.showCreateCard(allow2v2: allow2v2, status: CapiStrings.connectionError)
             }
+        }
+    }
+
+    private func showJoin(game: GameRef) {
+        showJoinCard(game: game, status: nil)
+    }
+
+    // Re-hostable for the same reason as showCreateCard: every card this
+    // hosts, first attempt or retry after a failure, wires onJoin to
+    // attemptJoin so the button never dead-ends.
+    private func showJoinCard(game: GameRef, status: String?) {
+        host(JoinCard(status: status) { [weak self] nickname in
+            self?.attemptJoin(game: game, nickname: nickname)
         })
+    }
+
+    private func attemptJoin(game: GameRef, nickname: String) {
+        Task { @MainActor in
+            do {
+                let r = try await CapiAPI.join(gameId: game.gameId, nickname: nickname, avatarColor: CapiStore.avatarColor)
+                let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
+                CapiStore.save(session)
+                self.currentRef = game
+                self.requestPresentationStyle(.expanded)
+                self.showGame(gameId: game.gameId, session: session)
+            } catch CapiAPI.Failure.server(let msg) {
+                // The two known 409 reasons from the join route, localized; anything else surfaces raw.
+                let status = msg == "Game is full" ? CapiStrings.tableFull
+                    : msg == "Game already started" ? CapiStrings.gameStarted
+                    : msg
+                self.showJoinCard(game: game, status: status)
+            } catch {
+                self.showJoinError(error, game: game)
+            }
+        }
     }
 
     private func showGame(gameId: String, session: CapiSession) {
@@ -131,8 +162,12 @@ final class MessagesViewController: MSMessagesAppViewController {
         currentGameId = gameId
     }
 
-    private func showJoinError(_ error: Error) {
-        host(JoinCard(status: "\(error)") { _ in })
+    private func showJoinError(_ error: Error, game: GameRef) {
+        // A non-server failure here is a connectivity problem (bad request,
+        // decode failure, no network); the raw error is not meaningful to a
+        // player, so show one honest, actionable message with a working
+        // retry rather than the error's description.
+        showJoinCard(game: game, status: CapiStrings.connectionError)
     }
 
     // MARK: bubbles
@@ -245,10 +280,11 @@ final class MessagesViewController: MSMessagesAppViewController {
 }
 
 // The bubble payload: gameId + code encoded in the message URL. The URL also
-// doubles as the web fallback for taps on macOS or devices without Capi: it
-// matches the web landing's own invite-link format
-// (https://playcapi.com/?join=<gameId>&code=<code>) so the tap lands right
-// on the join flow there.
+// doubles as the web fallback for taps on macOS or devices without Capi: the
+// landing page only consumes the join param and fetches the invite code
+// itself, so the code query item here is not for the landing. It exists for
+// the extension's own round-trip, so GameRef(from:) below can recover the
+// code for the bubble subcaption without an extra API call.
 struct GameRef {
     let gameId: String
     let code: String

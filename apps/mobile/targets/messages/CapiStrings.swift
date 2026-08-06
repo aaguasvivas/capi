@@ -18,4 +18,5 @@ enum CapiStrings {
     static var gameStarted: String { es ? "La partida ya empezó" : "Game already started" }
     static var openInCapi: String { es ? "Abrir en Capi" : "Open in Capi" }
     static var yourName: String { es ? "Tu nombre" : "Your name" }
+    static var connectionError: String { es ? "Error de conexión, intenta de nuevo" : "Connection error, try again" }
 }

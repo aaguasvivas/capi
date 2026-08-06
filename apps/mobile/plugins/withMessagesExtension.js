@@ -131,8 +131,11 @@ function withMessagesTarget(config) {
           INFOPLIST_FILE: `${TARGET}/Info.plist`,
           CODE_SIGN_ENTITLEMENTS: `${TARGET}/CapiMessages.entitlements`,
           GENERATE_INFOPLIST_FILE: "NO",
-          CURRENT_PROJECT_VERSION: "1",
-          MARKETING_VERSION: "1.1.0",
+          // EAS injects the remote build number into the config on its
+          // workers; reading it here keeps the appex version-locked to the
+          // container app forever.
+          CURRENT_PROJECT_VERSION: String(config.ios?.buildNumber ?? "1"),
+          MARKETING_VERSION: config.version ?? "1.1.0",
           ASSETCATALOG_COMPILER_APPICON_NAME: `"iMessage App Icon"`,
           SKIP_INSTALL: "YES",
         });

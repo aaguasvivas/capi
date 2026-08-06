@@ -185,22 +185,6 @@ function GameContent() {
   function handlePlay(tile: Tile, end: "left" | "right") {
     playSlam();
     submitMove({ type: "play", tile, end });
-    // gameState should already be set here: handlePlay only fires from the
-    // Hand component, which only renders once the active-game branch below
-    // (past the loading/error/waiting early returns) has already computed
-    // myTeam/oppTeam, so this closure reuses those same score-bar
-    // variables; the guard below just satisfies TypeScript's narrowing.
-    // Skip the emit if this play empties my hand: a hand-emptying play
-    // ends the round, so the roundOver/gameOver event should refresh the
-    // bubble instead, not a moved event wrongly claiming it's still
-    // someone's turn.
-    if (gameState && myHand.length > 1) {
-      postToExtension({
-        type: "moved",
-        myScore: gameState.scores[myTeam],
-        oppScore: gameState.scores[oppTeam],
-      });
-    }
   }
 
   function handlePass() {
