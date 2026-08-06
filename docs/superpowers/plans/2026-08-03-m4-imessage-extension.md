@@ -1099,10 +1099,17 @@ git commit -m "Docs: 1.1 iMessage release notes and review-note guidance"
 
 ## Self-review notes (fixed inline during writing)
 
-- Spec section 5 "waiting room" flow: create now opens the webview immediately (waiting room renders on the game page) instead of a native waiting state; simpler and matches the web.
+- Spec section 5 "waiting room" flow: create no longer opens the webview immediately. It stages the invite bubble in the compose field and dismisses the extension, GamePigeon style; the creator sends it and taps the bubble to sit at the table.
 - Spec's participant-UUID map simplified to gameId-keyed sessions in the App Group; the join API remains the seat arbiter and device restore preserves UserDefaults. Divergence noted against spec section 4a.
 - `MSMessage.url` doubles as the desktop/no-app fallback (opens the web game), which the spec listed as App Store install prompt only; strictly better, no spec change needed.
 - Caption for "moved" avoids opponent display names (Messages does not expose them to extensions); spec's example captions carried names of the mover, which the roundWon/gameWon captions still do.
 - Open in Capi uses the existing `capi://` scheme instead of the spec's universal link (the app declares no associatedDomains today); same handoff, zero new config.
 - The plugin hardcodes `MARKETING_VERSION 1.1.0` for the extension target; future version bumps must update it alongside app.json (called out here so it is not missed at 1.2).
 - Controller keeps `currentRef`/`currentSession` state because `conversation.selectedMessage` is nil immediately after a create; without it the creator's bubble refreshes would no-op (caught in self-review).
+- The bridge payload is `{type, myScore, oppScore}`, plus `iWon` on terminal events. Captions are chosen natively in `CapiStrings`, not passed from the web as a `captionKey`.
+- `moved` emits on server-confirmed plays and passes, while the phase is still playing. Terminal phases emit through the winner-gated roundOver/gameOver effects instead, so a losing iMessage player never posts a bubble.
+- The create card ships without color and theme pickers. avatarColor is a per-install random pick and theme is always barberia; both pickers are v1.2 candidates.
+- Embed mode hides waiting-room share chrome only. The game page already has no footer or language toggle, so the spec's compact-header and external-navigation-blocking ideas were not needed for v1: no external links exist on the page.
+- App Group identity is extension-only today. The RN app's AsyncStorage is not bridged to it, so sharing a nickname from app to extension is a signed-build matrix item and a v1.2 candidate.
+- Post-move auto-collapse tears down the webview; re-expanding reloads the page from scratch. Accepted v1 trade-off for making the staged bubble visible.
+- Known on-device matrix items: the second-game affordance when the extension process persists across activations (the drawer's live `currentRef` auto-resumes the last game), a true group-chat 2v2 picker, app-extension identity sharing on signed builds, and the memory ceiling under long live-watch.
