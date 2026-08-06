@@ -13,11 +13,18 @@ final class MessagesViewController: MSMessagesAppViewController {
     // The gameId currently mounted in the view, so showGame is idempotent
     // and render's early-return (below) doesn't rebuild the same webview.
     private var currentGameId: String?
+    // One-shot: set right before our own post-move requestPresentationStyle(.compact),
+    // so render's early-return (below) can tell that collapse apart from the
+    // user manually collapsing, and not fight it with an auto re-expand.
+    private var collapseRequested = false
 
     // MARK: presentation routing
 
     override func willBecomeActive(with conversation: MSConversation) {
         super.willBecomeActive(with: conversation)
+        // A fresh activation is never our own deferred collapse; reset so a
+        // swallowed flag can never eat a later legitimate bubble-tap expand.
+        collapseRequested = false
         render(for: conversation)
     }
 
@@ -32,11 +39,22 @@ final class MessagesViewController: MSMessagesAppViewController {
         // we already have a live session for the game in view, keep showing
         // it instead of re-deriving from the conversation. A tapped bubble
         // for a different game must win over the current one, and
-        // compact-only expansion avoids fighting the user's collapse.
+        // compact-only expansion avoids fighting the user's collapse. The
+        // collapseRequested one-shot flag tells our own post-move collapse
+        // apart from a user-initiated one, so only the latter auto-expands.
         let tappedId = conversation.selectedMessage.flatMap { GameRef(from: $0) }?.gameId
         if let ref = currentRef, tappedId == nil || tappedId == ref.gameId,
            let session = CapiStore.session(for: ref.gameId) {
-            if presentationStyle == .compact { requestPresentationStyle(.expanded) }
+            if presentationStyle == .compact {
+                if collapseRequested {
+                    // Our own post-move collapse: stay collapsed so the staged
+                    // bubble and its send arrow are what the user sees.
+                    collapseRequested = false
+                    clearChildren()
+                    return
+                }
+                requestPresentationStyle(.expanded)
+            }
             showGame(gameId: ref.gameId, session: session)
             return
         }
@@ -150,6 +168,7 @@ final class MessagesViewController: MSMessagesAppViewController {
         // makes Messages honor the request after the current transaction,
         // since a synchronous call here lands mid-transaction (during the
         // webview's touch handling) and gets silently ignored.
+        collapseRequested = true
         DispatchQueue.main.async { [weak self] in self?.requestPresentationStyle(.compact) }
     }
 
