@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Pressable, View, type ViewStyle } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop, G } from "react-native-svg";
 import type { Tile } from "@capi/engine";
-import { THEME } from "../theme";
+import { TileBack, useTileSkin } from "../lib/tileSkins";
 
 interface Props {
   tile: Tile;
@@ -32,7 +32,13 @@ const PIP_POSITIONS: Record<number, [number, number][]> = {
 // collide in the same SVG namespace.
 let pipGradientSeq = 0;
 
-function PipHalf({ pips }: { pips: number }) {
+function PipHalf({
+  pips,
+  stops,
+}: {
+  pips: number;
+  stops: [string, string, string];
+}) {
   const positions = PIP_POSITIONS[pips] ?? [];
   // Stable per-instance id across re-renders.
   const gradId = useRef(`pip-${pipGradientSeq++}`).current;
@@ -43,9 +49,9 @@ function PipHalf({ pips }: { pips: number }) {
             (where a real drilled hole shadows) with a faint lit rim, so pips
             read as carved into the tile rather than printed on it. */}
         <RadialGradient id={gradId} cx="38%" cy="34%" r="75%">
-          <Stop offset="0%" stopColor="#3a3a3a" />
-          <Stop offset="45%" stopColor="#1c1c1c" />
-          <Stop offset="100%" stopColor="#050505" />
+          <Stop offset="0%" stopColor={stops[0]} />
+          <Stop offset="45%" stopColor={stops[1]} />
+          <Stop offset="100%" stopColor={stops[2]} />
         </RadialGradient>
       </Defs>
       {positions.map(([cx, cy], i) => (
@@ -69,6 +75,7 @@ export default function TileDisplay({
   w,
   h,
 }: Props) {
+  const { skin } = useTileSkin();
   const isDouble = tile[0] === tile[1];
   const explicitSize = w !== undefined && h !== undefined;
   const width = explicitSize ? w! : small ? 36 : 44;
@@ -78,14 +85,10 @@ export default function TileDisplay({
     return (
       <View
         style={{
-          width,
-          height,
+          // Same rounded footprint as the back so the Android elevation
+          // outline and the iOS shadow shape match today's single-View back.
           borderRadius: 8,
-          backgroundColor: "#1e3a5f",
-          borderWidth: 2,
-          borderColor: "#0f1f35",
-          alignItems: "center",
-          justifyContent: "center",
+          backgroundColor: skin.back.bg,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.18,
@@ -93,24 +96,15 @@ export default function TileDisplay({
           elevation: 3,
         }}
       >
-        <View
-          style={{
-            width: small ? 20 : 28,
-            height: small ? 48 : 64,
-            borderRadius: 6,
-            borderWidth: 1,
-            borderColor: "rgba(42,90,140,0.3)",
-            backgroundColor: "rgba(42,90,140,0.2)",
-          }}
-        />
+        <TileBack skin={skin} width={width} height={height} />
       </View>
     );
   }
 
   // Border + face colors.
-  const faceColor = isDouble ? THEME.tileFaceDouble : THEME.tileFace;
+  const faceColor = isDouble ? skin.faceDouble : skin.face;
   const baseBorderWidth = isDouble ? 3 : 2;
-  const baseBorderColor = isDouble ? THEME.tileBorderDouble : THEME.tileBorder;
+  const baseBorderColor = isDouble ? skin.borderDouble : skin.border;
 
   let borderColor = baseBorderColor;
   const borderWidth = baseBorderWidth;
@@ -155,7 +149,7 @@ export default function TileDisplay({
 
   // Divider between the two pip halves.
   const dividerHeight = isDouble ? 2.5 : small ? 1.5 : 2;
-  const dividerColor = isDouble ? THEME.tileBorderDouble : "#b8a882";
+  const dividerColor = isDouble ? skin.dividerDouble : skin.divider;
 
   const tileBody = (
     <View
@@ -173,7 +167,7 @@ export default function TileDisplay({
       }}
     >
       <View style={{ flex: 1, width: "100%" }}>
-        <PipHalf pips={tile[0]} />
+        <PipHalf pips={tile[0]} stops={skin.pipTop} />
       </View>
 
       <View
@@ -182,10 +176,25 @@ export default function TileDisplay({
           height: dividerHeight,
           backgroundColor: dividerColor,
         }}
-      />
+      >
+        {skin.spinner && !small ? (
+          <View
+            style={{
+              position: "absolute",
+              top: (dividerHeight - 8) / 2,
+              left: "50%",
+              marginLeft: -4,
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: skin.spinner,
+            }}
+          />
+        ) : null}
+      </View>
 
       <View style={{ flex: 1, width: "100%" }}>
-        <PipHalf pips={tile[1]} />
+        <PipHalf pips={tile[1]} stops={skin.pipBottom} />
       </View>
     </View>
   );
