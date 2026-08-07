@@ -1206,6 +1206,7 @@ Use the loop from project memory (prebuild → xcodebuild → `xcrun simctl inst
 
 ---### Task 14: Deploy web + prod verification
 
+- [ ] PREREQUISITE (user action): supabase/migrations/002_premium_themes.sql has been pasted and run in the Supabase SQL Editor. The games table has `check (theme in ('barberia','colmado','patio'))` from 001_initial.sql, so premium-theme creates 500 until then (found by Task 11's agent). Verify with `curl -s -X POST https://playcapi.com/api/games -H 'Content-Type: application/json' -d '{"nickname":"T","theme":"quisqueya"}'` returning a gameId.
 - [ ] `git push origin main`; wait for the Vercel deploy (poll the landing chunk hash change).
 - [ ] Create one prod game per premium theme via `POST https://playcapi.com/api/games` with `{"nickname":"T","theme":"<id>"}`; open each in the browser pane; verify felts/watermarks/score bars, and `noche` readability. Verify a plain barberia game is unchanged (1.0 regression bar).
 - [ ] Verify one embed URL (`?embed=imessage&lang=es#s=<playerId>.<seat>`) on a `larimar` game: theme renders inside the embed chrome rules.
