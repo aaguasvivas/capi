@@ -34,7 +34,8 @@
     "plugins": [
       "expo-router",
       "./plugins/withFmtConstevalFix",
-      "./plugins/withMessagesExtension"
+      "./plugins/withMessagesExtension",
+      "expo-iap"
     ],
     "owner": "aaguasvivas",
     "extra": {
