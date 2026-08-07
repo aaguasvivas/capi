@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // chatReceive are synthesized with WebAudio oscillators. expo-av has no
 // synthesis, so those three are approximated by playing the bundled slam
 // asset at a different rate/volume (pitch shifts with rate on purpose).
-// The rates/volumes below are a first pass — tune on device.
+// The rates/volumes below are a first pass; tune on device.
 
 const MUTE_KEY = "capi_muted";
 

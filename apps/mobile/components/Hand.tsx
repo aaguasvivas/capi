@@ -121,7 +121,7 @@ export default function Hand({
           gap: 6,
           paddingHorizontal: 8,
           // Headroom for raised tiles: selected lifts -8 (+ scale overflow),
-          // playable lifts -2 — without this the tile tops clip at the
+          // playable lifts -2; without this the tile tops clip at the
           // ScrollView edge.
           paddingTop: 12,
           paddingBottom: 2,

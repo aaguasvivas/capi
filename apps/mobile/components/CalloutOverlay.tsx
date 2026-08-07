@@ -140,7 +140,7 @@ export function CalloutOverlay({
 }
 
 // ─── Mid-round VEINTICINCO banner ────────────────────────────────────────────
-// Non-blocking, auto-dismissing. The round continues underneath — the forcer
+// Non-blocking, auto-dismissing. The round continues underneath; the forcer
 // needs the board free to play their next tile.
 
 export function VeinticincoBanner({

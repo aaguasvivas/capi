@@ -31,7 +31,7 @@ export default function QuickChat({ onSend }: QuickChatProps) {
   }
 
   // The tray sits in normal flow above the button (the whole component is
-  // bottom-anchored by the screen), not position:absolute — RN drops touches
+  // bottom-anchored by the screen), not position:absolute, because RN drops touches
   // that land outside the parent's bounds, so an absolute tray would be
   // visible but untappable.
   return (

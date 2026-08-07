@@ -10,14 +10,14 @@ interface Props {
   currentTurn: string;
   mySeat: string;
   is2v2?: boolean;
-  /** Panel background — themed per table; defaults to the static barberia THEME. */
+  /** Panel background, themed per table; defaults to the static barberia THEME. */
   bg?: string;
-  /** Text color for names/scores — themed per table. */
+  /** Text color for names/scores, themed per table. */
   textColor?: string;
 }
 
 /**
- * Score number that pops when its value changes — makes mid-round bonuses
+ * Score number that pops when its value changes, making mid-round bonuses
  * (VEINTICINCO +25) visible even if the banner is missed.
  */
 function ScoreValue({
@@ -324,7 +324,7 @@ function TeamScore({
       style={{
         // flex: 1 caps each team at half the free width so long name pairs
         // shrink (ellipsize) instead of shoving the far avatar off-screen at
-        // SE width — and keeps the center target truly centered.
+        // SE width, and keeps the center target truly centered.
         flex: 1,
         flexDirection: align === "right" ? "row-reverse" : "row",
         alignItems: "center",

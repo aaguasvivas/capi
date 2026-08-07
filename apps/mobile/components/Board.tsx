@@ -128,7 +128,7 @@ export default function Board({ board, endsGlow }: Props) {
   }, [board]);
 
   // Auto-scroll to keep the latest played tile in view. Only fires when the
-  // tile count grows — not on resize, not on round resets.
+  // tile count grows, not on resize, not on round resets.
   useEffect(() => {
     if (layout.placements.length === 0 || !grew) return;
 
@@ -191,7 +191,7 @@ export default function Board({ board, endsGlow }: Props) {
               const isEnd =
                 !!endsGlow && (i === 0 || i === layout.placements.length - 1);
               // Center the tile's UNROTATED TW×TH box on the engine's anchor
-              // (p.x, p.y) via left/top, then rotate — RN rotates a view about
+              // (p.x, p.y) via left/top, then rotate. RN rotates a view about
               // its own center, so the visual center stays exactly on the
               // anchor for every rotation. (Do NOT translate by the rotated
               // half-extents here: RN's translateX/Y move the unrotated box,

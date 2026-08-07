@@ -141,7 +141,7 @@ export default function GameScreen() {
     prevBoardLenRef.current = len;
   }, [gameState]);
 
-  // Callout fanfare — fires for the mid-round banner and the overlay alike.
+  // Callout fanfare, fired for the mid-round banner and the overlay alike.
   useEffect(() => {
     if (lastCallout) playCallout();
   }, [lastCallout]);
@@ -226,7 +226,7 @@ export default function GameScreen() {
       });
       if (!res.ok) {
         // 409 = another player already advanced (or stale snapshot). That's a
-        // success from the user's perspective — just resync.
+        // success from the user's perspective, so just resync.
         if (res.status === 409) {
           await refetch();
         }
@@ -235,7 +235,7 @@ export default function GameScreen() {
         await refetch();
       }
     } catch {
-      /* connection error — overlay stays, realtime resyncs */
+      /* connection error: overlay stays, realtime resyncs */
     } finally {
       setNextRoundLoading(false);
     }
@@ -374,7 +374,7 @@ export default function GameScreen() {
               </Text>
             ) : null}
 
-            {/* Seat slots — one row in 1v1, 2×2 grid in 2v2 */}
+            {/* Seat slots: one row in 1v1, 2×2 grid in 2v2 */}
             <View
               style={{
                 flexDirection: "row",
@@ -576,7 +576,7 @@ export default function GameScreen() {
     : topPlayer?.nickname ?? s.opponent;
 
   // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
-  // trancao carries pts) and who they went to — headlined in the round-over
+  // trancao carries pts) and who they went to, headlined in the round-over
   // modal so the pips table can't be misread as the score.
   const roundAward =
     (typeof payload?.pipsAwarded === "number"
@@ -635,14 +635,14 @@ export default function GameScreen() {
         </View>
       ) : null}
 
-      {/* Felt game area — vertical gradient approximates the web's radial
+      {/* Felt game area. The vertical gradient approximates the web's radial
           light pool (center glow fading to dark edges) */}
       <LinearGradient
         colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
         locations={[0, 0.55, 1]}
         style={{ flex: 1 }}
       >
-        {/* Table watermark — behind the board and all floating UI */}
+        {/* Table watermark, behind the board and all floating UI */}
         <View
           pointerEvents="none"
           style={{
@@ -704,7 +704,7 @@ export default function GameScreen() {
           />
         </View>
 
-        {/* QuickChat toggle — floats bottom-left of the felt */}
+        {/* QuickChat toggle, floating bottom-left of the felt */}
         {!isGameEnded ? (
           <View
             style={{ position: "absolute", left: 8, bottom: 8, zIndex: 3 }}
@@ -713,7 +713,7 @@ export default function GameScreen() {
           </View>
         ) : null}
 
-        {/* My chat bubbles — above the QuickChat button */}
+        {/* My chat bubbles, above the QuickChat button */}
         <View
           pointerEvents="none"
           style={{
@@ -736,7 +736,7 @@ export default function GameScreen() {
           ))}
         </View>
 
-        {/* Opponent chat bubbles — under the opponent hand row */}
+        {/* Opponent chat bubbles, under the opponent hand row */}
         <View
           pointerEvents="none"
           style={{
@@ -761,7 +761,7 @@ export default function GameScreen() {
           })}
         </View>
 
-        {/* Top hand row (face-down) — partner in 2v2, opponent in 1v1 */}
+        {/* Top hand row (face-down): partner in 2v2, opponent in 1v1 */}
         {!isGameEnded ? (
           <View style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }}>
             <View
@@ -805,7 +805,7 @@ export default function GameScreen() {
                   {s.tileCount(topHand.length)}
                 </Text>
               </View>
-              {/* Boneyard indicator — 1v1 only (2v2 deals all 28 tiles) */}
+              {/* Boneyard indicator, 1v1 only (2v2 deals all 28 tiles) */}
               {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 ? (
                 <Text
                   style={{
@@ -833,7 +833,7 @@ export default function GameScreen() {
           </View>
         ) : null}
 
-        {/* Board — flanked by opponent side rails in 2v2 */}
+        {/* Board, flanked by opponent side rails in 2v2 */}
         {is2v2 && !isGameEnded ? (
           <View style={{ flex: 1, flexDirection: "row" }}>
             <SideRail
@@ -881,7 +881,7 @@ export default function GameScreen() {
                 {iWonRound ? s.wonRound : s.lostRound}
               </Text>
 
-              {/* Points awarded — the headline. Without it the pips table
+              {/* Points awarded, the headline. Without it the pips table
                   below reads like a scoreboard and the loser's counted pips
                   look like points credited to the loser. */}
               <View style={{ alignItems: "center" }}>
@@ -1175,7 +1175,7 @@ function ChatBubble({
 }
 
 // Narrow column flanking the board in 2v2: opponent avatar (turn ring when
-// active), name, and a tile-count chip — their hand stays hidden.
+// active), name, and a tile-count chip. Their hand stays hidden.
 function SideRail({
   player,
   isActive,
