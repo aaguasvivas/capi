@@ -106,14 +106,17 @@ default set in 1.1.
 - `borinquen`: white faces, red pips, navy divider; back is navy with a centered
   PR flag patch (three red stripes, two white, equilateral navy triangle
   reaching past the stripes' midpoint, white star at the triangle centroid).
-- `kingston`: black faces, gold pips, green divider; back is the full-bleed
-  Jamaican flag in reference colors (green #008049 triangles top and bottom,
-  black #2b2622 sides, gold #fcb422 saltire corner to corner, band about one
-  fifth of tile width).
+- `kingston`: black faces, gold pips (#fed100), green divider (#009b3a); back
+  is near-black with a centered true-proportion landscape flag patch inside a
+  thin gold frame: green triangles top and bottom, black hoist and fly, gold
+  saltire corner to corner with band width about one sixth of the patch height.
 
 Flag accuracy is a hard requirement; renders were visually approved against
-references on 2026-08-07 (Jamaica corrected once: green top/bottom, never on
-the sides).
+user-supplied references on 2026-08-07. Rule learned twice on Jamaica: never
+stretch a flag to the tile's aspect ratio. Distorting the saltire angle and
+triangle proportions reads as wrong even with correct colors, so non-quadrant
+flags (Borinquen, Kingston) render as true-proportion patches; only the
+quadrant-based DR flag survives full-bleed.
 
 ## Platform architecture summary
 
