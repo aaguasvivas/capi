@@ -1065,7 +1065,7 @@ export default function GameScreen() {
               style={{
                 fontSize: 11,
                 fontWeight: "600",
-                color: "#6b7280",
+                color: palette.handText,
                 textTransform: "uppercase",
                 letterSpacing: 1,
               }}
