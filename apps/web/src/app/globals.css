@@ -51,6 +51,51 @@
   --hand-bg: #e0ceb8;
 }
 
+/* ── Quisqueya ────────────────────────────────────────────
+   Deep navy felt with gold piping. The flag is a whisper,
+   not a shout: the fichas are the show.
+   ──────────────────────────────────────────────────────── */
+[data-theme="quisqueya"] {
+  --board-bg: #0f2b56;
+  --board-felt: #1d4380;
+  --page-bg: #eef1f6;
+  --score-bg: #0a1f3f;
+  --score-text: #eef1f6;
+  --accent: #c9a227;
+  --accent-light: #e0bf4d;
+  --hand-bg: #e2e8f2;
+}
+
+/* ── Larimar ──────────────────────────────────────────────
+   The blue-green of the national stone. Calm, elegant,
+   unmistakably Dominican.
+   ──────────────────────────────────────────────────────── */
+[data-theme="larimar"] {
+  --board-bg: #17606f;
+  --board-felt: #2a7d8e;
+  --page-bg: #e9f2f3;
+  --score-bg: #0d3d47;
+  --score-text: #e9f2f3;
+  --accent: #58b7c4;
+  --accent-light: #7fd0da;
+  --hand-bg: #d9e9eb;
+}
+
+/* ── Capi Noche ───────────────────────────────────────────
+   Near-black indigo felt, neon ring, gold details.
+   The brand premium table.
+   ──────────────────────────────────────────────────────── */
+[data-theme="noche"] {
+  --board-bg: #131329;
+  --board-felt: #23234a;
+  --page-bg: #15152b;
+  --score-bg: #0a0a18;
+  --score-text: #e6e6f5;
+  --accent: #6366f1;
+  --accent-light: #8b8df5;
+  --hand-bg: #1d1d3a;
+}
+
 /* ── Page background patterns ─────────────────────────── */
 
 /* Barbería: barber-pole diagonal stripes on cream walls */
@@ -85,6 +130,38 @@
     linear-gradient(rgba(120, 70, 30, 0.10) 1px, transparent 1px),
     linear-gradient(90deg, rgba(120, 70, 30, 0.10) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+/* Quisqueya: gold piping diagonals on pale blue walls */
+[data-theme="quisqueya"].theme-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 26px,
+    rgba(201, 162, 39, 0.07) 26px,
+    rgba(201, 162, 39, 0.07) 28px
+  );
+}
+
+/* Larimar: horizontal water lines on pale aqua walls */
+[data-theme="larimar"].theme-pattern {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 18px,
+    rgba(23, 96, 111, 0.08) 18px,
+    rgba(23, 96, 111, 0.08) 20px
+  );
+}
+
+/* Capi Noche: faint gold starfield on dark indigo */
+[data-theme="noche"].theme-pattern {
+  background-image: radial-gradient(
+    circle,
+    rgba(212, 175, 55, 0.06) 1px,
+    transparent 1px
+  );
+  background-size: 26px 26px;
 }
 
 /* ── Board surface textures (with built-in vignette lighting) ── */
@@ -157,6 +234,33 @@
   background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
 }
 
+/* Quisqueya: navy felt - lit center pool, dark edges, felt nap on top */
+[data-theme="quisqueya"] .theme-felt {
+  background-color: #0f2b56;
+  background-image:
+    var(--felt-grain),
+    radial-gradient(ellipse at 50% 40%, #1d4380 0%, #0f2b56 52%, #081a38 100%);
+  background-size: 160px 160px, 100% 100%;
+}
+
+/* Larimar: blue-green felt - lit center pool, dark edges, felt nap on top */
+[data-theme="larimar"] .theme-felt {
+  background-color: #17606f;
+  background-image:
+    var(--felt-grain),
+    radial-gradient(ellipse at 50% 40%, #2a7d8e 0%, #17606f 52%, #0d3d47 100%);
+  background-size: 160px 160px, 100% 100%;
+}
+
+/* Capi Noche: near-black indigo felt - lit center pool, felt nap on top */
+[data-theme="noche"] .theme-felt {
+  background-color: #131329;
+  background-image:
+    var(--felt-grain),
+    radial-gradient(ellipse at 50% 40%, #23234a 0%, #131329 52%, #0a0a18 100%);
+  background-size: 160px 160px, 100% 100%;
+}
+
 /* ── Light temperature overlays ───────────────────────── */
 
 /* Barbería: cool fluorescent tube tint */
@@ -183,6 +287,33 @@
     ellipse at 55% 40%,
     rgba(255, 235, 180, 0.05) 0%,
     rgba(25, 20, 10, 0.10) 100%
+  );
+}
+
+/* Quisqueya: cool evening blue tint */
+[data-theme="quisqueya"] .theme-light {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(200, 215, 245, 0.04) 0%,
+    rgba(3, 8, 22, 0.14) 100%
+  );
+}
+
+/* Larimar: soft aqua daylight tint */
+[data-theme="larimar"] .theme-light {
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    rgba(215, 240, 244, 0.05) 0%,
+    rgba(4, 18, 22, 0.13) 100%
+  );
+}
+
+/* Capi Noche: indigo neon glow tint */
+[data-theme="noche"] .theme-light {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(139, 141, 245, 0.05) 0%,
+    rgba(4, 4, 12, 0.20) 100%
   );
 }
 
@@ -214,6 +345,33 @@
     linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
+}
+
+/* Quisqueya: navy felt bleeds to the table edge */
+[data-theme="quisqueya"] .theme-hand-texture {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(15, 43, 86, 0.06) 0%,
+    transparent 50%
+  );
+}
+
+/* Larimar: blue-green felt bleeds to the table edge */
+[data-theme="larimar"] .theme-hand-texture {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(23, 96, 111, 0.07) 0%,
+    transparent 50%
+  );
+}
+
+/* Capi Noche: indigo felt bleeds to the table edge */
+[data-theme="noche"] .theme-hand-texture {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.06) 0%,
+    transparent 50%
+  );
 }
 
 /* ── Mobile responsiveness ────────────────────────────── */

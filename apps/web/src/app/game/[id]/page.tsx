@@ -711,6 +711,9 @@ function GameContent() {
               {gameState.theme === "barberia" && "BARBERÍA DON RAMÓN"}
               {gameState.theme === "colmado" && "COLMADO LA ESQUINA"}
               {gameState.theme === "patio" && "EL PATIO DE TÍA"}
+              {gameState.theme === "quisqueya" && "QUISQUEYA LA BELLA"}
+              {gameState.theme === "larimar" && "LARIMAR"}
+              {gameState.theme === "noche" && "CAPI NOCHE"}
             </p>
           </div>
 

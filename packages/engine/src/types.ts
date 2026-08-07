@@ -5,7 +5,13 @@ export type Tile = [Pip, Pip];
 
 export type Seat = "n" | "e" | "s" | "w";
 export type GameMode = "live" | "turn_based";
-export type Theme = "barberia" | "colmado" | "patio";
+export type Theme =
+  | "barberia"
+  | "colmado"
+  | "patio"
+  | "quisqueya"
+  | "larimar"
+  | "noche";
 
 export type CalloutType = "domino" | "trancao" | "capicua" | "veinticinco";
 
