@@ -31,6 +31,31 @@ export interface Strings {
   themeBarrio: string;
   themeOutdoors: string;
 
+  // Store / IAP
+  store: string;
+  owned: string;
+  restorePurchases: string;
+  restoreDone: (n: number) => string;
+  purchaseFailed: string;
+  removeAdsTitle: string;
+  removeAdsDesc: string;
+  todoCapiTitle: string;
+  todoCapiDesc: string;
+  privacyPolicy: string;
+  fichasLabel: string;
+  // Premium theme names + descs
+  themeQuisqueya: string;
+  themeQuisqueyaDesc: string;
+  themeLarimar: string;
+  themeLarimarDesc: string;
+  themeNoche: string;
+  themeNocheDesc: string;
+  fichasClasico: string;
+  fichasClasicoDesc: string;
+  fichasQuisqueyaDesc: string;
+  fichasBorinquenDesc: string;
+  fichasKingstonDesc: string;
+
   // Waiting room
   waitingForPlayers: (n: number) => string;
   preparing: string;
@@ -160,6 +185,29 @@ export const es: Strings = {
   themeBarrio: "Del barrio",
   themeOutdoors: "Al aire libre",
 
+  store: "Tienda",
+  owned: "Tuyo",
+  restorePurchases: "Restaurar compras",
+  restoreDone: (n) => (n > 0 ? "Compras restauradas" : "No hay compras que restaurar"),
+  purchaseFailed: "No se pudo completar la compra",
+  removeAdsTitle: "Quitar anuncios",
+  removeAdsDesc: "Sin anuncios para siempre",
+  todoCapiTitle: "Todo Capi",
+  todoCapiDesc: "Quita los anuncios y desbloquea los 6 diseños",
+  privacyPolicy: "Política de privacidad",
+  fichasLabel: "Fichas",
+  themeQuisqueya: "Quisqueya",
+  themeQuisqueyaDesc: "Azul y oro",
+  themeLarimar: "Larimar",
+  themeLarimarDesc: "Piedra nacional",
+  themeNoche: "Capi Noche",
+  themeNocheDesc: "Neón y oro",
+  fichasClasico: "Clásico",
+  fichasClasicoDesc: "El de siempre",
+  fichasQuisqueyaDesc: "Bandera RD",
+  fichasBorinquenDesc: "Bandera PR",
+  fichasKingstonDesc: "Bandera JM",
+
   waitingForPlayers: (n) => `Esperando ${n} jugador${n !== 1 ? "es" : ""}…`,
   preparing: "Preparando…",
   shareLink: "Comparte este enlace:",
@@ -273,6 +321,29 @@ export const en: Strings = {
   themeClassic: "The classic",
   themeBarrio: "From the block",
   themeOutdoors: "Outside vibes",
+
+  store: "Store",
+  owned: "Owned",
+  restorePurchases: "Restore Purchases",
+  restoreDone: (n) => (n > 0 ? "Purchases restored" : "No purchases to restore"),
+  purchaseFailed: "Purchase could not be completed",
+  removeAdsTitle: "Remove Ads",
+  removeAdsDesc: "No more banner ads, forever",
+  todoCapiTitle: "All of Capi",
+  todoCapiDesc: "Removes ads and unlocks all 6 designs",
+  privacyPolicy: "Privacy Policy",
+  fichasLabel: "Tiles",
+  themeQuisqueya: "Quisqueya",
+  themeQuisqueyaDesc: "Navy and gold",
+  themeLarimar: "Larimar",
+  themeLarimarDesc: "The national stone",
+  themeNoche: "Capi Noche",
+  themeNocheDesc: "Neon and gold",
+  fichasClasico: "Classic",
+  fichasClasicoDesc: "The original",
+  fichasQuisqueyaDesc: "DR flag",
+  fichasBorinquenDesc: "PR flag",
+  fichasKingstonDesc: "JM flag",
 
   waitingForPlayers: (n) => `Waiting on ${n} more…`,
   preparing: "Hold on…",
