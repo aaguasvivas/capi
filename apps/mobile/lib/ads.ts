@@ -60,7 +60,14 @@ async function start(): Promise<boolean> {
     // UMP fetches consent requirements from Google. On filtered or slow
     // networks (App Review environments included) this can stall; a stall
     // must not stop the ATT prompt from appearing.
-    await withTimeout(AdsConsent.gatherConsent(), 15000);
+    // Dev builds run Google's SAMPLE app id, which has no UMP configuration:
+    // gatherConsent presents an EMPTY native form that never loads and eats
+    // every touch (the JS timeout cannot dismiss a presented sheet). Skip
+    // consent in dev; ATT and initialize below still run. Production (real
+    // app id) keeps the full flow.
+    if (!__DEV__) {
+      await withTimeout(AdsConsent.gatherConsent(), 15000);
+    }
   } catch {
     // Consent info unavailable (offline, blocked, or no UMP message). Outside
     // the EEA ads may still serve, so fall through and let the canRequestAds
