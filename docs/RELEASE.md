@@ -29,7 +29,9 @@ eas build --platform ios --profile production   # EAS-managed certs for dev.capi
 eas submit --platform ios                       # uploads to App Store Connect + TestFlight
 ```
 
-Version 1.1 ships a Messages extension (CapiMessages, bundle id dev.capi.app.messages) as a companion play surface that uses the same server, same predefined-only chat rules, and no new data collection. For App Review, the extension is not a separate game but an additional client to the existing multiplayer game. Reviewers can test from the Messages sandbox on simulator or device by creating a game from the app drawer and joining as player 2 from a browser at playcapi.com.
+Version 1.1 ships three things in one review: the Messages extension (CapiMessages, bundle id dev.capi.app.messages), AdMob ads (one banner, home screen and waiting room only, UMP consent + ATT), and the first IAP catalog (8 non-consumables: Remove Ads, 3 premium tables, 3 tile designs, the Todo Capi bundle; Restore Purchases in the store sheet). For App Review, the extension is not a separate game but an additional client to the existing multiplayer game. Reviewers can test from the Messages sandbox on simulator or device by creating a game from the app drawer and joining as player 2 from a browser at playcapi.com. The step-by-step 1.1 submission runbook lives in docs/m5-submission-checklist.md; the ASC purchase setup table is docs/m5-asc-iap-setup.md.
+
+Two hard version rules from M5: expo-iap stays pinned at exactly 2.6.3 (2.7.0+ needs Kotlin 2.1 and breaks the SDK 52 Android build; react-native-iap@13.0.4 in STOREKIT2_MODE is the documented fallback), and no production build may ship while apps/mobile still contains the sample AdMob app id (3940256099942544) or the PENDING_ADMOB banner unit sentinel; grep for both before every EAS production build.
 
 The extension's MARKETING_VERSION and CURRENT_PROJECT_VERSION come from the resolved Expo config in plugins/withMessagesExtension.js (config.version and config.ios.buildNumber), not from hardcoded values. Version bumps happen in app.json only, and EAS remote build numbers flow into both the app and the appex automatically.
 
