@@ -20,6 +20,7 @@ import {
   useRealtimeGame,
   type ChatMessage,
 } from "../../hooks/useRealtimeGame";
+import AdBanner from "../../components/AdBanner";
 import Board from "../../components/Board";
 import BugReportButton from "../../components/BugReportButton";
 import Hand from "../../components/Hand";
@@ -518,6 +519,9 @@ export default function GameScreen() {
             </Text>
           </View>
         </View>
+        {/* Waiting room is a calm screen; the active game below never gets
+            a banner. */}
+        <AdBanner />
       </SafeAreaView>
     );
   }
