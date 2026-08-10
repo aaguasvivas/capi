@@ -67,6 +67,11 @@ async function start(): Promise<boolean> {
     // app id) keeps the full flow.
     if (!__DEV__) {
       await withTimeout(AdsConsent.gatherConsent(), 15000);
+    } else {
+      // With consent skipped, UMP reports canRequestAds=false without any
+      // error; mark the flow as errored so the fail-open rule below still
+      // initializes test ads in dev.
+      consentErrored = true;
     }
   } catch {
     // Consent info unavailable (offline, blocked, or no UMP message). Outside
