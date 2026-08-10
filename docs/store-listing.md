@@ -184,7 +184,7 @@ Gratis. Descarga Capi y dile a tu gente que llegue.
 **Apple 4+ / Google Play "Everyone".** No objectionable content: no violence, profanity, sexual or suggestive content; no gambling or simulated gambling (points only, no wagers, no currency, no prizes); no ads; no purchases in v1; no web browsing inside the app. Multiplayer interaction exists but is strictly bounded: in-game communication is a fixed set of predefined Dominican phrases and emotes, there is no free-text chat, and the only free text a user ever enters is their own nickname. Games are private tables joined by 6-letter invite code; there is no public matchmaking and no open lobby. Answer the interaction questions truthfully (users can interact online) and the communication questions as predefined-only.
 
 ## Apple Guideline 4.2 (minimum functionality), App Review note
-> Capi is a complete real-time online multiplayer game of Dominican dominoes, built natively with React Native and Expo. It is not a thin wrapper of the playcapi.com website: the app ships the full native game client (native board rendering with an auto-scaling snake layout, tile animations, haptic feedback, tile slam audio, safe-area layouts, persisted language and sound preferences), and it talks to the same server API and realtime channels as the web client, so app users and browser users can sit at the same table. The rules engine is server-authoritative: every move is validated on the server before it is applied, which prevents cheating. Gameplay implements the authentic Dominican ruleset: the capicúa bonus, tranque resolved by pip count, a 25-point award for making every opponent pass, and full-table pip scoring when a player dominates the round, in both 1v1 and 2v2 partner modes. Safety: there is no free-text chat; in-game communication is limited to a fixed set of predefined phrases and emotes, and the only free text a user enters is a nickname. Games are private, joined only by 6-letter invite codes shared between friends; there is no public matchmaking, no gambling or wagering, no ads, and no purchases. No account is required and gameplay data is not linked to user identity. To test: create a game with any nickname on one device, then join with the invite code from a second device or from a browser at playcapi.com.
+> Capi is a complete real-time online multiplayer game of Dominican dominoes, built natively with React Native and Expo. It is not a thin wrapper of the playcapi.com website: the app ships the full native game client (native board rendering with an auto-scaling snake layout, tile animations, haptic feedback, tile slam audio, safe-area layouts, persisted language and sound preferences), and it talks to the same server API and realtime channels as the web client, so app users and browser users can sit at the same table. The rules engine is server-authoritative: every move is validated on the server before it is applied, which prevents cheating. Gameplay implements the authentic Dominican ruleset: the capicúa bonus, tranque resolved by pip count, a 25-point award for making every opponent pass, and full-table pip scoring when a player dominates the round, in both 1v1 and 2v2 partner modes. Safety: there is no free-text chat; in-game communication is limited to a fixed set of predefined phrases and emotes, and the only free text a user enters is a nickname. Games are private, joined only by 6-letter invite codes shared between friends; there is no public matchmaking and no gambling or wagering. Version 1.1 adds an iMessage app extension (start a game from Messages: the invite is a bubble and the expanded view embeds the playcapi.com game page with the same private session), optional non-consumable in-app purchases (cosmetic table and tile designs, Remove Ads, and an everything bundle, with a Restore Purchases button in the in-app store), and a single AdMob banner shown only on the home screen and the waiting room, never during gameplay. Ads use Google UMP consent plus App Tracking Transparency, and purchasing Remove Ads or the bundle disables the ads SDK entirely. No account is required and gameplay data is not linked to user identity. To test: create a game with any nickname on one device, then join with the invite code from a second device or from a browser at playcapi.com; cosmetics can be reviewed via the store sheet on the home screen.
 
 ## Reminders before submitting
 - App Store device availability: iPhone only (app.json `supportsTablet: false`, portrait). Do not market iPad support.
@@ -216,9 +216,23 @@ Capi 1.0, la primera mano. Dominó dominicano de verdad con tu gente: capicúa, 
 **English:**
 ```
 Capi now lives in iMessage. Start a game right from your group chat: the invite is a bubble, turns update in the thread, and if you both stay at the table you watch every tile land live. 1v1 or 2v2 con tu frente.
+
+Also new, the Capi shop:
+• Three premium tables: Quisqueya, Larimar and Capi Noche
+• Three domino designs with flag backs: RD, PR and Jamaica
+• Todo Capi unlocks everything, and Remove Ads keeps the table clean
+
+A small banner may appear on the home screen. Never during a game, that is sacred.
 ```
 
 **Español:**
 ```
 Capi ahora vive en iMessage. Empieza la partida desde el chat: la invitación es una burbuja, los turnos se actualizan en el hilo, y si se quedan en la mesa ven caer cada ficha en vivo. 1v1 o 2v2 con tu frente.
+
+También nueva, la tienda de Capi:
+• Tres mesas premium: Quisqueya, Larimar y Capi Noche
+• Tres diseños de fichas con banderas: RD, PR y Jamaica
+• Todo Capi lo desbloquea todo, y Quitar anuncios deja la mesa limpia
+
+Puede salir un banner pequeño en la pantalla de inicio. Nunca durante la partida, eso es sagrado.
 ```
