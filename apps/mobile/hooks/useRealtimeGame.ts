@@ -3,8 +3,14 @@ import { AppState } from "react-native";
 import { supabase } from "../lib/supabase";
 import { API_BASE } from "../theme";
 import type { GameState, Tile, Seat } from "@capi/engine";
-import { getNextSeat } from "@capi/engine";
+import { getNextSeat, placeTileOnBoard, removeTileFromHand } from "@capi/engine";
+import { errorKeyFor, normalizeChatPayload, type ErrorKey } from "@capi/i18n";
 import type { PlayerSession } from "../lib/session";
+
+export type ConnectionState = "live" | "reconnecting" | "offline";
+
+// Fallback cadence while realtime is down or the table is still forming.
+const POLL_INTERVAL_MS = 10_000;
 
 interface PlayerRecord {
   id: string;
@@ -36,36 +42,6 @@ interface ChatBroadcastPayload {
   payload: string;
 }
 
-function tileEqual(a: Tile, b: Tile): boolean {
-  return (
-    (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])
-  );
-}
-
-function placeTileOnBoard(
-  board: Tile[],
-  tile: Tile,
-  end: "left" | "right"
-): Tile[] {
-  const [a, b] = tile;
-  if (board.length === 0) return [[a, b]];
-  if (end === "left") {
-    const leftEnd = board[0][0];
-    const match = a === leftEnd ? b : a;
-    return [[match, leftEnd] as Tile, ...board];
-  } else {
-    const rightEnd = board[board.length - 1][1];
-    const match = a === rightEnd ? b : a;
-    return [...board, [rightEnd, match] as Tile];
-  }
-}
-
-function removeTileFromHand(hand: Tile[], tile: Tile): Tile[] {
-  const idx = hand.findIndex((t) => tileEqual(t, tile));
-  if (idx < 0) return hand;
-  return [...hand.slice(0, idx), ...hand.slice(idx + 1)];
-}
-
 export function useRealtimeGame(
   gameId: string,
   session: PlayerSession | null
@@ -74,7 +50,12 @@ export function useRealtimeGame(
   const [players, setPlayers] = useState<PlayerRecord[]>([]);
   const [stateVersion, setStateVersion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Errors travel as string keys so the screen renders them in the player's
+  // language (see errors.ts in @capi/i18n).
+  const [errorKey, setErrorKey] = useState<ErrorKey | null>(null);
+  const [connection, setConnection] = useState<ConnectionState>("live");
+  // Seats currently connected to the table, from channel presence.
+  const [presence, setPresence] = useState<Partial<Record<Seat, boolean>>>({});
   const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
@@ -87,10 +68,20 @@ export function useRealtimeGame(
   const versionRef = useRef(stateVersion);
   versionRef.current = stateVersion;
 
+  // Lets fetchGame tell a first load apart from a background refetch without
+  // depending on gameState (which would re-run every effect built on it).
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+
+  // The game this render belongs to. Async work compares against it so a
+  // response for a game the screen already left never lands in the next one.
+  const activeGameRef = useRef(gameId);
+  activeGameRef.current = gameId;
+
   const preOptimisticRef = useRef<GameState | null>(null);
 
   // A move POST currently awaiting its response. Blocks duplicate
-  // submissions (double-clicks / button mashing) — the server's optimistic
+  // submissions (double-taps / button mashing). The server's optimistic
   // lock would reject them anyway, but this avoids the churn and the
   // confusing error flash.
   const moveInFlightRef = useRef(false);
@@ -109,6 +100,35 @@ export function useRealtimeGame(
   const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
     null
   );
+
+  // Everything above is per game. Expo Router can swap the id in place, so
+  // when it changes drop the previous game before any effect for the new one
+  // runs. Resetting during render is React's documented way to reset state on
+  // a prop change; the refs are cleared alongside.
+  const [renderedGameId, setRenderedGameId] = useState(gameId);
+  if (renderedGameId !== gameId) {
+    setRenderedGameId(gameId);
+    setGameState(null);
+    setPlayers([]);
+    setStateVersion(0);
+    setLoading(true);
+    setErrorKey(null);
+    setConnection("live");
+    setPresence({});
+    setGameSettings(null);
+    setInviteCode(null);
+    setLastCallout(null);
+    setLastCalloutPayload(null);
+    setChatMessages([]);
+    preOptimisticRef.current = null;
+    moveInFlightRef.current = false;
+    calloutVersionRef.current = 0;
+    dismissedCalloutVersionRef.current = 0;
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+  }
 
   const surfaceCallout = useCallback(
     (
@@ -129,11 +149,11 @@ export function useRealtimeGame(
     []
   );
 
-  const showTransientError = useCallback((message: string) => {
+  const showTransientError = useCallback((key: ErrorKey) => {
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
-    setError(message);
+    setErrorKey(key);
     errorTimerRef.current = setTimeout(() => {
-      setError(null);
+      setErrorKey(null);
       errorTimerRef.current = null;
     }, 3500);
   }, []);
@@ -144,17 +164,31 @@ export function useRealtimeGame(
     };
   }, []);
 
+  // Adopts a server-confirmed state. versionRef is bumped right away so the
+  // version guards and the next move POST see it before React re-renders.
+  const adoptState = useCallback((gs: GameState | null, sv: number) => {
+    preOptimisticRef.current = null;
+    versionRef.current = sv;
+    setGameState(gs);
+    setStateVersion(sv);
+  }, []);
+
   const fetchGame = useCallback(async () => {
+    const stale = () => activeGameRef.current !== gameId;
+    const fail = (sticky: ErrorKey) => {
+      // With a board on screen a failed refetch is a blip, not a dead end.
+      if (gameStateRef.current) showTransientError("connectionError");
+      else setErrorKey(sticky);
+    };
     try {
       const res = await fetch(`${API_BASE}/api/games/${gameId}`, { cache: "no-store" });
+      if (stale()) return;
       if (!res.ok) {
-        setError("Game not found");
+        fail("gameNotFound");
         return;
       }
       const data = await res.json();
-      const gs = data.game.game_state as GameState | null;
-      setGameState(gs);
-      setStateVersion(data.game.state_version);
+      if (stale()) return;
       setPlayers(data.players);
       if (data.game.settings) {
         setGameSettings(data.game.settings);
@@ -162,18 +196,21 @@ export function useRealtimeGame(
       if (data.game.invite_code) {
         setInviteCode(data.game.invite_code as string);
       }
-      setError(null);
-      surfaceCallout(
-        gs?.lastCallout,
-        gs?.lastCalloutPayload,
-        data.game.state_version
-      );
+      setErrorKey(null);
+      // Versions only move forward. Equal is applied too: the fetch is the
+      // truth, and replaces an optimistic preview at the same version.
+      const sv = data.game.state_version as number;
+      if (sv >= versionRef.current) {
+        const gs = data.game.game_state as GameState | null;
+        adoptState(gs, sv);
+        surfaceCallout(gs?.lastCallout, gs?.lastCalloutPayload, sv);
+      }
     } catch {
-      setError("Connection error");
+      if (!stale()) fail("connectionError");
     } finally {
-      setLoading(false);
+      if (!stale()) setLoading(false);
     }
-  }, [gameId, surfaceCallout]);
+  }, [gameId, adoptState, surfaceCallout, showTransientError]);
 
   useEffect(() => {
     fetchGame();
@@ -192,8 +229,21 @@ export function useRealtimeGame(
     };
   }, [fetchGame]);
 
-  // Postgres Changes - game state
+  // Realtime is the fast path, not the only one. While the socket is down, or
+  // while the table is still forming and no state has arrived, poll so a
+  // missed event can only delay an update, never lose it.
+  const polling = connection !== "live" || gameState === null;
   useEffect(() => {
+    if (!polling) return;
+    const id = setInterval(fetchGame, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [polling, fetchGame]);
+
+  // Postgres Changes - game state. Also the connection signal: this is the
+  // authoritative stream, so its subscription status is what "live" means.
+  useEffect(() => {
+    let active = true;
+    let subscribedOnce = false;
     const channel = supabase
       .channel(`game-${gameId}`)
       .on(
@@ -208,23 +258,31 @@ export function useRealtimeGame(
           const updated = payload.new as Record<string, unknown>;
           const sv = updated.state_version as number;
           const gs = updated.game_state as GameState | null;
-          if (sv > versionRef.current) {
-            preOptimisticRef.current = null;
-            setGameState(gs);
-            setStateVersion(sv);
-            surfaceCallout(gs?.lastCallout, gs?.lastCalloutPayload, sv);
-          }
-          if (updated.status === "playing" && !gs) {
+          if (gs && sv >= versionRef.current) {
+            adoptState(gs, sv);
+            surfaceCallout(gs.lastCallout, gs.lastCalloutPayload, sv);
+          } else if (!gs && (updated.status === "playing" || gameStateRef.current)) {
+            // The row changed but the event carries no state (the table just
+            // started, or the payload was trimmed): the fetch is the truth.
             fetchGame();
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (!active) return;
+        setConnection(status === "SUBSCRIBED" ? "live" : "reconnecting");
+        // A rejoin after a drop may have missed events: resync from the server.
+        if (status === "SUBSCRIBED") {
+          if (subscribedOnce) fetchGame();
+          subscribedOnce = true;
+        }
+      });
 
     return () => {
+      active = false;
       supabase.removeChannel(channel);
     };
-  }, [gameId, fetchGame, surfaceCallout]);
+  }, [gameId, fetchGame, adoptState, surfaceCallout]);
 
   // Postgres Changes - players joining
   useEffect(() => {
@@ -249,13 +307,14 @@ export function useRealtimeGame(
     };
   }, [gameId, fetchGame]);
 
-  // Broadcast channel - ephemeral chat delivery + state fast-path.
+  // Broadcast channel - ephemeral chat delivery, presence, and state fast-path.
   // postgres_changes delivers the authoritative update but its fanout adds
   // hundreds of ms; the mover already holds the server-confirmed state when
   // the move POST returns, so it broadcasts it here and the other players
   // apply it immediately. The version guard makes the later postgres event
   // a no-op, and remains the fallback if a broadcast is missed.
   useEffect(() => {
+    let active = true;
     const channel = supabase
       .channel(`chat-${gameId}`, {
         config: { broadcast: { self: false } },
@@ -266,16 +325,19 @@ export function useRealtimeGame(
         ({ payload }: { payload: Record<string, unknown> }) => {
           if (!payload || typeof payload.stateVersion !== "number") return;
           const sv = payload.stateVersion as number;
-          if (sv > versionRef.current) {
-            preOptimisticRef.current = null;
-            setGameState(payload.gameState as GameState);
-            setStateVersion(sv);
+          const gs = payload.gameState as GameState | undefined;
+          // A relayed state is only trusted as the exact next step. A gap
+          // means something was missed, so the server is asked instead.
+          if (gs && sv === versionRef.current + 1) {
+            adoptState(gs, sv);
             surfaceCallout(
               payload.callout as string | null,
               (payload.calloutPayload as Record<string, unknown> | null) ??
                 undefined,
               sv
             );
+          } else if (sv > versionRef.current) {
+            fetchGame();
           }
         }
       )
@@ -284,13 +346,17 @@ export function useRealtimeGame(
         { event: "chat" },
         ({ payload }: { payload: ChatBroadcastPayload }) => {
           if (!payload?.playerId) return;
+          if (payload.type !== "quick_chat" && payload.type !== "emote") return;
+          // Predefined phrases only: anything else on the channel is dropped.
+          const canonical = normalizeChatPayload(payload.type, payload.payload);
+          if (!canonical) return;
 
           const msg: ChatMessage = {
             id: `${Date.now()}-${Math.random()}`,
             playerId: payload.playerId,
             seat: payload.seat,
             type: payload.type,
-            payload: payload.payload,
+            payload: canonical,
             isMe: payload.playerId === session?.playerId,
           };
 
@@ -301,21 +367,48 @@ export function useRealtimeGame(
           });
         }
       )
-      .subscribe();
+      .on("presence", { event: "sync" }, () => {
+        if (!active) return;
+        const next: Partial<Record<Seat, boolean>> = {};
+        for (const entries of Object.values(
+          channel.presenceState<{ seat?: string }>()
+        )) {
+          for (const entry of entries) {
+            if (entry.seat) next[entry.seat as Seat] = true;
+          }
+        }
+        setPresence(next);
+      })
+      .subscribe((status) => {
+        if (!active) return;
+        // Presence lives per join, so the seat is announced after every rejoin.
+        if (status === "SUBSCRIBED" && session?.seat) {
+          channel.track({ seat: session.seat });
+        }
+      });
 
     chatChannelRef.current = channel;
 
     return () => {
+      active = false;
       supabase.removeChannel(channel);
       chatChannelRef.current = null;
     };
-  }, [gameId, session?.playerId, surfaceCallout]);
+  }, [gameId, session?.playerId, session?.seat, fetchGame, adoptState, surfaceCallout]);
 
+  // Resolves true only when the server accepted the move.
   const submitMove = useCallback(
-    async (intent: MoveIntentPayload) => {
-      if (!session) return;
-      if (moveInFlightRef.current) return;
+    async (intent: MoveIntentPayload): Promise<boolean> => {
+      if (!session) return false;
+      if (moveInFlightRef.current) return false;
       moveInFlightRef.current = true;
+      const stale = () => activeGameRef.current !== gameId;
+      const revertOptimistic = () => {
+        if (preOptimisticRef.current) {
+          setGameState(preOptimisticRef.current);
+          preOptimisticRef.current = null;
+        }
+      };
 
       // Optimistic update for play moves - instant visual feedback
       if (
@@ -355,27 +448,23 @@ export function useRealtimeGame(
         });
 
         const data = await res.json();
+        if (stale()) return false;
 
         if (res.status === 409 && data.stale) {
-          preOptimisticRef.current = null;
+          // The board was behind the server: drop the preview and catch up.
+          revertOptimistic();
           await fetchGame();
-          return;
+          return false;
         }
 
         if (!res.ok) {
-          // Revert optimistic update
-          if (preOptimisticRef.current) {
-            setGameState(preOptimisticRef.current);
-            preOptimisticRef.current = null;
-          }
-          showTransientError(data.error ?? "Move failed");
-          return;
+          revertOptimistic();
+          showTransientError(errorKeyFor(data.error));
+          return false;
         }
 
-        preOptimisticRef.current = null;
-        setGameState(data.gameState);
-        setStateVersion(data.stateVersion);
-        setError(null);
+        adoptState(data.gameState, data.stateVersion);
+        setErrorKey(null);
 
         if (data.callout) {
           surfaceCallout(
@@ -386,7 +475,7 @@ export function useRealtimeGame(
         }
 
         // State fast-path: hand the confirmed state to the other players
-        // directly — they'd otherwise wait on the postgres_changes fanout.
+        // directly, since they'd otherwise wait on the postgres_changes fanout.
         chatChannelRef.current?.send({
           type: "broadcast",
           event: "state",
@@ -397,28 +486,30 @@ export function useRealtimeGame(
             calloutPayload: data.calloutPayload ?? null,
           },
         });
+        return true;
       } catch {
-        if (preOptimisticRef.current) {
-          setGameState(preOptimisticRef.current);
-          preOptimisticRef.current = null;
-        }
-        showTransientError("Connection error");
+        if (stale()) return false;
+        revertOptimistic();
+        showTransientError("connectionError");
+        return false;
       } finally {
-        moveInFlightRef.current = false;
+        if (!stale()) moveInFlightRef.current = false;
       }
     },
-    [gameId, session, fetchGame, gameState, surfaceCallout, showTransientError]
+    [gameId, session, fetchGame, gameState, adoptState, surfaceCallout, showTransientError]
   );
 
   const sendChat = useCallback(
     async (type: "quick_chat" | "emote", payload: string) => {
       if (!session) return;
+      const canonical = normalizeChatPayload(type, payload);
+      if (!canonical) return;
 
       const broadcastPayload: ChatBroadcastPayload = {
         playerId: session.playerId,
         seat: session.seat,
         type,
-        payload,
+        payload: canonical,
       };
 
       // Add to local state immediately (sender sees their own message)
@@ -429,7 +520,7 @@ export function useRealtimeGame(
       };
       setChatMessages((prev) => [...prev, msg].slice(-3));
 
-      // Broadcast to the other player instantly (ephemeral)
+      // Broadcast to the other players instantly (ephemeral)
       chatChannelRef.current?.send({
         type: "broadcast",
         event: "chat",
@@ -443,7 +534,7 @@ export function useRealtimeGame(
         body: JSON.stringify({
           playerId: session.playerId,
           type,
-          payload,
+          payload: canonical,
         }),
       }).catch(() => {});
     },
@@ -472,7 +563,9 @@ export function useRealtimeGame(
     players,
     stateVersion,
     loading,
-    error,
+    errorKey,
+    connection,
+    presence,
     lastCallout,
     lastCalloutPayload,
     chatMessages,
