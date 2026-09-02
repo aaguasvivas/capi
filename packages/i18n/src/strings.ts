@@ -216,6 +216,17 @@ export interface Strings {
   priceUnknown: string;
   purchaseErrorProduct: string;
   purchaseErrorStore: string;
+
+  // iMessage extension bubbles and drawer, mirrored verbatim in
+  // apps/mobile/targets/messages/CapiStrings.swift (see swiftParity.test.ts)
+  yourTurnGeneric: string;
+  roundWon: (name: string) => string;
+  gameWon: (name: string) => string;
+  invite1v1: string;
+  invite2v2: string;
+  tableFull: string;
+  gameStarted: string;
+  openInCapi: string;
 }
 
 export const es: Strings = {
@@ -399,6 +410,15 @@ export const es: Strings = {
   priceUnknown: "Ver precio",
   purchaseErrorProduct: "Ese producto no está disponible todavía",
   purchaseErrorStore: "La App Store no respondió",
+
+  yourTurnGeneric: "Te toca",
+  roundWon: (name) => `${name} ganó la ronda`,
+  gameWon: (name) => `${name} ganó el juego`,
+  invite1v1: "¡A jugar dominó! 1v1",
+  invite2v2: "¡Dominó 2v2! Toca para sentarte",
+  tableFull: "La mesa está llena",
+  gameStarted: "La partida ya empezó",
+  openInCapi: "Abrir en Capi",
 };
 
 export const en: Strings = {
@@ -582,6 +602,15 @@ export const en: Strings = {
   priceUnknown: "See price",
   purchaseErrorProduct: "That item is not available yet",
   purchaseErrorStore: "The App Store did not respond",
+
+  yourTurnGeneric: "Your turn",
+  roundWon: (name) => `${name} took the round`,
+  gameWon: (name) => `${name} won the game`,
+  invite1v1: "Dominoes time! 1v1",
+  invite2v2: "2v2 dominoes! Tap to sit",
+  tableFull: "The table is full",
+  gameStarted: "Game already started",
+  openInCapi: "Open in Capi",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

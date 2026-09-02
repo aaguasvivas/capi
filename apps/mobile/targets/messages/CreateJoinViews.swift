@@ -1,25 +1,23 @@
 import SwiftUI
 
-struct CreateCard: View {
-    @State var nickname: String = CapiStore.nickname
-    let allow2v2: Bool
-    let status: String?
-    let onCreate: (_ nickname: String, _ is2v2: Bool) -> Void
-    @State private var is2v2 = false
+// Shared by both cards so the controller can flip busy and status without
+// re-hosting the view, which would drop what the player typed or picked.
+final class CardState: ObservableObject {
+    @Published var status: String?
+    @Published var busy = false
+}
 
-    // Explicit init (not the synthesized memberwise one) so status keeps a
-    // real, overridable default: a stored property default alone would be
-    // baked in and un-overridable from call sites.
-    init(allow2v2: Bool, status: String? = nil, onCreate: @escaping (_ nickname: String, _ is2v2: Bool) -> Void) {
-        self.allow2v2 = allow2v2
-        self.status = status
-        self.onCreate = onCreate
-    }
+struct CreateCard: View {
+    @ObservedObject var state: CardState
+    let allow2v2: Bool
+    let onCreate: (_ nickname: String, _ is2v2: Bool) -> Void
+    @State private var nickname = CapiStore.nickname
+    @State private var is2v2 = false
 
     var body: some View {
         VStack(spacing: 12) {
             Text("Capi").font(.system(size: 28, weight: .heavy))
-            if let status { Text(status).foregroundColor(.secondary) }
+            if let status = state.status { Text(status).foregroundColor(.secondary) }
             TextField(CapiStrings.yourName, text: $nickname)
                 .textFieldStyle(.roundedBorder).frame(maxWidth: 240)
             if allow2v2 {
@@ -28,33 +26,51 @@ struct CreateCard: View {
                     Text("2v2").tag(true)
                 }.pickerStyle(.segmented).frame(maxWidth: 240)
             }
-            Button(CapiStrings.create) {
+            SubmitButton(title: CapiStrings.create, busy: state.busy) {
                 let name = nickname.trimmingCharacters(in: .whitespaces)
                 guard !name.isEmpty else { return }
                 CapiStore.nickname = name
                 onCreate(name, allow2v2 && is2v2)
-            }.buttonStyle(.borderedProminent)
+            }
         }.padding()
     }
 }
 
 struct JoinCard: View {
-    @State var nickname: String = CapiStore.nickname
-    let status: String?
+    @ObservedObject var state: CardState
     let onJoin: (_ nickname: String) -> Void
+    @State private var nickname = CapiStore.nickname
 
     var body: some View {
         VStack(spacing: 12) {
             Text("Capi").font(.system(size: 28, weight: .heavy))
-            if let status { Text(status).foregroundColor(.secondary) }
+            if let status = state.status { Text(status).foregroundColor(.secondary) }
             TextField(CapiStrings.yourName, text: $nickname)
                 .textFieldStyle(.roundedBorder).frame(maxWidth: 240)
-            Button(CapiStrings.join) {
+            SubmitButton(title: CapiStrings.join, busy: state.busy) {
                 let name = nickname.trimmingCharacters(in: .whitespaces)
                 guard !name.isEmpty else { return }
                 CapiStore.nickname = name
                 onJoin(name)
-            }.buttonStyle(.borderedProminent)
+            }
         }.padding()
+    }
+}
+
+// The card's one action: spins and ignores taps while a request is in flight.
+struct SubmitButton: View {
+    let title: String
+    let busy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if busy { ProgressView().tint(.white) }
+                Text(title)
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(busy)
     }
 }
