@@ -52,7 +52,9 @@ build 17, not 16.
 
 - [x] Real AdMob ids swapped in, prebuild, sim smoke, committed, pushed.
 - [x] Build 16 kicked, submitted to TestFlight (pre-audit).
-- [ ] Build 17 (audit pass) kicked 2026-08-14, then `eas submit --latest`.
+- [x] Build 17 (audit pass, EAS id 83ce7a17) built and submitted to App Store
+      Connect (submission 75c4c902); it shows in TestFlight after Apple's
+      processing.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
 
