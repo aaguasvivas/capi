@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+// Static metadata carries one language (Spanish, the document default); the
+// page body below serves both languages in their own lang-tagged sections.
 export const metadata: Metadata = {
-  title: "Soporte / Support",
-  description:
-    "Ayuda con Capi, el dominó dominicano en línea. Get help with Capi, the online Dominican dominoes game.",
+  title: "Soporte",
+  description: "Ayuda con Capi, el dominó dominicano en línea.",
 };
 
 const GOLD = "#b8860b";

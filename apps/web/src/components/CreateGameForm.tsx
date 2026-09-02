@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useI18n } from "@/lib/i18n/context";
+import { apiErrorText, useI18n } from "@/lib/i18n/context";
 
 const AVATAR_COLORS = [
   "#6366f1",
@@ -91,7 +91,7 @@ export default function CreateGameForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? s.failedCreate);
+        setError(apiErrorText(s, data.error, s.failedCreate));
         return;
       }
 

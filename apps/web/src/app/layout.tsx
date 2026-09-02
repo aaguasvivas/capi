@@ -7,8 +7,10 @@ const inter = Inter({ subsets: ["latin"] });
 
 const SITE_URL = "https://playcapi.com";
 const TITLE = "Capi · Dominican Dominoes";
+// Metadata is static, so it carries one language: Spanish, the default UI
+// language and the lang the document ships with.
 const DESCRIPTION =
-  "Dominó dominicano online. 1v1 o 2v2, con tu frente. Authentic rules, no account, share a link to invite.";
+  "Dominó dominicano online. 1v1 o 2v2, con tu frente. Reglas auténticas, sin cuenta, comparte un enlace para invitar.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -36,8 +38,8 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: SITE_URL,
-    locale: "en_US",
-    alternateLocale: ["es_DO"],
+    locale: "es_DO",
+    alternateLocale: ["en_US"],
   },
   twitter: {
     card: "summary_large_image",
@@ -69,8 +71,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The layout renders statically, so lang is the Spanish default here.
+  // I18nProvider updates document.documentElement.lang on the client from the
+  // stored choice.
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`${inter.className} antialiased bg-gray-50`}>
         <I18nProvider>{children}</I18nProvider>
       </body>

@@ -6,7 +6,138 @@ import { useSearchParams } from "next/navigation";
 import CreateGameForm from "@/components/CreateGameForm";
 import JoinGameForm from "@/components/JoinGameForm";
 import { useI18n } from "@/lib/i18n/context";
-import type { Lang } from "@capi/i18n";
+import type { Lang, Strings } from "@capi/i18n";
+
+const SESSION_PREFIX = "capi_session_";
+const RESUME_MAX = 3;
+
+// GET /api/games/<id> returns whole rows. The landing page keeps only these
+// fields and drops everything else at the parse boundary.
+interface Lobby {
+  inviteCode: string;
+  status: string;
+  createdAt: string;
+  hostName: string;
+  full: boolean;
+}
+
+function pickLobby(data: unknown): Lobby | null {
+  if (!data || typeof data !== "object") return null;
+  const { game, players } = data as {
+    game?: Record<string, unknown>;
+    players?: unknown;
+  };
+  if (!game || typeof game.invite_code !== "string" || typeof game.status !== "string") {
+    return null;
+  }
+  const settings = game.settings as { is2v2?: boolean } | null | undefined;
+  const seated = Array.isArray(players)
+    ? (players as Array<{ seat?: unknown; nickname?: unknown }>)
+    : [];
+  const host = seated.find((p) => p.seat === "n");
+  return {
+    inviteCode: game.invite_code,
+    status: game.status,
+    createdAt: typeof game.created_at === "string" ? game.created_at : "",
+    hostName: typeof host?.nickname === "string" ? host.nickname : "",
+    // Mirrors maxPlayersFor in lib/gameStart without pulling the engine into
+    // the landing bundle.
+    full: seated.length >= (settings?.is2v2 ? 4 : 2),
+  };
+}
+
+type JoinLookup =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "ready"; code: string; hostName: string }
+  | { kind: "notFound" }
+  | { kind: "full" }
+  | { kind: "started" }
+  | { kind: "error" };
+
+async function lookupJoin(gameId: string): Promise<JoinLookup> {
+  try {
+    const r = await fetch(`/api/games/${encodeURIComponent(gameId)}`);
+    if (r.status === 404) return { kind: "notFound" };
+    if (!r.ok) return { kind: "error" };
+    const lobby = pickLobby(await r.json());
+    if (!lobby) return { kind: "error" };
+    if (lobby.status !== "waiting") return { kind: "started" };
+    if (lobby.full) return { kind: "full" };
+    return { kind: "ready", code: lobby.inviteCode, hostName: lobby.hostName };
+  } catch {
+    return { kind: "error" };
+  }
+}
+
+function lookupText(lookup: JoinLookup, s: Strings): string {
+  switch (lookup.kind) {
+    case "loading":
+      return s.joinLookupLoading;
+    case "ready":
+      return lookup.hostName ? s.joiningTableOf(lookup.hostName) : "";
+    case "notFound":
+      return s.joinLookupNotFound;
+    case "full":
+      return s.joinLookupFull;
+    case "started":
+      return s.joinLookupStarted;
+    case "error":
+      return s.networkError;
+    default:
+      return "";
+  }
+}
+
+interface ResumeEntry {
+  gameId: string;
+  code: string;
+  createdAt: string;
+}
+
+function readSessions(): Array<{ key: string; gameId: string }> {
+  const sessions: Array<{ key: string; gameId: string }> = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(SESSION_PREFIX)) continue;
+      try {
+        const parsed = JSON.parse(localStorage.getItem(key) ?? "") as { gameId?: unknown };
+        if (typeof parsed.gameId === "string" && parsed.gameId) {
+          sessions.push({ key, gameId: parsed.gameId });
+        }
+      } catch {
+        // Not a session this page understands; leave it alone.
+      }
+    }
+  } catch {
+    // Storage unavailable: nothing to resume.
+  }
+  return sessions;
+}
+
+// Resolves to a card entry for a live game, or null. Prunes sessions whose
+// game is gone or finished; a network or server failure keeps the session
+// for next time.
+async function lookupResume(key: string, gameId: string): Promise<ResumeEntry | null> {
+  try {
+    const r = await fetch(`/api/games/${encodeURIComponent(gameId)}`);
+    if (r.status === 404) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    if (!r.ok) return null;
+    const lobby = pickLobby(await r.json());
+    if (!lobby) return null;
+    if (lobby.status === "finished") {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return { gameId, code: lobby.inviteCode, createdAt: lobby.createdAt };
+  } catch {
+    return null;
+  }
+}
 
 function LangToggle() {
   const { lang, setLang } = useI18n();
@@ -35,20 +166,47 @@ function HomeContent() {
   const [tab, setTab] = useState<"create" | "join">(joinId ? "join" : "create");
   const { s } = useI18n();
 
-  const [prefillCode, setPrefillCode] = useState("");
+  const [lookup, setLookup] = useState<JoinLookup>(
+    joinId ? { kind: "loading" } : { kind: "idle" }
+  );
 
   useEffect(() => {
     if (!joinId) return;
-    fetch(`/api/games/${joinId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.game?.invite_code) {
-          setPrefillCode(data.game.invite_code);
-          setTab("join");
-        }
-      })
-      .catch(() => {});
+    let cancelled = false;
+    lookupJoin(joinId).then((result) => {
+      if (!cancelled) setLookup(result);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [joinId]);
+
+  const [resume, setResume] = useState<ResumeEntry[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    for (const { key, gameId } of readSessions()) {
+      lookupResume(key, gameId).then((entry) => {
+        if (cancelled || !entry) return;
+        setResume((prev) =>
+          [...prev.filter((e) => e.gameId !== entry.gameId), entry]
+            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+            .slice(0, RESUME_MAX)
+        );
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const noteText = lookupText(lookup, s);
+  const noteTone =
+    lookup.kind === "loading"
+      ? "border-gray-200 bg-gray-50 text-gray-500"
+      : lookup.kind === "ready"
+        ? "border-gray-200 bg-gray-50 text-gray-800"
+        : "border-red-200 bg-red-50 text-red-700";
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f5f0e8] via-[#f0ebe3] to-[#e8d5c0] flex items-center justify-center p-4">
@@ -89,6 +247,27 @@ function HomeContent() {
           </div>
         </div>
 
+        {/* Resume: games this browser is seated at and that are still going */}
+        {resume.length > 0 && (
+          <section className="space-y-1.5">
+            <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+              {s.resumeGame}
+            </p>
+            {resume.map((g) => (
+              <Link
+                key={g.gameId}
+                href={`/game/${g.gameId}`}
+                className="flex items-center justify-between rounded-xl border border-gray-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-gray-800 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+              >
+                <span>{s.resumeGameHint(g.code)}</span>
+                <span aria-hidden className="text-gray-400">
+                  →
+                </span>
+              </Link>
+            ))}
+          </section>
+        )}
+
         {/* Card */}
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/80 overflow-hidden">
           {/* Tabs */}
@@ -120,7 +299,19 @@ function HomeContent() {
             {tab === "create" ? (
               <CreateGameForm />
             ) : (
-              <JoinGameForm prefillCode={prefillCode} />
+              <>
+                {noteText && (
+                  <p
+                    role="status"
+                    className={`mb-4 rounded-xl border px-3.5 py-2.5 text-sm font-medium ${noteTone}`}
+                  >
+                    {noteText}
+                  </p>
+                )}
+                <JoinGameForm
+                  prefillCode={lookup.kind === "ready" ? lookup.code : ""}
+                />
+              </>
             )}
           </div>
         </div>
