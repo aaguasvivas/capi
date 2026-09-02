@@ -8,6 +8,15 @@ interface CalloutOverlayProps {
   onDismiss: () => void;
 }
 
+// The callout words are the game's own vocabulary: players shout exactly
+// these at the table whether they speak Spanish or English, so they are
+// deliberately not in the i18n dictionaries. Defined once here, used by the
+// overlay cards and the mid-round banner.
+const CALLOUT_DOMINO = "¡DOMINÓ!";
+const CALLOUT_TRANCAO = "¡TRANCAO!";
+const CALLOUT_CAPICUA = "¡CAPICÚA!";
+const CALLOUT_VEINTICINCO = "¡VEINTICINCO!";
+
 const CALLOUT_CONFIG: Record<
   string,
   {
@@ -20,7 +29,7 @@ const CALLOUT_CONFIG: Record<
   }
 > = {
   domino: {
-    label: "¡DOMINÓ!",
+    label: CALLOUT_DOMINO,
     emoji: "🎯",
     cardBg: "#facc15", // yellow-400
     borderColor: "#fcd34d", // amber-300
@@ -28,7 +37,7 @@ const CALLOUT_CONFIG: Record<
     subTextColor: "rgba(120,53,15,0.85)", // amber-900/80
   },
   trancao: {
-    label: "¡TRANCAO!",
+    label: CALLOUT_TRANCAO,
     emoji: "🔒",
     cardBg: "#dc2626", // red-600
     borderColor: "#f87171", // red-400
@@ -36,7 +45,7 @@ const CALLOUT_CONFIG: Record<
     subTextColor: "rgba(254,226,226,0.85)", // red-100/80
   },
   capicua: {
-    label: "¡CAPICÚA!",
+    label: CALLOUT_CAPICUA,
     emoji: "🔥",
     cardBg: "#f59e0b", // amber-500
     borderColor: "#fdba74", // orange-300
@@ -44,7 +53,7 @@ const CALLOUT_CONFIG: Record<
     subTextColor: "rgba(124,45,18,0.85)", // orange-900/80
   },
   veinticinco: {
-    label: "¡VEINTICINCO!",
+    label: CALLOUT_VEINTICINCO,
     emoji: "💥",
     cardBg: "#4f46e5", // indigo-600
     borderColor: "#c084fc", // purple-400
@@ -63,9 +72,30 @@ export function CalloutOverlay({
   const config = CALLOUT_CONFIG[callout];
   if (!config) return null;
 
+  // Award lines, shared by the card and the screen-reader label so both say
+  // the same thing.
+  const lines: string[] = [];
+  if (payload) {
+    if (typeof payload.pipsAwarded === "number" && payload.pipsAwarded > 0) {
+      lines.push(`+${payload.pipsAwarded} ${s.points}`);
+    }
+    if (typeof payload.capicuaBonus === "number") {
+      lines.push(`+${payload.capicuaBonus} ${s.capicuaBonus}`);
+    }
+    if (typeof payload.veinticincoBonus === "number") {
+      lines.push(`+${payload.veinticincoBonus} ${s.bonus}`);
+    }
+    if (typeof payload.pts === "number" && payload.pts > 0) {
+      lines.push(`+${payload.pts} ${s.points}`);
+    }
+  }
+
   return (
     <Pressable
       onPress={onDismiss}
+      accessibilityViewIsModal
+      accessibilityRole="button"
+      accessibilityLabel={[config.label, ...lines, s.tapToContinue].join(", ")}
       style={{
         position: "absolute",
         top: 0,
@@ -105,29 +135,16 @@ export function CalloutOverlay({
           {config.label}
         </Text>
 
-        {payload && (
+        {lines.length > 0 && (
           <View style={{ marginTop: 20, gap: 6, alignItems: "center" }}>
-            {typeof payload.pipsAwarded === "number" &&
-              payload.pipsAwarded > 0 && (
-                <Text style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}>
-                  +{payload.pipsAwarded} {s.points}
-                </Text>
-              )}
-            {typeof payload.capicuaBonus === "number" && (
-              <Text style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}>
-                +{payload.capicuaBonus} {s.capicuaBonus}
+            {lines.map((line, i) => (
+              <Text
+                key={i}
+                style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}
+              >
+                {line}
               </Text>
-            )}
-            {typeof payload.veinticincoBonus === "number" && (
-              <Text style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}>
-                +{payload.veinticincoBonus} {s.bonus}
-              </Text>
-            )}
-            {typeof payload.pts === "number" && payload.pts > 0 && (
-              <Text style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}>
-                +{payload.pts} {s.points}
-              </Text>
-            )}
+            ))}
           </View>
         )}
 
@@ -189,7 +206,7 @@ export function VeinticincoBanner({
               letterSpacing: -0.5,
             }}
           >
-            ¡VEINTICINCO!
+            {CALLOUT_VEINTICINCO}
           </Text>
           <Text
             style={{

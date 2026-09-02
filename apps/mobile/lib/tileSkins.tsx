@@ -24,6 +24,9 @@ export interface TileSkin {
   borderDouble: string;
   pipTop: [string, string, string];    // radial gradient stops, light→dark
   pipBottom: [string, string, string];
+  // Faint ring under each pip well. Dark on light faces, light on dark faces
+  // (a black ring vanishes on kingston), alpha baked into the color.
+  pipRing: string;
   divider: string;
   dividerDouble: string;
   spinner: string | null;              // center dot on the divider
@@ -35,6 +38,8 @@ export interface TileSkin {
 }
 
 const DRILLED: [string, string, string] = ["#3a3a3a", "#1c1c1c", "#050505"];
+const RING_ON_LIGHT = "rgba(0,0,0,0.18)";
+const RING_ON_DARK = "rgba(255,255,255,0.22)";
 
 export const TILE_SKINS: Record<TileSkinId, TileSkin> = {
   clasico: {
@@ -42,6 +47,7 @@ export const TILE_SKINS: Record<TileSkinId, TileSkin> = {
     face: "#FBF8ED", faceDouble: "#ECE4CC",
     border: "#c8bc9e", borderDouble: "#8a7d60",
     pipTop: DRILLED, pipBottom: DRILLED,
+    pipRing: RING_ON_LIGHT,
     divider: "#b8a882", dividerDouble: "#8a7d60",
     spinner: null,
     back: { bg: "#1e3a5f", border: "#0f1f35", variant: "clasico" },
@@ -52,6 +58,7 @@ export const TILE_SKINS: Record<TileSkinId, TileSkin> = {
     border: "#c9b98e", borderDouble: "#8a7d60",
     pipTop: ["#e05252", "#b71c1c", "#7f0f0f"],
     pipBottom: ["#4a6fb5", "#1d3f7a", "#0e2450"],
+    pipRing: RING_ON_LIGHT,
     divider: "#c9a227", dividerDouble: "#c9a227",
     spinner: "#c9a227",
     back: { bg: "#ffffff", border: "#8a7d60", variant: "rd" },
@@ -62,6 +69,7 @@ export const TILE_SKINS: Record<TileSkinId, TileSkin> = {
     border: "#c4c4c4", borderDouble: "#8f8f8f",
     pipTop: ["#f26666", "#e4002b", "#8f0018"],
     pipBottom: ["#f26666", "#e4002b", "#8f0018"],
+    pipRing: RING_ON_LIGHT,
     divider: "#003087", dividerDouble: "#003087",
     spinner: "#003087",
     back: { bg: "#003087", border: "#001d52", variant: "pr" },
@@ -69,9 +77,12 @@ export const TILE_SKINS: Record<TileSkinId, TileSkin> = {
   kingston: {
     id: "kingston",
     face: "#1f1f1f", faceDouble: "#151515",
-    border: "#000000", borderDouble: "#3a3a3a",
+    // Mid grays, not black: the tile keeps a silhouette on dark felts
+    // (noche, colmado), and doubles stay a clear step lighter.
+    border: "#4a4a4a", borderDouble: "#7a7a7a",
     pipTop: ["#ffe066", "#fed100", "#9c7f00"],
     pipBottom: ["#ffe066", "#fed100", "#9c7f00"],
+    pipRing: RING_ON_DARK,
     divider: "#009b3a", dividerDouble: "#009b3a",
     spinner: "#fed100",
     back: { bg: "#141414", border: "#000000", variant: "jm" },

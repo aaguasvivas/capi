@@ -85,7 +85,9 @@ export default function BugReportButton({
     <>
       <Pressable
         onPress={() => setOpen(true)}
+        accessibilityRole="button"
         accessibilityLabel={s.reportBug}
+        hitSlop={10}
         style={{
           width: 30,
           height: 30,
@@ -149,7 +151,9 @@ export default function BugReportButton({
               <Pressable
                 onPress={requestClose}
                 disabled={status === "sending"}
+                accessibilityRole="button"
                 accessibilityLabel={s.reportBugCancel}
+                hitSlop={12}
                 style={{ opacity: status === "sending" ? 0.5 : 1, marginTop: -2 }}
               >
                 <Text style={{ color: "#9ca3af", fontSize: 18, lineHeight: 20 }}>

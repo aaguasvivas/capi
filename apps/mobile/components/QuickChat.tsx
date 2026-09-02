@@ -1,31 +1,19 @@
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { EMOTES, QUICK_PHRASES, type QuickChatKind } from "@capi/i18n";
 import { useI18n } from "../lib/i18n";
 
 interface QuickChatProps {
-  onSend: (type: "quick_chat" | "emote", payload: string) => void;
+  // Quick chat is predefined end to end: phrases go out as ids from
+  // QUICK_PHRASES and every receiver renders them in its own language.
+  onSend: (type: QuickChatKind, payload: string) => void;
 }
-
-// Same lists as the web QuickChat component.
-const PHRASES_ES = [
-  "¡Dale!", "¡Tranquilo!", "¡Aguanta!",
-  "¡Eso e'!", "¡Vamo' allá!", "¡Qué lo qué!",
-];
-
-const PHRASES_EN = [
-  "Let's go!", "Chill out!", "Hold up!",
-  "That's crazy!", "We outside!", "Say less!",
-];
-
-const EMOTES = ["🔥", "😂", "😤", "💀", "👑"];
 
 export default function QuickChat({ onSend }: QuickChatProps) {
   const { lang, s } = useI18n();
   const [open, setOpen] = useState(false);
 
-  const phrases = lang === "en" ? PHRASES_EN : PHRASES_ES;
-
-  function handleSend(type: "quick_chat" | "emote", value: string) {
+  function handleSend(type: QuickChatKind, value: string) {
     onSend(type, value);
     setOpen(false);
   }
@@ -38,7 +26,7 @@ export default function QuickChat({ onSend }: QuickChatProps) {
     <View style={{ alignItems: "flex-start" }}>
       {open ? (
         <View style={tray}>
-          {/* Emote row */}
+          {/* Emote row. The emoji itself is the accessible name. */}
           <View
             style={{
               flexDirection: "row",
@@ -50,7 +38,7 @@ export default function QuickChat({ onSend }: QuickChatProps) {
               <Pressable
                 key={e}
                 onPress={() => handleSend("emote", e)}
-                accessibilityLabel={`Emote ${e}`}
+                accessibilityRole="button"
                 style={emoteButton}
               >
                 <Text style={{ fontSize: 20 }}>{e}</Text>
@@ -60,16 +48,17 @@ export default function QuickChat({ onSend }: QuickChatProps) {
 
           <View style={{ height: 1, backgroundColor: "rgba(255,255,255,0.1)" }} />
 
-          {/* Quick phrases */}
+          {/* Quick phrases, shown in the current language, sent by id */}
           <View style={{ gap: 6 }}>
-            {phrases.map((p) => (
+            {QUICK_PHRASES.map((p) => (
               <Pressable
-                key={p}
-                onPress={() => handleSend("quick_chat", p)}
+                key={p.id}
+                onPress={() => handleSend("quick_chat", p.id)}
+                accessibilityRole="button"
                 style={phraseRow}
               >
                 <Text style={{ color: "#fde68a", fontSize: 14, fontWeight: "700" }}>
-                  {p}
+                  {p[lang]}
                 </Text>
               </Pressable>
             ))}
@@ -79,7 +68,10 @@ export default function QuickChat({ onSend }: QuickChatProps) {
 
       <Pressable
         onPress={() => setOpen((prev) => !prev)}
+        accessibilityRole="button"
         accessibilityLabel={open ? s.closeTray : s.quickChat}
+        accessibilityState={{ expanded: open }}
+        hitSlop={10}
         style={{
           ...toggleButton,
           backgroundColor: open ? "#f59e0b" : "rgba(0,0,0,0.3)",

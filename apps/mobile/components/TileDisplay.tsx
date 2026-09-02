@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { Pressable, View, type ViewStyle } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop, G } from "react-native-svg";
 import type { Tile } from "@capi/engine";
@@ -32,12 +32,14 @@ const PIP_POSITIONS: Record<number, [number, number][]> = {
 // collide in the same SVG namespace.
 let pipGradientSeq = 0;
 
-function PipHalf({
+const PipHalf = memo(function PipHalf({
   pips,
   stops,
+  ring,
 }: {
   pips: number;
   stops: [string, string, string];
+  ring: string;
 }) {
   const positions = PIP_POSITIONS[pips] ?? [];
   // Stable per-instance id across re-renders.
@@ -56,16 +58,17 @@ function PipHalf({
       </Defs>
       {positions.map(([cx, cy], i) => (
         <G key={i}>
-          {/* faint dark base ring under the well */}
-          <Circle cx={cx} cy={cy} r={10} fill="#000" opacity={0.18} />
+          {/* faint base ring under the well; the skin picks a dark or light
+              ring so it shows on both ivory and black faces */}
+          <Circle cx={cx} cy={cy} r={10} fill={ring} />
           <Circle cx={cx} cy={cy} r={9.2} fill={`url(#${gradId})`} />
         </G>
       ))}
     </Svg>
   );
-}
+});
 
-export default function TileDisplay({
+function TileDisplay({
   tile,
   selected = false,
   onPress,
@@ -77,9 +80,9 @@ export default function TileDisplay({
 }: Props) {
   const { skin } = useTileSkin();
   const isDouble = tile[0] === tile[1];
-  const explicitSize = w !== undefined && h !== undefined;
-  const width = explicitSize ? w! : small ? 36 : 44;
-  const height = explicitSize ? h! : small ? 72 : 88;
+  const width = w !== undefined && h !== undefined ? w : small ? 36 : 44;
+  const height = w !== undefined && h !== undefined ? h : small ? 72 : 88;
+  const label = `${tile[0]} ${tile[1]}`;
 
   if (faceDown) {
     return (
@@ -147,12 +150,16 @@ export default function TileDisplay({
     };
   }
 
-  // Divider between the two pip halves.
-  const dividerHeight = isDouble ? 2.5 : small ? 1.5 : 2;
+  // Divider and spinner dot scale with the tile so the compact board tile
+  // (28 wide) and the hand tile (36) keep the same proportions as the 44.
+  const dividerHeight = Math.max(1.5, width * 0.05);
   const dividerColor = isDouble ? skin.dividerDouble : skin.divider;
+  const dot = Math.round(width * 0.18);
 
   const tileBody = (
     <View
+      accessible={!onPress}
+      accessibilityLabel={onPress ? undefined : label}
       style={{
         width,
         height,
@@ -167,7 +174,7 @@ export default function TileDisplay({
       }}
     >
       <View style={{ flex: 1, width: "100%" }}>
-        <PipHalf pips={tile[0]} stops={skin.pipTop} />
+        <PipHalf pips={tile[0]} stops={skin.pipTop} ring={skin.pipRing} />
       </View>
 
       <View
@@ -177,16 +184,16 @@ export default function TileDisplay({
           backgroundColor: dividerColor,
         }}
       >
-        {skin.spinner && !small ? (
+        {skin.spinner ? (
           <View
             style={{
               position: "absolute",
-              top: (dividerHeight - 8) / 2,
+              top: (dividerHeight - dot) / 2,
               left: "50%",
-              marginLeft: -4,
-              width: 8,
-              height: 8,
-              borderRadius: 4,
+              marginLeft: -dot / 2,
+              width: dot,
+              height: dot,
+              borderRadius: dot / 2,
               backgroundColor: skin.spinner,
             }}
           />
@@ -194,14 +201,19 @@ export default function TileDisplay({
       </View>
 
       <View style={{ flex: 1, width: "100%" }}>
-        <PipHalf pips={tile[1]} stops={skin.pipBottom} />
+        <PipHalf pips={tile[1]} stops={skin.pipBottom} ring={skin.pipRing} />
       </View>
     </View>
   );
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ selected }}
+      >
         {tileBody}
       </Pressable>
     );
@@ -209,3 +221,19 @@ export default function TileDisplay({
 
   return tileBody;
 }
+
+// Tiles arrive as fresh arrays on every game-state update, so compare pips,
+// not references; everything else is a primitive or a stable handler.
+export default memo(
+  TileDisplay,
+  (a, b) =>
+    a.tile[0] === b.tile[0] &&
+    a.tile[1] === b.tile[1] &&
+    a.selected === b.selected &&
+    a.onPress === b.onPress &&
+    a.small === b.small &&
+    a.faceDown === b.faceDown &&
+    a.highlight === b.highlight &&
+    a.w === b.w &&
+    a.h === b.h
+);
