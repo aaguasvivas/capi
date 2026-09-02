@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/context";
 
 interface CalloutOverlayProps {
@@ -61,17 +61,34 @@ export default function CalloutOverlay({
 }: CalloutOverlayProps) {
   const { s } = useI18n();
   const [mounted, setMounted] = useState(false);
+  const dismissRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Focus lands on the dismiss button so Enter and Space close the overlay.
+  useEffect(() => {
+    dismissRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onDismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
   const config = CALLOUT_CONFIG[callout];
   if (!config) return null;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="callout-title"
       className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer"
       onClick={onDismiss}
     >
@@ -93,6 +110,7 @@ export default function CalloutOverlay({
         <p className="text-7xl mb-3 drop-shadow-lg">{config.emoji}</p>
 
         <h2
+          id="callout-title"
           className={`text-5xl font-black tracking-tight ${config.textColor} drop-shadow-sm`}
         >
           {config.label}
@@ -118,9 +136,19 @@ export default function CalloutOverlay({
           </div>
         )}
 
-        <p className={`mt-8 text-sm ${config.subTextColor} animate-pulse`}>
+        {/* The backdrop click already dismisses; stop the bubble so a
+            keyboard activation does not dismiss twice. */}
+        <button
+          ref={dismissRef}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDismiss();
+          }}
+          className={`mt-6 min-h-[44px] px-5 text-sm rounded-xl ${config.subTextColor} animate-pulse focus:outline-none focus-visible:ring-2 focus-visible:ring-current`}
+        >
           {s.tapToContinue}
-        </p>
+        </button>
       </div>
     </div>
   );

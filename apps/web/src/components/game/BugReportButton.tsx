@@ -80,13 +80,18 @@ export default function BugReportButton({
 
   return (
     <>
+      {/* 44px hit area around the 32px bubble; the negative margin keeps the
+          layout footprint the bubble's own size. */}
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
+        className="w-11 h-11 -m-1.5 flex items-center justify-center group"
         title={s.reportBug}
         aria-label={s.reportBug}
       >
-        🐞
+        <span className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 group-hover:bg-black/50 transition-colors text-white/70 group-hover:text-white text-sm">
+          🐞
+        </span>
       </button>
 
       {open && (
@@ -97,15 +102,24 @@ export default function BugReportButton({
               setOpen(false);
           }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="bug-report-title"
+            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4"
+          >
             <div className="flex items-start justify-between">
-              <h2 className="font-black text-lg text-gray-900">
+              <h2
+                id="bug-report-title"
+                className="font-black text-lg text-gray-900"
+              >
                 🐞 {s.reportBugTitle}
               </h2>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 disabled={status === "sending"}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none -mt-1 disabled:opacity-50"
+                className="w-11 h-11 -m-2.5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 text-lg leading-none disabled:opacity-50"
                 aria-label={s.reportBugCancel}
               >
                 ✕
@@ -135,20 +149,22 @@ export default function BugReportButton({
 
             <div className="flex items-center justify-end gap-2 pt-1">
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 disabled={status === "sending"}
-                className="px-3 py-2 text-sm text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50"
+                className="min-h-[44px] px-3 text-sm text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50"
               >
                 {s.reportBugCancel}
               </button>
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={
                   !message.trim() ||
                   status === "sending" ||
                   status === "sent"
                 }
-                className="px-4 py-2 text-sm bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[44px] px-4 text-sm bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "sending"
                   ? s.reportBugSending

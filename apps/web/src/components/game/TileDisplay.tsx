@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { memo } from "react";
 import type { Tile } from "@capi/engine";
 
 interface Props {
   tile: Tile;
   selected?: boolean;
-  onClick?: () => void;
+  onClick?: (tile: Tile) => void;
   small?: boolean;
   faceDown?: boolean;
   highlight?: boolean;
@@ -27,38 +27,55 @@ const PIP_POSITIONS: Record<number, [number, number][]> = {
   6: [[30, 22], [70, 22], [30, 50], [70, 50], [30, 78], [70, 78]],
 };
 
-// A unique id per PipHalf instance so multiple tiles' gradient defs don't
-// collide in the DOM.
-let pipGradientSeq = 0;
+// One gradient definition serves every pip on the page: Board and Hand each
+// mount TileGradientDefs once and the pip fill references it by id.
+const PIP_GRADIENT_ID = "capi-pip-well";
 
-function PipHalf({ pips }: { pips: number }) {
-  const positions = PIP_POSITIONS[pips] ?? [];
-  // Stable per-instance id across re-renders.
-  const gradId = useRef(`pip-${pipGradientSeq++}`).current;
+/**
+ * Shared defs for the drilled-pip gradient. Rendered once by Board and once
+ * by Hand instead of minting a gradient per tile half. Zero-size and
+ * absolutely positioned rather than display:none, which would stop WebKit
+ * from resolving the url(#id) reference.
+ */
+export function TileGradientDefs() {
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-full block">
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width={0}
+      height={0}
+      style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }}
+    >
       <defs>
         {/* Drilled-pip look: a dished well that's darkest just off-center
             (where a real drilled hole shadows) with a faint lit rim, so pips
             read as carved into the tile rather than printed on it. */}
-        <radialGradient id={gradId} cx="38%" cy="34%" r="75%">
+        <radialGradient id={PIP_GRADIENT_ID} cx="38%" cy="34%" r="75%">
           <stop offset="0%" stopColor="#3a3a3a" />
           <stop offset="45%" stopColor="#1c1c1c" />
           <stop offset="100%" stopColor="#050505" />
         </radialGradient>
       </defs>
+    </svg>
+  );
+}
+
+function PipHalf({ pips }: { pips: number }) {
+  const positions = PIP_POSITIONS[pips] ?? [];
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full block">
       {positions.map(([cx, cy], i) => (
         <g key={i}>
           {/* faint lit rim below/right of the well */}
           <circle cx={cx} cy={cy} r={10} fill="#000" opacity={0.18} />
-          <circle cx={cx} cy={cy} r={9.2} fill={`url(#${gradId})`} />
+          <circle cx={cx} cy={cy} r={9.2} fill={`url(#${PIP_GRADIENT_ID})`} />
         </g>
       ))}
     </svg>
   );
 }
 
-export default function TileDisplay({
+function TileDisplay({
   tile,
   selected,
   onClick,
@@ -117,8 +134,11 @@ export default function TileDisplay({
 
   return (
     <button
-      onClick={onClick}
+      type="button"
+      onClick={onClick ? () => onClick(tile) : undefined}
       disabled={!onClick}
+      aria-label={`${tile[0]} ${tile[1]}`}
+      aria-pressed={onClick ? !!selected : undefined}
       style={sizeStyle}
       className={`
         ${sizeClasses} rounded-lg flex flex-col items-center justify-center
@@ -153,3 +173,21 @@ export default function TileDisplay({
     </button>
   );
 }
+
+// Tiles arrive as fresh arrays on every realtime sync, so compare by pips
+// rather than by reference; everything else is a scalar or a callback.
+function tilePropsEqual(a: Props, b: Props): boolean {
+  return (
+    a.tile[0] === b.tile[0] &&
+    a.tile[1] === b.tile[1] &&
+    a.selected === b.selected &&
+    a.onClick === b.onClick &&
+    a.small === b.small &&
+    a.faceDown === b.faceDown &&
+    a.highlight === b.highlight &&
+    a.w === b.w &&
+    a.h === b.h
+  );
+}
+
+export default memo(TileDisplay, tilePropsEqual);

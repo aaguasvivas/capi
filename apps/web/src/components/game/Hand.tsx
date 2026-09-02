@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { Tile } from "@capi/engine";
-import TileDisplay from "./TileDisplay";
+import TileDisplay, { TileGradientDefs } from "./TileDisplay";
 import { useI18n } from "@/lib/i18n/context";
+
+type End = "left" | "right";
 
 interface Props {
   tiles: Tile[];
@@ -11,16 +13,33 @@ interface Props {
   boardLeftEnd: number;
   boardRightEnd: number;
   boneyardCount: number;
-  onPlay: (tile: Tile, end: "left" | "right") => void;
+  onPlay: (tile: Tile, end: End) => void;
   onPass: () => void;
   onDraw: () => void;
+  /** Fires with the tile waiting on the end chooser, or null once it closes. */
+  onSelect?: (tile: Tile | null) => void;
 }
 
-function tileMatchesEnd(tile: Tile, pip: number): boolean {
+// From this many tiles on, the hand uses the small preset so a drawn-up
+// 1v1 hand still fits inside its capped height.
+const SMALL_HAND_AT = 9;
+
+const END_BUTTON =
+  "min-h-[40px] px-4 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold hover:brightness-110 transition-all active:scale-95";
+
+function matchesEnd(tile: Tile, pip: number): boolean {
   return tile[0] === pip || tile[1] === pip;
 }
 
-export default function Hand({
+function sameTile(a: Tile, b: Tile): boolean {
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+function tileKey(tile: Tile): string {
+  return `${tile[0]}-${tile[1]}`;
+}
+
+function Hand({
   tiles,
   isMyTurn,
   boardLeftEnd,
@@ -29,165 +48,189 @@ export default function Hand({
   onPlay,
   onPass,
   onDraw,
+  onSelect,
 }: Props) {
   const { s } = useI18n();
   const [selected, setSelected] = useState<Tile | null>(null);
+  // The tile that was tapped but fits nowhere. n re-keys it so a second tap
+  // restarts the shake even mid-animation; the finished animation rests at
+  // the identity frame, so the entry can linger until the next shake.
+  const [shake, setShake] = useState<{ key: string; n: number } | null>(null);
   const prevCountRef = useRef(tiles.length);
   const [newTileCount, setNewTileCount] = useState(0);
 
   useEffect(() => {
-    const prev = prevCountRef.current;
-    const curr = tiles.length;
-    if (curr > prev) {
-      setNewTileCount(curr - prev);
-      const timer = setTimeout(() => setNewTileCount(0), 1500);
-      return () => clearTimeout(timer);
-    }
-    prevCountRef.current = curr;
+    const added = tiles.length - prevCountRef.current;
+    prevCountRef.current = tiles.length;
+    if (added <= 0) return;
+    setNewTileCount(added);
+    const timer = setTimeout(() => setNewTileCount(0), 1500);
+    return () => clearTimeout(timer);
   }, [tiles.length]);
 
-  useEffect(() => {
-    prevCountRef.current = tiles.length;
-  }, [tiles.length]);
+  const select = useCallback(
+    (tile: Tile | null) => {
+      setSelected(tile);
+      onSelect?.(tile);
+    },
+    [onSelect]
+  );
 
   // Clear any stale tile selection when it's no longer my turn or a new
   // round starts with an empty board.
   useEffect(() => {
-    if (!isMyTurn || boardLeftEnd === -1) {
-      setSelected(null);
-    }
-  }, [isMyTurn, boardLeftEnd]);
+    if (selected && (!isMyTurn || boardLeftEnd === -1)) select(null);
+  }, [selected, isMyTurn, boardLeftEnd, select]);
 
-  const hasLegalPlay =
-    boardLeftEnd === -1
-      ? tiles.length > 0
-      : tiles.some(
-          (t) =>
-            tileMatchesEnd(t, boardLeftEnd) ||
-            tileMatchesEnd(t, boardRightEnd)
-        );
+  const boardEmpty = boardLeftEnd === -1;
+  const hasLegalPlay = boardEmpty
+    ? tiles.length > 0
+    : tiles.some(
+        (t) => matchesEnd(t, boardLeftEnd) || matchesEnd(t, boardRightEnd)
+      );
 
-  function handleTileClick(tile: Tile) {
-    if (!isMyTurn) return;
-    // Empty board (e.g., round 2+ first move): play immediately, no
-    // left/right end choice is meaningful when there are no ends yet.
-    if (boardLeftEnd === -1) {
-      onPlay(tile, "left");
-      setSelected(null);
-      return;
-    }
-    setSelected((prev) =>
-      prev && prev[0] === tile[0] && prev[1] === tile[1] ? null : tile
-    );
-  }
+  // Play the end the tap meant. One matching end plays at once. Two matching
+  // ends showing the same pip are the same play, so that goes at once too.
+  // Only two different pips need the chooser. A tile that fits nowhere
+  // shakes instead of opening a dead-end panel.
+  const handleTileClick = useCallback(
+    (tile: Tile) => {
+      if (!isMyTurn) return;
+      if (boardEmpty) {
+        onPlay(tile, "left");
+        return;
+      }
+      if (selected && sameTile(selected, tile)) {
+        select(null);
+        return;
+      }
+      const left = matchesEnd(tile, boardLeftEnd);
+      const right = matchesEnd(tile, boardRightEnd);
+      if (!left && !right) {
+        const key = tileKey(tile);
+        setShake((prev) => ({ key, n: (prev?.n ?? 0) + 1 }));
+        return;
+      }
+      if (left && right && boardLeftEnd !== boardRightEnd) {
+        select(tile);
+        return;
+      }
+      onPlay(tile, right ? "right" : "left");
+      if (selected) select(null);
+    },
+    [isMyTurn, boardEmpty, boardLeftEnd, boardRightEnd, onPlay, select, selected]
+  );
 
-  function handleEndClick(end: "left" | "right") {
+  function handleEndClick(end: End) {
     if (!selected) return;
     onPlay(selected, end);
-    setSelected(null);
+    select(null);
   }
 
-  const matchesLeft = selected
-    ? tileMatchesEnd(selected, boardLeftEnd)
-    : false;
-  const matchesRight = selected
-    ? tileMatchesEnd(selected, boardRightEnd)
-    : false;
+  const small = tiles.length >= SMALL_HAND_AT;
+  const chooser = isMyTurn && selected;
 
   return (
-    <div className="space-y-3">
-      {isMyTurn && selected && (
-        <div className="flex items-center justify-center gap-3 animate-slide-up">
-          <button
-            onClick={() => handleEndClick("left")}
-            disabled={!matchesLeft}
-            className="px-4 py-2 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold disabled:opacity-30 hover:brightness-110 transition-all active:scale-95"
-          >
-            {s.leftEnd}
-          </button>
-          <button
-            onClick={() => setSelected(null)}
-            className="px-3 py-2 text-sm rounded-xl border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors"
-          >
-            ✕
-          </button>
-          <button
-            onClick={() => handleEndClick("right")}
-            disabled={!matchesRight}
-            className="px-4 py-2 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold disabled:opacity-30 hover:brightness-110 transition-all active:scale-95"
-          >
-            {s.rightEnd}
-          </button>
-        </div>
-      )}
+    <div className="hand-cap flex flex-col gap-2">
+      <TileGradientDefs />
 
-      <div className="flex flex-wrap gap-1.5 justify-center">
+      {/* Top padding leaves room for the raised selected tile inside the
+          scroll clip; the list wraps and scrolls once the cap is reached. */}
+      <div className="min-h-0 overflow-y-auto overscroll-contain flex flex-wrap content-start justify-center gap-1.5 px-0.5 pt-4 pb-1">
         {tiles.map((tile, i) => {
+          const key = tileKey(tile);
+          const isSelected = !!selected && sameTile(selected, tile);
           const isPlayable =
             isMyTurn &&
             !selected &&
-            (boardLeftEnd === -1 ||
-              tileMatchesEnd(tile, boardLeftEnd) ||
-              tileMatchesEnd(tile, boardRightEnd));
-
+            (boardEmpty ||
+              matchesEnd(tile, boardLeftEnd) ||
+              matchesEnd(tile, boardRightEnd));
           const isNewTile =
             newTileCount > 0 && i >= tiles.length - newTileCount;
           const staggerIdx = isNewTile
             ? i - (tiles.length - newTileCount)
             : 0;
+          const shaking = shake?.key === key;
 
           return (
             <div
-              key={`${tile[0]}-${tile[1]}`}
-              className={isNewTile ? "animate-tile-enter" : ""}
+              key={shaking ? `${key}-shake-${shake.n}` : key}
+              className={
+                shaking
+                  ? "animate-tile-shake"
+                  : isNewTile
+                    ? "animate-tile-enter"
+                    : undefined
+              }
               style={
-                isNewTile
+                isNewTile && !shaking
                   ? { animationDelay: `${staggerIdx * 150}ms` }
                   : undefined
               }
             >
               <TileDisplay
                 tile={tile}
-                selected={
-                  !!selected &&
-                  selected[0] === tile[0] &&
-                  selected[1] === tile[1]
-                }
+                small={small}
+                selected={isSelected}
                 highlight={isPlayable}
-                onClick={isMyTurn ? () => handleTileClick(tile) : undefined}
+                onClick={isMyTurn ? handleTileClick : undefined}
               />
             </div>
           );
         })}
       </div>
 
-      {isMyTurn && !selected && !hasLegalPlay && boneyardCount > 0 && (
-        <div className="flex justify-center pt-1">
+      {/* One fixed-height action row: the chooser, draw, pass, or the
+          waiting note all take the same slot, so the hand never jumps. */}
+      <div className="h-11 flex-shrink-0 flex items-center justify-center">
+        {chooser ? (
+          <div className="flex items-center gap-3 animate-slide-up">
+            <button
+              type="button"
+              onClick={() => handleEndClick("left")}
+              className={END_BUTTON}
+            >
+              {s.playOnEnd(boardLeftEnd)}
+            </button>
+            <button
+              type="button"
+              onClick={() => select(null)}
+              aria-label={s.closeTray}
+              className="min-w-[40px] min-h-[40px] px-3 text-sm rounded-xl border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              ✕
+            </button>
+            <button
+              type="button"
+              onClick={() => handleEndClick("right")}
+              className={END_BUTTON}
+            >
+              {s.playOnEnd(boardRightEnd)}
+            </button>
+          </div>
+        ) : isMyTurn && !hasLegalPlay && boneyardCount > 0 ? (
           <button
+            type="button"
             onClick={onDraw}
-            className="px-6 py-2.5 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
+            className="min-h-[40px] px-6 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
           >
             {s.draw(boneyardCount)}
           </button>
-        </div>
-      )}
-
-      {isMyTurn && !selected && !hasLegalPlay && boneyardCount === 0 && (
-        <div className="flex justify-center pt-1">
+        ) : isMyTurn && !hasLegalPlay ? (
           <button
+            type="button"
             onClick={onPass}
-            className="px-6 py-2.5 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
+            className="min-h-[40px] px-6 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
           >
             {s.pass}
           </button>
-        </div>
-      )}
-
-      {!isMyTurn && (
-        <p className="text-center text-sm text-gray-500 pt-1 select-none">
-          {s.waitingTurn}
-        </p>
-      )}
+        ) : !isMyTurn ? (
+          <p className="text-sm text-gray-500 select-none">{s.waitingTurn}</p>
+        ) : null}
+      </div>
     </div>
   );
 }
+
+export default memo(Hand);

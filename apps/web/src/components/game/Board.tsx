@@ -1,23 +1,58 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Tile } from "@capi/engine";
-import TileDisplay from "./TileDisplay";
+import { layoutBoard, dimsForWidth, type LayoutResult } from "@capi/engine";
+import TileDisplay, { TileGradientDefs } from "./TileDisplay";
 import { useI18n } from "@/lib/i18n/context";
-import { layoutBoard, dimsForWidth } from "@capi/engine";
 
 interface Props {
   board: Tile[];
   /** Emerald halo on the open ends (index 0 and last) while it's your turn. */
   endsGlow?: boolean;
+  /** The local hand. When given, only the ends this hand can play on glow. */
+  hand?: Tile[];
+  /** Tile waiting on the end chooser: the ends it fits pulse, the rest go quiet. */
+  selectedTile?: Tile | null;
 }
 
-export default function Board({ board, endsGlow }: Props) {
+const EMPTY_LAYOUT: LayoutResult = { placements: [], contentW: 0, contentH: 0 };
+
+const NEWEST_RING = {
+  borderRadius: "0.5rem",
+  boxShadow: "0 0 0 2px rgba(251,191,36,0.55), 0 0 14px rgba(251,191,36,0.3)",
+};
+
+const END_GLOW = {
+  borderRadius: "0.5rem",
+  boxShadow: "0 0 0 2px rgba(52,211,153,0.55), 0 0 12px rgba(52,211,153,0.35)",
+};
+
+function matchesEnd(tile: Tile, pip: number): boolean {
+  return tile[0] === pip || tile[1] === pip;
+}
+
+function sameTile(a: Tile | null, b: Tile | null): boolean {
+  if (!a || !b) return a === b;
+  return a[0] === b[0] && a[1] === b[1];
+}
+
+// The chain grows at either end: a tile played on the left lands at index 0,
+// on the right at the last index. Comparing the first tile against the
+// previous board tells which end grew. Kept as state that is updated during
+// render (React's "information from previous renders" pattern) so the
+// newest-tile derivation stays pure and survives unrelated re-renders.
+interface Growth {
+  len: number;
+  first: Tile | null;
+  newest: number; // index of the latest play, -1 after a round reset
+  grew: boolean;
+}
+
+function Board({ board, endsGlow, hand, selectedTile }: Props) {
   const { s } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const lastBoardLenRef = useRef(0);
-  const prevFirstTileRef = useRef<Tile | null>(null);
 
   // Observe the scroll container's size so layout recalculates on resize.
   useEffect(() => {
@@ -34,10 +69,13 @@ export default function Board({ board, endsGlow }: Props) {
   // Compact tiles on narrow screens so more fit per row and the chain stays
   // short; full size on tablet/desktop.
   const dims = dimsForWidth(size.w);
-  const layout =
-    board.length > 0 && size.w > 0
-      ? layoutBoard(board, size.w, dims)
-      : { placements: [], contentW: 0, contentH: 0 };
+  const layout = useMemo(
+    () =>
+      board.length > 0 && size.w > 0
+        ? layoutBoard(board, size.w, dims)
+        : EMPTY_LAYOUT,
+    [board, size.w, dims]
+  );
 
   // The inner content div is at least the size of the visible viewport, so
   // short chains sit centered instead of stuck in the top-left corner.
@@ -48,41 +86,36 @@ export default function Board({ board, endsGlow }: Props) {
   const xOffset = (innerW - layout.contentW) / 2;
   const yOffset = (innerH - layout.contentH) / 2;
 
-  // The chain grows at either end: a tile played on the left end lands at
-  // index 0, on the right end at the last index. Detect which end grew by
-  // comparing the first tile against the previous render, and remember it
-  // so the last-move highlight survives unrelated re-renders.
-  const newestIndexRef = useRef(-1);
-  const prevLen = lastBoardLenRef.current;
-  const grew = board.length > prevLen;
-  if (grew) {
-    const prevFirst = prevFirstTileRef.current;
-    newestIndexRef.current =
-      prevLen > 0 &&
-      prevFirst &&
-      (board[0][0] !== prevFirst[0] || board[0][1] !== prevFirst[1])
+  const [growth, setGrowth] = useState<Growth>({
+    len: 0,
+    first: null,
+    newest: -1,
+    grew: false,
+  });
+  const first = board.length > 0 ? board[0] : null;
+  if (board.length !== growth.len || !sameTile(first, growth.first)) {
+    const grew = board.length > growth.len;
+    const newest = grew
+      ? growth.len > 0 && !sameTile(first, growth.first)
         ? 0
-        : board.length - 1;
-  } else if (board.length < prevLen) {
-    newestIndexRef.current = -1; // round reset
+        : board.length - 1
+      : -1;
+    setGrowth({ len: board.length, first, newest, grew });
   }
-  const newestIndex = newestIndexRef.current;
-
-  useEffect(() => {
-    lastBoardLenRef.current = board.length;
-    prevFirstTileRef.current = board.length > 0 ? board[0] : null;
-  }, [board]);
+  const newestIndex = growth.newest;
 
   // Auto-scroll to keep the latest played tile in view. Only fires when the
-  // tile count grows — not on resize, not on round resets.
+  // chain grows, not on resize and not on round resets.
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el || layout.placements.length === 0 || !grew) return;
+    if (!el || !growth.grew || layout.placements.length === 0) return;
 
     // If the whole chain fits in the viewport, no scroll needed.
     if (layout.contentW <= size.w && layout.contentH <= size.h) return;
 
-    const target = layout.placements[newestIndex] ?? layout.placements[layout.placements.length - 1];
+    const target =
+      layout.placements[growth.newest] ??
+      layout.placements[layout.placements.length - 1];
     const targetLeft = target.x + xOffset - el.clientWidth / 2;
     const targetTop = target.y + yOffset - el.clientHeight / 2;
     el.scrollTo({
@@ -91,7 +124,25 @@ export default function Board({ board, endsGlow }: Props) {
       behavior: "smooth",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board.length, layout.contentW, layout.contentH, size.w, size.h]);
+  }, [growth]);
+
+  // Open ends of the serpentine chain are always index 0 (left end, pip
+  // board[0][0]) and the last index (right end, pip board[last][1]). A
+  // 1-tile board is one tile that is both ends.
+  const lastIndex = layout.placements.length - 1;
+  const leftPip = board.length > 0 ? board[0][0] : -1;
+  const rightPip = board.length > 0 ? board[board.length - 1][1] : -1;
+  const playable = useMemo(
+    () => ({
+      left: hand ? hand.some((t) => matchesEnd(t, leftPip)) : true,
+      right: hand ? hand.some((t) => matchesEnd(t, rightPip)) : true,
+    }),
+    [hand, leftPip, rightPip]
+  );
+  const fits = {
+    left: !!selectedTile && matchesEnd(selectedTile, leftPip),
+    right: !!selectedTile && matchesEnd(selectedTile, rightPip),
+  };
 
   return (
     <div
@@ -99,6 +150,7 @@ export default function Board({ board, endsGlow }: Props) {
       className="flex-1 min-h-0 w-full relative overflow-auto z-0 board-scroll"
       style={{ WebkitOverflowScrolling: "touch" }}
     >
+      <TileGradientDefs />
       {board.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center text-white/30 text-sm italic select-none z-[2] pointer-events-none">
           {s.emptyTable}
@@ -113,18 +165,24 @@ export default function Board({ board, endsGlow }: Props) {
       >
         {layout.placements.map((p, i) => {
           const isNewest = i === newestIndex;
-          // Open ends of the serpentine chain are always index 0 and the last
-          // index (a 1-tile board is one tile that is both ends). Amber
-          // newest-ring wins when a tile is both newest and an end.
-          const isEnd =
-            !!endsGlow && (i === 0 || i === layout.placements.length - 1);
+          const isLeftEnd = i === 0;
+          const isRightEnd = i === lastIndex;
+          // While a tile waits on the chooser, only the ends it fits light
+          // up, and they pulse. Otherwise the amber newest-ring wins over
+          // the resting your-turn glow when a tile is both newest and an end.
+          const pulse =
+            (isLeftEnd && fits.left) || (isRightEnd && fits.right);
+          const glow =
+            !selectedTile &&
+            !!endsGlow &&
+            ((isLeftEnd && playable.left) || (isRightEnd && playable.right));
           return (
             <div
               // Re-key the newest tile per play so its slam animation
               // re-triggers even when the same index grows twice in a row
               // (two consecutive plays on the same end).
               key={isNewest ? `n-${i}-${board.length}` : `t-${i}`}
-              className="absolute"
+              className={pulse ? "absolute end-pulse" : "absolute"}
               style={{
                 left: p.x + xOffset,
                 top: p.y + yOffset,
@@ -133,21 +191,15 @@ export default function Board({ board, endsGlow }: Props) {
               }}
             >
               <div
-                className={isNewest && grew ? "animate-tile-slam" : ""}
+                className={isNewest && growth.grew ? "animate-tile-slam" : ""}
                 style={
-                  isNewest
-                    ? {
-                        borderRadius: "0.5rem",
-                        boxShadow:
-                          "0 0 0 2px rgba(251,191,36,0.55), 0 0 14px rgba(251,191,36,0.3)",
-                      }
-                    : isEnd
-                      ? {
-                          borderRadius: "0.5rem",
-                          boxShadow:
-                            "0 0 0 2px rgba(52,211,153,0.55), 0 0 12px rgba(52,211,153,0.35)",
-                        }
-                      : undefined
+                  pulse
+                    ? undefined
+                    : isNewest
+                      ? NEWEST_RING
+                      : glow
+                        ? END_GLOW
+                        : undefined
                 }
               >
                 <TileDisplay tile={p.tile} w={dims.TW} h={dims.TH} />
@@ -159,3 +211,5 @@ export default function Board({ board, endsGlow }: Props) {
     </div>
   );
 }
+
+export default memo(Board);

@@ -166,7 +166,7 @@
 
 /* ── Board surface textures (with built-in vignette lighting) ── */
 
-/* Organic fabric grain — faint fractal noise, no straight lines (so no
+/* Organic fabric grain: faint fractal noise, no straight lines (so no
    moiré). Black pixels at low noisy alpha; reads as felt nap over the
    lit gradient beneath it. Shared so any theme can layer it on. */
 :root {
@@ -382,41 +382,12 @@
   }
 }
 
-/* Safe area for notched devices */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .min-h-screen {
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  }
-}
-
-@supports (padding-top: env(safe-area-inset-top)) {
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-}
-
 /* Prevent overscroll / bounce on iOS */
 html, body {
   overscroll-behavior: none;
 }
 
 /* ── Utilities ────────────────────────────────────────── */
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.writing-vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
 
 /* Prevent text selection on game elements */
 .select-game-none {
@@ -455,4 +426,41 @@ html, body {
   display: none;
   width: 0;
   height: 0;
+}
+
+/* ── Hand ─────────────────────────────────────────────────
+   The hand never grows past 38% of the viewport; the tile list inside it
+   wraps and scrolls. vh comes first as the fallback where dvh is missing. */
+.hand-cap {
+  max-height: 38vh;
+  max-height: 38dvh;
+}
+
+/* A tapped tile that fits neither end: a quick sideways shake with a dip in
+   opacity, then back where it was. */
+@keyframes tile-shake {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  20% { transform: translateX(-5px); opacity: 0.6; }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); opacity: 0.6; }
+  80% { transform: translateX(3px); }
+}
+.animate-tile-shake {
+  animation: tile-shake 0.35s ease-in-out both;
+}
+
+/* ── Board end pulse ──────────────────────────────────────
+   An open end that fits the tile waiting on the chooser breathes with an
+   emerald ring, stronger than the resting your-turn glow. */
+@keyframes end-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.7), 0 0 12px rgba(52, 211, 153, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 1), 0 0 24px rgba(52, 211, 153, 0.7);
+  }
+}
+.end-pulse {
+  border-radius: 0.5rem;
+  animation: end-pulse 0.9s ease-in-out infinite;
 }
