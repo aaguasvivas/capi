@@ -88,7 +88,7 @@ describe("scoreDomino", () => {
 });
 
 describe("scoreTrancao", () => {
-  it("lower team wins difference", () => {
+  it("lower side wins and takes every pip on the table (both sides)", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -98,8 +98,8 @@ describe("scoreTrancao", () => {
       scores: [0, 0],
       roundIndex: 0,
       hands: {
-        n: [[1, 1]],
-        s: [[6, 6]],
+        n: [[1, 1]], // 2
+        s: [[6, 6]], // 12
         e: [],
         w: [],
       },
@@ -117,9 +117,10 @@ describe("scoreTrancao", () => {
     };
     const r = scoreTrancao(state);
     expect(r.winnerTeam).toBe(0);
-    expect(r.pts).toBe(10);
+    // Whole table, not the difference: 2 + 12 = 14
+    expect(r.pts).toBe(14);
   });
-  it("tie: starter wins, 0 pts", () => {
+  it("tie: starter's team wins and takes the whole table", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -129,8 +130,8 @@ describe("scoreTrancao", () => {
       scores: [0, 0],
       roundIndex: 0,
       hands: {
-        n: [[1, 2]],
-        s: [[1, 2]],
+        n: [[1, 2]], // 3
+        s: [[1, 2]], // 3
         e: [],
         w: [],
       },
@@ -148,19 +149,58 @@ describe("scoreTrancao", () => {
     };
     const r = scoreTrancao(state);
     expect(r.winnerTeam).toBe(0);
-    expect(r.pts).toBe(0);
+    expect(r.pts).toBe(6);
+  });
+  it("tie: a starter on team 1 takes the whole table for team 1", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: false,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[2, 3]], // 5
+        s: [[0, 5]], // 5
+        e: [],
+        w: [],
+      },
+      board: [],
+      boneyard: [],
+      currentTurn: "s",
+      consecutivePasses: 2,
+      passesSinceLastPlay: 2,
+      starterThisRound: "s",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: null,
+    };
+    const r = scoreTrancao(state);
+    expect(r.winnerTeam).toBe(1);
+    expect(r.pts).toBe(10);
   });
 });
 
 describe("isCapicua", () => {
-  it("true when both ends match, tile not double/blank", () => {
+  it("true when both ends match and the tile is not a double", () => {
     expect(isCapicua([[4, 5], [5, 3], [3, 4]], [4, 3])).toBe(true);
   });
   it("false when tile is double", () => {
     expect(isCapicua([[3, 3]], [3, 3])).toBe(false);
   });
-  it("false when tile has blank", () => {
-    expect(isCapicua([[0, 1], [1, 2], [2, 0]], [0, 4])).toBe(false);
+  it("false for the double blank (doubles are the only exclusion)", () => {
+    expect(isCapicua([[0, 0]], [0, 0])).toBe(false);
+  });
+  it("true when the closing tile has a blank", () => {
+    // Board ends 3 and 3; the closing tile [0,3] carries a blank and still counts.
+    expect(isCapicua([[3, 5], [5, 0], [0, 3]], [0, 3])).toBe(true);
+  });
+  it("true when both open ends are blank", () => {
+    // Board ends 0 and 0; the closing tile [5,0] is not a double.
+    expect(isCapicua([[0, 3], [3, 5], [5, 0]], [5, 0])).toBe(true);
   });
   it("false when ends differ", () => {
     expect(isCapicua([[3, 4], [4, 5]], [5, 2])).toBe(false);
@@ -207,7 +247,7 @@ describe("2v2 - teamPips", () => {
 describe("2v2 - scoreDomino", () => {
   it("returns the sum of ALL remaining hands (opps + winner's teammate)", () => {
     // Winner N went out (hand empty). Per Dominican rules the winner's team
-    // banks every remaining pip on the table — both opps AND the teammate.
+    // banks every remaining pip on the table, both opps AND the teammate.
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -240,7 +280,7 @@ describe("2v2 - scoreDomino", () => {
 });
 
 describe("2v2 - scoreTrancao", () => {
-  it("compares team pip totals", () => {
+  it("lower team wins and takes every pip on the table (both teams)", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -268,8 +308,40 @@ describe("2v2 - scoreTrancao", () => {
       lastPlayedBy: null,
     };
     const r = scoreTrancao(state);
-    // Team 0 = 2+4 = 6, Team 1 = 12+10 = 22
+    // Team 0 = 2+4 = 6, Team 1 = 12+10 = 22. Team 0 takes 6 + 22 = 28.
     expect(r.winnerTeam).toBe(0);
-    expect(r.pts).toBe(16);
+    expect(r.pts).toBe(28);
+  });
+  it("tie: starter's team takes the whole table", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 1]],   // 2
+        e: [[3, 0]],   // 3
+        s: [[2, 2]],   // 4
+        w: [[1, 2]],   // 3
+      },
+      board: [],
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 4,
+      passesSinceLastPlay: 4,
+      starterThisRound: "e",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: null,
+    };
+    const r = scoreTrancao(state);
+    // Team 0 = 6, Team 1 = 6. Starter E is on team 1, which takes all 12.
+    expect(r.winnerTeam).toBe(1);
+    expect(r.pts).toBe(12);
   });
 });
