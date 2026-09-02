@@ -25,28 +25,42 @@ const ALL_TILES: Tile[] = (() => {
   return tiles;
 })();
 
-function shuffle<T>(arr: T[]): T[] {
+export type Rng = () => number;
+
+// Default deal randomness: the platform CSPRNG when available (Node and every
+// browser), so a deal can never be predicted from earlier deals.
+export function secureRandom(): number {
+  const c = globalThis.crypto;
+  if (c && typeof c.getRandomValues === "function") {
+    const buf = new Uint32Array(1);
+    c.getRandomValues(buf);
+    return buf[0] / 4294967296;
+  }
+  return Math.random();
+}
+
+function shuffle<T>(arr: T[], rng: Rng): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
 }
 
-function tileEqual(a: Tile, b: Tile): boolean {
+export function tileEqual(a: Tile, b: Tile): boolean {
   return (
     (a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])
   );
 }
 
-function removeTileFromHand(hand: Tile[], tile: Tile): Tile[] {
+export function removeTileFromHand(hand: Tile[], tile: Tile): Tile[] {
   const idx = hand.findIndex((t) => tileEqual(t, tile));
   if (idx < 0) return hand;
   return [...hand.slice(0, idx), ...hand.slice(idx + 1)];
 }
 
-function placeTileOnBoard(
+export function placeTileOnBoard(
   board: Tile[],
   tile: Tile,
   end: "left" | "right"
@@ -90,10 +104,12 @@ export function createInitialState(params: {
   theme: GameState["theme"];
   is2v2: boolean;
   targetScore?: number;
+  // Seeded in tests for reproducible games; production uses secureRandom.
+  rng?: Rng;
 }): GameState {
-  const { mode, theme, is2v2, targetScore = 100 } = params;
+  const { mode, theme, is2v2, targetScore = 100, rng = secureRandom } = params;
   const seats = getSeatsForGame(is2v2);
-  const shuffled = shuffle(ALL_TILES);
+  const shuffled = shuffle(ALL_TILES, rng);
   const hands: Record<Seat, Tile[]> = {
     n: [],
     e: [],
@@ -309,7 +325,9 @@ export function applyMove(
     const newConsecutive = state.consecutivePasses + 1;
     const newPassesSincePlay = state.passesSinceLastPlay + 1;
     const passThreshold = state.is2v2 ? 4 : 2;
-    const veinticincoThreshold = state.is2v2 ? 3 : 1;
+    // Pase corrido is a parejas rule: it needs the three other seats to pass.
+    // Heads-up, a single pass is just a pass (and two passes are a trancao).
+    const veinticincoThreshold = state.is2v2 ? 3 : Infinity;
     const nextTurn = getNextSeat(seat, state.is2v2);
 
     // VEINTICINCO ("pase corrido"): the cycle of forced passes returns to
@@ -328,16 +346,14 @@ export function applyMove(
         state.scores[0] + (winningTeam === 0 ? VEINTICINCO_BONUS : 0),
         state.scores[1] + (winningTeam === 1 ? VEINTICINCO_BONUS : 0),
       ];
-      const winner =
-        newScores[0] >= state.targetScore || newScores[1] >= state.targetScore
-          ? (newScores[0] >= state.targetScore ? 0 : 1)
-          : null;
       const payload: Record<string, unknown> = {
         winningTeam,
         veinticincoBonus: VEINTICINCO_BONUS,
         team0Pips: teamPips(state, 0),
         team1Pips: teamPips(state, 1),
       };
+      // The bonus is banked mid-round; a game only ends when a round does,
+      // so a live board is never abandoned with hands still full.
       const newState: GameState = {
         ...state,
         scores: newScores,
@@ -346,8 +362,6 @@ export function applyMove(
         passesSinceLastPlay: newPassesSincePlay,
         lastCallout: "veinticinco",
         lastCalloutPayload: payload,
-        winnerTeam: winner,
-        phase: winner !== null ? "finished" : "playing",
       };
       return {
         success: true,
@@ -428,11 +442,15 @@ function getRoundWinningSeat(state: GameState): Seat {
  */
 export function startNewRound(
   state: GameState,
-  existingPlayers: Record<Seat, GameState["players"][Seat]>
+  existingPlayers: Record<Seat, GameState["players"][Seat]>,
+  rng: Rng = secureRandom
 ): GameState {
+  // Only a round that actually ended can be redealt; a finished game stays
+  // finished and a live round is never reshuffled underneath the players.
+  if (state.phase !== "round_over") return state;
   const starter = getRoundWinningSeat(state);
   const seats = getSeatsForGame(state.is2v2);
-  const shuffled = shuffle(ALL_TILES);
+  const shuffled = shuffle(ALL_TILES, rng);
   const hands: Record<Seat, Tile[]> = { n: [], e: [], s: [], w: [] };
   let idx = 0;
   for (const seat of seats) {

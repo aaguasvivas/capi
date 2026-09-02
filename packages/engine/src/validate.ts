@@ -10,6 +10,15 @@ function tileInHand(hand: Tile[], tile: Tile): boolean {
   return hand.some((t) => tileEqual(t, tile));
 }
 
+// Requests arrive as JSON; the type says Tile but the wire says anything.
+function isTile(value: unknown): value is Tile {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((p) => Number.isInteger(p) && p >= 0 && p <= 6)
+  );
+}
+
 function tileMatchesEnd(tile: Tile, endPip: number): boolean {
   return tile[0] === endPip || tile[1] === endPip;
 }
@@ -51,8 +60,16 @@ export function validateMove(
     if (!intent.tile || intent.end === undefined) {
       return "Play requires tile and end";
     }
+    if (!isTile(intent.tile)) {
+      return "Invalid tile";
+    }
     if (!tileInHand(hand, intent.tile)) {
       return "Tile not in hand";
+    }
+    // Anything but the two real ends would skip both match checks below and
+    // let a crafted request drop an unmatched tile onto the board.
+    if (intent.end !== "left" && intent.end !== "right") {
+      return "Invalid end";
     }
     if (state.board.length === 0) {
       return null;

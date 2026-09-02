@@ -12,8 +12,8 @@ import type { GameState, MoveIntent, Seat, Tile } from "../src/types";
  * transition. Any violation prints the seed, so failures reproduce exactly.
  */
 
-// Deterministic RNG (mulberry32). The engine shuffles via Math.random, so
-// tests stub Math.random with this to make whole games reproducible.
+// Deterministic RNG (mulberry32), passed straight into the engine's deal so
+// whole games reproduce from a seed without touching any global.
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
@@ -28,10 +28,6 @@ function mulberry32(seed: number): () => number {
 afterEach(() => {
   vi.restoreAllMocks();
 });
-
-function stubEngineRng(seed: number): void {
-  vi.spyOn(Math, "random").mockImplementation(mulberry32(seed));
-}
 
 const canonKey = (t: Tile): string => `${Math.min(t[0], t[1])}-${Math.max(t[0], t[1])}`;
 const ALL_KEYS: Set<string> = (() => {
@@ -199,14 +195,14 @@ function assertTransition(
       const t1 = teamPips(next, 1);
       const pts = (next.lastCalloutPayload?.pts as number) ?? -1;
       const winner = (next.lastCalloutPayload?.winningTeam as number) ?? -1;
-      expect(pts, L("trancao pts = pip difference")).toBe(Math.abs(t0 - t1));
+      // A trancao pays the whole table to the lighter side, like a domino.
+      expect(pts, L("trancao pts = every pip on the table")).toBe(t0 + t1);
       if (t0 !== t1) {
         expect(winner, L("trancao lower pips wins")).toBe(t0 < t1 ? 0 : 1);
       } else {
         expect(winner, L("trancao tie goes to starter")).toBe(
           getTeam(next.starterThisRound, next.is2v2)
         );
-        expect(pts, L("trancao tie pays 0")).toBe(0);
       }
       expect(winner === 0 ? delta0 : delta1, L("trancao credits winner")).toBe(pts);
       expect(winner === 0 ? delta1 : delta0, L("trancao pays one side")).toBe(0);
@@ -250,10 +246,10 @@ function playFullGame(opts: {
 }): GameState {
   const { seed, is2v2, targetScore } = opts;
   const label = `seed=${seed} ${is2v2 ? "2v2" : "1v1"} target=${targetScore}`;
-  stubEngineRng(seed);
+  const dealRng = mulberry32(seed);
   const choiceRng = mulberry32(seed ^ 0x9e3779b9);
 
-  let state = createInitialState({ mode: "live", theme: "colmado", is2v2, targetScore });
+  let state = createInitialState({ mode: "live", theme: "colmado", is2v2, targetScore, rng: dealRng });
   assertDealInvariants(state, `${label} initial deal`);
   // createInitialState auto-plays the starter's opening tile.
   expect(state.board.length, `${label}: opening tile placed`).toBe(1);
@@ -286,7 +282,7 @@ function playFullGame(opts: {
       const starter = expectedNextStarter(state);
       const prevScores = state.scores;
       const prevRound = state.roundIndex;
-      state = startNewRound(state, state.players);
+      state = startNewRound(state, state.players, dealRng);
       assertDealInvariants(state, `${label} round ${state.roundIndex} deal`);
       expect(state.currentTurn, `${label}: round winner leads next round`).toBe(starter);
       expect(state.starterThisRound, `${label}: starter recorded`).toBe(starter);
@@ -310,19 +306,19 @@ function playFullGame(opts: {
 }
 
 describe("invariant fuzz: full random games through the real reducer", () => {
-  const TARGETS = [25, 50, 100];
+  // 100 and 200 are the production targets; the short ones exercise the
+  // game-over transitions many more times per run.
+  const TARGETS = [25, 50, 100, 200];
 
   it("1v1: 60 seeded games hold every invariant at every step", () => {
     for (let i = 0; i < 60; i++) {
-      playFullGame({ seed: 1000 + i, is2v2: false, targetScore: TARGETS[i % 3] });
-      vi.restoreAllMocks();
+      playFullGame({ seed: 1000 + i, is2v2: false, targetScore: TARGETS[i % TARGETS.length] });
     }
   });
 
   it("2v2: 60 seeded games hold every invariant at every step", () => {
     for (let i = 0; i < 60; i++) {
-      playFullGame({ seed: 2000 + i, is2v2: true, targetScore: TARGETS[i % 3] });
-      vi.restoreAllMocks();
+      playFullGame({ seed: 2000 + i, is2v2: true, targetScore: TARGETS[i % TARGETS.length] });
     }
   });
 });
@@ -339,13 +335,13 @@ describe("invariant fuzz: illegal intents are rejected without side effects", ()
   it("out-of-turn, foreign-tile, wrong-end, bad-draw and bad-pass all bounce", () => {
     for (let i = 0; i < 30; i++) {
       const is2v2 = i % 2 === 0;
-      stubEngineRng(3000 + i);
       const choiceRng = mulberry32(9000 + i);
       let state = createInitialState({
         mode: "live",
         theme: "patio",
         is2v2,
         targetScore: 100,
+        rng: mulberry32(3000 + i),
       });
 
       // Walk a few random legal steps so states are mid-game, then attack.
@@ -420,9 +416,7 @@ describe("invariant fuzz: determinism under a seeded shuffle", () => {
       for (const is2v2 of [false, true]) {
         const runs: GameState[] = [];
         for (let run = 0; run < 2; run++) {
-          const final = playFullGame({ seed, is2v2, targetScore: 50 });
-          runs.push(final);
-          vi.restoreAllMocks();
+          runs.push(playFullGame({ seed, is2v2, targetScore: 50 }));
         }
         expect(runs[0], `seed ${seed} ${is2v2 ? "2v2" : "1v1"} reproducible`).toEqual(runs[1]);
       }
