@@ -13,6 +13,7 @@ const RESEND_FROM =
   "Capi Bug Reports <onboarding@resend.dev>";
 
 const MAX_MESSAGE_LEN = 4000;
+const MAX_STATE_LEN = 200_000;
 
 interface BugReportBody {
   gameId?: string | null;
@@ -51,21 +52,31 @@ export async function POST(req: NextRequest) {
 
     const trimmed = body.message.trim();
 
+    // The attached snapshot is unbounded JSON from the client; keep it to
+    // something a real game state can be (a full state is a few KB) so the
+    // table and the inbox cannot be flooded through this route.
+    const gameStateJson = body.gameState == null ? null : JSON.stringify(body.gameState);
+    if (gameStateJson && gameStateJson.length > MAX_STATE_LEN) {
+      return NextResponse.json({ error: "Game state too large" }, { status: 400 });
+    }
+    const short = (v: unknown, max: number) =>
+      typeof v === "string" ? v.slice(0, max) : null;
+
     // Build the row we want in the DB AND in the email. We intentionally
-    // do not ask Supabase to .select() it back — anon only has INSERT,
+    // do not ask Supabase to .select() it back: anon only has INSERT,
     // not SELECT, on bug_reports for privacy reasons. Asking PostgREST to
     // return the row would 401.
     const row = {
-      game_id: body.gameId ?? null,
-      player_id: body.playerId ?? null,
+      game_id: short(body.gameId, 64),
+      player_id: short(body.playerId, 64),
       message: trimmed,
-      user_agent: body.userAgent ?? null,
-      url: body.url ?? null,
-      viewport_w: body.viewportW ?? null,
-      viewport_h: body.viewportH ?? null,
-      language: body.language ?? null,
+      user_agent: short(body.userAgent, 512),
+      url: short(body.url, 1024),
+      viewport_w: typeof body.viewportW === "number" ? body.viewportW : null,
+      viewport_h: typeof body.viewportH === "number" ? body.viewportH : null,
+      language: short(body.language, 16),
       game_state: body.gameState ?? null,
-      state_version: body.stateVersion ?? null,
+      state_version: typeof body.stateVersion === "number" ? body.stateVersion : null,
     };
 
     const db = createServerClient();
@@ -110,7 +121,9 @@ export async function POST(req: NextRequest) {
 }
 
 function emailSubject(message: string, gameId: string | null): string {
-  const snippet = message.slice(0, 60).replace(/\s+/g, " ");
+  // Collapse whitespace (including newlines) so user text cannot shape the
+  // subject line into extra headers.
+  const snippet = message.slice(0, 60).replace(/[\s\r\n]+/g, " ");
   const tag = gameId ? `game ${gameId.slice(0, 8)}` : "no game";
   return `Capi bug (${tag}): ${snippet}${message.length > 60 ? "..." : ""}`;
 }

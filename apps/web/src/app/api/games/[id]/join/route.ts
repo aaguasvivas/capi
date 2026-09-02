@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Seat } from "@capi/engine";
 import { buildStartedState, maxPlayersFor, type GameRow } from "@/lib/gameStart";
+import { cleanAvatarColor, cleanNickname } from "@/lib/validation";
 
 export async function POST(
   req: NextRequest,
@@ -9,9 +10,10 @@ export async function POST(
 ) {
   try {
     const body = await req.json();
-    const { nickname, avatarColor = "#ec4899" } = body;
+    const nickname = cleanNickname(body.nickname);
+    const avatarColor = cleanAvatarColor(body.avatarColor, "#ec4899");
 
-    if (!nickname || typeof nickname !== "string" || nickname.trim().length === 0) {
+    if (!nickname) {
       return NextResponse.json({ error: "Nickname is required" }, { status: 400 });
     }
 
@@ -60,7 +62,7 @@ export async function POST(
       .insert({
         game_id: params.id,
         seat: nextSeat,
-        nickname: nickname.trim(),
+        nickname,
         avatar_color: avatarColor,
       })
       .select()
@@ -90,7 +92,7 @@ export async function POST(
       });
     }
 
-    const { error: updateError } = await db
+    const { data: started, error: updateError } = await db
       .from("games")
       .update({
         status: "playing",
@@ -98,11 +100,18 @@ export async function POST(
         state_version: 1,
       })
       .eq("id", params.id)
-      .eq("state_version", 0);
+      .eq("state_version", 0)
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       console.error("Failed to start game:", updateError);
       return NextResponse.json({ error: "Failed to start game" }, { status: 500 });
+    }
+    // A concurrent join already dealt the round; this seat is still valid and
+    // the client's first fetch will see the live table.
+    if (!started) {
+      return NextResponse.json({ playerId: newPlayer.id, seat: nextSeat, gameId: params.id });
     }
 
     return NextResponse.json({

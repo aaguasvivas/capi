@@ -6,6 +6,9 @@
 
 export type Lang = "es" | "en";
 
+export * from "./chat";
+export * from "./errors";
+
 export interface Strings {
   // Landing
   tagline: string;
@@ -163,6 +166,56 @@ export interface Strings {
   // Round-over award clarity
   pipsInHand: string;
   awardedTo: string;
+
+  // Table presence + connection
+  you: string;
+  roundEnded: string;
+  connectionLive: string;
+  connectionReconnecting: string;
+  connectionOffline: string;
+  waitingFor: (name: string) => string;
+  awayHint: string;
+  turnOf: (name: string) => string;
+  refresh: string;
+  leaveTable: string;
+  leaveConfirm: string;
+  resumeGame: string;
+  resumeGameHint: (code: string) => string;
+
+  // Sessionless game page
+  spectating: string;
+  spectatingHint: string;
+  joinTable: string;
+
+  // Playing a tile
+  playOnEnd: (pip: number) => string;
+
+  // Join by link states
+  joinLookupLoading: string;
+  joinLookupNotFound: string;
+  joinLookupFull: string;
+  joinLookupStarted: string;
+  joiningTableOf: (name: string) => string;
+  codeIs6: string;
+
+  // Server and engine errors, by key (see errors.ts)
+  errNotYourTurn: string;
+  errMustPlay: string;
+  errMustDraw: string;
+  errTileMismatch: string;
+  errMoveFailed: string;
+  errStale: string;
+  errNotAtTable: string;
+  errGameFull: string;
+  errGameStarted: string;
+  errNotInPlay: string;
+
+  // Store honesty
+  storeUnavailable: string;
+  restoreFailed: string;
+  priceUnknown: string;
+  purchaseErrorProduct: string;
+  purchaseErrorStore: string;
 }
 
 export const es: Strings = {
@@ -300,8 +353,52 @@ export const es: Strings = {
   footerPrivacy: "Privacidad",
   footerSupport: "Soporte",
 
-  pipsInHand: "Puntos en mano",
+  pipsInHand: "Pintas en mano",
   awardedTo: "para",
+
+  you: "Tú",
+  roundEnded: "Ronda terminada",
+  connectionLive: "En vivo",
+  connectionReconnecting: "Reconectando…",
+  connectionOffline: "Sin conexión",
+  waitingFor: (name) => `Esperando a ${name}…`,
+  awayHint: "Parece que se desconectó",
+  turnOf: (name) => `Turno de ${name}`,
+  refresh: "Actualizar",
+  leaveTable: "Salir de la mesa",
+  leaveConfirm: "¿Salir de la mesa? La partida sigue y puedes volver desde el inicio.",
+  resumeGame: "Volver a tu partida",
+  resumeGameHint: (code) => `Mesa ${code}`,
+
+  spectating: "Solo mirando",
+  spectatingHint: "Esta mesa está llena. Puedes mirar la partida.",
+  joinTable: "Unirse a la mesa",
+
+  playOnEnd: (pip) => `Jugar en el ${pip}`,
+
+  joinLookupLoading: "Buscando la mesa…",
+  joinLookupNotFound: "Esa mesa ya no existe",
+  joinLookupFull: "Esa mesa está llena",
+  joinLookupStarted: "Esa partida ya empezó",
+  joiningTableOf: (name) => `Uniéndote a la mesa de ${name}`,
+  codeIs6: "El código tiene 6 letras",
+
+  errNotYourTurn: "No es tu turno",
+  errMustPlay: "Tienes ficha para jugar",
+  errMustDraw: "Primero jala del pozo",
+  errTileMismatch: "Esa ficha no pega ahí",
+  errMoveFailed: "No se pudo jugar",
+  errStale: "La mesa cambió, actualizando…",
+  errNotAtTable: "No estás en esta mesa",
+  errGameFull: "Esa mesa está llena",
+  errGameStarted: "Esa partida ya empezó",
+  errNotInPlay: "La partida no está en juego",
+
+  storeUnavailable: "La tienda no responde ahora",
+  restoreFailed: "No se pudo conectar con la App Store",
+  priceUnknown: "Ver precio",
+  purchaseErrorProduct: "Ese producto no está disponible todavía",
+  purchaseErrorStore: "La App Store no respondió",
 };
 
 export const en: Strings = {
@@ -441,6 +538,50 @@ export const en: Strings = {
 
   pipsInHand: "Pips left in hand",
   awardedTo: "to",
+
+  you: "You",
+  roundEnded: "Round over",
+  connectionLive: "Live",
+  connectionReconnecting: "Reconnecting…",
+  connectionOffline: "Offline",
+  waitingFor: (name) => `Waiting for ${name}…`,
+  awayHint: "Looks like they disconnected",
+  turnOf: (name) => `${name}'s turn`,
+  refresh: "Refresh",
+  leaveTable: "Leave the table",
+  leaveConfirm: "Leave the table? The game keeps going and you can come back from home.",
+  resumeGame: "Back to your game",
+  resumeGameHint: (code) => `Table ${code}`,
+
+  spectating: "Watching only",
+  spectatingHint: "This table is full. You can watch the game.",
+  joinTable: "Join the table",
+
+  playOnEnd: (pip) => `Play on the ${pip}`,
+
+  joinLookupLoading: "Finding the table…",
+  joinLookupNotFound: "That table no longer exists",
+  joinLookupFull: "That table is full",
+  joinLookupStarted: "That game already started",
+  joiningTableOf: (name) => `Joining ${name}'s table`,
+  codeIs6: "The code is 6 characters",
+
+  errNotYourTurn: "Not your turn",
+  errMustPlay: "You have a tile you can play",
+  errMustDraw: "Draw from the boneyard first",
+  errTileMismatch: "That tile does not fit there",
+  errMoveFailed: "Could not play that",
+  errStale: "The table changed, syncing…",
+  errNotAtTable: "You are not at this table",
+  errGameFull: "That table is full",
+  errGameStarted: "That game already started",
+  errNotInPlay: "The game is not in play",
+
+  storeUnavailable: "The store is not responding right now",
+  restoreFailed: "Could not reach the App Store",
+  priceUnknown: "See price",
+  purchaseErrorProduct: "That item is not available yet",
+  purchaseErrorStore: "The App Store did not respond",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

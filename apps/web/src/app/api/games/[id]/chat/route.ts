@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { normalizeChatPayload } from "@capi/i18n";
 
 export async function POST(
   req: NextRequest,
@@ -24,6 +25,14 @@ export async function POST(
       return NextResponse.json({ error: "Invalid type" }, { status: 400 });
     }
 
+    // Chat is predefined-only, and the server is where that is enforced:
+    // only a known phrase id (or a legacy display string that maps to one)
+    // or a listed emote is accepted and stored, never free text.
+    const canonical = normalizeChatPayload(type, payload);
+    if (!canonical) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+
     const db = createServerClient();
 
     // Verify player belongs to this game
@@ -43,7 +52,7 @@ export async function POST(
       game_id: params.id,
       player_id: playerId,
       type,
-      payload,
+      payload: canonical,
     });
 
     if (insertError) {

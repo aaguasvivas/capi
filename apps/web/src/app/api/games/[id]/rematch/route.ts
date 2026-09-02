@@ -2,27 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { GameState } from "@capi/engine";
 import { buildStartedState, maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
+import { uniqueInviteCode } from "@/lib/inviteCode";
 
 type Db = ReturnType<typeof createServerClient>;
-
-function generateInviteCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
-async function uniqueInviteCode(db: Db): Promise<string> {
-  let code = generateInviteCode();
-  for (let attempts = 0; attempts < 5; attempts++) {
-    const { data } = await db.from("games").select("id").eq("invite_code", code).single();
-    if (!data) break;
-    code = generateInviteCode();
-  }
-  return code;
-}
 
 interface Arrival {
   gameId: string;
