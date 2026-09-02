@@ -13,6 +13,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Preflight: the render below shells out to rsvg-convert.
+try {
+  execFileSync("which", ["rsvg-convert"], { stdio: "ignore" });
+} catch {
+  console.error("rsvg-convert not found. Install it with: brew install librsvg");
+  process.exit(1);
+}
+
 const OUT = fileURLToPath(new URL("../store-assets/play/", import.meta.url));
 mkdirSync(OUT, { recursive: true });
 

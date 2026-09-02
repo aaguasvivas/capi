@@ -6,6 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Preflight: every render below shells out to rsvg-convert.
+try {
+  execFileSync("which", ["rsvg-convert"], { stdio: "ignore" });
+} catch {
+  console.error("rsvg-convert not found. Install it with: brew install librsvg");
+  process.exit(1);
+}
+
 const OUT = fileURLToPath(
   new URL("../targets/messages/Assets.xcassets/iMessage App Icon.stickersiconset/", import.meta.url)
 );

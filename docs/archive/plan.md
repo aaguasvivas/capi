@@ -1,4 +1,6 @@
-# Dominican Dominoes MVP — Complete Plan
+# Dominican Dominoes MVP: Complete Plan
+
+> Historical: the original web-only MVP plan, written before the monorepo, the mobile app, and the milestone specs in docs/superpowers/. Kept for context, not maintained.
 
 ---
 
@@ -11,7 +13,7 @@
 - **Win**: First to 100 points
 - **Start**: Highest double starts; if no doubles, highest tile starts (first player draws 7, second draws 7; remainder stays in boneyard)
 - **Turn order**: Clockwise. Must play if possible; else PASS
-- **Round end**: (a) DOMINÓ — someone empties hand, or (b) TRANCAO — all pass in sequence (1v1: 2 passes; 2v2: 4 passes)
+- **Round end**: (a) DOMINÓ: someone empties hand, or (b) TRANCAO: all pass in sequence (1v1: 2 passes; 2v2: 4 passes)
 - **Pip matching**: Only open ends matter; placement must match one end
 
 ### 1.2 Scoring
@@ -270,7 +272,7 @@ function applyMove(
 - **DOMINÓ**: winning team gets sum of opponent hands' pips.
 - **TRANCAO**: compare team pip totals; lower wins; score = difference. Tie → starter's team wins, 0 pts.
 - **CAPICÚA**: add 25 to DOMINÓ score.
-- **VEINTICINCO**: add 25 when applicable; then add opponent pips (or in blocked case, the normal blocked score). VEINTICINCO can occur mid-round; the 25 is added when the round eventually ends (or we define: VEINTICINCO gives 25 immediately and round continues; per your spec, "reveal pip totals and award score" suggests it might end the round—clarify in Qs).
+- **VEINTICINCO**: add 25 when applicable; then add opponent pips (or in blocked case, the normal blocked score). VEINTICINCO can occur mid-round; the 25 is added when the round eventually ends (or we define: VEINTICINCO gives 25 immediately and round continues; per your spec, "reveal pip totals and award score" suggests it might end the round; clarify in Qs).
 
 **Default**: VEINTICINCO ends the round: 25 + opponent(s) remaining pips to the player who caused it. Same flow as DOMINÓ for scoring (everyone else's pips to winner), plus 25.
 
@@ -444,4 +446,4 @@ Before implementation, a few choices that affect logic:
 
 1. **VEINTICINCO timing**: Does VEINTICINCO end the round immediately (score 25 + opponent pips and start new round), or does the player who caused it get another turn and the round continues until DOMINÓ/TRANCAO? *(Default: ends round immediately, like DOMINÓ)*
 2. **Rematch**: Does rematch require all original players to re-join, or can new players fill empty seats? *(Default: same players; new game link shared, first to join gets their prior seat)*
-3. **First hand in 2v2**: Who gets the first 7 tiles—only N and E (opponents), or all 4? *(Default: all 4 draw 7; N starts, so N and E have 7 each, S and W have 7 each)*
+3. **First hand in 2v2**: Who gets the first 7 tiles, only N and E (opponents), or all 4? *(Default: all 4 draw 7; N starts, so N and E have 7 each, S and W have 7 each)*

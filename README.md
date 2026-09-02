@@ -33,9 +33,9 @@ Capi is the Dominican dominoes game you grew up with, built for the culture. No 
 | `apps/mobile` | Expo app (SDK 52, React 18.3.1 pinned) for iOS and Android |
 | `packages/engine` | Pure TypeScript rules engine + board layout, zero dependencies |
 | `packages/i18n` | Typed ES/EN string dictionaries shared by both apps |
-| `docs/` | Release playbook, runbook, and store listing kit |
+| `docs/` | Release playbook, runbook, and store listing kit; start at [docs/README.md](docs/README.md) |
 
-The engine carries the test suite (99 Vitest tests), including a property suite that plays hundreds of random legal games per run to prove board tiles can never overlap at any screen width.
+Tests live next to the code they cover: the engine suite (rules, scoring, a property suite that plays hundreds of random legal games per run to prove board tiles can never overlap at any screen width, and a seeded fuzz of full games), plus the web and mobile suites. `npm run test:all` runs all three from the repo root.
 
 ## Getting started
 
@@ -47,17 +47,18 @@ cd capi
 npm install
 ```
 
-Environment: create `apps/web/.env.local` with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `apps/mobile/.env` with `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Run the SQL files in `supabase/migrations/` in order in your Supabase SQL editor.
+Environment: copy `apps/web/.env.example` to `apps/web/.env.local` and `apps/mobile/.env.example` to `apps/mobile/.env`, then fill in the Supabase values (the other variables are optional and documented inline). Run the SQL files in `supabase/migrations/` in order in your Supabase SQL editor.
 
 ```bash
-npm test                                 # engine suite, from the repo root
+npm run test:all                         # engine, web, and mobile suites, from the repo root
+npm run verify                           # test:all plus the em-dash check
 cd apps/web && npm run dev               # web at http://localhost:3000
 cd apps/mobile && npx expo start         # mobile via Expo Go (Node 20 required)
 ```
 
 ## Shipping
 
-Store identity, EAS build profiles, and the submission runbook live in [docs/RELEASE.md](docs/RELEASE.md) and [docs/PLAYBOOK.md](docs/PLAYBOOK.md). Store copy (EN + ES) is in [docs/store-listing.md](docs/store-listing.md).
+Store identity, EAS build profiles, and the submission runbook live in [docs/PLAYBOOK.md](docs/PLAYBOOK.md) and [docs/RELEASE.md](docs/RELEASE.md); the 1.1 gate list is [docs/m5-submission-checklist.md](docs/m5-submission-checklist.md). Store copy (EN + ES) is in [docs/store-listing.md](docs/store-listing.md).
 
 ## License
 

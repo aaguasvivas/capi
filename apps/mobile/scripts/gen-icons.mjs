@@ -14,6 +14,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Preflight: every render below shells out to rsvg-convert.
+try {
+  execFileSync("which", ["rsvg-convert"], { stdio: "ignore" });
+} catch {
+  console.error("rsvg-convert not found. Install it with: brew install librsvg");
+  process.exit(1);
+}
+
 const ASSETS = process.env.OUT_DIR ?? fileURLToPath(new URL("../assets/", import.meta.url));
 mkdirSync(ASSETS, { recursive: true });
 

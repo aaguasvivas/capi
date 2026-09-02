@@ -6,6 +6,11 @@
   "scripts": {
     "test": "npm test --workspace @capi/engine",
     "test:web": "npm test --workspace @capi/web",
+    "test:mobile": "npm test --workspace @capi/mobile",
+    "test:all": "npm test && npm run test:web && npm run test:mobile",
+    "typecheck": "npm run typecheck --workspace @capi/engine --workspace @capi/web --workspace @capi/mobile",
+    "check:emdash": "if grep -rnI --exclude-dir=node_modules \"$(printf '\\342\\200\\224')\" apps/web/src apps/mobile/app apps/mobile/components apps/mobile/lib apps/mobile/targets packages docs; then echo 'verify: em dash (U+2014) found in the files above' >&2; exit 1; fi",
+    "verify": "npm run test:all && npm run check:emdash",
     "dev:web": "npm run dev --workspace @capi/web",
     "build:web": "npm run build --workspace @capi/web",
     "start:mobile": "npm run start --workspace @capi/mobile"

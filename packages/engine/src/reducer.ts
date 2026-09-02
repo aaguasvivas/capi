@@ -297,8 +297,8 @@ export function applyMove(
       ...state,
       hands: { ...state.hands, [seat]: newHand },
       boneyard: newBoneyard,
-      // Clear any mid-round VEINTICINCO callout — drawing is the active player
-      // responding to the round, the prior callout has been observed.
+      // Clear any mid-round VEINTICINCO callout: drawing is the active player
+      // responding to the round, so the prior callout has been observed.
       lastCallout: null,
       lastCalloutPayload: null,
     };
@@ -313,7 +313,7 @@ export function applyMove(
     const nextTurn = getNextSeat(seat, state.is2v2);
 
     // VEINTICINCO ("pase corrido"): the cycle of forced passes returns to
-    // `lastPlayedBy`. Award +25 to their team as a MID-ROUND bonus — the
+    // `lastPlayedBy`. Award +25 to their team as a MID-ROUND bonus; the
     // round does NOT end. `lastPlayedBy` gets the next turn and must play
     // (or pass, which can stack into a TRANCAO below). VEINTICINCO can fire
     // multiple times in one round if the same player keeps forcing
@@ -357,7 +357,7 @@ export function applyMove(
       };
     }
 
-    // TRANCAO: pass threshold reached — the board is truly locked because
+    // TRANCAO: pass threshold reached. The board is truly locked because
     // nobody (including `lastPlayedBy`, whose pass got us here) can play.
     // The +25 from any preceding VEINTICINCO is already banked in state.scores;
     // TRANCAO adds pip-diff scoring on top.
