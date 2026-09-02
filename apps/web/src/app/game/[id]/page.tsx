@@ -936,6 +936,12 @@ function GameContent() {
                   </div>
                 </div>
 
+                {gameState.rematchGameId && (
+                  <p className="text-sm font-bold text-[var(--accent-light)] relative z-10">
+                    {s.rematchReady}
+                  </p>
+                )}
+
                 <button
                   disabled={rematchLoading}
                   onClick={async () => {
@@ -973,7 +979,11 @@ function GameContent() {
                   }}
                   className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
                 >
-                  {rematchLoading ? s.creatingRematch : s.playAgain}
+                  {rematchLoading
+                    ? s.creatingRematch
+                    : gameState.rematchGameId
+                    ? s.joinRematch
+                    : s.playAgain}
                 </button>
               </div>
             </div>

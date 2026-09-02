@@ -42,6 +42,9 @@ export interface GameState {
   players: Record<Seat, PlayerInfo | null>;
   winnerTeam: number | null;
   lastPlayedBy: Seat | null;
+  // Set on a finished game once any player asks for a rematch: the id of the
+  // new table every seat can arrive at (same seats, same names).
+  rematchGameId?: string;
 }
 
 export interface MoveIntent {

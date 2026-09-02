@@ -1025,6 +1025,19 @@ export default function GameScreen() {
                 />
               </View>
 
+              {gameState.rematchGameId ? (
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "700",
+                    color: palette.accent,
+                    textAlign: "center",
+                  }}
+                >
+                  {s.rematchReady}
+                </Text>
+              ) : null}
+
               <Pressable
                 onPress={handleRematch}
                 disabled={rematchLoading}
@@ -1037,7 +1050,9 @@ export default function GameScreen() {
                 {rematchLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={overlayButtonText}>{s.playAgain}</Text>
+                  <Text style={overlayButtonText}>
+                    {gameState.rematchGameId ? s.joinRematch : s.playAgain}
+                  </Text>
                 )}
               </Pressable>
             </View>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { createInitialState, getTeam } from "@capi/engine";
-import type { GameState, PlayerInfo, Seat } from "@capi/engine";
+import type { Seat } from "@capi/engine";
+import { buildStartedState, maxPlayersFor, type GameRow } from "@/lib/gameStart";
 
 export async function POST(
   req: NextRequest,
@@ -32,7 +32,7 @@ export async function POST(
     }
 
     const is2v2: boolean = game.settings?.is2v2 ?? false;
-    const maxPlayers = is2v2 ? 4 : 2;
+    const maxPlayers = maxPlayersFor(game as GameRow);
 
     const { data: existingPlayers } = await db
       .from("players")
@@ -67,6 +67,11 @@ export async function POST(
       .single();
 
     if (playerError || !newPlayer) {
+      // Two people grabbing the last seat at once: the unique (game_id, seat)
+      // index rejects the loser, which is a full table, not a server fault.
+      if (playerError?.code === "23505") {
+        return NextResponse.json({ error: "Game is full" }, { status: 409 });
+      }
       console.error("Failed to create joining player:", playerError);
       return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
     }
@@ -85,34 +90,11 @@ export async function POST(
       });
     }
 
-    const initialState = createInitialState({
-      mode: game.mode,
-      theme: game.theme,
-      is2v2,
-      targetScore: game.settings?.targetScore ?? 100,
-    });
-
-    const playersByState: Record<Seat, PlayerInfo | null> = { n: null, e: null, s: null, w: null };
-    for (const p of allPlayers) {
-      const seat = p.seat as Seat;
-      playersByState[seat] = {
-        seat,
-        nickname: p.nickname,
-        avatarColor: p.avatar_color,
-        team: getTeam(seat, is2v2),
-      };
-    }
-
-    const stateWithPlayers: GameState = {
-      ...initialState,
-      players: playersByState,
-    };
-
     const { error: updateError } = await db
       .from("games")
       .update({
         status: "playing",
-        game_state: stateWithPlayers,
+        game_state: buildStartedState(game as GameRow, allPlayers),
         state_version: 1,
       })
       .eq("id", params.id)

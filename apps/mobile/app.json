@@ -39,7 +39,7 @@
       [
         "react-native-google-mobile-ads",
         {
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "iosAppId": "ca-app-pub-4879291425090726~7274134137",
           "userTrackingUsageDescription": "This lets Capi show ads that are more relevant to you. Your games stay on the table.",
           "skAdNetworkItems": [
             "cstr6suwn9.skadnetwork",

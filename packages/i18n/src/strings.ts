@@ -115,6 +115,8 @@ export interface Strings {
   lostFlavor: string;
   playAgain: string;
   creatingRematch: string;
+  joinRematch: string;
+  rematchReady: string;
 
   // System
   loading: string;
@@ -260,6 +262,8 @@ export const es: Strings = {
   lostFlavor: "La próxima va pa' ti",
   playAgain: "Jugar otra vez",
   creatingRematch: "Creando…",
+  joinRematch: "Ir a la revancha",
+  rematchReady: "La revancha ya está servida",
 
   loading: "Cargando…",
   backToHome: "Volver al inicio",
@@ -397,6 +401,8 @@ export const en: Strings = {
   lostFlavor: "Run it back, you got next",
   playAgain: "Run it back",
   creatingRematch: "Setting up…",
+  joinRematch: "Join the rematch",
+  rematchReady: "The rematch table is ready",
 
   loading: "Loading…",
   backToHome: "Back to home",

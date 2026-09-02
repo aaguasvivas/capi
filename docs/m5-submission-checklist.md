@@ -15,12 +15,13 @@ repo session; "You" = Adelson in consoles or on phones.
       present in the generated output.
 - [ ] Simulator pass done (pickers, locked flows, banner placement, skins,
       clasico pixel parity, iMessage regression).
-- [ ] Web premium themes verified on playcapi.com (needs B1 first).
+- [x] Web premium themes verified on playcapi.com (2026-08-14: all three render
+      live with exact spec colors and watermarks in playing games).
 
 ## B. Backend + consoles (You)
 
-- [ ] B1. Supabase SQL Editor: run supabase/migrations/002_premium_themes.sql
-      (self-testing). Without it premium-table creates return 500.
+- [x] B1. Supabase SQL Editor: run supabase/migrations/002_premium_themes.sql
+      (done 2026-08-14, self-test passed; premium creates verified on prod).
 - [ ] B2. AdMob: app entry linked to the App Store listing (App settings shows
       "Capi: Dominican Dominoes"). The app-ads.txt warning clears on Google's
       crawl; config is already correct and ads serve meanwhile.
