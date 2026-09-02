@@ -138,6 +138,9 @@ function GameContent({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [muted, setMutedState] = useState(() => isMuted());
+  // Tile picked in the hand whose end is still being chosen; the board pulses
+  // the ends it can go on.
+  const [pendingTile, setPendingTile] = useState<Tile | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
@@ -275,22 +278,28 @@ function GameContent({ id }: { id: string }) {
     };
   }, []);
 
-  function handlePlay(tile: Tile, end: "left" | "right") {
-    if (!mySeat) return;
-    playSlam();
-    void submitMove({ type: "play", tile, end });
-  }
+  // Stable handlers so the memoized Hand and Board skip re-renders caused by
+  // toasts and chat bubbles.
+  const handlePlay = useCallback(
+    (tile: Tile, end: "left" | "right") => {
+      if (!mySeat) return;
+      setPendingTile(null);
+      playSlam();
+      void submitMove({ type: "play", tile, end });
+    },
+    [mySeat, submitMove]
+  );
 
-  function handlePass() {
+  const handlePass = useCallback(() => {
     if (!mySeat) return;
     void submitMove({ type: "pass" });
-  }
+  }, [mySeat, submitMove]);
 
-  function handleDraw() {
+  const handleDraw = useCallback(() => {
     if (!mySeat) return;
     playDrawSound();
     void submitMove({ type: "draw" });
-  }
+  }, [mySeat, submitMove]);
 
   function toggleMute() {
     const next = !muted;
@@ -797,7 +806,7 @@ function GameContent({ id }: { id: string }) {
               />
               <button
                 onClick={toggleMute}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
+                className="w-11 h-11 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
                 title={muted ? s.enableSound : s.muteSound}
               >
                 {muted ? "🔇" : "🔊"}
@@ -932,7 +941,7 @@ function GameContent({ id }: { id: string }) {
 
               {/* Board (centered) */}
               <div className="flex-1 min-w-0 flex flex-col">
-                <Board board={board} endsGlow={isMyTurn} />
+                <Board board={board} endsGlow={isMyTurn} hand={myHand} selectedTile={pendingTile} />
               </div>
 
               {/* Right opponent */}
@@ -959,7 +968,7 @@ function GameContent({ id }: { id: string }) {
               </div>
             </div>
           ) : (
-            <Board board={board} endsGlow={isMyTurn} />
+            <Board board={board} endsGlow={isMyTurn} hand={myHand} selectedTile={pendingTile} />
           )}
 
           {/* ── Round Over overlay ── */}
@@ -1180,6 +1189,7 @@ function GameContent({ id }: { id: string }) {
                 onPlay={handlePlay}
                 onPass={handlePass}
                 onDraw={handleDraw}
+                onSelect={setPendingTile}
               />
             </div>
           ) : (
