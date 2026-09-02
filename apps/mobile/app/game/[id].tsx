@@ -160,6 +160,9 @@ function GameTable({
   >(null);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
+  // Tile picked in the hand but not yet placed (both ends fit with different
+  // pips); the board pulses the ends it can go on.
+  const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
   const [muted, setMutedState] = useState(isMuted());
   const [chatBubbles, setChatBubbles] = useState<ChatBubbleItem[]>([]);
   // Failures raised by this screen (next round, rematch); the hook raises
@@ -867,6 +870,11 @@ function GameTable({
   const board = gameState.board;
   const boardLeftEnd = board.length > 0 ? board[0][0] : -1;
   const boardRightEnd = board.length > 0 ? board[board.length - 1][1] : -1;
+  // Only the ends this hand can actually play on light up.
+  const playableEnds = {
+    left: isMyTurn && myHand.some((t) => t[0] === boardLeftEnd || t[1] === boardLeftEnd),
+    right: isMyTurn && myHand.some((t) => t[0] === boardRightEnd || t[1] === boardRightEnd),
+  };
 
   // 1v1: single opponent across. 2v2: partner across, opponents on the sides.
   const relSeats = is2v2 ? getRelativeSeats(viewSeat) : null;
@@ -1344,7 +1352,12 @@ function GameTable({
                 tilesLabel={s.tilesLabel}
               />
               <View style={{ flex: 1 }}>
-                <Board board={board} endsGlow={isMyTurn} />
+                <Board
+                  board={board}
+                  endsGlow={isMyTurn}
+                  playableEnds={playableEnds}
+                  selectedTile={selectedTile}
+                />
               </View>
               <SideRail
                 player={rightPlayer}
@@ -1355,7 +1368,12 @@ function GameTable({
             </View>
           ) : (
             <View style={{ flex: 1 }}>
-              <Board board={board} endsGlow={isMyTurn} />
+              <Board
+                  board={board}
+                  endsGlow={isMyTurn}
+                  playableEnds={playableEnds}
+                  selectedTile={selectedTile}
+                />
             </View>
           )}
 
@@ -1624,6 +1642,7 @@ function GameTable({
               onPlay={handlePlay}
               onPass={handlePass}
               onDraw={handleDraw}
+              onSelectionChange={setSelectedTile}
             />
           </View>
         ) : (

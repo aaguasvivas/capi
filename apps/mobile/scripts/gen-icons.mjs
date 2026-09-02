@@ -7,7 +7,7 @@
 //   OUT_DIR=/tmp/x node scripts/gen-icons.mjs      # render elsewhere (previews)
 //
 // Design language: sibling of Anota's icon (framed, deep field, colored pips)
-// in Capi's own palette — ink field, cream tiles, barbería red + gold.
+// in Capi's own palette, ink field, cream tiles, barbería red + gold.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -91,7 +91,7 @@ function tile({
     </g>`;
 }
 
-// "La Capicúa": the snake corner — a red-pipped double and a gold-tipped
+// "La Capicúa": the snake corner, a red-pipped double and a gold-tipped
 // horizontal tile meeting in the L every Capi table produces. Bleeds slightly
 // off-canvas for energy.
 function cornerMark(monochrome = false) {
@@ -113,7 +113,7 @@ function cornerMark(monochrome = false) {
   );
 }
 
-// "El Slam": one big capicúa tile mid-slam — red crown, gold base.
+// "El Slam": one big capicúa tile mid-slam, red crown, gold base.
 function slamMark(monochrome = false) {
   return tile({
     cx: 512, cy: 522, W: 430, H: 830, rot: -8,
@@ -134,8 +134,8 @@ function cmarkMark(monochrome = false) {
     ${tile({ cx: 742, cy: 512, W: 150, H: 290, rot: -10, top: 1, bottom: 3, shadow: [16, 22], monochrome })}`;
 }
 
-// "The Classic": the original quiet mark — cream tile, ink pips, gold
-// capicúa centers — with the depth pass (hard shadow, stronger presence)
+// "The Classic": the original quiet mark, cream tile, ink pips, gold
+// capicúa centers, with the depth pass (hard shadow, stronger presence)
 // that it was missing.
 function classicMark(monochrome = false) {
   return tile({

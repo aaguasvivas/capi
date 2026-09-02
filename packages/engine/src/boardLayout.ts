@@ -3,14 +3,14 @@ import type { Tile } from "./types";
 // Tile + spacing dimensions for the board chain, in layout px. Two tiers:
 // the full-size desktop/tablet set and a crisp compact set for narrow phones,
 // where smaller tiles fit more per row and keep the snake from scrolling far.
-// (All values stay integers so tiles render sharp — we shrink the tile, we
+// (All values stay integers so tiles render sharp, we shrink the tile, we
 // don't CSS-scale it.)
 export interface TileDims {
   TW: number; // short side
   TH: number; // long side
   GAP: number; // in-row spacing; 0 = flush edge-to-edge like a real table (tile borders form the seam)
   EDGE: number; // padding inside the inner content div
-  // Clear air kept between the tiles of one row and the next — see note below.
+  // Clear air kept between the tiles of one row and the next, see note below.
   VGAP: number;
 }
 
@@ -35,7 +35,7 @@ export const { TW, TH, GAP, EDGE, VGAP } = DEFAULT_DIMS;
 // for doubles leaves plain rows looking sparse. Instead each row's vertical
 // half-extent is measured from its actual tiles (TH/2 if it holds any double,
 // else TW/2) and consecutive rows are spaced so exactly VGAP of air sits
-// between their nearest edges — uniform clearance everywhere, nothing overlaps.
+// between their nearest edges, uniform clearance everywhere, nothing overlaps.
 
 export interface Placed {
   tile: Tile;
@@ -85,8 +85,7 @@ export function layoutBoard(
   const minRow = TH + GAP + TW;
   const rowMaxW = Math.max(minRow, availW - EDGE * 2);
 
-  // ── Pass 1: assign each tile a row, x-center and orientation. No Y yet —
-  // vertical positions depend on each row's tallest tile, which we only know
+  // ── Pass 1: assign each tile a row, x-center and orientation. No Y yet, // vertical positions depend on each row's tallest tile, which we only know
   // once the whole chain is laid out.
   interface Pre {
     tile: Tile;
@@ -119,7 +118,7 @@ export function layoutBoard(
 
     if (!fitsInRow && placedInRow > 0) {
       // Turn the corner with a vertical tile. Y is resolved in pass 3 to the
-      // midline between this row and the next, so its body bridges both — top
+      // midline between this row and the next, so its body bridges both, top
       // half meeting the last tile of this row, bottom half the first tile of
       // the next. This is how a real domino train rounds a corner; the chain
       // stays visually unbroken instead of leaving a void at the turn.
@@ -150,7 +149,7 @@ export function layoutBoard(
     placedInRow++;
   }
 
-  // ── Pass 2: each row's vertical half-extent — TH/2 if it carries any
+  // ── Pass 2: each row's vertical half-extent, TH/2 if it carries any
   // crosswise double, otherwise TW/2. Corners straddle rows and don't count.
   const rowCount =
     pre.reduce(

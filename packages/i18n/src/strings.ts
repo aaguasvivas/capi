@@ -186,6 +186,9 @@ export interface Strings {
   spectating: string;
   spectatingHint: string;
   joinTable: string;
+  teamWins: (name: string) => string;
+  cancel: string;
+  failedRematch: string;
 
   // Playing a tile
   playOnEnd: (pip: number) => string;
@@ -384,6 +387,9 @@ export const es: Strings = {
   spectating: "Solo mirando",
   spectatingHint: "Esta mesa está llena. Puedes mirar la partida.",
   joinTable: "Unirse a la mesa",
+  teamWins: (name) => `Ganó ${name}`,
+  cancel: "Cancelar",
+  failedRematch: "No se pudo armar la revancha",
 
   playOnEnd: (pip) => `Jugar en el ${pip}`,
 
@@ -576,6 +582,9 @@ export const en: Strings = {
   spectating: "Watching only",
   spectatingHint: "This table is full. You can watch the game.",
   joinTable: "Join the table",
+  teamWins: (name) => `${name} wins`,
+  cancel: "Cancel",
+  failedRematch: "Could not set up the rematch",
 
   playOnEnd: (pip) => `Play on the ${pip}`,
 

@@ -1,25 +1,25 @@
-# Capi Mobile M1 — Monorepo + 1v1 Vertical Slice Implementation Plan
+# Capi Mobile M1, Monorepo + 1v1 Vertical Slice Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Restructure the repo into an npm-workspaces monorepo with a shared `@capi/engine` package, then build an Expo (React Native) app that plays a full 1v1 Dominican dominoes game against the existing live backend — verified on a device/simulator against a web player.
+**Goal:** Restructure the repo into an npm-workspaces monorepo with a shared `@capi/engine` package, then build an Expo (React Native) app that plays a full 1v1 Dominican dominoes game against the existing live backend, verified on a device/simulator against a web player.
 
-**Architecture:** One canonical pure-TS engine package consumed by both `apps/web` (current Next.js app, relocated) and `apps/mobile` (new Expo app). Mobile is a new *client* of the already-deployed playcapi.com API + Supabase Realtime — no backend changes. The hard-won game logic and board geometry port verbatim; only React presentation is rebuilt in RN.
+**Architecture:** One canonical pure-TS engine package consumed by both `apps/web` (current Next.js app, relocated) and `apps/mobile` (new Expo app). Mobile is a new *client* of the already-deployed playcapi.com API + Supabase Realtime, no backend changes. The hard-won game logic and board geometry port verbatim; only React presentation is rebuilt in RN.
 
 **Tech Stack:** npm workspaces, TypeScript, Vitest (engine tests), Next.js 14 (web, unchanged behavior), Expo + Expo Router + NativeWind + react-native-svg + @supabase/supabase-js + AsyncStorage (mobile).
 
-**Reference (do not delete during the port — they are the source of truth for the RN rebuild):** the current web components under `apps/web/src/components/game/` after relocation: `Board.tsx`, `Hand.tsx`, `TileDisplay.tsx`, `ScorePanel.tsx`, `CalloutOverlay.tsx`, `apps/web/src/app/game/[id]/page.tsx`, `apps/web/src/hooks/useRealtimeGame.ts`.
+**Reference (do not delete during the port, they are the source of truth for the RN rebuild):** the current web components under `apps/web/src/components/game/` after relocation: `Board.tsx`, `Hand.tsx`, `TileDisplay.tsx`, `ScorePanel.tsx`, `CalloutOverlay.tsx`, `apps/web/src/app/game/[id]/page.tsx`, `apps/web/src/hooks/useRealtimeGame.ts`.
 
 ---
 
-## Phase A — Monorepo restructure + engine extraction (HIGH RISK, gated)
+## Phase A, Monorepo restructure + engine extraction (HIGH RISK, gated)
 
 This phase changes no behavior. Exit gate: web app builds, all 93 tests pass, production Vercel deploy verified. **Do not start Phase B until the gate passes.**
 
 ### Task A1: Create the workspace root and engine package skeleton
 
 **Files:**
-- Create: `package.json` (new workspace root — replaces current root package.json)
+- Create: `package.json` (new workspace root, replaces current root package.json)
 - Create: `packages/engine/package.json`
 - Create: `packages/engine/tsconfig.json`
 - Modify: move current root `package.json` → `apps/web/package.json` (Task A3)
@@ -27,7 +27,7 @@ This phase changes no behavior. Exit gate: web app builds, all 93 tests pass, pr
 - [ ] **Step 1: Snapshot current green state**
 
 Run: `npm test`
-Expected: `Tests 93 passed (93)`. If not 93, STOP — fix before restructuring.
+Expected: `Tests 93 passed (93)`. If not 93, STOP, fix before restructuring.
 
 - [ ] **Step 2: Create the engine package directory and move engine source**
 
@@ -152,7 +152,7 @@ Add to `packages/engine/package.json` a `"scripts"` block:
     "vitest": "^2.1.6"
   }
 ```
-(Merge into the existing JSON object from Task A1 Step 5 — do not create a second top-level object.)
+(Merge into the existing JSON object from Task A1 Step 5, do not create a second top-level object.)
 
 - [ ] **Step 5: Commit (tests will run after workspace install in A4)**
 
@@ -187,7 +187,7 @@ git mv package.json apps/web/package.json
 git mv package-lock.json apps/web/package-lock.json
 ```
 
-Note: `supabase/` (migrations), `docs/`, `README.md`, `.gitignore`, `.nvmrc` stay at the repo root. **Move `.env.local` → `apps/web/.env.local`** (`mv .env.local apps/web/.env.local` — it's gitignored, so plain `mv`, not `git mv`): Next.js only loads env files from its own project directory, so leaving it at the root would break local dev (Gate 3). `__tests__/` is now empty (engine tests moved) — remove it: `rmdir __tests__/engine __tests__/components __tests__ 2>/dev/null || true`.
+Note: `supabase/` (migrations), `docs/`, `README.md`, `.gitignore`, `.nvmrc` stay at the repo root. **Move `.env.local` → `apps/web/.env.local`** (`mv .env.local apps/web/.env.local`, it's gitignored, so plain `mv`, not `git mv`): Next.js only loads env files from its own project directory, so leaving it at the root would break local dev (Gate 3). `__tests__/` is now empty (engine tests moved), remove it: `rmdir __tests__/engine __tests__/components __tests__ 2>/dev/null || true`.
 
 - [ ] **Step 2: Rename the web package and add the engine dependency**
 
@@ -201,7 +201,7 @@ In `apps/web/next.config.js`, add `transpilePackages` to the base config (the en
 const nextConfig = { transpilePackages: ["@capi/engine", "@capi/i18n"] };
 ```
 (`@capi/i18n` is created in A5; listing it now is harmless and saves a second edit.)
-Remove the now-misplaced root `"test"` script's reliance on the old test dir — the web `package.json` keeps `"test": "vitest run"` (it will find no tests now; that's fine, engine tests live in the engine package). Leave other scripts (`dev`, `build`, `start`, `lint`) unchanged.
+Remove the now-misplaced root `"test"` script's reliance on the old test dir, the web `package.json` keeps `"test": "vitest run"` (it will find no tests now; that's fine, engine tests live in the engine package). Leave other scripts (`dev`, `build`, `start`, `lint`) unchanged.
 
 - [ ] **Step 3: Re-point web imports of the engine + boardLayout**
 
@@ -258,17 +258,17 @@ npm install
 ```
 Expected: completes; `node_modules/@capi/engine` symlink exists (`ls -la node_modules/@capi`).
 
-- [ ] **Step 3: GATE 1 — engine tests pass from the package**
+- [ ] **Step 3: GATE 1, engine tests pass from the package**
 
 Run: `npm test`
 Expected: `Tests 93 passed (93)`.
 
-- [ ] **Step 4: GATE 2 — web builds**
+- [ ] **Step 4: GATE 2, web builds**
 
 Run: `npm run build:web`
 Expected: `✓ Compiled successfully` and the route list printed. No module-resolution errors for `@capi/engine`.
 
-- [ ] **Step 5: GATE 3 — web dev runs and a game works locally**
+- [ ] **Step 5: GATE 3, web dev runs and a game works locally**
 
 Start `npm run dev:web`, open http://localhost:3000, create a 1v1 game, confirm the board renders and a tile can be selected. (Manual smoke; backend is the live Supabase via `.env.local`.) Stop the dev server.
 
@@ -279,7 +279,7 @@ git add -A
 git commit -m "Add npm workspace root; engine tests + web build green from monorepo"
 ```
 
-- [ ] **Step 7: GATE 4 — production deploy**
+- [ ] **Step 7: GATE 4, production deploy**
 
 Update the Vercel project's **Root Directory** setting to `apps/web` (Vercel dashboard → Project → Settings → Build & Development → Root Directory). Push to main. Confirm the Vercel build succeeds and playcapi.com loads + a game works. **If the deploy fails and cannot be quickly fixed, revert the push and fall back to the "shared engine folder, web at root" layout before proceeding.**
 
@@ -340,7 +340,7 @@ git push origin main
 
 ---
 
-## Phase B — Expo app scaffold
+## Phase B, Expo app scaffold
 
 ### Task B1: Scaffold the Expo app
 
@@ -424,7 +424,7 @@ git add -A && git commit -m "Scaffold Expo app (apps/mobile) wired to @capi/engi
 
 ---
 
-## Phase C — RN UI vertical slice (1v1, barbería)
+## Phase C, RN UI vertical slice (1v1, barbería)
 
 Port these web files to RN. Translation rules applied throughout:
 - `<div>` → `<View>`; tappable → `<Pressable>`; `<p>/<span>/<h2>` → `<Text>`.
@@ -432,7 +432,7 @@ Port these web files to RN. Translation rules applied throughout:
 - Inline `<svg>` → `react-native-svg` (`Svg`, `Rect`, `Circle`, `Line`, `RadialGradient`, `Stop`, `Defs`, `G`). The pip/gradient logic ports 1:1.
 - Absolute positioning uses RN `style={{ position: "absolute", left, top, transform: [{ rotate: \`${deg}deg\` }] }}`.
 - `localStorage` → `AsyncStorage` (async).
-- The `layoutBoard`, engine, and i18n imports come from `@capi/engine` / `@capi/i18n` — NEVER reimplement the math.
+- The `layoutBoard`, engine, and i18n imports come from `@capi/engine` / `@capi/i18n`, NEVER reimplement the math.
 
 ### Task C1: Theme constants + Supabase client + API base
 
@@ -506,7 +506,7 @@ git add -A && git commit -m "Mobile: TileDisplay (react-native-svg pips + drille
 
 - [ ] **Step 1: Implement the RN board**
 
-Port `Board`: a `ScrollView` (both directions; use a horizontal `ScrollView` containing a vertical one, or a single `ScrollView` with `contentContainerStyle` sized to `innerW`×`innerH`). Use the container's measured width (via `onLayout`) as `availW`, call `dimsForWidth(width)` and `layoutBoard(board, width, dims)` from `@capi/engine` — DO NOT reimplement. Render each placement as an absolutely-positioned `<View>` at `{left: p.x + xOffset, top: p.y + yOffset, transform:[{translateX:-half},{translateY:-half},{rotate:\`${p.rot}deg\`}]}` wrapping `<TileDisplay w={dims.TW} h={dims.TH} />`. Port the newest-tile detection (left-end vs right-end index) and the amber last-move ring. Auto-scroll to the newest tile via a `ScrollView` ref + `scrollTo` (only when board grew). Empty-board state shows the "mesa vacía" text.
+Port `Board`: a `ScrollView` (both directions; use a horizontal `ScrollView` containing a vertical one, or a single `ScrollView` with `contentContainerStyle` sized to `innerW`×`innerH`). Use the container's measured width (via `onLayout`) as `availW`, call `dimsForWidth(width)` and `layoutBoard(board, width, dims)` from `@capi/engine`, DO NOT reimplement. Render each placement as an absolutely-positioned `<View>` at `{left: p.x + xOffset, top: p.y + yOffset, transform:[{translateX:-half},{translateY:-half},{rotate:\`${p.rot}deg\`}]}` wrapping `<TileDisplay w={dims.TW} h={dims.TH} />`. Port the newest-tile detection (left-end vs right-end index) and the amber last-move ring. Auto-scroll to the newest tile via a `ScrollView` ref + `scrollTo` (only when board grew). Empty-board state shows the "mesa vacía" text.
 
 - [ ] **Step 2: Render-smoke with a fixed board**
 
@@ -558,7 +558,7 @@ Copy the web hook. Changes only:
 - All `fetch("/api/...")` → `fetch(\`${API_BASE}/api/...\`)`.
 - Import `supabase` from `../lib/supabase`.
 - Session/storage is passed in (the hook already takes `session`); no localStorage here.
-- Keep: optimistic play update, in-flight guard, version-keyed callout dismissal, transient errors, 409 handling. These are already hardened — port verbatim.
+- Keep: optimistic play update, in-flight guard, version-keyed callout dismissal, transient errors, 409 handling. These are already hardened, port verbatim.
 - Add an `AppState` listener: on `active` (app returns to foreground), call `fetchGame()` so a backgrounded phone re-syncs.
 
 - [ ] **Step 2: Commit**
@@ -578,7 +578,7 @@ git add -A && git commit -m "Mobile: useRealtimeGame (API base + AppState resume
 
 - [ ] **Step 2: i18n context**
 
-`apps/mobile/lib/i18n.tsx`: a small React context that holds `lang` (default `"es"`) and exposes `s` from `@capi/i18n` dictionaries — port the web `context.tsx` logic, persisting the choice with AsyncStorage. Wrap the app in `_layout.tsx`.
+`apps/mobile/lib/i18n.tsx`: a small React context that holds `lang` (default `"es"`) and exposes `s` from `@capi/i18n` dictionaries, port the web `context.tsx` logic, persisting the choice with AsyncStorage. Wrap the app in `_layout.tsx`.
 
 - [ ] **Step 3: Commit**
 
@@ -594,7 +594,7 @@ git add -A && git commit -m "Mobile: AsyncStorage session + i18n context"
 
 - [ ] **Step 1: Landing screen**
 
-Build `app/index.tsx`: name input, color picker, a "Crear partida" button (POST `${API_BASE}/api/games` with `{nickname, avatarColor, mode:"live", theme:"barberia", is2v2:false, targetScore:100}`), and a "Unirse" path (input 6-char code → GET `${API_BASE}/api/games/by-code/<code>` → navigate). On create success: `saveSession(gameId, {...})` then `router.push(\`/game/${gameId}\`)`. (Mode picker / themes / 200-target are M2 — hardcode 1v1 + barbería + 100 for the slice.)
+Build `app/index.tsx`: name input, color picker, a "Crear partida" button (POST `${API_BASE}/api/games` with `{nickname, avatarColor, mode:"live", theme:"barberia", is2v2:false, targetScore:100}`), and a "Unirse" path (input 6-char code → GET `${API_BASE}/api/games/by-code/<code>` → navigate). On create success: `saveSession(gameId, {...})` then `router.push(\`/game/${gameId}\`)`. (Mode picker / themes / 200-target are M2, hardcode 1v1 + barbería + 100 for the slice.)
 
 - [ ] **Step 2: Commit**
 
@@ -620,7 +620,7 @@ git add -A && git commit -m "Mobile: game screen (1v1 end-to-end)"
 
 ---
 
-## Phase D — Live verification (the M1 exit gate)
+## Phase D, Live verification (the M1 exit gate)
 
 ### Task D1: Cross-platform 1v1 game, phone vs web
 
@@ -641,7 +641,7 @@ On the phone: create a 1v1 game. On a laptop browser at playcapi.com: join via t
 
 - [ ] **Step 3: Confirm the shared engine is identical**
 
-Run at repo root: `npm test`. Expected: `Tests 93 passed (93)` — the same engine the mobile app just used.
+Run at repo root: `npm test`. Expected: `Tests 93 passed (93)`, the same engine the mobile app just used.
 
 - [ ] **Step 4: Confirm web is unaffected**
 

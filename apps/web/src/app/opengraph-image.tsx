@@ -114,7 +114,7 @@ export default async function OpenGraphImage() {
           </div>
         </div>
 
-        {/* Scattered tiles (right) — feels like a game in progress */}
+        {/* Scattered tiles (right), feels like a game in progress */}
         <Tile pipsA={6} pipsB={6} left={770} top={70} rotate={-7} />
         <Tile pipsA={3} pipsB={6} left={975} top={235} rotate={13} />
         <Tile pipsA={3} pipsB={0} left={815} top={395} rotate={-15} />

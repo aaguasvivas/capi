@@ -13,7 +13,7 @@ import type { GameState, MoveIntent, Tile } from "../src/types";
 
 // ───────────────────────────────────────────────────────────────────────────
 // The board snake is the game's visual staple, and the one hard requirement
-// is: NO TWO TILES MAY EVER OVERLAP — at any container width, at either dims
+// is: NO TWO TILES MAY EVER OVERLAP, at any container width, at either dims
 // tier, for any board the rules can actually produce. This suite enforces
 // that as a property over the reachable game space (real games driven through
 // createInitialState/applyMove) plus a set of adversarial crafted chains.
@@ -135,7 +135,7 @@ function assertNoOverlapsEverywhere(board: Tile[]): void {
 
 // Seeded PRNG (mulberry32) so move selection is deterministic and cheap.
 // NOTE: the deal inside createInitialState uses the engine's Math.random
-// shuffle, so the exact games differ run to run — that is fine, because any
+// shuffle, so the exact games differ run to run, that is fine, because any
 // failure logs the generated BOARD, which is the complete repro input for
 // layoutBoard (layout depends only on board + width + dims).
 function mulberry32(seed: number): () => number {
@@ -235,12 +235,12 @@ function playRandomGame(
   return stats;
 }
 
-describe("boardLayout overlap property — random legal games", () => {
+describe("boardLayout overlap property, random legal games", () => {
   it(`${GAMES} reducer-driven games: every board after every move, all widths + both tiers`, () => {
     // Coverage: for ALL 200 games (alternating 1v1 / 2v2), EVERY board state
     // (the opening tile plus the board after every single move) is checked at
     // all 8 widths via dimsForWidth(w) AND at both explicit tiers at width
-    // 500 — 10 layout checks per board state, ~5k board states / ~50k layout
+    // 500, 10 layout checks per board state, ~5k board states / ~50k layout
     // checks per run (~4.7k moves, chains up to 27 tiles). No sampling: full
     // coverage runs in under a second, so no final-boards-only fallback.
     let totalMoves = 0;
@@ -268,12 +268,11 @@ describe("boardLayout overlap property — random legal games", () => {
 });
 
 // ───────────────────────────────────────────────────────────────────────────
-// Adversarial crafted chains — worst known shapes, always run everywhere.
+// Adversarial crafted chains, worst known shapes, always run everywhere.
 // ───────────────────────────────────────────────────────────────────────────
 
 // Every double in one chain, each bridged by a connector. At narrow widths
-// this wraps multiple rows with crosswise doubles landing next to corners —
-// the tightest vertical-spacing case the layout has to survive.
+// this wraps multiple rows with crosswise doubles landing next to corners, // the tightest vertical-spacing case the layout has to survive.
 const MAX_DOUBLES_CHAIN: Tile[] = [
   [0, 0], [0, 1], [1, 1], [1, 2], [2, 2], [2, 3], [3, 3],
   [3, 4], [4, 4], [4, 5], [5, 5], [5, 6], [6, 6],
@@ -293,7 +292,7 @@ const TINY_BOARDS: Tile[][] = [
   [[3, 4], [4, 4]], // horizontal + double
 ];
 
-describe("boardLayout overlap property — adversarial fixed boards", () => {
+describe("boardLayout overlap property, adversarial fixed boards", () => {
   it("crafted fixtures are themselves legal chains (ends connect)", () => {
     for (const board of [MAX_DOUBLES_CHAIN, HORIZONTAL_CHAIN, ...TINY_BOARDS]) {
       expect(isLegalChain(board)).toBe(true);

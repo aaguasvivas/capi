@@ -60,7 +60,7 @@ const DOUBLES: Tile[] = [
 // chain wraps most aggressively (and rows pack tightest).
 const WIDTHS = [320, 375, 414, 600, 800, 1024];
 
-describe("boardLayout — no overlaps", () => {
+describe("boardLayout, no overlaps", () => {
   it("all seven doubles in a row never overlap (the reported bug class)", () => {
     for (const w of WIDTHS) assertNoOverlaps(DOUBLES, w);
   });
@@ -108,7 +108,7 @@ describe("boardLayout — no overlaps", () => {
   });
 });
 
-describe("boardLayout — spacing invariants", () => {
+describe("boardLayout, spacing invariants", () => {
   it("keeps an ordinary all-horizontal row pair at the tuned 60px pitch", () => {
     // A long non-double chain on a narrow board wraps into stacked horizontal
     // rows; their centerlines should sit TW/2 + VGAP + TW/2 = 60 apart.

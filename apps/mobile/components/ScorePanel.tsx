@@ -88,7 +88,9 @@ export default function ScorePanel({
     const team1Players = team1Seats
       .map((seat) => players.find((p) => p.seat === seat))
       .filter(Boolean) as Array<{ nickname: string; avatar_color: string }>;
-    const myTeam = mySeat === "n" || mySeat === "s" ? 0 : 1;
+    // A spectator has no seat and therefore no "(you)" tag on either side.
+    const myTeam =
+      mySeat === "n" || mySeat === "s" ? 0 : mySeat === "e" || mySeat === "w" ? 1 : null;
     const team0Active = team0Seats.includes(currentTurn);
     const team1Active = team1Seats.includes(currentTurn);
 

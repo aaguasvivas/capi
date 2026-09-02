@@ -1,4 +1,4 @@
-# Capi Mobile: Expo Port + Store Readiness — Design
+# Capi Mobile: Expo Port + Store Readiness, Design
 
 **Date:** 2026-06-10
 **Status:** Approved (pending spec review)
@@ -8,7 +8,7 @@
 
 Capi is a Dominican dominoes game: a Next.js 14 web app (playcapi.com) backed by
 Supabase (Postgres + Realtime), with a pure-TypeScript server-authoritative game
-engine (`src/lib/engine/`: types, reducer, validate, scoring — 93 passing tests)
+engine (`src/lib/engine/`: types, reducer, validate, scoring, 93 passing tests)
 and a pure board-layout module (`boardLayout.ts`). The web app is polished and
 correct after an extensive audit/fix cycle (Dominican rules: DOMINÓ, CAPICÚA,
 mid-round VEINTICINCO with stacking, reachable TRANCAO; overlap-proof snake
@@ -33,7 +33,7 @@ reusing the TypeScript engine verbatim.
 ```
 capi/
 ├── packages/
-│   └── engine/             # @capi/engine — pure TS, zero runtime deps
+│   └── engine/             # @capi/engine, pure TS, zero runtime deps
 │       ├── src/            # types.ts, reducer.ts, validate.ts, scoring.ts,
 │       │                   # boardLayout.ts (pure snake math)
 │       └── __tests__/      # the 93 engine + layout tests move here
@@ -67,13 +67,13 @@ guarantee of a single engine).
 
 - **Expo (managed workflow)** + **Expo Router** (file-based routing, mirrors
   the Next.js mental model).
-- **NativeWind** for styling — the Tailwind classes and theme tokens carry
+- **NativeWind** for styling, the Tailwind classes and theme tokens carry
   over with minimal translation.
-- **react-native-svg** — TileDisplay pips (incl. the drilled-pip radial
+- **react-native-svg**, TileDisplay pips (incl. the drilled-pip radial
   gradient) and the mode glyphs port directly.
-- **@supabase/supabase-js** — works in RN for Realtime subscriptions; REST
+- **@supabase/supabase-js**, works in RN for Realtime subscriptions; REST
   calls go to the deployed playcapi.com API.
-- **EAS Build/Submit** — added at the store-ready milestone, not during the
+- **EAS Build/Submit**, added at the store-ready milestone, not during the
   slice.
 
 ## 5. What ports verbatim vs. what is rebuilt
@@ -86,7 +86,7 @@ guarantee of a single engine).
 - Move-intent and API request/response shapes.
 
 **Ported with light changes:**
-- `useRealtimeGame` hook — fetch + Supabase logic identical; storage moves
+- `useRealtimeGame` hook, fetch + Supabase logic identical; storage moves
   from `localStorage` to `AsyncStorage`; base URL becomes configurable
   (env: dev `localhost`, prod `https://playcapi.com`).
 
@@ -99,7 +99,7 @@ guarantee of a single engine).
 
 ## 6. Milestones
 
-### M1 — Vertical slice (the proving milestone)
+### M1, Vertical slice (the proving milestone)
 Create/join → 1v1 game vs a web player → board + hand render → tap tile,
 choose end, play/pass/draw → callouts + mid-round banner → round over → next
 round → game over. One theme (barbería). Runs on a real device (Expo Go or
@@ -110,22 +110,21 @@ web browser) explicitly verified.
 sync divergence; board renders the snake correctly at phone width; 93 engine
 tests still pass from the shared package; web app unaffected in production.
 
-### M2 — Parity
+### M2, Parity
 2v2 (side rails, partner labels), all three themes, quick chat + emotes,
 sounds + haptics, ES/EN toggle, rematch, bug-report hook-up, reduced-motion
 respect (RN `AccessibilityInfo`).
 
-### M3 — Store readiness
+### M3, Store readiness
 App icons/splash, EAS build profiles, store metadata (names, screenshots,
-privacy), TestFlight + Play internal track, crash reporting (Sentry RN —
-matches the web's Sentry), store review-guideline pass (Apple 4.2 minimum
+privacy), TestFlight + Play internal track, crash reporting (Sentry RN, matches the web's Sentry), store review-guideline pass (Apple 4.2 minimum
 functionality is satisfied by native UI + haptics + full game).
 
-### M4 — iMessage extension (own spec later)
+### M4, iMessage extension (own spec later)
 GamePigeon-style: an iMessage App Extension where each turn is an
 `MSMessage` bubble carrying encoded game state; asynchronous turn-by-turn,
 no live server required. Reuses `@capi/engine` (via JavaScriptCore bridge or
-a small Swift port — decided in its own design doc). Out of scope for this
+a small Swift port, decided in its own design doc). Out of scope for this
 spec beyond the constraint it imposes: **the engine package stays pure and
 dependency-free so it can be embedded anywhere.**
 
@@ -146,7 +145,7 @@ already-hardened web hook.
 ## 8. Testing
 
 - Engine + layout tests run in the workspace (`npm test` at root runs all
-  packages). No mobile-specific engine tests needed — same code.
+  packages). No mobile-specific engine tests needed, same code.
 - M1 verification is live, on-device/simulator: scripted opponents via the
   public API (the existing capi-bot pattern) + manual phone play, mirroring
   how the web app was verified this cycle.
@@ -158,9 +157,9 @@ already-hardened web hook.
 | Risk | Mitigation |
 |---|---|
 | Repo move breaks Vercel deploy | Step-0 gate with explicit production verification; fallback layout documented above |
-| RN board performance (many absolutely-positioned views) | Board is ≤28 tiles — trivial view count; if needed, flatten with `react-native-svg` rendering |
+| RN board performance (many absolutely-positioned views) | Board is ≤28 tiles, trivial view count; if needed, flatten with `react-native-svg` rendering |
 | Supabase Realtime flakiness on mobile networks | Same recovery paths as web (refetch on stale/409); add foreground-resume refetch (`AppState` listener) |
-| Apple "minimum functionality" rejection (4.2) for thin apps | Full native UI (not a webview), haptics, sounds — comfortably above the bar |
+| Apple "minimum functionality" rejection (4.2) for thin apps | Full native UI (not a webview), haptics, sounds, comfortably above the bar |
 | Engine import paths break web during restructure | Single-commit move + full test/build/deploy verification before mobile work begins |
 
 ## 10. Out of scope (this spec)
