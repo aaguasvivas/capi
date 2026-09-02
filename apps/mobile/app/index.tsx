@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -11,19 +11,22 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import AdBanner from "../components/AdBanner";
 import ModeGlyph from "../components/ModeGlyph";
 import StoreSheet from "../components/StoreSheet";
 import { useEntitlements } from "../lib/entitlements";
 import {
+  deriveEntitlements,
   PRODUCT_IDS,
   type PremiumFichasId,
   type PremiumMesaId,
   type ProductId,
 } from "../lib/iapCatalog";
 import { useI18n } from "../lib/i18n";
-import { saveSession } from "../lib/session";
+import { clearSession, saveSession } from "../lib/session";
 import { TILE_SKINS, useTileSkin, type TileSkinId } from "../lib/tileSkins";
 import { API_BASE, THEME } from "../theme";
 import type { Lang } from "@capi/i18n";
@@ -109,6 +112,76 @@ function productIdForFichas(id: PremiumFichasId): ProductId {
   }
 }
 
+// Which locked picker card opened the store, so the matching purchase can
+// select that design and dismiss the sheet.
+type StoreTarget = { mesa: PremiumMesaId } | { fichas: PremiumFichasId };
+
+// Tables this device joined that are still in progress, read from the
+// per-game session keys (capi_session_<gameId>).
+const SESSION_KEY_PREFIX = "capi_session_";
+const MAX_RESUMABLE = 3;
+
+interface ResumableGame {
+  gameId: string;
+  code: string | null;
+  createdAt: number;
+}
+
+// Fire-and-forget audit of every saved session: the server says whether the
+// table still exists and is still in play. Gone (404) or finished tables lose
+// their key; a network miss keeps the key and shows nothing for now.
+async function loadResumableGames(): Promise<ResumableGame[]> {
+  let keys: readonly string[];
+  try {
+    keys = await AsyncStorage.getAllKeys();
+  } catch {
+    return [];
+  }
+  const ids = keys
+    .filter((k) => k.startsWith(SESSION_KEY_PREFIX))
+    .map((k) => k.slice(SESSION_KEY_PREFIX.length));
+  const checks = await Promise.all(
+    ids.map(async (gameId): Promise<ResumableGame | null> => {
+      try {
+        const res = await fetch(`${API_BASE}/api/games/${gameId}`, {
+          cache: "no-store",
+        });
+        if (res.status === 404) {
+          clearSession(gameId);
+          return null;
+        }
+        if (!res.ok) return null;
+        const { game } = (await res.json()) as {
+          game: {
+            status?: string;
+            invite_code?: string | null;
+            created_at?: string;
+            game_state?: { phase?: string } | null;
+          };
+        };
+        if (
+          game.status === "finished" ||
+          game.game_state?.phase === "finished"
+        ) {
+          clearSession(gameId);
+          return null;
+        }
+        return {
+          gameId,
+          code: typeof game.invite_code === "string" ? game.invite_code : null,
+          createdAt: Date.parse(game.created_at ?? "") || 0,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return checks
+    .filter((g): g is ResumableGame => g !== null)
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, MAX_RESUMABLE);
+}
+
 // Mini vertical tile: face, center divider, one pip per half. Enough to tell
 // the four skins apart at a glance.
 function SkinSwatch({ id }: { id: TileSkinId }) {
@@ -168,6 +241,22 @@ export default function Index() {
   const [loading, setLoading] = useState<"create" | "join" | null>(null);
   const [error, setError] = useState("");
   const [storeOpen, setStoreOpen] = useState(false);
+  const storeTargetRef = useRef<StoreTarget | null>(null);
+  const [resumable, setResumable] = useState<ResumableGame[]>([]);
+
+  // Re-audit saved sessions every time home comes back into focus: a table
+  // left mid-game shows up here, a finished one disappears.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      loadResumableGames().then((games) => {
+        if (active) setResumable(games);
+      });
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
 
   // Premium labels come from i18n; the free three keep their TABLE_THEMES
   // labels (proper nouns, identical in both languages).
@@ -192,6 +281,36 @@ export default function Index() {
     borinquen: "Borinquen",
     kingston: "Kingston",
   };
+
+  function openStore(target: StoreTarget | null) {
+    storeTargetRef.current = target;
+    setStoreOpen(true);
+  }
+
+  function closeStore() {
+    storeTargetRef.current = null;
+    setStoreOpen(false);
+  }
+
+  // A confirmed purchase of the design that opened the sheet (or of the
+  // bundle that includes it) selects it and dismisses the sheet. A single
+  // design bought from the Tienda pill is selected too, sheet left open.
+  function handlePurchased(id: ProductId) {
+    const got = deriveEntitlements([id]);
+    const target = storeTargetRef.current;
+    if (target && "mesa" in target && got.mesas.has(target.mesa)) {
+      setTheme(target.mesa);
+      closeStore();
+      return;
+    }
+    if (target && "fichas" in target && got.fichas.has(target.fichas)) {
+      setSkinId(target.fichas);
+      closeStore();
+      return;
+    }
+    if (got.mesas.size === 1) setTheme([...got.mesas][0]);
+    if (got.fichas.size === 1) setSkinId([...got.fichas][0]);
+  }
 
   async function handleCreate() {
     if (!nickname.trim() || loading) return;
@@ -266,22 +385,14 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
+      <StatusBar style="dark" />
+
       {/* Store entry, top-left mirror of the language toggle */}
-      <View
-        style={{
-          position: "absolute",
-          top: insets.top + 12,
-          left: 20,
-          zIndex: 10,
-          backgroundColor: "rgba(255,255,255,0.85)",
-          borderRadius: 999,
-          padding: 3,
-          borderWidth: 1,
-          borderColor: "#e5e7eb",
-        }}
-      >
+      <View style={[floatingPillStyle, { left: 20, top: insets.top + 12 }]}>
         <Pressable
-          onPress={() => setStoreOpen(true)}
+          onPress={() => openStore(null)}
+          accessibilityRole="button"
+          accessibilityLabel={s.store}
           style={{
             paddingHorizontal: 12,
             paddingVertical: 5,
@@ -298,23 +409,18 @@ export default function Index() {
 
       {/* Language toggle */}
       <View
-        style={{
-          position: "absolute",
-          top: insets.top + 12,
-          right: 20,
-          zIndex: 10,
-          flexDirection: "row",
-          backgroundColor: "rgba(255,255,255,0.85)",
-          borderRadius: 999,
-          padding: 3,
-          borderWidth: 1,
-          borderColor: "#e5e7eb",
-        }}
+        style={[
+          floatingPillStyle,
+          { right: 20, top: insets.top + 12, flexDirection: "row" },
+        ]}
       >
         {LANGS.map((l) => (
           <Pressable
             key={l}
             onPress={() => setLang(l)}
+            accessibilityRole="button"
+            accessibilityLabel={l === "es" ? "ES" : "EN"}
+            accessibilityState={{ selected: lang === l }}
             style={{
               paddingHorizontal: 12,
               paddingVertical: 5,
@@ -374,6 +480,63 @@ export default function Index() {
           </Text>
         </View>
 
+        {/* Tables still in play on this device */}
+        {resumable.length > 0 ? (
+          <View style={{ gap: 8, marginBottom: 16 }}>
+            {resumable.map((g) => {
+              const hint = g.code ? s.resumeGameHint(g.code) : null;
+              return (
+                <Pressable
+                  key={g.gameId}
+                  onPress={() => router.push(`/game/${g.gameId}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    hint ? `${s.resumeGame}, ${hint}` : s.resumeGame
+                  }
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor: "#ffffff",
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb",
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: "700",
+                        color: "#1f2937",
+                      }}
+                      numberOfLines={1}
+                    >
+                      {s.resumeGame}
+                    </Text>
+                    {hint ? (
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#9ca3af",
+                          marginTop: 1,
+                          fontVariant: ["tabular-nums"],
+                        }}
+                        numberOfLines={1}
+                      >
+                        {hint}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Text style={{ fontSize: 18, color: "#9ca3af" }}>›</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+
         <View
           style={{
             backgroundColor: "#ffffff",
@@ -396,6 +559,7 @@ export default function Index() {
               maxLength={20}
               placeholder={s.namePlaceholder}
               placeholderTextColor="#9ca3af"
+              accessibilityLabel={s.yourName}
               style={inputStyle}
             />
           </View>
@@ -408,6 +572,10 @@ export default function Index() {
                 <Pressable
                   key={c}
                   onPress={() => setAvatarColor(c)}
+                  hitSlop={6}
+                  accessibilityRole="button"
+                  accessibilityLabel={s.yourColor}
+                  accessibilityState={{ selected: avatarColor === c }}
                   style={{
                     width: 32,
                     height: 32,
@@ -434,6 +602,10 @@ export default function Index() {
                   t.premium !== undefined && !ent.mesas.has(t.premium)
                     ? t.premium
                     : null;
+                const title = t.premium ? premiumLabels[t.premium] : t.label;
+                const price = lockedMesa
+                  ? prices.get(productIdForMesa(lockedMesa)) ?? s.priceUnknown
+                  : null;
                 return (
                   <Pressable
                     key={t.id}
@@ -441,11 +613,18 @@ export default function Index() {
                       // Guard here only: theme state never holds a locked id,
                       // and unlocking mid-session keeps state valid.
                       if (lockedMesa) {
-                        setStoreOpen(true);
+                        openStore({ mesa: lockedMesa });
                         return;
                       }
                       setTheme(t.id);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      price
+                        ? `${title}, ${themeDescs[t.id]}, ${price}`
+                        : `${title}, ${themeDescs[t.id]}`
+                    }
+                    accessibilityState={{ selected: theme === t.id }}
                     style={[
                       cardStyle,
                       {
@@ -502,13 +681,15 @@ export default function Index() {
                         </View>
                       ) : null}
                     </View>
-                    <Text style={cardTitleStyle}>
-                      {t.premium ? premiumLabels[t.premium] : t.label}
-                    </Text>
+                    <Text style={cardTitleStyle}>{title}</Text>
                     <Text style={cardDescStyle}>{themeDescs[t.id]}</Text>
-                    {lockedMesa ? (
-                      <Text style={priceTagStyle}>
-                        {prices.get(productIdForMesa(lockedMesa)) ?? "$0.99"}
+                    {price ? (
+                      <Text
+                        style={priceTagStyle}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                      >
+                        {price}
                       </Text>
                     ) : null}
                   </Pressable>
@@ -525,16 +706,25 @@ export default function Index() {
                 // Non-null when this skin is premium and not owned yet.
                 const lockedFichas =
                   f !== "clasico" && !ent.fichas.has(f) ? f : null;
+                const price = lockedFichas
+                  ? prices.get(productIdForFichas(lockedFichas)) ??
+                    s.priceUnknown
+                  : null;
                 return (
                   <Pressable
                     key={f}
                     onPress={() => {
                       if (lockedFichas) {
-                        setStoreOpen(true);
+                        openStore({ fichas: lockedFichas });
                         return;
                       }
                       setSkinId(f);
                     }}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      price ? `${fichasLabels[f]}, ${price}` : fichasLabels[f]
+                    }
+                    accessibilityState={{ selected: skinId === f }}
                     style={[
                       cardStyle,
                       {
@@ -560,11 +750,13 @@ export default function Index() {
                     >
                       {fichasLabels[f]}
                     </Text>
-                    {lockedFichas ? (
-                      <Text style={priceTagStyle}>
-                        🔒{" "}
-                        {prices.get(productIdForFichas(lockedFichas)) ??
-                          "$0.99"}
+                    {price ? (
+                      <Text
+                        style={priceTagStyle}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                      >
+                        🔒 {price}
                       </Text>
                     ) : null}
                   </Pressable>
@@ -579,6 +771,9 @@ export default function Index() {
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Pressable
                 onPress={() => setIs2v2(false)}
+                accessibilityRole="button"
+                accessibilityLabel="1v1"
+                accessibilityState={{ selected: !is2v2 }}
                 style={[
                   cardStyle,
                   {
@@ -592,6 +787,9 @@ export default function Index() {
               </Pressable>
               <Pressable
                 onPress={() => setIs2v2(true)}
+                accessibilityRole="button"
+                accessibilityLabel={`2v2, ${s.conTuFrente}`}
+                accessibilityState={{ selected: is2v2 }}
                 style={[
                   cardStyle,
                   {
@@ -613,6 +811,9 @@ export default function Index() {
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Pressable
                 onPress={() => setTargetScore(100)}
+                accessibilityRole="button"
+                accessibilityLabel={s.score100}
+                accessibilityState={{ selected: targetScore === 100 }}
                 style={[
                   cardStyle,
                   {
@@ -627,6 +828,9 @@ export default function Index() {
               </Pressable>
               <Pressable
                 onPress={() => setTargetScore(200)}
+                accessibilityRole="button"
+                accessibilityLabel={s.score200}
+                accessibilityState={{ selected: targetScore === 200 }}
                 style={[
                   cardStyle,
                   {
@@ -652,6 +856,12 @@ export default function Index() {
           <Pressable
             onPress={handleCreate}
             disabled={!nickname.trim() || loading !== null}
+            accessibilityRole="button"
+            accessibilityLabel={s.createAction}
+            accessibilityState={{
+              disabled: !nickname.trim() || loading !== null,
+              busy: loading === "create",
+            }}
             style={{
               backgroundColor: THEME.scoreBg,
               borderRadius: 14,
@@ -688,6 +898,7 @@ export default function Index() {
               autoCapitalize="characters"
               placeholder="XXXXXX"
               placeholderTextColor="#9ca3af"
+              accessibilityLabel={s.inviteCode}
               style={[
                 inputStyle,
                 {
@@ -705,6 +916,13 @@ export default function Index() {
             disabled={
               !nickname.trim() || inviteCode.length !== 6 || loading !== null
             }
+            accessibilityRole="button"
+            accessibilityLabel={s.joinAction}
+            accessibilityState={{
+              disabled:
+                !nickname.trim() || inviteCode.length !== 6 || loading !== null,
+              busy: loading === "join",
+            }}
             style={{
               borderWidth: 2,
               borderColor: THEME.scoreBg,
@@ -734,10 +952,31 @@ export default function Index() {
           until an ad actually loads. */}
       <AdBanner />
 
-      <StoreSheet visible={storeOpen} onClose={() => setStoreOpen(false)} />
+      <StoreSheet
+        visible={storeOpen}
+        onClose={closeStore}
+        onPurchased={handlePurchased}
+      />
     </SafeAreaView>
   );
 }
+
+// Store and language pills float over the scrolling form: opaque with a soft
+// shadow so scrolled content never shows through them.
+const floatingPillStyle = {
+  position: "absolute" as const,
+  zIndex: 10,
+  backgroundColor: "#ffffff",
+  borderRadius: 999,
+  padding: 3,
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.08,
+  shadowRadius: 6,
+  elevation: 3,
+};
 
 const labelStyle = {
   fontSize: 11,

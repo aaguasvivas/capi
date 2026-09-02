@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useEntitlements } from "../lib/entitlements";
 import { useI18n } from "../lib/i18n";
 import { PRODUCT_IDS, type ProductId } from "../lib/iapCatalog";
@@ -16,18 +17,30 @@ import { THEME } from "../theme";
 
 // Page-sheet store: Todo Capi hero, remove ads, 3 mesas, 3 fichas, restore,
 // privacy link. Owned states derive from ent so a mid-sheet purchase updates
-// rows live. Fallback prices mirror the ASC tiers and only show before the
-// price warm-up resolves.
+// rows live. Prices come from the store only; until they arrive every buy
+// button shows a neutral "see price" pill, never a guessed amount.
 export default function StoreSheet({
   visible,
   onClose,
+  onPurchased,
 }: {
   visible: boolean;
   onClose: () => void;
+  // Fires after the store confirmed a purchase, with the product bought.
+  onPurchased?: (id: ProductId) => void;
 }) {
   const { s } = useI18n();
-  const { ent, buying, restoring, lastError, restore, clearError, devGrantAll } =
-    useEntitlements();
+  const {
+    ent,
+    prices,
+    buying,
+    restoring,
+    lastError,
+    restore,
+    refreshPrices,
+    clearError,
+    devGrantAll,
+  } = useEntitlements();
 
   // Surface each purchase error exactly once; the ref guards re-renders that
   // land before clearError() settles.
@@ -39,16 +52,32 @@ export default function StoreSheet({
     }
     if (alertedErrorRef.current === lastError) return;
     alertedErrorRef.current = lastError;
-    Alert.alert(s.purchaseFailed, lastError);
+    if (lastError === "purchaseFailed") Alert.alert(s.purchaseFailed);
+    else Alert.alert(s.purchaseFailed, s[lastError]);
     clearError();
   }, [lastError, clearError, s]);
+
+  // The launch warm-up can miss (offline, slow store). Try again each time the
+  // sheet opens without prices; once a retry also comes back empty, say so.
+  const [priceFetchMissed, setPriceFetchMissed] = useState(false);
+  const noPrices = prices.size === 0;
+  useEffect(() => {
+    if (!visible || !noPrices) return;
+    let active = true;
+    refreshPrices().then(() => {
+      if (active) setPriceFetchMissed(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [visible, noPrices, refreshPrices]);
 
   async function handleRestore() {
     try {
       const n = await restore();
-      Alert.alert(s.restoreDone(n));
+      Alert.alert(n === null ? s.restoreFailed : s.restoreDone(n));
     } catch {
-      Alert.alert(s.purchaseFailed);
+      Alert.alert(s.restoreFailed);
     }
   }
 
@@ -59,7 +88,12 @@ export default function StoreSheet({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={{ flex: 1, backgroundColor: THEME.pageBg }}>
+      {/* iOS page sheets sit below the status bar already (top inset 0);
+          Android shows the modal full screen, so the header needs the inset. */}
+      <SafeAreaView
+        edges={["top"]}
+        style={{ flex: 1, backgroundColor: THEME.pageBg }}
+      >
         {/* Header */}
         <View
           style={{
@@ -76,6 +110,9 @@ export default function StoreSheet({
           </Text>
           <Pressable
             onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel={s.closeTray}
+            hitSlop={8}
             style={{
               width: 32,
               height: 32,
@@ -98,6 +135,19 @@ export default function StoreSheet({
             gap: 10,
           }}
         >
+          {noPrices && priceFetchMissed ? (
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#9ca3af",
+                textAlign: "center",
+                marginBottom: 2,
+              }}
+            >
+              {s.storeUnavailable}
+            </Text>
+          ) : null}
+
           {/* Todo Capi hero */}
           <View
             style={{
@@ -121,7 +171,7 @@ export default function StoreSheet({
             <BuyButton
               productId={PRODUCT_IDS.todo}
               owned={ent.ownedIds.has(PRODUCT_IDS.todo)}
-              fallbackPrice="$4.99"
+              onPurchased={onPurchased}
               hero
             />
           </View>
@@ -131,7 +181,7 @@ export default function StoreSheet({
             desc={s.removeAdsDesc}
             productId={PRODUCT_IDS.removeAds}
             owned={ent.adFree}
-            fallbackPrice="$1.99"
+            onPurchased={onPurchased}
           />
 
           <SectionLabel text={s.table} />
@@ -140,21 +190,21 @@ export default function StoreSheet({
             desc={s.themeQuisqueyaDesc}
             productId={PRODUCT_IDS.mesaQuisqueya}
             owned={ent.mesas.has("quisqueya")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
           <ProductRow
             name={s.themeLarimar}
             desc={s.themeLarimarDesc}
             productId={PRODUCT_IDS.mesaLarimar}
             owned={ent.mesas.has("larimar")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
           <ProductRow
             name={s.themeNoche}
             desc={s.themeNocheDesc}
             productId={PRODUCT_IDS.mesaNoche}
             owned={ent.mesas.has("noche")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
 
           <SectionLabel text={s.fichasLabel} />
@@ -163,27 +213,30 @@ export default function StoreSheet({
             desc={s.fichasQuisqueyaDesc}
             productId={PRODUCT_IDS.fichasQuisqueya}
             owned={ent.fichas.has("quisqueya")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
           <ProductRow
             name="Fichas Borinquen"
             desc={s.fichasBorinquenDesc}
             productId={PRODUCT_IDS.fichasBorinquen}
             owned={ent.fichas.has("borinquen")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
           <ProductRow
             name="Fichas Kingston"
             desc={s.fichasKingstonDesc}
             productId={PRODUCT_IDS.fichasKingston}
             owned={ent.fichas.has("kingston")}
-            fallbackPrice="$0.99"
+            onPurchased={onPurchased}
           />
 
           {/* Restore */}
           <Pressable
             onPress={handleRestore}
             disabled={restoring || buying !== null}
+            accessibilityRole="button"
+            accessibilityLabel={s.restorePurchases}
+            accessibilityState={{ disabled: restoring || buying !== null }}
             style={{
               alignItems: "center",
               paddingVertical: 12,
@@ -206,6 +259,8 @@ export default function StoreSheet({
             onPress={() =>
               Linking.openURL("https://playcapi.com/privacy").catch(() => {})
             }
+            accessibilityRole="link"
+            accessibilityLabel={s.privacyPolicy}
             style={{ alignItems: "center", paddingVertical: 4 }}
           >
             <Text
@@ -230,7 +285,7 @@ export default function StoreSheet({
             </Pressable>
           ) : null}
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 }
@@ -257,13 +312,13 @@ function ProductRow({
   desc,
   productId,
   owned,
-  fallbackPrice,
+  onPurchased,
 }: {
   name: string;
   desc: string;
   productId: ProductId;
   owned: boolean;
-  fallbackPrice: string;
+  onPurchased?: (id: ProductId) => void;
 }) {
   return (
     <View
@@ -287,11 +342,7 @@ function ProductRow({
           {desc}
         </Text>
       </View>
-      <BuyButton
-        productId={productId}
-        owned={owned}
-        fallbackPrice={fallbackPrice}
-      />
+      <BuyButton productId={productId} owned={owned} onPurchased={onPurchased} />
     </View>
   );
 }
@@ -301,12 +352,12 @@ function ProductRow({
 function BuyButton({
   productId,
   owned,
-  fallbackPrice,
+  onPurchased,
   hero,
 }: {
   productId: ProductId;
   owned: boolean;
-  fallbackPrice: string;
+  onPurchased?: (id: ProductId) => void;
   hero?: boolean;
 }) {
   const { s } = useI18n();
@@ -328,11 +379,16 @@ function BuyButton({
   }
 
   const busy = buying !== null;
-  const price = prices.get(productId) ?? fallbackPrice;
+  const price = prices.get(productId) ?? s.priceUnknown;
   return (
     <Pressable
-      onPress={() => buy(productId)}
+      onPress={async () => {
+        if (await buy(productId)) onPurchased?.(productId);
+      }}
       disabled={busy}
+      accessibilityRole="button"
+      accessibilityLabel={price}
+      accessibilityState={{ disabled: busy, busy: buying === productId }}
       style={{
         alignSelf: hero ? "stretch" : "auto",
         minWidth: 64,
@@ -351,6 +407,7 @@ function BuyButton({
         <ActivityIndicator size="small" color={hero ? "#ffffff" : "#6366f1"} />
       ) : (
         <Text
+          numberOfLines={1}
           style={{
             color: hero ? "#ffffff" : "#6366f1",
             fontSize: hero ? 15 : 13,

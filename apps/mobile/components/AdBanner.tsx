@@ -5,16 +5,18 @@ import { ADS_CONFIGURED, BANNER_AD_UNIT_ID } from "../lib/adUnits";
 import BannerSlot from "./BannerSlot";
 
 // Drop-in banner: renders nothing until consent+init succeed, and never for
-// ad-free owners (their SDK is never even initialized).
+// ad-free owners (their SDK is never even initialized). Waits for the launch
+// restore to settle so a fresh install of an ad-free buyer never flashes a
+// banner before the store confirms the purchase.
 export default function AdBanner({
   onHeight,
 }: {
   onHeight?: (h: number) => void;
 }) {
-  const { ent, hydrated } = useEntitlements();
+  const { ent, hydrated, reconciled } = useEntitlements();
   const [ready, setReady] = useState(false);
 
-  const enabled = ADS_CONFIGURED && hydrated && !ent.adFree;
+  const enabled = ADS_CONFIGURED && hydrated && reconciled && !ent.adFree;
 
   useEffect(() => {
     if (!enabled) return;

@@ -8,7 +8,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -27,19 +26,40 @@ import {
   initIap,
   restoreOwned,
   setPurchaseCallbacks,
+  type PurchaseFailure,
 } from "./purchases";
 
 const STORAGE_KEY = "@capi/iap_v1";
 
+// A fresh install of an ad-free buyer must not flash a banner before the
+// launch restore answers, but a wedged store must not hold ads back forever.
+const RECONCILE_CAP_MS = 3000;
+
+// i18n key for the purchase failure alert. The store layer only emits stable
+// codes; raw store strings stay in the console.
+export type PurchaseErrorKey =
+  | "purchaseErrorProduct"
+  | "purchaseErrorStore"
+  | "purchaseFailed";
+
+const ERROR_KEYS: Record<PurchaseFailure, PurchaseErrorKey> = {
+  "product-unavailable": "purchaseErrorProduct",
+  "store-unavailable": "purchaseErrorStore",
+  failed: "purchaseFailed",
+};
+
 interface EntitlementsCtx {
   ent: Entitlements;
   hydrated: boolean;
+  // True once the launch restore settled (either way) or the cap elapsed.
+  reconciled: boolean;
   prices: Map<ProductId, string>;
   buying: ProductId | null;
   restoring: boolean;
-  lastError: string | null;
-  buy: (id: ProductId) => void;
-  restore: () => Promise<number>; // how many owned ids came back
+  lastError: PurchaseErrorKey | null;
+  buy: (id: ProductId) => Promise<boolean>; // true once the store confirmed
+  restore: () => Promise<number | null>; // owned ids found; null: unreachable
+  refreshPrices: () => Promise<void>;
   clearError: () => void;
   devGrantAll: () => void; // __DEV__ only; no-op in production builds
 }
@@ -49,12 +69,11 @@ const Ctx = createContext<EntitlementsCtx | null>(null);
 export function EntitlementsProvider({ children }: { children: ReactNode }) {
   const [owned, setOwned] = useState<Set<ProductId>>(new Set());
   const [hydrated, setHydrated] = useState(false);
+  const [reconciled, setReconciled] = useState(false);
   const [prices, setPrices] = useState<Map<ProductId, string>>(new Map());
   const [buying, setBuying] = useState<ProductId | null>(null);
   const [restoring, setRestoring] = useState(false);
-  const [lastError, setLastError] = useState<string | null>(null);
-  const ownedRef = useRef(owned);
-  ownedRef.current = owned;
+  const [lastError, setLastError] = useState<PurchaseErrorKey | null>(null);
 
   const persist = useCallback((ids: Set<ProductId>) => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([...ids])).catch(() => {});
@@ -75,12 +94,28 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
+  const grantAll = useCallback(
+    (ids: ProductId[]) => {
+      if (!ids.length) return;
+      setOwned((prev) => {
+        const next = new Set(prev);
+        ids.forEach((i) => next.add(i));
+        persist(next);
+        return next;
+      });
+    },
+    [persist]
+  );
+
   useEffect(() => {
     let active = true;
-    setPurchaseCallbacks(grant, (message) => {
+    setPurchaseCallbacks(grant, (code) => {
       setBuying(null);
-      setLastError(message);
+      setLastError(ERROR_KEYS[code]);
     });
+    const cap = setTimeout(() => {
+      if (active) setReconciled(true);
+    }, RECONCILE_CAP_MS);
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -95,39 +130,38 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
       }
       if (active) setHydrated(true);
       const ok = await initIap();
-      if (!ok || !active) return;
+      if (!ok || !active) {
+        if (active) setReconciled(true);
+        return;
+      }
       // Silent launch restore + price warm-up; failures leave cache as-is.
-      try {
-        const ids = await restoreOwned();
-        if (active && ids.length) {
-          setOwned((prev) => {
-            const next = new Set(prev);
-            ids.forEach((i) => next.add(i));
-            persist(next);
-            return next;
-          });
-        }
-      } catch {}
-      try {
-        const p = await fetchPrices();
-        if (active) setPrices(p);
-      } catch {}
+      const ids = await restoreOwned();
+      if (!active) return;
+      if (ids) grantAll(ids);
+      setReconciled(true);
+      const p = await fetchPrices();
+      if (active && p.size) setPrices(p);
     })();
     return () => {
       active = false;
+      clearTimeout(cap);
       endIap();
     };
-  }, [grant, persist]);
+  }, [grant, grantAll]);
 
-  const buy = useCallback((id: ProductId) => {
+  const buy = useCallback(async (id: ProductId) => {
     setLastError(null);
     setBuying(id);
-    buyProduct(id).catch(() => {
+    try {
+      await buyProduct(id);
+      return true;
+    } catch {
       // buyProduct rejects on cancellation and failure alike; real failures
       // already reached lastError through the onFailure callback, so this
       // path only clears the spinner and never raises its own error.
       setBuying(null);
-    });
+      return false;
+    }
   }, []);
 
   const restore = useCallback(async () => {
@@ -135,45 +169,53 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
     setRestoring(true);
     try {
       const ids = await restoreOwned();
-      if (ids.length) {
-        setOwned((prev) => {
-          const next = new Set(prev);
-          ids.forEach((i) => next.add(i));
-          persist(next);
-          return next;
-        });
-      }
+      if (ids === null) return null;
+      grantAll(ids);
       return ids.length;
     } finally {
       setRestoring(false);
     }
-  }, [persist]);
+  }, [grantAll]);
+
+  const refreshPrices = useCallback(async () => {
+    const p = await fetchPrices();
+    if (p.size) setPrices(p);
+  }, []);
 
   const devGrantAll = useCallback(() => {
     if (!__DEV__) return;
-    setOwned((prev) => {
-      const next = new Set(prev);
-      (Object.values(PRODUCT_IDS) as ProductId[]).forEach((i) => next.add(i));
-      persist(next);
-      return next;
-    });
-  }, [persist]);
+    grantAll(Object.values(PRODUCT_IDS) as ProductId[]);
+  }, [grantAll]);
 
   const ent = useMemo(() => deriveEntitlements(owned), [owned]);
   const value = useMemo(
     () => ({
       ent,
       hydrated,
+      reconciled,
       prices,
       buying,
       restoring,
       lastError,
       buy,
       restore,
+      refreshPrices,
       clearError: () => setLastError(null),
       devGrantAll,
     }),
-    [ent, hydrated, prices, buying, restoring, lastError, buy, restore, devGrantAll]
+    [
+      ent,
+      hydrated,
+      reconciled,
+      prices,
+      buying,
+      restoring,
+      lastError,
+      buy,
+      restore,
+      refreshPrices,
+      devGrantAll,
+    ]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

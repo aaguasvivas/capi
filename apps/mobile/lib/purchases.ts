@@ -25,13 +25,20 @@ let updateSub: { remove: () => void } | null = null;
 let errorSub: { remove: () => void } | null = null;
 let connected = false;
 
-// Last raw store error seen, for diagnostics only. Never shown verbatim.
+// Last raw store error seen, for the console only. Raw store strings never
+// reach the UI: failures surface as one of the stable codes below and the
+// entitlements layer maps those to translated copy.
 let lastStoreError = "";
 
-// Thrown when the store has no record of a product we asked to buy. This is a
+// "product-unavailable": the store has no record of the product. That is a
 // configuration problem (App Store Connect), not a payment failure; Anota
 // chased the generic message for two review cycles before learning this.
-const PRODUCT_UNAVAILABLE = "product-unavailable";
+// "store-unavailable": the connection could not be opened at all.
+// "failed": the store reported an error while a purchase was in flight.
+export type PurchaseFailure =
+  | "product-unavailable"
+  | "store-unavailable"
+  | "failed";
 
 // When a purchase is in flight, the listeners settle this resolver. Only the
 // product being bought settles it; ownership of anything else that arrives
@@ -49,13 +56,18 @@ function settleBuy(sku: ProductId | null, owned: boolean) {
 // App-level hooks so a purchase result reaches entitlement state and the user
 // even when the store sheet has been dismissed to let StoreKit present.
 let onOwned: ((id: ProductId) => void) | null = null;
-let onPurchaseError: ((message: string) => void) | null = null;
+let onPurchaseError: ((code: PurchaseFailure) => void) | null = null;
 export function setPurchaseCallbacks(
   onGrant: (id: ProductId) => void,
-  onFailure: (message: string) => void
+  onFailure: (code: PurchaseFailure) => void
 ): void {
   onOwned = onGrant;
   onPurchaseError = onFailure;
+}
+
+function reportFailure(code: PurchaseFailure): void {
+  console.warn(`[iap] ${code}`, lastStoreError);
+  onPurchaseError?.(code);
 }
 
 function purchasedId(purchase: unknown): ProductId | null {
@@ -109,9 +121,7 @@ export async function initIap(): Promise<boolean> {
       // Any error, including user cancellation, ends the in-flight buy.
       settleBuy(null, false);
       const cancelled = /cancel/i.test(code) || /cancel/i.test(message);
-      if (!cancelled) {
-        onPurchaseError?.(lastStoreError || "Purchase failed");
-      }
+      if (!cancelled) reportFailure("failed");
     });
     await ensureConnected();
     return true;
@@ -148,13 +158,17 @@ export async function fetchPrices(): Promise<Map<ProductId, string>> {
       const price = p?.displayPrice;
       if (id && typeof price === "string") prices.set(id, price);
     }
-  } catch {
-    // Prices stay empty; callers fall back to placeholder strings.
+  } catch (e) {
+    // Prices stay empty; the UI shows a neutral "see price" pill instead.
+    console.warn("[iap] getProducts failed", e);
   }
   return prices;
 }
 
-export async function restoreOwned(): Promise<ProductId[]> {
+// Owned product ids as the store reports them. null means the store could not
+// be reached (offline, timeout, no connection); an empty array means it
+// answered and the account owns nothing.
+export async function restoreOwned(): Promise<ProductId[] | null> {
   try {
     await ensureConnected();
     const purchases = await withTimeout(
@@ -168,8 +182,9 @@ export async function restoreOwned(): Promise<ProductId[]> {
       if (id) owned.add(id);
     }
     return [...owned];
-  } catch {
-    return [];
+  } catch (e) {
+    console.warn("[iap] getAvailablePurchases failed", e);
+    return null;
   }
 }
 
@@ -179,7 +194,7 @@ export async function buyProduct(id: ProductId): Promise<void> {
   } catch (e) {
     // The entitlements provider treats a rejection as a silent spinner-clear;
     // a dead store connection deserves the failure alert, so report it too.
-    onPurchaseError?.(lastStoreError || "Store unavailable");
+    reportFailure("store-unavailable");
     throw e;
   }
   // Confirm the store actually knows this product before trying to buy it.
@@ -201,10 +216,8 @@ export async function buyProduct(id: ProductId): Promise<void> {
     known = true;
   }
   if (!known) {
-    onPurchaseError?.(PRODUCT_UNAVAILABLE);
-    const err = new Error(PRODUCT_UNAVAILABLE) as Error & { code: string };
-    err.code = PRODUCT_UNAVAILABLE;
-    throw err;
+    reportFailure("product-unavailable");
+    throw new Error("product-unavailable");
   }
 
   return new Promise<void>((resolve, reject) => {
@@ -225,7 +238,7 @@ export async function buyProduct(id: ProductId): Promise<void> {
         // the in-flight state; user-facing messaging already went through
         // onPurchaseError (cancellations stay silent by design).
         if (owned) resolve();
-        else reject(new Error(lastStoreError || "purchase-not-completed"));
+        else reject(new Error("purchase-not-completed"));
       },
     };
     // Fire the purchase; the result arrives via the listeners in initIap.

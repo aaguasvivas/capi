@@ -111,9 +111,17 @@ async function start(): Promise<boolean> {
 }
 
 // Idempotent: the first caller triggers the flow, everyone else awaits it.
-// Without real ad unit ids the whole stack stays off.
+// Without real ad unit ids the whole stack stays off. A flow that ends dark
+// (offline consent fetch, SDK init timeout) forgets its promise, so the next
+// banner mount retries once connectivity is back instead of staying dark for
+// the rest of the session.
 export async function initAds(): Promise<boolean> {
   if (!ADS_CONFIGURED) return false;
-  if (!startedPromise) startedPromise = start();
+  if (!startedPromise) {
+    startedPromise = start().then((ok) => {
+      if (!ok) startedPromise = null;
+      return ok;
+    });
+  }
   return startedPromise;
 }

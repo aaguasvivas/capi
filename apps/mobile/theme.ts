@@ -93,8 +93,8 @@ export function getTheme(name?: string): ThemePalette {
   return THEMES[name as keyof typeof THEMES] ?? THEMES.barberia;
 }
 
-// Static barberia-flavored theme + tile constants. Screens without a game
-// theme (landing, waiting room) and tile rendering keep using this.
+// Static barberia-flavored theme. Screens without a game theme (landing,
+// waiting room) keep using this; tile colors live in lib/tileSkins.
 export const THEME = {
   pageBg: "#f5f0e8",
   feltCenter: "#2e8a4e",
@@ -104,10 +104,6 @@ export const THEME = {
   scoreText: "#f5f0e8",
   accent: "#c0392b",
   handBg: "#ebe4d4",
-  tileFace: "#FBF8ED",
-  tileFaceDouble: "#ECE4CC",
-  tileBorder: "#c8bc9e",
-  tileBorderDouble: "#8a7d60",
 };
 
 export const API_BASE =
