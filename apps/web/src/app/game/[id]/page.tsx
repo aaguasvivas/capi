@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useRealtimeGame } from "@/hooks/useRealtimeGame";
 import type { ChatMessage } from "@/hooks/useRealtimeGame";
@@ -11,8 +12,16 @@ import CalloutOverlay from "@/components/game/CalloutOverlay";
 import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
-import type { Tile, Seat } from "@capi/engine";
-import { getTeam, getOpponentTeam } from "@capi/engine";
+import TablePresence from "@/components/game/TablePresence";
+import {
+  JoinCard,
+  SpectatorBar,
+  SpectatorScoreBar,
+  SpectatorSeats,
+} from "@/components/game/SessionGate";
+import type { Tile, Seat, Theme } from "@capi/engine";
+import { getTeam, getOpponentTeam, getSeatsForGame } from "@capi/engine";
+import { chatText, errorKeyFor } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
 import { isImessageEmbed, embedLang } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
@@ -39,7 +48,50 @@ interface ChatBubble extends ChatMessage {
   phase: "in" | "out";
 }
 
-function getRelativeSeats(mySeat: Seat): { top: Seat; left: Seat; right: Seat } {
+const SEATS: readonly string[] = ["n", "e", "s", "w"];
+const THEMES: readonly string[] = [
+  "barberia",
+  "colmado",
+  "patio",
+  "quisqueya",
+  "larimar",
+  "noche",
+];
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && THEMES.includes(value);
+}
+
+// The session this browser holds for one table. Anything malformed is
+// dropped so the page falls back to join or spectate instead of guessing
+// a seat.
+function readStoredSession(gameId: string): Session | null {
+  const key = `capi_session_${gameId}`;
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Partial<Session>;
+    if (
+      typeof parsed.playerId === "string" &&
+      typeof parsed.seat === "string" &&
+      SEATS.includes(parsed.seat)
+    ) {
+      return { playerId: parsed.playerId, seat: parsed.seat, gameId };
+    }
+  } catch {
+    /* fall through and drop it */
+  }
+  localStorage.removeItem(key);
+  return null;
+}
+
+// Seats around the table from one player's point of view. 1v1 has only the
+// opponent across; 2v2 puts the partner across and the opponents on the sides.
+function getRelativeSeats(
+  mySeat: Seat,
+  is2v2: boolean
+): { top: Seat; left: Seat | null; right: Seat | null } {
+  if (!is2v2) return { top: mySeat === "n" ? "s" : "n", left: null, right: null };
   switch (mySeat) {
     case "n": return { top: "s", left: "w", right: "e" };
     case "e": return { top: "w", left: "n", right: "s" };
@@ -48,23 +100,49 @@ function getRelativeSeats(mySeat: Seat): { top: Seat; left: Seat; right: Seat } 
   }
 }
 
+// iMessage bubble markers survive remounts: a finished game reopened later
+// must not post its bubble again. A table finishes once, and each round ends
+// once, so rounds are keyed by index. state_version is not stable enough for
+// this: a rematch request bumps it on the finished game.
+interface BridgeMarks {
+  roundOver?: number;
+  gameOver?: boolean;
+}
+
+function readBridgeMarks(gameId: string): BridgeMarks {
+  try {
+    const raw = localStorage.getItem(`capi_bridge_${gameId}`);
+    return raw ? (JSON.parse(raw) as BridgeMarks) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeBridgeMarks(gameId: string, marks: BridgeMarks) {
+  try {
+    localStorage.setItem(`capi_bridge_${gameId}`, JSON.stringify(marks));
+  } catch {
+    /* storage blocked: worst case is one repeated bubble */
+  }
+}
+
 let toastId = 0;
 
-function GameContent() {
-  const { id } = useParams<{ id: string }>();
+function GameContent({ id }: { id: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Embed mode hides share chrome because bubble taps replace invite links.
   const embedded = isImessageEmbed(searchParams);
-  const { s, lang, setLang } = useI18n();
+  const { s, setLang } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
-  const [muted, setMutedState] = useState(true);
+  const [muted, setMutedState] = useState(() => isMuted());
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
   const [chatBubbles, setChatBubbles] = useState<ChatBubble[]>([]);
+  const [waitingTheme, setWaitingTheme] = useState<Theme | null>(null);
 
   // Track which chat message IDs we've already displayed
   const seenChatIdsRef = useRef<Set<string>>(new Set());
@@ -74,6 +152,7 @@ function GameContent() {
   // Refs for detecting changes
   const prevBoardLenRef = useRef(0);
   const prevOppHandLenRef = useRef(-1);
+  const prevRoundRef = useRef(-1);
 
   useEffect(() => {
     loadMuteState();
@@ -87,28 +166,19 @@ function GameContent() {
       localStorage.setItem(`capi_session_${id}`, JSON.stringify(boot));
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }
-    const raw = localStorage.getItem(`capi_session_${id}`);
-    if (raw) {
-      try {
-        setSession(JSON.parse(raw));
-      } catch {
-        router.push("/");
-      }
-    }
-  }, [id, router]);
+    setSession(readStoredSession(id));
+  }, [id]);
 
   // The extension passes the device language via ?lang=; adopt it once on
   // mount so the native drawer chrome and this embedded table agree. Guarded
-  // by a ref (not just the dependency array) so it never re-fires later from
-  // an in-page language switch.
+  // by a ref so it never re-fires from an in-page language switch.
   const langSyncedRef = useRef(false);
   useEffect(() => {
-    if (langSyncedRef.current) return;
+    if (langSyncedRef.current || !embedded) return;
     langSyncedRef.current = true;
-    if (!embedded) return;
     const wanted = embedLang(searchParams);
-    if (wanted && wanted !== lang) setLang(wanted);
-  }, [embedded, searchParams, lang, setLang]);
+    if (wanted) setLang(wanted);
+  }, [embedded, searchParams, setLang]);
 
   const {
     gameState,
@@ -117,7 +187,9 @@ function GameContent() {
     players,
     stateVersion,
     loading,
-    error,
+    errorKey,
+    connection,
+    presence,
     lastCallout,
     lastCalloutPayload,
     chatMessages,
@@ -126,6 +198,25 @@ function GameContent() {
     clearCallout,
     refetch,
   } = useRealtimeGame(id, session);
+
+  // No session means no seat: the page joins or watches, never plays as "n".
+  const mySeat: Seat | null = session ? (session.seat as Seat) : null;
+  const is2v2 = gameState?.is2v2 ?? gameSettings?.is2v2 ?? false;
+  const myTeam: 0 | 1 | null = mySeat ? getTeam(mySeat, is2v2) : null;
+
+  // Round outcome, shared by the round-over card and the bridge effect. The
+  // callout payload names the winning team; without it the winner is unknown.
+  const payload = gameState?.lastCalloutPayload ?? lastCalloutPayload;
+  const winningTeamRaw = payload?.winningTeam;
+  const roundWinnerTeam: 0 | 1 | null =
+    winningTeamRaw === 0 ? 0 : winningTeamRaw === 1 ? 1 : null;
+
+  // API failures arrive as fixed English messages; known ones map to a
+  // localized key, anything else gets the caller's context-specific fallback.
+  function apiErrorText(message: unknown, fallback: string): string {
+    const key = errorKeyFor(message, "errMoveFailed");
+    return key === "errMoveFailed" ? fallback : s[key];
+  }
 
   const showToast = useCallback((message: string) => {
     const tid = ++toastId;
@@ -168,6 +259,7 @@ function GameContent() {
         const removeTimer = setTimeout(() => {
           setChatBubbles((prev) => prev.filter((b) => b.id !== msg.id));
           bubbleTimersRef.current.delete(msg.id);
+          bubbleTimersRef.current.delete(`${msg.id}-rm`);
         }, 350);
         bubbleTimersRef.current.set(`${msg.id}-rm`, removeTimer);
       }, 2500);
@@ -177,29 +269,38 @@ function GameContent() {
 
   // Cleanup bubble timers on unmount
   useEffect(() => {
+    const timers = bubbleTimersRef.current;
     return () => {
-      bubbleTimersRef.current.forEach((t) => clearTimeout(t));
+      timers.forEach((t) => clearTimeout(t));
     };
   }, []);
 
   function handlePlay(tile: Tile, end: "left" | "right") {
+    if (!mySeat) return;
     playSlam();
-    submitMove({ type: "play", tile, end });
+    void submitMove({ type: "play", tile, end });
   }
 
   function handlePass() {
-    submitMove({ type: "pass" });
+    if (!mySeat) return;
+    void submitMove({ type: "pass" });
   }
 
   function handleDraw() {
+    if (!mySeat) return;
     playDrawSound();
-    submitMove({ type: "draw" });
+    void submitMove({ type: "draw" });
   }
 
   function toggleMute() {
     const next = !muted;
     setMutedState(next);
     setMuted(next);
+  }
+
+  async function handleJoined(next: Session) {
+    setSession(next);
+    await refetch();
   }
 
   async function handleNextRound() {
@@ -221,7 +322,7 @@ function GameContent() {
           // stale), which is success from the user's perspective, just sync.
           await refetch();
         } else {
-          showToast(data.error ?? s.errorStartRound);
+          showToast(apiErrorText(data.error, s.errorStartRound));
         }
       } else {
         await refetch();
@@ -233,29 +334,31 @@ function GameContent() {
     }
   }
 
-  // Detect board changes (opponent played) to play slam sound
+  // Detect board changes (a tile landed) to play the slam sound
+  const boardLen = gameState?.board.length ?? 0;
   useEffect(() => {
-    if (!gameState) return;
-    const boardLen = gameState.board.length;
     if (prevBoardLenRef.current > 0 && boardLen > prevBoardLenRef.current) {
       playSlam();
     }
     prevBoardLenRef.current = boardLen;
-  }, [gameState?.board.length, gameState]);
+  }, [boardLen]);
 
-  // Detect opponent drawing tiles to show toast (1v1 only - no boneyard in 2v2)
+  // Detect opponent drawing tiles to show toast (1v1 only - no boneyard in
+  // 2v2). A new deal refills every hand, so the comparison restarts per round.
   useEffect(() => {
-    if (!gameState || !session || gameState.is2v2) return;
-    const oppSeat = session.seat === "n" ? "s" : "n";
-    const oppHand =
-      gameState.hands[oppSeat as keyof typeof gameState.hands] ?? [];
-    const oppLen = oppHand.length;
+    if (!gameState || !mySeat || gameState.is2v2) return;
+    const oppSeat: Seat = mySeat === "n" ? "s" : "n";
+    const oppLen = (gameState.hands[oppSeat] ?? []).length;
+    if (gameState.roundIndex !== prevRoundRef.current) {
+      prevRoundRef.current = gameState.roundIndex;
+      prevOppHandLenRef.current = oppLen;
+      return;
+    }
     if (prevOppHandLenRef.current >= 0 && oppLen > prevOppHandLenRef.current) {
-      const drew = oppLen - prevOppHandLenRef.current;
-      showToast(s.opponentDrew(drew));
+      showToast(s.opponentDrew(oppLen - prevOppHandLenRef.current));
     }
     prevOppHandLenRef.current = oppLen;
-  }, [gameState, session, showToast]);
+  }, [gameState, mySeat, showToast, s]);
 
   // Play callout sound when a callout appears
   useEffect(() => {
@@ -268,24 +371,9 @@ function GameContent() {
   // round-over or game-over card becomes visible, so it can refresh the
   // turn bubble. These mirror the isRoundOver/isFinished + !lastCallout
   // conditions the overlays further down use to show those same cards.
-  // They're declared here, ahead of the loading/error/waiting early
-  // returns, because hooks must run unconditionally on every render; that
-  // means myTeam/oppTeam (computed only in the active-game branch below)
-  // aren't in scope yet, so each effect re-derives them locally via
-  // deriveTeams below, the same getTeam/getOpponentTeam logic used for
-  // the score-bar consts further down. The ref guards are what make each
-  // notification fire exactly once per occurrence: they block re-emits
-  // from unrelated re-renders (gameState gets a new object reference on
-  // every realtime sync) while the card stays up, then reset once the
-  // card goes away so the next round or rematch can notify again.
-  function deriveTeams(
-    seat: Seat | undefined,
-    is2v2: boolean
-  ): { myTeam: 0 | 1; oppTeam: 0 | 1 } {
-    const myTeam = getTeam(seat ?? "n", is2v2);
-    return { myTeam, oppTeam: getOpponentTeam(myTeam) };
-  }
-
+  // The ref guards block re-emits from unrelated re-renders (gameState gets
+  // a new object reference on every realtime sync) while the card stays up;
+  // the stored marks block re-emits across remounts of the same card.
   const roundOverVisible = gameState?.phase === "round_over" && !lastCallout;
   const roundOverNotifiedRef = useRef(false);
   useEffect(() => {
@@ -293,27 +381,18 @@ function GameContent() {
       roundOverNotifiedRef.current = false;
       return;
     }
-    if (roundOverNotifiedRef.current || !gameState) return;
+    if (roundOverNotifiedRef.current || !gameState || myTeam === null) return;
     roundOverNotifiedRef.current = true;
-    const { myTeam: myTeamNow, oppTeam: oppTeamNow } = deriveTeams(
-      session?.seat as Seat | undefined,
-      gameState.is2v2
-    );
-    // Same source the round-over modal uses for iWonRound further down:
-    // the callout payload's winningTeam, with the same gameState-first
-    // fallback to the standalone lastCalloutPayload.
-    const roundPayloadNow = gameState.lastCalloutPayload ?? lastCalloutPayload;
-    const roundWinnerTeamNow =
-      roundPayloadNow && typeof roundPayloadNow.winningTeam === "number"
-        ? roundPayloadNow.winningTeam
-        : null;
+    const marks = readBridgeMarks(id);
+    if (marks.roundOver === gameState.roundIndex) return;
+    writeBridgeMarks(id, { ...marks, roundOver: gameState.roundIndex });
     postToExtension({
       type: "roundOver",
-      iWon: roundWinnerTeamNow === myTeamNow,
-      myScore: gameState.scores[myTeamNow],
-      oppScore: gameState.scores[oppTeamNow],
+      iWon: roundWinnerTeam === myTeam,
+      myScore: gameState.scores[myTeam],
+      oppScore: gameState.scores[getOpponentTeam(myTeam)],
     });
-  }, [roundOverVisible, gameState, session, lastCalloutPayload]);
+  }, [roundOverVisible, gameState, myTeam, roundWinnerTeam, id]);
 
   const gameOverVisible = gameState?.phase === "finished" && !lastCallout;
   const gameOverNotifiedRef = useRef(false);
@@ -322,19 +401,37 @@ function GameContent() {
       gameOverNotifiedRef.current = false;
       return;
     }
-    if (gameOverNotifiedRef.current || !gameState) return;
+    if (gameOverNotifiedRef.current || !gameState || myTeam === null) return;
     gameOverNotifiedRef.current = true;
-    const { myTeam: myTeamNow, oppTeam: oppTeamNow } = deriveTeams(
-      session?.seat as Seat | undefined,
-      gameState.is2v2
-    );
+    const marks = readBridgeMarks(id);
+    if (marks.gameOver) return;
+    writeBridgeMarks(id, { ...marks, gameOver: true });
     postToExtension({
       type: "gameOver",
-      iWon: gameState.winnerTeam === myTeamNow,
-      myScore: gameState.scores[myTeamNow],
-      oppScore: gameState.scores[oppTeamNow],
+      iWon: gameState.winnerTeam === myTeam,
+      myScore: gameState.scores[myTeam],
+      oppScore: gameState.scores[getOpponentTeam(myTeam)],
     });
-  }, [gameOverVisible, gameState, session]);
+  }, [gameOverVisible, gameState, myTeam, id]);
+
+  // The waiting room has no game_state yet, so the table's theme comes from
+  // the game row itself.
+  const inWaitingRoom = !loading && !errorKey && !gameState;
+  useEffect(() => {
+    if (!inWaitingRoom || waitingTheme) return;
+    let cancelled = false;
+    fetch(`/api/games/${id}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && isTheme(data?.game?.theme)) {
+          setWaitingTheme(data.game.theme);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [id, inWaitingRoom, waitingTheme]);
 
   // --- Loading state ---
   if (loading) {
@@ -349,11 +446,11 @@ function GameContent() {
   }
 
   // --- Error state ---
-  if (error && !gameState) {
+  if (errorKey && !gameState) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f5f0e8]">
         <div className="text-center space-y-3">
-          <p className="text-red-600 font-medium">{error}</p>
+          <p className="text-red-600 font-medium">{s[errorKey]}</p>
           <button
             onClick={() => router.push("/")}
             className="text-sm text-indigo-600 underline"
@@ -367,63 +464,64 @@ function GameContent() {
 
   // --- Waiting for players ---
   if (!gameState || gameState.phase === "waiting") {
-    const is2v2Waiting = gameSettings?.is2v2 ?? false;
-    const maxPlayers = is2v2Waiting ? 4 : 2;
-    const seatOrder: Seat[] = is2v2Waiting ? ["n", "e", "s", "w"] : ["n", "s"];
+    const maxPlayers = is2v2 ? 4 : 2;
+    const seatOrder = getSeatsForGame(is2v2);
     const seatLabels: Record<Seat, string> = { n: s.seatNorth, e: s.seatEast, s: s.seatSouth, w: s.seatWest };
-    const playersNeeded = maxPlayers - players.length;
+    const playersNeeded = Math.max(0, maxPlayers - players.length);
+    // A visitor with no seat can take a free one from right here.
+    const canJoin = !session && playersNeeded > 0;
 
     return (
       <div
-        data-theme="barberia"
+        data-theme={waitingTheme ?? "barberia"}
         className="min-h-screen flex items-center justify-center bg-theme-page p-4"
       >
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-sm w-full text-center space-y-4">
-          <div className="text-4xl">{is2v2Waiting ? "👥" : "🎲"}</div>
+          <div className="text-4xl">{is2v2 ? "👥" : "🎲"}</div>
           <h2 className="text-lg font-black text-gray-900">
             {playersNeeded > 0
               ? s.waitingForPlayers(playersNeeded)
               : s.preparing}
           </h2>
-          {is2v2Waiting && (
+          {is2v2 && (
             <p className="text-xs text-indigo-600 font-semibold">
               2v2 - {s.conTuFrente}
             </p>
           )}
 
           {/* Seat slots */}
-          <div className={`grid gap-2 ${is2v2Waiting ? "grid-cols-2" : "grid-cols-2"}`}>
+          <div className="grid gap-2 grid-cols-2">
             {seatOrder.map((seat) => {
               const p = players.find((pl) => pl.seat === seat);
-              const isMe = p?.id === session?.playerId;
+              const isMe = !!p && p.id === session?.playerId;
               return (
                 <div
                   key={seat}
-                  className={`px-3 py-3 rounded-xl border-2 transition-all ${
+                  className={`px-3 py-3 rounded-xl border-2 transition-all min-w-0 ${
                     p
                       ? "border-green-300 bg-green-50"
                       : "border-dashed border-gray-300 bg-gray-50"
                   }`}
                 >
                   {p ? (
-                    <div className="flex items-center gap-2 justify-center">
+                    <div className="flex items-center gap-2 justify-center min-w-0">
                       <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                         style={{ backgroundColor: p.avatar_color ?? "#999" }}
                       >
                         {p.nickname?.[0]?.toUpperCase() ?? "?"}
                       </div>
-                      <span className="text-sm font-medium text-gray-800 truncate">
+                      <span className="text-sm font-medium text-gray-800 truncate min-w-0">
                         {p.nickname}
                         {isMe && <span className="text-[10px] text-gray-400 ml-1">{s.youTag}</span>}
                       </span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 justify-center">
-                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                    <div className="flex items-center gap-2 justify-center min-w-0">
+                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <span className="text-gray-400 text-xs">?</span>
                       </div>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-400 truncate min-w-0">
                         {seatLabels[seat]}
                       </span>
                     </div>
@@ -433,14 +531,16 @@ function GameContent() {
             })}
           </div>
 
-          {is2v2Waiting && (
+          {is2v2 && (
             <div className="flex justify-center gap-4 text-[10px] text-gray-400">
               <span>N-S: {s.team1}</span>
               <span>E-W: {s.team2}</span>
             </div>
           )}
 
-          {!embedded && (
+          {canJoin && <JoinCard gameId={id} onJoined={handleJoined} />}
+
+          {session && !embedded && (
             <>
               {/* Primary action: copy the deep link */}
               <button
@@ -472,11 +572,7 @@ function GameContent() {
                   </>
                 )}
               </button>
-            </>
-          )}
 
-          {!embedded && (
-            <>
               {/* Secondary: the short code, for typing in by hand */}
               {inviteCode && (
                 <div className="space-y-1.5">
@@ -509,34 +605,44 @@ function GameContent() {
           )}
 
           <p className="text-xs text-gray-400">{s.autoRefresh}</p>
+
+          <div className="flex items-center justify-center gap-4 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                void refetch();
+              }}
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              {s.refresh}
+            </button>
+            {!embedded && (
+              <Link href="/" className="text-gray-400 hover:text-gray-600">
+                {s.leaveTable}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   // --- Active game ---
-  const mySeat = (session?.seat ?? "n") as Seat;
-  const myHand =
-    gameState.hands[mySeat] ?? [];
-  const isMyTurn = gameState.currentTurn === mySeat;
   const board = gameState.board;
   const boardLeftEnd = board.length > 0 ? board[0][0] : -1;
   const boardRightEnd =
     board.length > 0 ? board[board.length - 1][1] : -1;
-  const is2v2 = gameState.is2v2;
+  const myHand = mySeat ? gameState.hands[mySeat] ?? [] : [];
+  const isMyTurn = mySeat !== null && gameState.currentTurn === mySeat;
 
-  const myPlayer = players.find(
-    (p: { seat: string }) => p.seat === mySeat
-  );
+  const myPlayer = mySeat ? players.find((p) => p.seat === mySeat) : undefined;
 
-  // For 1v1: single opponent at top
-  // For 2v2: partner at top, opponents on sides
-  const relSeats = is2v2 ? getRelativeSeats(mySeat) : null;
-
-  const oppSeat1v1 = mySeat === "n" ? "s" : "n";
-  const topSeat = is2v2 ? relSeats!.top : oppSeat1v1;
-  const topPlayer = players.find((p) => p.seat === topSeat);
-  const topHand = gameState.hands[topSeat as Seat] ?? [];
+  // Seated view: opponent (1v1) or partner (2v2) across, opponents on the
+  // sides in 2v2. A spectator has no vantage point; SpectatorSeats lists all.
+  const relSeats = mySeat ? getRelativeSeats(mySeat, is2v2) : null;
+  const topSeat = relSeats?.top ?? null;
+  const topPlayer = topSeat ? players.find((p) => p.seat === topSeat) : undefined;
+  const topHand = topSeat ? gameState.hands[topSeat] ?? [] : [];
 
   const leftSeat = relSeats?.left ?? null;
   const rightSeat = relSeats?.right ?? null;
@@ -549,25 +655,29 @@ function GameContent() {
   const isFinished = gameState.phase === "finished";
   const isGameEnded = isRoundOver || isFinished;
 
-  // Use the engine's helper so 1v1 and 2v2 are handled correctly.
-  // In 1v1 N=team0, S=team1 (opponents). In 2v2 N+S=team0 vs E+W=team1.
-  const myTeam = getTeam(mySeat, is2v2);
-  const oppTeam = getOpponentTeam(myTeam);
+  // Team A is mine when seated (team 0 for a spectator), team B the other.
+  // In 1v1 N=team0, S=team1. In 2v2 N+S=team0 vs E+W=team1.
+  const teamA: 0 | 1 = myTeam ?? 0;
+  const teamB = getOpponentTeam(teamA);
+  const teamLabel = (team: 0 | 1): string => {
+    const seats: Seat[] = is2v2
+      ? team === 0
+        ? ["n", "s"]
+        : ["e", "w"]
+      : [team === 0 ? "n" : "s"];
+    const names = seats
+      .map((seat) => players.find((p) => p.seat === seat)?.nickname)
+      .filter(Boolean);
+    if (names.length > 0) return names.join(" & ");
+    if (myTeam === null) return team === 0 ? s.team1 : s.team2;
+    return team === myTeam ? s.you : s.opponent;
+  };
+  const teamAName = teamLabel(teamA);
+  const teamBName = teamLabel(teamB);
 
-  const payload = gameState.lastCalloutPayload ?? lastCalloutPayload;
-  const roundWinnerTeam =
-    payload && typeof payload.winningTeam === "number"
-      ? payload.winningTeam
-      : null;
-  const iWonRound = roundWinnerTeam === myTeam;
-
-  // Team names for overlays
-  const myTeamName = is2v2
-    ? [myPlayer?.nickname, topPlayer?.nickname].filter(Boolean).join(" & ")
-    : myPlayer?.nickname ?? s.youTag;
-  const oppTeamName = is2v2
-    ? [leftPlayer?.nickname, rightPlayer?.nickname].filter(Boolean).join(" & ")
-    : topPlayer?.nickname ?? s.opponent;
+  // A seated player gets won/lost wording only when the winner is known.
+  const roundOutcomeKnown = myTeam !== null && roundWinnerTeam !== null;
+  const iWonRound = roundOutcomeKnown && roundWinnerTeam === myTeam;
 
   // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
   // trancao carries pts) and who they went to, headlined in the round-over
@@ -579,7 +689,14 @@ function GameContent() {
         ? payload.pts
         : 0) +
     (typeof payload?.capicuaBonus === "number" ? payload.capicuaBonus : 0);
-  const roundWinnerName = iWonRound ? myTeamName : oppTeamName;
+  const pipsFor = (team: 0 | 1): string => {
+    const value = team === 0 ? payload?.team0Pips : payload?.team1Pips;
+    return typeof value === "number" ? String(value) : "-";
+  };
+
+  const winnerTeam: 0 | 1 | null =
+    gameState.winnerTeam === 0 ? 0 : gameState.winnerTeam === 1 ? 1 : null;
+  const iWonGame = myTeam !== null && winnerTeam === myTeam;
 
   // Split bubbles by sender position for layout
   const myBubbles = chatBubbles.filter((b) => b.isMe);
@@ -592,11 +709,7 @@ function GameContent() {
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
   const bannerTeamName =
-    roundWinnerTeam === null
-      ? null
-      : roundWinnerTeam === myTeam
-        ? myTeamName
-        : oppTeamName;
+    roundWinnerTeam === null ? null : teamLabel(roundWinnerTeam);
 
   return (
     <div
@@ -630,19 +743,39 @@ function GameContent() {
       </div>
 
       {/* Score bar */}
-      <ScorePanel
-        scores={gameState.scores}
-        targetScore={gameState.targetScore}
-        players={players}
+      {mySeat ? (
+        <ScorePanel
+          scores={gameState.scores}
+          targetScore={gameState.targetScore}
+          players={players}
+          currentTurn={gameState.currentTurn}
+          mySeat={mySeat}
+          is2v2={is2v2}
+        />
+      ) : (
+        <SpectatorScoreBar
+          scores={gameState.scores}
+          targetScore={gameState.targetScore}
+          players={players}
+          currentTurn={gameState.currentTurn}
+          is2v2={is2v2}
+        />
+      )}
+
+      {/* Connection, turn, and away status */}
+      <TablePresence
+        connection={connection}
+        presence={presence}
         currentTurn={gameState.currentTurn}
+        playing={gameState.phase === "playing"}
         mySeat={mySeat}
-        is2v2={is2v2}
+        players={players}
       />
 
       {/* Error banner */}
-      {error && (
+      {errorKey && (
         <div className="bg-red-500/90 px-4 py-2 text-sm text-white text-center">
-          {error}
+          {s[errorKey]}
         </div>
       )}
 
@@ -654,24 +787,26 @@ function GameContent() {
           <div className="absolute inset-0 theme-light pointer-events-none z-[1]" />
 
           {/* Bottom-right utility cluster: bug report + mute */}
-          <div className="absolute bottom-2 right-2 z-[3] flex items-center gap-1.5">
-            <BugReportButton
-              gameId={id}
-              playerId={session?.playerId}
-              gameState={gameState}
-              stateVersion={stateVersion}
-            />
-            <button
-              onClick={toggleMute}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
-              title={muted ? s.enableSound : s.muteSound}
-            >
-              {muted ? "🔇" : "🔊"}
-            </button>
-          </div>
+          {!embedded && (
+            <div className="absolute bottom-2 right-2 z-[3] flex items-center gap-1.5">
+              <BugReportButton
+                gameId={id}
+                playerId={session?.playerId}
+                gameState={gameState}
+                stateVersion={stateVersion}
+              />
+              <button
+                onClick={toggleMute}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
+                title={muted ? s.enableSound : s.muteSound}
+              >
+                {muted ? "🔇" : "🔊"}
+              </button>
+            </div>
+          )}
 
           {/* QuickChat toggle - floats on board bottom-left */}
-          {!isGameEnded && (
+          {!embedded && mySeat && !isGameEnded && (
             <div className="absolute bottom-2 left-2 z-[3]">
               <QuickChat
                 onSend={sendChat}
@@ -717,50 +852,60 @@ function GameContent() {
             </p>
           </div>
 
-          {/* Top player hand (partner in 2v2, opponent in 1v1) */}
-          {!isGameEnded && (
-            <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 flex-shrink-0 z-[2]">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${
-                      gameState.currentTurn === topSeat ? "ring-2 ring-green-400" : ""
-                    }`}
-                    style={{
-                      backgroundColor:
-                        topPlayer?.avatar_color ?? "#999",
-                    }}
-                  >
-                    {topPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
+          {/* Top row: the player across (partner in 2v2, opponent in 1v1),
+              or every seat for a spectator */}
+          {!isGameEnded &&
+            (mySeat ? (
+              <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 flex-shrink-0 z-[2]">
+                <div className="flex items-center justify-between gap-2 mb-1 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 ${
+                        gameState.currentTurn === topSeat ? "ring-2 ring-green-400" : ""
+                      }`}
+                      style={{
+                        backgroundColor:
+                          topPlayer?.avatar_color ?? "#999",
+                      }}
+                    >
+                      {topPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
+                    </div>
+                    <span className="text-white/60 text-xs font-medium truncate min-w-0">
+                      {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
+                      {is2v2 && <span className="opacity-60 ml-1">{s.partnerTag}</span>}
+                      {" - "}
+                      {s.tileCount(topHand.length)}
+                    </span>
                   </div>
-                  <span className="text-white/60 text-xs font-medium truncate">
-                    {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
-                    {is2v2 && <span className="opacity-60 ml-1">{s.partnerTag}</span>}
-                    {" - "}
-                    {s.tileCount(topHand.length)}
-                  </span>
+                  {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 && (
+                    <span className="text-amber-300/80 text-xs font-medium flex-shrink-0">
+                      {s.boneyard}: {gameState.boneyard.length}
+                    </span>
+                  )}
                 </div>
-                {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 && (
-                  <span className="text-amber-300/80 text-xs font-medium flex-shrink-0">
-                    {s.boneyard}: {gameState.boneyard.length}
-                  </span>
-                )}
+                <div className="flex gap-0.5 overflow-hidden justify-center">
+                  {topHand.map((_: Tile, i: number) => (
+                    <TileDisplay
+                      key={i}
+                      tile={[0, 0]}
+                      small
+                      faceDown
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-0.5 overflow-hidden justify-center">
-                {topHand.map((_: Tile, i: number) => (
-                  <TileDisplay
-                    key={i}
-                    tile={[0, 0]}
-                    small
-                    faceDown
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            ) : (
+              <SpectatorSeats
+                players={players}
+                hands={gameState.hands}
+                currentTurn={gameState.currentTurn}
+                is2v2={is2v2}
+                boneyardCount={gameState.boneyard?.length ?? 0}
+              />
+            ))}
 
-          {/* Board + side hands for 2v2 */}
-          {is2v2 && !isGameEnded ? (
+          {/* Board + side hands for a seated 2v2 player */}
+          {is2v2 && mySeat && !isGameEnded ? (
             <div className="flex-1 flex min-h-0 relative">
               {/* Left opponent */}
               <div className="w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] py-2">
@@ -819,74 +964,77 @@ function GameContent() {
 
           {/* ── Round Over overlay ── */}
           {isRoundOver && !lastCallout && (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-              <div className="bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full mx-6 shadow-2xl animate-callout-enter space-y-4">
-                <p className="text-5xl">{iWonRound ? "🎉" : "😤"}</p>
+            <div className="absolute inset-0 bg-black/60 flex overflow-y-auto py-6 px-6 z-10">
+              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-4">
+                <p className="text-5xl">
+                  {roundOutcomeKnown ? (iWonRound ? "🎉" : "😤") : "🎲"}
+                </p>
                 <h2 className="text-2xl font-black">
-                  {iWonRound ? s.wonRound : s.lostRound}
+                  {roundOutcomeKnown
+                    ? iWonRound
+                      ? s.wonRound
+                      : s.lostRound
+                    : s.roundEnded}
                 </h2>
 
                 {/* Points awarded is the headline. Without it the pips table
                     below reads like a scoreboard and the loser's counted
-                    pips look like points credited to the loser. */}
-                <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
-                  +{roundAward}
-                  <span className="block text-xs font-bold opacity-70 mt-0.5">
-                    {s.awardedTo} {roundWinnerName}
-                  </span>
-                </p>
+                    pips look like points credited to the loser. Hidden when
+                    the winner is unknown rather than guessed. */}
+                {roundWinnerTeam !== null && (
+                  <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
+                    +{roundAward}
+                    <span className="block text-xs font-bold opacity-70 mt-0.5">
+                      {s.awardedTo} {teamLabel(roundWinnerTeam)}
+                    </span>
+                  </p>
+                )}
 
                 {/* Pip breakdown */}
                 <div className="bg-white/10 rounded-xl p-3 space-y-1 text-sm">
                   <div className="text-[9px] uppercase tracking-widest opacity-50 text-center pb-1">
                     {s.pipsInHand}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="truncate mr-2">{myTeamName}</span>
+                  <div className="flex justify-between min-w-0">
+                    <span className="truncate mr-2">{teamAName}</span>
                     <span className="font-bold tabular-nums flex-shrink-0">
-                      {typeof payload?.team0Pips === "number"
-                        ? myTeam === 0
-                          ? String(payload.team0Pips)
-                          : String(payload.team1Pips)
-                        : "-"}
+                      {pipsFor(teamA)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="truncate mr-2">{oppTeamName}</span>
+                  <div className="flex justify-between min-w-0">
+                    <span className="truncate mr-2">{teamBName}</span>
                     <span className="font-bold tabular-nums flex-shrink-0">
-                      {typeof payload?.team0Pips === "number"
-                        ? oppTeam === 0
-                          ? String(payload.team0Pips)
-                          : String(payload.team1Pips)
-                        : "-"}
+                      {pipsFor(teamB)}
                     </span>
                   </div>
                 </div>
 
                 {/* Score update */}
                 <div className="flex items-center justify-center gap-6 text-2xl font-black tabular-nums">
-                  <span>{gameState.scores[myTeam]}</span>
-                  <span className="text-sm font-normal opacity-50">–</span>
-                  <span>{gameState.scores[oppTeam]}</span>
+                  <span>{gameState.scores[teamA]}</span>
+                  <span className="text-sm font-normal opacity-50">·</span>
+                  <span>{gameState.scores[teamB]}</span>
                 </div>
 
-                <button
-                  onClick={handleNextRound}
-                  disabled={nextRoundLoading}
-                  className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  {nextRoundLoading ? s.nextRoundLoading : s.nextRound}
-                </button>
+                {mySeat && (
+                  <button
+                    onClick={handleNextRound}
+                    disabled={nextRoundLoading}
+                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {nextRoundLoading ? s.nextRoundLoading : s.nextRound}
+                  </button>
+                )}
               </div>
             </div>
           )}
 
           {/* ── Game Over overlay ── */}
           {isFinished && !lastCallout && (
-            <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10">
-              <div className="bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full mx-6 shadow-2xl animate-callout-enter space-y-5 relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/70 flex overflow-y-auto py-6 px-6 z-10">
+              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-5 relative overflow-hidden">
                 {/* Confetti particles */}
-                {gameState.winnerTeam === myTeam && (
+                {iWonGame && (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <span
@@ -906,32 +1054,40 @@ function GameContent() {
                 )}
 
                 <p className="text-6xl relative z-10">
-                  {gameState.winnerTeam === myTeam ? "🏆" : "💪"}
+                  {myTeam === null || iWonGame ? "🏆" : "💪"}
                 </p>
                 <h2 className="text-3xl font-black relative z-10">
-                  {gameState.winnerTeam === myTeam ? s.won : s.lost}
+                  {myTeam !== null
+                    ? iWonGame
+                      ? s.won
+                      : s.lost
+                    : winnerTeam !== null
+                      ? teamLabel(winnerTeam)
+                      : s.roundEnded}
                 </h2>
-                <p className="text-sm opacity-60 relative z-10">
-                  {gameState.winnerTeam === myTeam ? s.wonFlavor : s.lostFlavor}
-                </p>
+                {myTeam !== null && (
+                  <p className="text-sm opacity-60 relative z-10">
+                    {iWonGame ? s.wonFlavor : s.lostFlavor}
+                  </p>
+                )}
 
                 {/* Final scores */}
                 <div className="bg-white/10 rounded-xl p-4 space-y-2 relative z-10">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center min-w-0">
                     <span className="font-medium truncate mr-2">
-                      {myTeamName}
+                      {teamAName}
                     </span>
                     <span className="text-2xl font-black tabular-nums">
-                      {gameState.scores[myTeam]}
+                      {gameState.scores[teamA]}
                     </span>
                   </div>
                   <div className="h-px bg-white/10" />
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center min-w-0">
                     <span className="font-medium truncate mr-2">
-                      {oppTeamName}
+                      {teamBName}
                     </span>
                     <span className="text-2xl font-black tabular-nums">
-                      {gameState.scores[oppTeam]}
+                      {gameState.scores[teamB]}
                     </span>
                   </div>
                 </div>
@@ -942,97 +1098,105 @@ function GameContent() {
                   </p>
                 )}
 
-                <button
-                  disabled={rematchLoading}
-                  onClick={async () => {
-                    if (!session) return;
-                    setRematchLoading(true);
-                    let navigating = false;
-                    try {
-                      const res = await fetch(`/api/games/${id}/rematch`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ playerId: session.playerId }),
-                      });
-                      const data = await res.json().catch(() => ({}));
-                      if (res.ok && data.gameId) {
-                        localStorage.setItem(
-                          `capi_session_${data.gameId}`,
-                          JSON.stringify({
-                            playerId: data.playerId,
-                            seat: data.seat,
-                            gameId: data.gameId,
-                          })
-                        );
-                        navigating = true;
-                        router.push(`/game/${data.gameId}`);
-                      } else {
-                        showToast(data.error ?? s.connectionError);
+                {mySeat && (
+                  <button
+                    disabled={rematchLoading}
+                    onClick={async () => {
+                      if (!session) return;
+                      setRematchLoading(true);
+                      let navigating = false;
+                      try {
+                        const res = await fetch(`/api/games/${id}/rematch`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ playerId: session.playerId }),
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (res.ok && data.gameId) {
+                          localStorage.setItem(
+                            `capi_session_${data.gameId}`,
+                            JSON.stringify({
+                              playerId: data.playerId,
+                              seat: data.seat,
+                              gameId: data.gameId,
+                            })
+                          );
+                          navigating = true;
+                          router.push(`/game/${data.gameId}`);
+                        } else {
+                          showToast(apiErrorText(data.error, s.failedCreate));
+                        }
+                      } catch {
+                        showToast(s.connectionError);
+                      } finally {
+                        // Keep the button disabled while navigating away;
+                        // re-enable it on any failure so the user can retry.
+                        if (!navigating) setRematchLoading(false);
                       }
-                    } catch {
-                      showToast(s.connectionError);
-                    } finally {
-                      // Keep the button disabled while navigating away;
-                      // re-enable it on any failure so the user can retry.
-                      if (!navigating) setRematchLoading(false);
-                    }
-                  }}
-                  className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
-                >
-                  {rematchLoading
-                    ? s.creatingRematch
-                    : gameState.rematchGameId
-                    ? s.joinRematch
-                    : s.playAgain}
-                </button>
+                    }}
+                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
+                  >
+                    {rematchLoading
+                      ? s.creatingRematch
+                      : gameState.rematchGameId
+                      ? s.joinRematch
+                      : s.playAgain}
+                  </button>
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Player hand area */}
-        {!isGameEnded && (
-          <div
-            className={`bg-theme-hand theme-hand-texture px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0 transition-all duration-300 ${
-              isMyTurn
-                ? "border-t-2 border-[var(--accent)] animate-turn-glow"
-                : "border-t border-black/10"
-            }`}
-            style={{
-              paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
-            }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {s.yourHand}
-              </p>
-              {isMyTurn && (
-                <span className="text-xs font-bold text-[var(--accent)] animate-pulse">
-                  {s.yourTurn}
-                </span>
-              )}
+        {/* Player hand area, or the spectator strip in its place */}
+        {!isGameEnded &&
+          (mySeat ? (
+            <div
+              className={`bg-theme-hand theme-hand-texture px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0 max-h-[38dvh] overflow-y-auto transition-all duration-300 ${
+                isMyTurn
+                  ? "border-t-2 border-[var(--accent)] animate-turn-glow"
+                  : "border-t border-black/10"
+              }`}
+              style={{
+                paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {s.yourHand}
+                </p>
+                {isMyTurn && (
+                  <span className="text-xs font-bold text-[var(--accent)] animate-pulse">
+                    {s.yourTurn}
+                  </span>
+                )}
+              </div>
+              <Hand
+                tiles={myHand}
+                isMyTurn={isMyTurn}
+                boardLeftEnd={boardLeftEnd}
+                boardRightEnd={boardRightEnd}
+                boneyardCount={gameState.boneyard?.length ?? 0}
+                onPlay={handlePlay}
+                onPass={handlePass}
+                onDraw={handleDraw}
+              />
             </div>
-            <Hand
-              tiles={myHand}
-              isMyTurn={isMyTurn}
-              boardLeftEnd={boardLeftEnd}
-              boardRightEnd={boardRightEnd}
-              boneyardCount={gameState.boneyard?.length ?? 0}
-              onPlay={handlePlay}
-              onPass={handlePass}
-              onDraw={handleDraw}
-            />
-          </div>
-        )}
+          ) : (
+            <SpectatorBar embedded={embedded} />
+          ))}
       </div>
     </div>
   );
 }
 
 export default function GamePage() {
+  const { id } = useParams<{ id: string }>();
+  // A fresh mount per table: rematch navigation must not carry refs, timers,
+  // or seen-message sets from the finished game into the new one.
   return (
     <Suspense>
-      <GameContent />
+      <GameContent key={id} id={id} />
     </Suspense>
   );
 }
@@ -1081,6 +1245,8 @@ function VeinticincoBanner({
 }
 
 // ─── Chat Bubble Display ──────────────────────────────────────────────────────
+// Payloads are canonical phrase ids (or emotes); each viewer renders the
+// phrase in their own language.
 
 interface ChatBubbleDisplayProps {
   bubble: ChatBubble;
@@ -1088,7 +1254,9 @@ interface ChatBubbleDisplayProps {
 }
 
 function ChatBubbleDisplay({ bubble, accentColor }: ChatBubbleDisplayProps) {
+  const { lang } = useI18n();
   const isEmote = bubble.type === "emote";
+  const text = chatText(bubble.type, bubble.payload, lang);
   const animClass =
     bubble.phase === "in"
       ? isEmote
@@ -1099,7 +1267,7 @@ function ChatBubbleDisplay({ bubble, accentColor }: ChatBubbleDisplayProps) {
   if (isEmote) {
     return (
       <div className={`text-3xl leading-none select-none ${animClass}`}>
-        {bubble.payload}
+        {text}
       </div>
     );
   }
@@ -1116,7 +1284,7 @@ function ChatBubbleDisplay({ bubble, accentColor }: ChatBubbleDisplayProps) {
         boxShadow: `0 2px 12px ${accentColor}55`,
       }}
     >
-      {bubble.payload}
+      {text}
     </div>
   );
 }
