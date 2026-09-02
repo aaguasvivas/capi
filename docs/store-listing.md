@@ -26,8 +26,8 @@ Capi is multiplayer you play WITH your people: create a table, send the 6-letter
 
 THE REAL RULES
 • Capicúa: close the round with a ficha that matches both ends and take a +25 bonus
-• Tranque: when the table locks, the side with the fewest pips left wins the round
-• Make every opponent pass and collect 25 points on the spot
+• Tranque: when the table locks, the side with the fewest pips left wins the round and takes every pip on the table
+• Parejas: make all three others pass and collect 25 points on the spot
 • Dominate the round and every pip left on the table counts for you
 
 WITH YOUR PEOPLE
@@ -70,8 +70,8 @@ Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de
 
 LAS REGLAS DE VERDAD
 • Capicúa: cierra la ronda con una ficha que pega por las dos puntas y llévate +25
-• Tranque: si la mesa se tranca, gana el lado que menos puntos deja en la mano
-• Haz pasar a todos tus rivales y anótate 25 al momento
+• Tranque: si la mesa se tranca, gana el lado que menos puntos deja en la mano y se lleva todos los de la mesa
+• En parejas, haz pasar a los otros tres y anótate 25 al momento
 • Domina la ronda y todos los puntos que quedan en la mesa son tuyos
 
 CON TU GENTE
@@ -113,8 +113,8 @@ Capi is multiplayer you play WITH your people: create a table, send the 6-letter
 
 THE REAL RULES
 • Capicúa: close the round with a ficha that matches both ends and take a +25 bonus
-• Tranque: when the table locks, the side with the fewest pips left wins the round
-• Make every opponent pass and collect 25 points on the spot
+• Tranque: when the table locks, the side with the fewest pips left wins the round and takes every pip on the table
+• Parejas: make all three others pass and collect 25 points on the spot
 • Dominate the round and every pip left on the table counts for you
 
 WITH YOUR PEOPLE
@@ -153,8 +153,8 @@ Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de
 
 LAS REGLAS DE VERDAD
 • Capicúa: cierra la ronda con una ficha que pega por las dos puntas y llévate +25
-• Tranque: si la mesa se tranca, gana el lado que menos puntos deja en la mano
-• Haz pasar a todos tus rivales y anótate 25 al momento
+• Tranque: si la mesa se tranca, gana el lado que menos puntos deja en la mano y se lleva todos los de la mesa
+• En parejas, haz pasar a los otros tres y anótate 25 al momento
 • Domina la ronda y todos los puntos que quedan en la mesa son tuyos
 
 CON TU GENTE
