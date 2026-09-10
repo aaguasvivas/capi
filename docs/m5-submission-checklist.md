@@ -7,17 +7,17 @@ State on 2026-09-10: builds 16 and 17 were rejected by App Store Connect with
 ITMS-90649 (no iMessage app icon in the bundle). Root cause: the config plugin
 created a generic app extension, so Xcode never compiled the icon set; the
 target is now the `.messages` subtype and the set includes the 29x29 settings
-icons. Build 18 carries that fix plus the claim flow (a silent seat can be
+icons. Build 19 carries that fix plus the claim flow (a silent seat can be
 claimed after 2 minutes), the how-to-play page, store previews, typed callout
 payloads, the "Te toca" quick phrase, the app version in bug reports, and
-Sentry wiring (off until a DSN exists). Test and submit build 18.
+Sentry wiring (off until a DSN exists). Test and submit build 19.
 
 ## A. Code gates (Me)
 
 - [x] `grep -rn "3940256099942544\|PENDING_ADMOB" apps/mobile` returns NOTHING
       (real AdMob ids landed 2026-08-14).
-- [x] All suites green via `npm run verify` (engine 130, web 28, mobile 7, no em
-      dashes), tsc clean in web and mobile, `npm run build:web` passes.
+- [x] All suites green via `npm run verify` (engine 141, web 28, mobile 7, no em
+      dashes), `npm run typecheck` clean, `npm run build:web` passes.
 - [x] Build gate passed: prebuild + simulator xcodebuild BUILD SUCCEEDED with the
       real GADApplicationIdentifier, ATT strings, 50 SKAdNetworkItems, and
       PlugIns/CapiMessages.appex present.
@@ -65,8 +65,10 @@ Sentry wiring (off until a DSN exists). Test and submit build 18.
 - [x] Build 16 kicked, submitted to TestFlight (pre-audit).
 - [x] Build 17 (audit pass, EAS id 83ce7a17) built and submitted to App Store
       Connect (submission 75c4c902); rejected by ITMS-90649 like build 16.
-- [ ] Build 18 (icon fix + September features): local sim pass, EAS build,
-      submit; the ITMS email must not come back.
+- [x] Build 19 (icon fix + September features, EAS id b2cfe343): the .ipa's
+      extension declares CFBundleIcons, simulator pass done on iPhone SE and
+      14 Plus, submitted to App Store Connect (submission 6782fb49). The ITMS
+      email must not come back for it; build 18 is a cancelled build.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
 
@@ -86,9 +88,9 @@ Sentry wiring (off until a DSN exists). Test and submit build 18.
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
 - [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select build 18 for the 1.1 version (16 and 17 have no iMessage icon).
+- [ ] D8. Select build 19 for the 1.1 version (16 and 17 have no iMessage icon).
 
-## E. TestFlight matrix (You + me, two phones, build 17)
+## E. TestFlight matrix (You + me, two phones, build 19)
 
 - [ ] iMessage: create from Messages on phone A, join from phone B's bubble,
       play with live-watch both directions, "Open in Capi" seats you in the app
