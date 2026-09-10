@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Seat } from "@capi/engine";
+import { CLAIM_AFTER_MS, STALL_NOTICE_MS, formatStall } from "@capi/engine";
 import type { ConnectionState } from "@/hooks/useRealtimeGame";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -21,12 +22,19 @@ interface Props {
   /** Null for a spectator. */
   mySeat: Seat | null;
   players: Array<{ seat: string; nickname: string }>;
+  /** Server clock of the last move; drives the stall notice and the claim. */
+  lastMoveAt?: string;
+  /** True when my side may claim once the window closes (seated, other side on turn). */
+  canClaim: boolean;
+  claiming: boolean;
+  onClaim: () => void;
 }
 
 // Status line right under the score bar: connection state, whose turn it is,
-// and a warning once the seat on turn has been gone for a while. It reserves
-// its height so the board never jumps when a state comes or goes, and mirrors
-// the turn text into a polite live region for screen readers.
+// a warning once the seat on turn has been gone for a while, and the claim
+// once that seat has been silent past the window. It reserves its height so
+// the board never jumps when a state comes or goes, and mirrors the turn text
+// into a polite live region for screen readers.
 export default function TablePresence({
   connection,
   presence,
@@ -34,10 +42,15 @@ export default function TablePresence({
   playing,
   mySeat,
   players,
+  lastMoveAt,
+  canClaim,
+  claiming,
+  onClaim,
 }: Props) {
   const { s } = useI18n();
   const [showLive, setShowLive] = useState(false);
   const [away, setAway] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (connection !== "live") {
@@ -59,6 +72,21 @@ export default function TablePresence({
     return () => clearTimeout(t);
   }, [turnAbsent, currentTurn]);
 
+  // One tick per second while the other side is on turn, so the stall notice
+  // and the claim unlock on their own.
+  const watching = playing && currentTurn !== mySeat && !!lastMoveAt;
+  useEffect(() => {
+    if (!watching) return;
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1_000);
+    return () => clearInterval(t);
+  }, [watching, lastMoveAt]);
+
+  const lastMove = lastMoveAt ? Date.parse(lastMoveAt) : NaN;
+  const stalled = watching && !Number.isNaN(lastMove) ? Math.max(0, now - lastMove) : 0;
+  const stallNotice = stalled >= STALL_NOTICE_MS;
+  const claimReady = canClaim && stalled >= CLAIM_AFTER_MS;
+
   const turnName =
     players.find((p) => p.seat === currentTurn)?.nickname ?? s.opponent;
   const turnText = !playing
@@ -72,11 +100,28 @@ export default function TablePresence({
     body = <Pill tone="red">{s.connectionOffline}</Pill>;
   } else if (connection === "reconnecting") {
     body = <Pill tone="amber">{s.connectionReconnecting}</Pill>;
-  } else if (away) {
+  } else if (away || stallNotice) {
     body = (
-      <div className="leading-tight py-0.5">
-        <p className="font-bold text-amber-300">{s.waitingFor(turnName)}</p>
-        <p className="text-[10px] font-medium opacity-60">{s.awayHint}</p>
+      <div className="leading-tight py-1 space-y-1">
+        <p className="font-bold text-amber-300">
+          {stallNotice
+            ? s.stalledFor(turnName, formatStall(stalled))
+            : s.waitingFor(turnName)}
+        </p>
+        {claimReady ? (
+          <button
+            type="button"
+            onClick={onClaim}
+            disabled={claiming}
+            className="px-3 py-1 rounded-full bg-amber-400 text-gray-900 text-[11px] font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-60"
+          >
+            {s.claimWin}
+          </button>
+        ) : (
+          <p className="text-[10px] font-medium opacity-60">
+            {away ? s.awayHint : canClaim ? s.claimHint : null}
+          </p>
+        )}
       </div>
     );
   } else if (showLive) {

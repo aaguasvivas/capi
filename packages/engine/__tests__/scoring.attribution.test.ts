@@ -26,7 +26,7 @@ function base2v2(overrides: Partial<GameState>): GameState {
   return { ...state, phase: "playing", scores: [0, 0], boneyard: [], ...overrides };
 }
 
-const T = (a: number, b: number): Tile => [a, b];
+const T = (a: number, b: number): Tile => [a, b] as Tile;
 
 describe("score attribution: 1v1", () => {
   it("getTeam maps n to 0, s to 1", () => {
@@ -94,7 +94,7 @@ describe("score attribution: 1v1", () => {
     expect(r2.newState.phase).toBe("round_over");
     // n has 3 pips, s has 7. Team 0 is lighter and takes the whole table: 10.
     expect(r2.newState.scores).toEqual([10, 0]);
-    const payload = r2.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = r2.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(0);
     expect(payload.pts).toBe(10);
   });
@@ -217,7 +217,7 @@ describe("score attribution: 2v2", () => {
     expect(res.success).toBe(true);
     expect(res.callout).toBe("trancao");
     expect(res.newState.scores).toEqual([12, 0]);
-    const payload = res.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = res.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(0);
   });
 });

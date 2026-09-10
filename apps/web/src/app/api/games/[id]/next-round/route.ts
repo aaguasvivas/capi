@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { startNewRound } from "@capi/engine";
 import type { GameState, Seat } from "@capi/engine";
+import { reportError } from "@/lib/report";
 
 export async function POST(
   req: NextRequest,
@@ -67,7 +68,11 @@ export async function POST(
       Seat,
       GameState["players"][Seat]
     >;
-    const newState = startNewRound(currentState, existingPlayers);
+    const newState: GameState = {
+      ...startNewRound(currentState, existingPlayers),
+      // A fresh deal restarts the claim window for the opener.
+      lastMoveAt: new Date().toISOString(),
+    };
     const newVersion = stateVersion + 1;
 
     const { data: updated, error: updateError } = await db
@@ -95,7 +100,7 @@ export async function POST(
       stateVersion: newVersion,
     });
   } catch (err) {
-    console.error("POST /api/games/[id]/next-round error:", err);
+    reportError(err, "POST /api/games/[id]/next-round");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

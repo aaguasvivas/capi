@@ -403,6 +403,29 @@ function GameContent({ id }: { id: string }) {
     });
   }, [roundOverVisible, gameState, myTeam, roundWinnerTeam, id]);
 
+  // Claim the game once the seat on turn has been silent past the window.
+  // The server re-checks with its own clock; a refusal shows as a toast.
+  const [claiming, setClaiming] = useState(false);
+  async function handleClaim() {
+    if (!session || claiming) return;
+    if (!window.confirm(s.claimWinConfirm)) return;
+    setClaiming(true);
+    try {
+      const res = await fetch(`/api/games/${id}/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId: session.playerId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) showToast(apiErrorText(data.error, s.errMoveFailed));
+      await refetch();
+    } catch {
+      showToast(s.connectionError);
+    } finally {
+      setClaiming(false);
+    }
+  }
+
   const gameOverVisible = gameState?.phase === "finished" && !lastCallout;
   const gameOverNotifiedRef = useRef(false);
   useEffect(() => {
@@ -707,6 +730,20 @@ function GameContent({ id }: { id: string }) {
     gameState.winnerTeam === 0 ? 0 : gameState.winnerTeam === 1 ? 1 : null;
   const iWonGame = myTeam !== null && winnerTeam === myTeam;
 
+  // One line on the game-over card when the game ended by claim.
+  const forfeitLine = (seat: Seat): string => {
+    const names: Record<Seat, string> = {
+      n: s.seatNorth,
+      e: s.seatEast,
+      s: s.seatSouth,
+      w: s.seatWest,
+    };
+    const name = players.find((p) => p.seat === seat)?.nickname ?? names[seat];
+    if (myTeam === null) return s.endedByForfeit(name);
+    if (seat === mySeat) return s.youForfeited;
+    return iWonGame ? s.wonByForfeit(name) : s.lostByForfeit(name);
+  };
+
   // Split bubbles by sender position for layout
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
@@ -779,6 +816,14 @@ function GameContent({ id }: { id: string }) {
         playing={gameState.phase === "playing"}
         mySeat={mySeat}
         players={players}
+        lastMoveAt={gameState.lastMoveAt}
+        canClaim={
+          myTeam !== null &&
+          gameState.phase === "playing" &&
+          getTeam(gameState.currentTurn, is2v2) !== myTeam
+        }
+        claiming={claiming}
+        onClaim={handleClaim}
       />
 
       {/* Error banner */}
@@ -1074,10 +1119,16 @@ function GameContent({ id }: { id: string }) {
                       ? teamLabel(winnerTeam)
                       : s.roundEnded}
                 </h2>
-                {myTeam !== null && (
-                  <p className="text-sm opacity-60 relative z-10">
-                    {iWonGame ? s.wonFlavor : s.lostFlavor}
+                {gameState.forfeit ? (
+                  <p className="text-sm opacity-80 relative z-10">
+                    {forfeitLine(gameState.forfeit.seat)}
                   </p>
+                ) : (
+                  myTeam !== null && (
+                    <p className="text-sm opacity-60 relative z-10">
+                      {iWonGame ? s.wonFlavor : s.lostFlavor}
+                    </p>
+                  )
                 )}
 
                 {/* Final scores */}

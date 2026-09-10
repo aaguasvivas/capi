@@ -15,6 +15,7 @@ export interface QuickPhrase {
 
 export const QUICK_PHRASES: readonly QuickPhrase[] = [
   { id: "dale", es: "¡Dale!", en: "Let's go!" },
+  { id: "te_toca", es: "¡Te toca!", en: "Your turn!" },
   { id: "tranquilo", es: "¡Tranquilo!", en: "Chill out!" },
   { id: "aguanta", es: "¡Aguanta!", en: "Hold up!" },
   { id: "eso_e", es: "¡Eso e'!", en: "That's crazy!" },

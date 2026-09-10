@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 import { supabase } from "../lib/supabase";
 import { API_BASE } from "../theme";
-import type { GameState, Tile, Seat } from "@capi/engine";
+import type { CalloutPayload, GameState, Seat, Tile } from "@capi/engine";
 import { getNextSeat, placeTileOnBoard, removeTileFromHand } from "@capi/engine";
 import { errorKeyFor, normalizeChatPayload, type ErrorKey } from "@capi/i18n";
 import type { PlayerSession } from "../lib/session";
@@ -59,10 +59,7 @@ export function useRealtimeGame(
   const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
-  const [lastCalloutPayload, setLastCalloutPayload] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [lastCalloutPayload, setLastCalloutPayload] = useState<CalloutPayload | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const versionRef = useRef(stateVersion);
@@ -133,7 +130,7 @@ export function useRealtimeGame(
   const surfaceCallout = useCallback(
     (
       callout: string | null | undefined,
-      payload: Record<string, unknown> | null | undefined,
+      payload: CalloutPayload | null | undefined,
       version: number
     ) => {
       if (!callout) {
@@ -332,7 +329,7 @@ export function useRealtimeGame(
             adoptState(gs, sv);
             surfaceCallout(
               payload.callout as string | null,
-              (payload.calloutPayload as Record<string, unknown> | null) ??
+              (payload.calloutPayload as CalloutPayload | null) ??
                 undefined,
               sv
             );

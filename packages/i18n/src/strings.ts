@@ -8,6 +8,7 @@ export type Lang = "es" | "en";
 
 export * from "./chat";
 export * from "./errors";
+export * from "./rules";
 
 export interface Strings {
   // Landing
@@ -162,6 +163,8 @@ export interface Strings {
   // Footer
   footerPrivacy: string;
   footerSupport: string;
+  howToPlay: string;
+  back: string;
 
   // Round-over award clarity
   pipsInHand: string;
@@ -175,6 +178,15 @@ export interface Strings {
   connectionOffline: string;
   waitingFor: (name: string) => string;
   awayHint: string;
+  // Claim window: the seat on turn has been silent; the other side may end it.
+  stalledFor: (name: string, time: string) => string;
+  claimHint: string;
+  claimWin: string;
+  claimWinConfirm: string;
+  wonByForfeit: (name: string) => string;
+  lostByForfeit: (name: string) => string;
+  youForfeited: string;
+  endedByForfeit: (name: string) => string;
   turnOf: (name: string) => string;
   refresh: string;
   leaveTable: string;
@@ -205,6 +217,7 @@ export interface Strings {
   errNotYourTurn: string;
   errMustPlay: string;
   errMustDraw: string;
+  errClaimTooEarly: string;
   errTileMismatch: string;
   errMoveFailed: string;
   errStale: string;
@@ -356,7 +369,7 @@ export const es: Strings = {
   reportBug: "Reportar bug",
   reportBugTitle: "¿Algo salió mal?",
   reportBugPrompt:
-    "Cuéntame qué pasó. Mando el estado del juego conmigo para reproducirlo.",
+    "Cuéntame qué pasó. Este mensaje le llega al equipo de Capi, no a tu oponente. Mando el estado del juego para reproducirlo.",
   reportBugPlaceholder: "Ej: Mis fichas desaparecieron después de pasar…",
   reportBugSend: "Enviar",
   reportBugSending: "Enviando…",
@@ -366,6 +379,8 @@ export const es: Strings = {
 
   footerPrivacy: "Privacidad",
   footerSupport: "Soporte",
+  howToPlay: "Cómo se juega",
+  back: "Volver",
 
   pipsInHand: "Pintas en mano",
   awardedTo: "para",
@@ -377,10 +392,20 @@ export const es: Strings = {
   connectionOffline: "Sin conexión",
   waitingFor: (name) => `Esperando a ${name}…`,
   awayHint: "Parece que se desconectó",
+  stalledFor: (name, time) => `${name} lleva ${time} sin jugar`,
+  claimHint: "A los 2 minutos sin jugada puedes reclamar la partida.",
+  claimWin: "Reclamar la partida",
+  claimWinConfirm:
+    "La partida termina aquí y tu lado gana por abandono. ¿Seguro?",
+  wonByForfeit: (name) => `${name} no volvió a jugar. Ganaste la partida.`,
+  lostByForfeit: (name) => `${name} dejó de jugar y la partida terminó.`,
+  youForfeited: "Dejaste de jugar y el otro lado reclamó la partida.",
+  endedByForfeit: (name) => `${name} dejó de jugar. La partida terminó.`,
   turnOf: (name) => `Turno de ${name}`,
   refresh: "Actualizar",
   leaveTable: "Salir de la mesa",
-  leaveConfirm: "¿Salir de la mesa? La partida sigue y puedes volver desde el inicio.",
+  leaveConfirm:
+    "¿Salir de la mesa? La partida sigue y puedes volver desde el inicio. Si pasas 2 minutos sin jugar, el otro lado puede reclamar la partida.",
   resumeGame: "Volver a tu partida",
   resumeGameHint: (code) => `Mesa ${code}`,
 
@@ -403,6 +428,7 @@ export const es: Strings = {
   errNotYourTurn: "No es tu turno",
   errMustPlay: "Tienes ficha para jugar",
   errMustDraw: "Primero jala del pozo",
+  errClaimTooEarly: "Todavía no. Espera a que pasen 2 minutos sin jugada.",
   errTileMismatch: "Esa ficha no pega ahí",
   errMoveFailed: "No se pudo jugar",
   errStale: "La mesa cambió, actualizando…",
@@ -552,7 +578,7 @@ export const en: Strings = {
   reportBugTitle: "Something off?",
   reportBugSent: "Thanks - got it.",
   reportBugPrompt:
-    "Tell me what happened. I send the game state along so I can repro it.",
+    "Tell me what happened. This goes to the Capi team, not to your opponent. I send the game state along so I can repro it.",
   reportBugPlaceholder: "e.g. My tiles disappeared after I passed…",
   reportBugSend: "Send",
   reportBugSending: "Sending…",
@@ -561,6 +587,8 @@ export const en: Strings = {
 
   footerPrivacy: "Privacy",
   footerSupport: "Support",
+  howToPlay: "How to play",
+  back: "Back",
 
   pipsInHand: "Pips left in hand",
   awardedTo: "to",
@@ -572,10 +600,20 @@ export const en: Strings = {
   connectionOffline: "Offline",
   waitingFor: (name) => `Waiting for ${name}…`,
   awayHint: "Looks like they disconnected",
+  stalledFor: (name, time) => `${name} hasn't played in ${time}`,
+  claimHint: "After 2 minutes without a move you can claim the win.",
+  claimWin: "Claim the win",
+  claimWinConfirm:
+    "The game ends here and your side wins by forfeit. Sure?",
+  wonByForfeit: (name) => `${name} never came back. You win the game.`,
+  lostByForfeit: (name) => `${name} stopped playing and the game ended.`,
+  youForfeited: "You stopped playing and the other side claimed the game.",
+  endedByForfeit: (name) => `${name} stopped playing. The game ended.`,
   turnOf: (name) => `${name}'s turn`,
   refresh: "Refresh",
   leaveTable: "Leave the table",
-  leaveConfirm: "Leave the table? The game keeps going and you can come back from home.",
+  leaveConfirm:
+    "Leave the table? The game keeps going and you can come back from home. After 2 minutes without a move, the other side can claim the win.",
   resumeGame: "Back to your game",
   resumeGameHint: (code) => `Table ${code}`,
 
@@ -598,6 +636,7 @@ export const en: Strings = {
   errNotYourTurn: "Not your turn",
   errMustPlay: "You have a tile you can play",
   errMustDraw: "Draw from the boneyard first",
+  errClaimTooEarly: "Not yet. Wait until 2 minutes pass without a move.",
   errTileMismatch: "That tile does not fit there",
   errMoveFailed: "Could not play that",
   errStale: "The table changed, syncing…",

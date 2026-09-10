@@ -15,6 +15,27 @@ export type Theme =
 
 export type CalloutType = "domino" | "trancao" | "capicua" | "veinticinco";
 
+// What a callout carries for the overlays and the score attribution. Every
+// callout names the side that scored and both sides' pips at that moment;
+// the optional fields belong to one callout each (dominó and capicúa award
+// `pipsAwarded`, tranque awards `pts`, pase corrido awards `veinticincoBonus`).
+export interface CalloutPayload {
+  winningTeam: 0 | 1;
+  team0Pips: number;
+  team1Pips: number;
+  pipsAwarded?: number;
+  capicuaBonus?: number;
+  pts?: number;
+  veinticincoBonus?: number;
+}
+
+// How a game ended when it was not played to the target score: the seat on
+// turn stayed silent past the claim window and the other side claimed it.
+export interface Forfeit {
+  seat: Seat;
+  at: string;
+}
+
 export interface PlayerInfo {
   seat: Seat;
   nickname: string;
@@ -38,13 +59,18 @@ export interface GameState {
   passesSinceLastPlay: number;
   starterThisRound: Seat;
   lastCallout: CalloutType | null;
-  lastCalloutPayload: Record<string, unknown> | null;
+  lastCalloutPayload: CalloutPayload | null;
   players: Record<Seat, PlayerInfo | null>;
   winnerTeam: number | null;
   lastPlayedBy: Seat | null;
   // Set on a finished game once any player asks for a rematch: the id of the
   // new table every seat can arrive at (same seats, same names).
   rematchGameId?: string;
+  // Server clock (ISO 8601) of the last accepted move, deal, or round start.
+  // Written by the API, never by the engine; drives the claim window.
+  lastMoveAt?: string;
+  // Present only on a game that ended by claim (see Forfeit).
+  forfeit?: Forfeit;
 }
 
 export interface MoveIntent {
@@ -58,7 +84,7 @@ export interface MoveResult {
   newState: GameState;
   error?: string;
   callout?: CalloutType;
-  calloutPayload?: Record<string, unknown>;
+  calloutPayload?: CalloutPayload;
 }
 
 const SEAT_ORDER: Seat[] = ["n", "e", "s", "w"];

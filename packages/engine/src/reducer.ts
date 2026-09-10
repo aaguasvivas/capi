@@ -1,4 +1,11 @@
-import type { GameState, Seat, Tile, MoveIntent, MoveResult } from "./types";
+import type {
+  CalloutPayload,
+  GameState,
+  Seat,
+  Tile,
+  MoveIntent,
+  MoveResult,
+} from "./types";
 import {
   getNextSeat,
   getTeam,
@@ -183,7 +190,7 @@ function endRoundWithDomino(
 ): GameState {
   let pts = scoreDomino(state, winningTeam);
   let callout: MoveResult["callout"] = "domino";
-  const payload: Record<string, unknown> = {
+  const payload: CalloutPayload = {
     winningTeam,
     pipsAwarded: pts,
     team0Pips: teamPips(state, 0),
@@ -346,7 +353,7 @@ export function applyMove(
         state.scores[0] + (winningTeam === 0 ? VEINTICINCO_BONUS : 0),
         state.scores[1] + (winningTeam === 1 ? VEINTICINCO_BONUS : 0),
       ];
-      const payload: Record<string, unknown> = {
+      const payload: CalloutPayload = {
         winningTeam,
         veinticincoBonus: VEINTICINCO_BONUS,
         team0Pips: teamPips(state, 0),
@@ -417,7 +424,7 @@ function getRoundWinningSeat(state: GameState): Seat {
   }
 
   if (callout === "trancao") {
-    const winningTeam = (state.lastCalloutPayload?.winningTeam as number) ?? 0;
+    const winningTeam = state.lastCalloutPayload?.winningTeam ?? 0;
     const seats = getSeatsForGame(state.is2v2);
     let bestSeat: Seat = seats[0];
     let bestPips = Infinity;

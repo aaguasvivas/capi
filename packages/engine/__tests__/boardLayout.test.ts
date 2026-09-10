@@ -48,7 +48,7 @@ function assertNoOverlaps(board: Tile[], availW: number) {
 
 const FULL_SET: Tile[] = (() => {
   const tiles: Tile[] = [];
-  for (let a = 0; a <= 6; a++) for (let b = a; b <= 6; b++) tiles.push([a, b]);
+  for (let a = 0; a <= 6; a++) for (let b = a; b <= 6; b++) tiles.push([a, b] as Tile);
   return tiles;
 })();
 
@@ -68,7 +68,7 @@ describe("boardLayout, no overlaps", () => {
   it("alternating double / non-double chain never overlaps", () => {
     const board: Tile[] = [];
     for (let i = 0; i < 14; i++) {
-      board.push(i % 2 === 0 ? [i % 7, i % 7] : [(i + 1) % 7, (i + 3) % 7]);
+      board.push((i % 2 === 0 ? [i % 7, i % 7] : [(i + 1) % 7, (i + 3) % 7]) as Tile);
     }
     for (const w of WIDTHS) assertNoOverlaps(board, w);
   });

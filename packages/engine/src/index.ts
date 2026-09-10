@@ -3,3 +3,4 @@ export * from "./validate";
 export * from "./scoring";
 export * from "./reducer";
 export * from "./boardLayout";
+export * from "./forfeit";

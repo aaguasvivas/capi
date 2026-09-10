@@ -305,7 +305,7 @@ describe("applyMove - TRANCAO scoring", () => {
     // the whole table, 22 + 6 = 28. Team 0 gets nothing.
     expect(result.newState.phase).toBe("round_over");
     expect(result.newState.scores).toEqual([0, 28]);
-    const payload = result.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = result.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(1);
     expect(payload.pts).toBe(28);
     expect(payload.team0Pips).toBe(22);
@@ -663,7 +663,7 @@ describe("2v2 - TRANCAO", () => {
     expect(result.newState.lastCallout).toBe("trancao");
     // Tie: starter E (team 1) takes every pip on the table, 14 + 14 = 28.
     expect(result.newState.scores).toEqual([0, 28]);
-    const payload = result.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = result.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(1);
     expect(payload.pts).toBe(28);
   });
@@ -1223,7 +1223,7 @@ describe("audit/B: draw mechanics", () => {
     expect(locked.callout).toBe("trancao");
     expect(locked.newState.phase).toBe("round_over");
     expect(locked.newState.scores).toEqual([26, 0]);
-    const payload = locked.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = locked.newState.lastCalloutPayload!;
     expect(payload.team0Pips).toBe(12);
     expect(payload.team1Pips).toBe(14);
   });
@@ -1316,7 +1316,7 @@ describe("audit/B: startNewRound", () => {
       passesSinceLastPlay: 0,
       starterThisRound: "s",
       lastCallout: "domino",
-      lastCalloutPayload: { winningTeam: 0 },
+      lastCalloutPayload: { team0Pips: 0, team1Pips: 0, winningTeam: 0 },
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
       lastPlayedBy: "n",
@@ -1355,7 +1355,7 @@ describe("audit/B: startNewRound", () => {
       passesSinceLastPlay: 0,
       starterThisRound: "n",
       lastCallout: "domino",
-      lastCalloutPayload: { winningTeam: 1 },
+      lastCalloutPayload: { team0Pips: 0, team1Pips: 0, winningTeam: 1 },
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
       lastPlayedBy: "s",
@@ -1388,7 +1388,7 @@ describe("audit/B: startNewRound", () => {
       passesSinceLastPlay: 4,
       starterThisRound: "e",
       lastCallout: "trancao",
-      lastCalloutPayload: { winningTeam: 0 },
+      lastCalloutPayload: { team0Pips: 0, team1Pips: 0, winningTeam: 0 },
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
       lastPlayedBy: "e",
@@ -1539,7 +1539,7 @@ describe("audit/B: TRANCAO scoring on a tie", () => {
     expect(r.callout).toBe("trancao");
     expect(r.newState.phase).toBe("round_over");
     expect(r.newState.scores).toEqual([0, 10]);
-    const payload = r.newState.lastCalloutPayload as Record<string, unknown>;
+    const payload = r.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(1);
     expect(payload.pts).toBe(10);
   });
@@ -1922,7 +1922,7 @@ describe("audit/B: VEINTICINCO callout clears on next move", () => {
       passesSinceLastPlay: 3,
       starterThisRound: "n",
       lastCallout: "veinticinco",
-      lastCalloutPayload: { winningTeam: 0, veinticincoBonus: 25 },
+      lastCalloutPayload: { team0Pips: 0, team1Pips: 0, winningTeam: 0, veinticincoBonus: 25 },
       players: { n: null, e: null, s: null, w: null },
       winnerTeam: null,
       lastPlayedBy: "n",

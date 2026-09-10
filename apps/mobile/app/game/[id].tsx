@@ -19,8 +19,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useKeepAwake } from "expo-keep-awake";
-import type { Tile, Seat } from "@capi/engine";
-import { getTeam } from "@capi/engine";
+import type { CalloutPayload, Seat, Tile } from "@capi/engine";
+import {
+  CLAIM_AFTER_MS,
+  STALL_NOTICE_MS,
+  formatStall,
+  getTeam,
+} from "@capi/engine";
 import { chatText, errorKeyFor, type ErrorKey } from "@capi/i18n";
 import {
   useRealtimeGame,
@@ -170,6 +175,10 @@ function GameTable({
   const [localErrorKey, setLocalErrorKey] = useState<ErrorKey | null>(null);
   const [liveFlash, setLiveFlash] = useState(false);
   const [awaySeat, setAwaySeat] = useState<Seat | null>(null);
+  // Claim window: a one-second clock while the other side is on turn, and
+  // the in-flight state of the claim itself.
+  const [now, setNow] = useState(() => Date.now());
+  const [claiming, setClaiming] = useState(false);
   const [topRowHeight, setTopRowHeight] = useState(0);
 
   // Slam plays on board growth from any source: my optimistic play, a remote
@@ -332,6 +341,17 @@ function GameTable({
     return () => clearTimeout(t);
   }, [turnSeat, turnPresent, sessionSeat]);
 
+  // Stall clock: ticks while the other side is on turn so the notice and the
+  // claim button unlock on their own. Restarts with every accepted move.
+  const lastMoveAt = gameState?.lastMoveAt ?? null;
+  const watchingStall = !!turnSeat && turnSeat !== sessionSeat && !!lastMoveAt;
+  useEffect(() => {
+    if (!watchingStall) return;
+    setNow(Date.now());
+    const t = setInterval(() => setNow(Date.now()), 1_000);
+    return () => clearInterval(t);
+  }, [watchingStall, lastMoveAt]);
+
   const flashError = useCallback((key: ErrorKey) => {
     if (localErrorTimerRef.current) clearTimeout(localErrorTimerRef.current);
     setLocalErrorKey(key);
@@ -442,6 +462,37 @@ function GameTable({
     } finally {
       if (!navigating) setRematchLoading(false);
     }
+  }
+
+  // Ends the game in my side's favor once the seat on turn has been silent
+  // past the window. The server re-checks with its own clock; a refusal
+  // shows as the usual error pill.
+  function handleClaim() {
+    if (!session || claiming) return;
+    Alert.alert(s.claimWin, s.claimWinConfirm, [
+      { text: s.cancel, style: "cancel" },
+      {
+        text: s.claimWin,
+        style: "destructive",
+        onPress: async () => {
+          setClaiming(true);
+          try {
+            const res = await fetch(`${API_BASE}/api/games/${id}/claim`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ playerId: session.playerId }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) flashError(errorKeyFor(data.error));
+            await refetch();
+          } catch {
+            flashError("connectionError");
+          } finally {
+            setClaiming(false);
+          }
+        },
+      },
+    ]);
   }
 
   async function handleJoin() {
@@ -952,6 +1003,28 @@ function GameTable({
 
   const winnerTeam = gameState.winnerTeam;
   const iWonGame = !spectating && winnerTeam === viewTeam;
+
+  // Stall notice and claim: how long the seat on turn has been silent, and
+  // whether my side may end the game for it.
+  const stalledMs =
+    watchingStall && lastMoveAt
+      ? Math.max(0, now - Date.parse(lastMoveAt))
+      : 0;
+  const stallNotice = stalledMs >= STALL_NOTICE_MS;
+  const canClaim =
+    mySeat !== null &&
+    gameState.phase === "playing" &&
+    getTeam(gameState.currentTurn, gameState.is2v2) !==
+      getTeam(mySeat, gameState.is2v2);
+  const claimReady = canClaim && stalledMs >= CLAIM_AFTER_MS;
+  const stallSeat: Seat | null = stallNotice ? gameState.currentTurn : null;
+  const seatName = (seat: Seat) =>
+    players.find((p) => p.seat === seat)?.nickname ?? seatLabels[seat];
+  const forfeitLine = (seat: Seat) => {
+    if (spectating) return s.endedByForfeit(seatName(seat));
+    if (seat === mySeat) return s.youForfeited;
+    return iWonGame ? s.wonByForfeit(seatName(seat)) : s.lostByForfeit(seatName(seat));
+  };
   const winnerName =
     winnerTeam === null
       ? null
@@ -1140,7 +1213,7 @@ function GameTable({
                   </Text>
                 </View>
               ) : null}
-              {awaySeat ? (
+              {awaySeat || stallSeat ? (
                 <View style={awayPill}>
                   <Text
                     style={{
@@ -1150,17 +1223,51 @@ function GameTable({
                       textAlign: "center",
                     }}
                   >
-                    {s.waitingFor(awayName)}
+                    {stallSeat
+                      ? s.stalledFor(seatName(stallSeat), formatStall(stalledMs))
+                      : s.waitingFor(awayName)}
                   </Text>
-                  <Text
-                    style={{
-                      color: "rgba(255,255,255,0.75)",
-                      fontSize: 11,
-                      textAlign: "center",
-                    }}
-                  >
-                    {s.awayHint}
-                  </Text>
+                  {claimReady ? (
+                    <Pressable
+                      onPress={handleClaim}
+                      disabled={claiming}
+                      accessibilityRole="button"
+                      accessibilityLabel={s.claimWin}
+                      accessibilityState={{ disabled: claiming, busy: claiming }}
+                      style={{
+                        marginTop: 4,
+                        paddingHorizontal: 14,
+                        paddingVertical: 8,
+                        borderRadius: 999,
+                        backgroundColor: "#f59e0b",
+                        opacity: claiming ? 0.6 : 1,
+                      }}
+                    >
+                      {claiming ? (
+                        <ActivityIndicator color="#111827" />
+                      ) : (
+                        <Text
+                          style={{
+                            color: "#111827",
+                            fontSize: 13,
+                            fontWeight: "800",
+                          }}
+                        >
+                          {s.claimWin}
+                        </Text>
+                      )}
+                    </Pressable>
+                  ) : awaySeat || canClaim ? (
+                    <Text
+                      style={{
+                        color: "rgba(255,255,255,0.75)",
+                        fontSize: 11,
+                        textAlign: "center",
+                      }}
+                    >
+                      {awaySeat ? s.awayHint : s.claimHint}
+                    </Text>
+                  ) : null}
                 </View>
               ) : null}
             </View>
@@ -1516,7 +1623,18 @@ function GameTable({
                 >
                   {finishedTitle}
                 </Text>
-                {!spectating ? (
+                {gameState.forfeit ? (
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: palette.scoreText,
+                      opacity: 0.8,
+                      textAlign: "center",
+                    }}
+                  >
+                    {forfeitLine(gameState.forfeit.seat)}
+                  </Text>
+                ) : !spectating ? (
                   <Text
                     style={{
                       fontSize: 13,
@@ -1944,7 +2062,7 @@ function SideRail({
 }
 
 function pipFor(
-  payload: Record<string, unknown> | null,
+  payload: CalloutPayload | null,
   team: 0 | 1
 ): string {
   if (!payload || typeof payload.team0Pips !== "number") return "-";

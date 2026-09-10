@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import type { GameState, Tile, Seat } from "@capi/engine";
+import type { CalloutPayload, GameState, Seat, Tile } from "@capi/engine";
 import {
   getNextSeat,
   getTeam,
@@ -78,10 +78,7 @@ export function useRealtimeGame(
   const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
-  const [lastCalloutPayload, setLastCalloutPayload] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [lastCalloutPayload, setLastCalloutPayload] = useState<CalloutPayload | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   // Highest state version applied so far. Written at every apply site (not
@@ -133,7 +130,7 @@ export function useRealtimeGame(
   const surfaceCallout = useCallback(
     (
       callout: string | null | undefined,
-      payload: Record<string, unknown> | null | undefined,
+      payload: CalloutPayload | null | undefined,
       version: number
     ) => {
       if (!callout) {
@@ -202,7 +199,7 @@ export function useRealtimeGame(
       gs: GameState | null,
       sv: number,
       callout: string | null | undefined,
-      calloutPayload: Record<string, unknown> | null | undefined
+      calloutPayload: CalloutPayload | null | undefined
     ) => {
       preOptimisticRef.current = null;
       versionRef.current = sv;
@@ -363,7 +360,7 @@ export function useRealtimeGame(
             gs as GameState,
             sv,
             payload.callout as string | null,
-            (payload.calloutPayload as Record<string, unknown> | null) ??
+            (payload.calloutPayload as CalloutPayload | null) ??
               undefined
           );
         }

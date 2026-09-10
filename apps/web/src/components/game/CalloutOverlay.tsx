@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { CalloutPayload } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
 
 interface CalloutOverlayProps {
   callout: string;
-  payload: Record<string, unknown> | null;
+  payload: CalloutPayload | null;
   onDismiss: () => void;
 }
 

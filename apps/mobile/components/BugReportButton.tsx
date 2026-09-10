@@ -9,8 +9,13 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Constants from "expo-constants";
 import { useI18n } from "../lib/i18n";
 import { API_BASE, THEME } from "../theme";
+
+// The app version rides in the user agent so a report can be matched to the
+// build that produced it.
+const APP_VERSION = Constants.expoConfig?.version ?? "unknown";
 
 interface Props {
   gameId: string;
@@ -59,7 +64,7 @@ export default function BugReportButton({
           gameId,
           playerId,
           message: trimmed,
-          userAgent: `Capi Mobile (${Platform.OS} ${Platform.Version})`,
+          userAgent: `Capi Mobile ${APP_VERSION} (${Platform.OS} ${Platform.Version})`,
           url: `${API_BASE}/game/${gameId}`,
           viewportW: width,
           viewportH: height,

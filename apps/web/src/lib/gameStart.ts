@@ -40,5 +40,5 @@ export function buildStartedState(game: GameRow, players: PlayerRow[]): GameStat
       team: getTeam(seat, is2v2),
     };
   }
-  return { ...initial, players: seated };
+  return { ...initial, players: seated, lastMoveAt: new Date().toISOString() };
 }

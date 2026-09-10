@@ -1,10 +1,11 @@
 import { useEffect } from "react";
+import type { CalloutPayload } from "@capi/engine";
 import { Pressable, Text, View } from "react-native";
 import { useI18n } from "../lib/i18n";
 
 interface CalloutOverlayProps {
   callout: string;
-  payload: Record<string, unknown> | null;
+  payload: CalloutPayload | null;
   onDismiss: () => void;
 }
 

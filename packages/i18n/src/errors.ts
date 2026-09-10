@@ -13,7 +13,8 @@ export type ErrorKey =
   | "errNotAtTable"
   | "errGameFull"
   | "errGameStarted"
-  | "errNotInPlay";
+  | "errNotInPlay"
+  | "errClaimTooEarly";
 
 const EXACT: Record<string, ErrorKey> = {
   "Not your turn": "errNotYourTurn",
@@ -32,6 +33,7 @@ const EXACT: Record<string, ErrorKey> = {
   "Game already started": "errGameStarted",
   "State is stale - refetch": "errStale",
   "State conflict - refetch": "errStale",
+  "Too early to claim": "errClaimTooEarly",
   "Connection error": "connectionError",
 };
 

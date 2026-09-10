@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { applyMove } from "@capi/engine";
 import type { GameState, Seat, MoveIntent } from "@capi/engine";
+import { reportError } from "@/lib/report";
 
 export async function POST(
   req: NextRequest,
@@ -71,16 +72,18 @@ export async function POST(
     }
 
     const newVersion = stateVersion + 1;
+    // The server clock of this move: the claim window counts from here.
+    const newState: GameState = { ...result.newState, lastMoveAt: new Date().toISOString() };
 
     // Write new state with optimistic locking
     const { data: updated, error: updateError } = await db
       .from("games")
       .update({
-        game_state: result.newState,
+        game_state: newState,
         state_version: newVersion,
-        status: result.newState.phase === "finished"
+        status: newState.phase === "finished"
           ? "finished"
-          : result.newState.phase === "round_over"
+          : newState.phase === "round_over"
           ? "round_over"
           : "playing",
       })
@@ -111,13 +114,13 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      gameState: result.newState,
+      gameState: newState,
       stateVersion: newVersion,
       callout: result.callout ?? null,
       calloutPayload: result.calloutPayload ?? null,
     });
   } catch (err) {
-    console.error("POST /api/games/[id]/move error:", err);
+    reportError(err, "POST /api/games/[id]/move");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
