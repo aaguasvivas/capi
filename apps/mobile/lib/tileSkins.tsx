@@ -136,6 +136,23 @@ export function useTileSkin() {
   return useContext(SkinContext);
 }
 
+// Renders children in one fixed skin, whatever the user picked. Store
+// previews use it to show a skin the user does not own yet. setSkinId is a
+// no-op here: a scope never changes the stored choice.
+export function SkinScope({
+  skinId,
+  children,
+}: {
+  skinId: TileSkinId;
+  children: ReactNode;
+}) {
+  const value = useMemo<SkinCtx>(
+    () => ({ skin: TILE_SKINS[skinId], skinId, setSkinId: () => {} }),
+    [skinId],
+  );
+  return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;
+}
+
 // ---------------------------------------------------------------------------
 // Back renderer
 // ---------------------------------------------------------------------------

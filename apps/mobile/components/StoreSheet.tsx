@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -10,15 +10,25 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEntitlements } from "../lib/entitlements";
 import { useI18n } from "../lib/i18n";
-import { PRODUCT_IDS, type ProductId } from "../lib/iapCatalog";
-import { THEME } from "../theme";
+import {
+  PRODUCT_IDS,
+  type PremiumFichasId,
+  type PremiumMesaId,
+  type ProductId,
+} from "../lib/iapCatalog";
+import { SkinScope } from "../lib/tileSkins";
+import { THEME, THEMES } from "../theme";
+import TileDisplay from "./TileDisplay";
 
 // Page-sheet store: Todo Capi hero, remove ads, 3 mesas, 3 fichas, restore,
-// privacy link. Owned states derive from ent so a mid-sheet purchase updates
-// rows live. Prices come from the store only; until they arrive every buy
-// button shows a neutral "see price" pill, never a guessed amount.
+// privacy link. Every product shows what it sells: real tiles in the skin,
+// the felt of the mesa, a struck-out ad tag. Owned states derive from ent so
+// a mid-sheet purchase updates rows live. Prices come from the store only;
+// until they arrive every buy button shows a neutral "see price" pill, never
+// a guessed amount.
 export default function StoreSheet({
   visible,
   onClose,
@@ -163,6 +173,24 @@ export default function StoreSheet({
             <Text style={{ fontSize: 18, fontWeight: "900", color: "#111827" }}>
               {s.todoCapiTitle}
             </Text>
+            {/* What the bundle unlocks, in the order of the sections below */}
+            <View
+              style={{
+                alignSelf: "stretch",
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 6,
+                marginVertical: 2,
+              }}
+            >
+              <MesaPreview id="quisqueya" size="strip" />
+              <MesaPreview id="larimar" size="strip" />
+              <MesaPreview id="noche" size="strip" />
+              <FichasPreview id="quisqueya" size="strip" />
+              <FichasPreview id="borinquen" size="strip" />
+              <FichasPreview id="kingston" size="strip" />
+            </View>
             <Text
               style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}
             >
@@ -179,6 +207,7 @@ export default function StoreSheet({
           <ProductRow
             name={s.removeAdsTitle}
             desc={s.removeAdsDesc}
+            preview={<AdFreePreview />}
             productId={PRODUCT_IDS.removeAds}
             owned={ent.adFree}
             onPurchased={onPurchased}
@@ -188,6 +217,7 @@ export default function StoreSheet({
           <ProductRow
             name={s.themeQuisqueya}
             desc={s.themeQuisqueyaDesc}
+            preview={<MesaPreview id="quisqueya" />}
             productId={PRODUCT_IDS.mesaQuisqueya}
             owned={ent.mesas.has("quisqueya")}
             onPurchased={onPurchased}
@@ -195,6 +225,7 @@ export default function StoreSheet({
           <ProductRow
             name={s.themeLarimar}
             desc={s.themeLarimarDesc}
+            preview={<MesaPreview id="larimar" />}
             productId={PRODUCT_IDS.mesaLarimar}
             owned={ent.mesas.has("larimar")}
             onPurchased={onPurchased}
@@ -202,6 +233,7 @@ export default function StoreSheet({
           <ProductRow
             name={s.themeNoche}
             desc={s.themeNocheDesc}
+            preview={<MesaPreview id="noche" />}
             productId={PRODUCT_IDS.mesaNoche}
             owned={ent.mesas.has("noche")}
             onPurchased={onPurchased}
@@ -211,6 +243,7 @@ export default function StoreSheet({
           <ProductRow
             name={`Fichas ${s.themeQuisqueya}`}
             desc={s.fichasQuisqueyaDesc}
+            preview={<FichasPreview id="quisqueya" />}
             productId={PRODUCT_IDS.fichasQuisqueya}
             owned={ent.fichas.has("quisqueya")}
             onPurchased={onPurchased}
@@ -218,6 +251,7 @@ export default function StoreSheet({
           <ProductRow
             name="Fichas Borinquen"
             desc={s.fichasBorinquenDesc}
+            preview={<FichasPreview id="borinquen" />}
             productId={PRODUCT_IDS.fichasBorinquen}
             owned={ent.fichas.has("borinquen")}
             onPurchased={onPurchased}
@@ -225,6 +259,7 @@ export default function StoreSheet({
           <ProductRow
             name="Fichas Kingston"
             desc={s.fichasKingstonDesc}
+            preview={<FichasPreview id="kingston" />}
             productId={PRODUCT_IDS.fichasKingston}
             owned={ent.fichas.has("kingston")}
             onPurchased={onPurchased}
@@ -310,12 +345,16 @@ function SectionLabel({ text }: { text: string }) {
 function ProductRow({
   name,
   desc,
+  preview,
   productId,
   owned,
   onPurchased,
 }: {
   name: string;
   desc: string;
+  // What the product looks like (one of the previews below). Decorative:
+  // the name and description carry the meaning for screen readers.
+  preview: ReactNode;
   productId: ProductId;
   owned: boolean;
   onPurchased?: (id: ProductId) => void;
@@ -334,15 +373,183 @@ function ProductRow({
         paddingVertical: 12,
       }}
     >
+      {preview}
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 14, fontWeight: "700", color: "#111827" }}>
+        <Text
+          numberOfLines={1}
+          style={{ fontSize: 14, fontWeight: "700", color: "#111827" }}
+        >
           {name}
         </Text>
-        <Text style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}>
+        <Text
+          numberOfLines={2}
+          style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}
+        >
           {desc}
         </Text>
       </View>
       <BuyButton productId={productId} owned={owned} onPurchased={onPurchased} />
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Product previews. Row previews are 64 x 44; the Todo Capi strip shows the
+// same six at 40 x 28. Every box is decorative: the row text carries the
+// meaning, so screen readers skip the box and the tiles inside it.
+// ---------------------------------------------------------------------------
+
+const PREVIEW_SIZES = {
+  row: { w: 64, h: 44 },
+  strip: { w: 40, h: 28 },
+} as const;
+type PreviewSize = keyof typeof PREVIEW_SIZES;
+
+const DECORATIVE = {
+  accessibilityElementsHidden: true,
+  importantForAccessibility: "no-hide-descendants",
+} as const;
+
+// Two tiles in the skin on sale. The ground is a neutral light gray so the
+// black kingston tiles and the white borinquen tiles both keep a silhouette.
+function FichasPreview({
+  id,
+  size = "row",
+}: {
+  id: PremiumFichasId;
+  size?: PreviewSize;
+}) {
+  const { w, h } = PREVIEW_SIZES[size];
+  const tileH = h - 8;
+  const tileW = Math.round(tileH / 2);
+  return (
+    <View
+      {...DECORATIVE}
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 10,
+        backgroundColor: "#f3f4f6",
+        overflow: "hidden",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: size === "row" ? 5 : 3,
+      }}
+    >
+      <SkinScope skinId={id}>
+        <TileDisplay tile={[6, 6]} w={tileW} h={tileH} />
+        <TileDisplay tile={[2, 5]} w={tileW} h={tileH} />
+      </SkinScope>
+    </View>
+  );
+}
+
+// The felt of the mesa on sale, framed in its accent, with two clasico tiles
+// on it (a double standing, a tile lying) so it reads as a table and not as
+// a color chip. Same three-stop gradient as the game screen.
+function MesaPreview({
+  id,
+  size = "row",
+}: {
+  id: PremiumMesaId;
+  size?: PreviewSize;
+}) {
+  const palette = THEMES[id];
+  const { w, h } = PREVIEW_SIZES[size];
+  const tileH = size === "row" ? 24 : 16;
+  const tileW = tileH / 2;
+  return (
+    <LinearGradient
+      {...DECORATIVE}
+      colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
+      locations={[0, 0.55, 1]}
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: palette.accent,
+        overflow: "hidden",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 3,
+      }}
+    >
+      <SkinScope skinId="clasico">
+        <TileDisplay tile={[6, 6]} w={tileW} h={tileH} />
+        {/* The lying tile: the wrapper reserves its rotated footprint */}
+        <View
+          style={{
+            width: tileH,
+            height: tileW,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View style={{ transform: [{ rotate: "90deg" }] }}>
+            <TileDisplay tile={[3, 4]} w={tileW} h={tileH} />
+          </View>
+        </View>
+      </SkinScope>
+    </LinearGradient>
+  );
+}
+
+// A struck-out "AD" tag drawn with plain views. The label is a pictogram,
+// not copy: it is hidden from screen readers with the rest of the box.
+function AdFreePreview() {
+  const { w, h } = PREVIEW_SIZES.row;
+  const strikeW = 56;
+  const strikeH = 2.5;
+  return (
+    <View
+      {...DECORATIVE}
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 10,
+        backgroundColor: "#f3f4f6",
+        overflow: "hidden",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <View
+        style={{
+          width: 44,
+          height: 28,
+          borderRadius: 6,
+          borderWidth: 1.5,
+          borderColor: "#9ca3af",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 11,
+            fontWeight: "800",
+            letterSpacing: 1.5,
+            color: "#6b7280",
+          }}
+        >
+          AD
+        </Text>
+      </View>
+      <View
+        style={{
+          position: "absolute",
+          left: (w - strikeW) / 2,
+          top: (h - strikeH) / 2,
+          width: strikeW,
+          height: strikeH,
+          borderRadius: strikeH / 2,
+          backgroundColor: "#dc2626",
+          transform: [{ rotate: "-32deg" }],
+        }}
+      />
     </View>
   );
 }
