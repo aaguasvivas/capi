@@ -395,16 +395,18 @@ function GameTable({
   }
 
   function confirmLeave() {
+    const leave = () => {
+      if (router.canGoBack()) router.dismissAll();
+      else router.replace("/");
+    };
+    // Nothing to protect once the game is over: leave without asking.
+    if (gameState?.phase === "finished") {
+      leave();
+      return;
+    }
     Alert.alert(s.leaveTable, s.leaveConfirm, [
       { text: s.reportBugCancel, style: "cancel" },
-      {
-        text: s.leaveTable,
-        style: "destructive",
-        onPress: () => {
-          if (router.canGoBack()) router.dismissAll();
-          else router.replace("/");
-        },
-      },
+      { text: s.leaveTable, style: "destructive", onPress: leave },
     ]);
   }
 

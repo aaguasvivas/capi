@@ -241,7 +241,7 @@ export default function StoreSheet({
 
           <SectionLabel text={s.fichasLabel} />
           <ProductRow
-            name={`Fichas ${s.themeQuisqueya}`}
+            name={s.themeQuisqueya}
             desc={s.fichasQuisqueyaDesc}
             preview={<FichasPreview id="quisqueya" />}
             productId={PRODUCT_IDS.fichasQuisqueya}
@@ -249,7 +249,7 @@ export default function StoreSheet({
             onPurchased={onPurchased}
           />
           <ProductRow
-            name="Fichas Borinquen"
+            name="Borinquen"
             desc={s.fichasBorinquenDesc}
             preview={<FichasPreview id="borinquen" />}
             productId={PRODUCT_IDS.fichasBorinquen}
@@ -257,7 +257,7 @@ export default function StoreSheet({
             onPurchased={onPurchased}
           />
           <ProductRow
-            name="Fichas Kingston"
+            name="Kingston"
             desc={s.fichasKingstonDesc}
             preview={<FichasPreview id="kingston" />}
             productId={PRODUCT_IDS.fichasKingston}
