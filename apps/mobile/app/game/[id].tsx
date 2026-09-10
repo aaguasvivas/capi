@@ -1189,11 +1189,13 @@ function GameTable({
             </Text>
           </View>
 
-          {/* Transient notices: move errors and an away opponent. Absolute,
-              so the board never shifts when they appear. */}
-          {bannerKey || awaySeat ? (
+          {/* Transient notices: move errors, an away opponent, and the stall
+              notice with its claim button. Absolute, so the board never
+              shifts when they appear; box-none so the board still gets every
+              touch outside the pills while the claim button stays tappable. */}
+          {bannerKey || awaySeat || stallSeat ? (
             <View
-              pointerEvents="none"
+              pointerEvents="box-none"
               style={{
                 position: "absolute",
                 top: floatingTop,
