@@ -25,6 +25,15 @@
       "ios": {
         "image": "latest"
       }
+    },
+    "simulator": {
+      "extends": "production",
+      "distribution": "internal",
+      "autoIncrement": false,
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      }
     }
   },
   "submit": {

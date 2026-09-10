@@ -17,5 +17,7 @@ Sentry.init({
   ignoreErrors: ["Network request failed"],
 });
 
-// Wraps the root layout: a React error boundary plus native crash capture.
-export const withSentry = Sentry.wrap;
+// No Sentry.wrap on the root layout on purpose: it only adds touch
+// breadcrumbs and app-start tracing, and on a binary without the native
+// module (an older install running newer JS) it renders a black screen.
+// Uncaught errors and native crashes are captured by init alone.

@@ -1,6 +1,6 @@
 // First import on purpose: error reporting initializes before anything else
 // can throw. It is a no-op without EXPO_PUBLIC_SENTRY_DSN and in dev builds.
-import { withSentry } from "../lib/sentry";
+import "../lib/sentry";
 import { Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
 import { I18nProvider } from "../lib/i18n";
@@ -24,4 +24,4 @@ function RootLayout() {
   );
 }
 
-export default withSentry(RootLayout);
+export default RootLayout;
