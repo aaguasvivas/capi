@@ -387,8 +387,18 @@ export default function Index() {
     <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
       <StatusBar style="dark" />
 
-      {/* Store entry, top-left mirror of the language toggle */}
-      <View style={[floatingPillStyle, { left: 20, top: insets.top + 12 }]}>
+      {/* Store and rules entries, top-left mirror of the language toggle */}
+      <View
+        style={[
+          floatingPillStyle,
+          {
+            left: 20,
+            top: insets.top + 12,
+            flexDirection: "row",
+            alignItems: "center",
+          },
+        ]}
+      >
         <Pressable
           onPress={() => openStore(null)}
           accessibilityRole="button"
@@ -403,6 +413,23 @@ export default function Index() {
             style={{ fontSize: 11, fontWeight: "800", color: THEME.scoreBg }}
           >
             🛍 {s.store}
+          </Text>
+        </Pressable>
+        <View style={{ width: 1, height: 14, backgroundColor: "#e5e7eb" }} />
+        <Pressable
+          onPress={() => router.push("/rules")}
+          accessibilityRole="button"
+          accessibilityLabel={s.howToPlay}
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 5,
+            borderRadius: 999,
+          }}
+        >
+          <Text
+            style={{ fontSize: 11, fontWeight: "800", color: THEME.scoreBg }}
+          >
+            📖 {s.howToPlay}
           </Text>
         </Pressable>
       </View>

@@ -323,6 +323,15 @@ function HomeContent() {
         {/* Footer */}
         <footer className="flex items-center justify-center gap-3 pt-1 text-[11px] font-medium text-gray-400">
           <Link
+            href="/rules"
+            className="hover:text-gray-600 transition-colors"
+          >
+            {s.howToPlay}
+          </Link>
+          <span aria-hidden className="text-gray-300">
+            ·
+          </span>
+          <Link
             href="/privacy"
             className="hover:text-gray-600 transition-colors"
           >
