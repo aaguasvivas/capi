@@ -74,6 +74,12 @@ function withMessagesTarget(config) {
     proj.hash.project.objects["PBXContainerItemProxy"] = proj.hash.project.objects["PBXContainerItemProxy"] || {};
 
     const target = proj.addTarget(TARGET, "app_extension", TARGET, BUNDLE_ID);
+    // addTarget only knows the generic extension product type. Messages
+    // extensions must be the ".messages" subtype: that is what makes actool
+    // compile the "iMessage App Icon" set and declare CFBundleIcons in the
+    // extension's Info.plist. With the generic type the icons were silently
+    // left out and App Store Connect rejected the binary (ITMS-90649).
+    target.pbxNativeTarget.productType = '"com.apple.product-type.app-extension.messages"';
 
     // 3. Groups + build phases
     //
