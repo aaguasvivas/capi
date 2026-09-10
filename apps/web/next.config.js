@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { transpilePackages: ["@capi/engine", "@capi/i18n"] };
+const nextConfig = {
+  transpilePackages: ["@capi/engine", "@capi/i18n"],
+  // Next 14 needs this for src/instrumentation.ts (Sentry's server and edge
+  // init plus onRequestError) to load.
+  experimental: { instrumentationHook: true },
+};
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
@@ -22,14 +27,14 @@ module.exports = isSentryEnabled
       // traces in the dashboard show original TS lines instead of minified.
       widenClientFileUpload: true,
 
-      // Don't ship source maps to the browser — they're only uploaded to
+      // Don't ship source maps to the browser: they're only uploaded to
       // Sentry and stripped from the public build.
       hideSourceMaps: true,
 
       // Strip Sentry's verbose logger from the client bundle.
       disableLogger: true,
 
-      // Skip auto-creating Vercel cron monitors — we don't have any yet.
+      // Skip auto-creating Vercel cron monitors; we don't have any yet.
       automaticVercelMonitors: false,
     })
   : nextConfig;

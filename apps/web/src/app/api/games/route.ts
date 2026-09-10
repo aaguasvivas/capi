@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { uniqueInviteCode } from "@/lib/inviteCode";
 import { cleanAvatarColor, cleanNickname, isMode, isTheme } from "@/lib/validation";
+import { reportError } from "@/lib/report";
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
       seat: "n",
     });
   } catch (err) {
-    console.error("POST /api/games error:", err);
+    reportError(err, "POST /api/games");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

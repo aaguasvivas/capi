@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { normalizeChatPayload } from "@capi/i18n";
+import { reportError } from "@/lib/report";
 
 export async function POST(
   req: NextRequest,
@@ -65,7 +66,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("POST /api/games/[id]/chat error:", err);
+    reportError(err, "POST /api/games/[id]/chat");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

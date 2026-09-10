@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { reportError } from "@/lib/report";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export async function GET(
 
     return NextResponse.json({ game, players: players ?? [] });
   } catch (err) {
-    console.error("GET /api/games/[id] error:", err);
+    reportError(err, "GET /api/games/[id]");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

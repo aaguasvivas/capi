@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { GameState } from "@capi/engine";
 import { buildStartedState, maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
 import { uniqueInviteCode } from "@/lib/inviteCode";
+import { reportError } from "@/lib/report";
 
 type Db = ReturnType<typeof createServerClient>;
 
@@ -158,7 +159,7 @@ export async function POST(
     }
     return NextResponse.json(arrival);
   } catch (err) {
-    console.error("POST /api/games/[id]/rematch error:", err);
+    reportError(err, "POST /api/games/[id]/rematch");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

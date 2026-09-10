@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { Seat } from "@capi/engine";
 import { buildStartedState, maxPlayersFor, type GameRow } from "@/lib/gameStart";
 import { cleanAvatarColor, cleanNickname } from "@/lib/validation";
+import { reportError } from "@/lib/report";
 
 export async function POST(
   req: NextRequest,
@@ -120,7 +121,7 @@ export async function POST(
       gameId: params.id,
     });
   } catch (err) {
-    console.error("POST /api/games/[id]/join error:", err);
+    reportError(err, "POST /api/games/[id]/join");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

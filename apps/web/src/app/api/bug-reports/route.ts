@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
+import { reportError } from "@/lib/report";
 
 const REPORT_TO = "adelsonaguasvivas@gmail.com";
 const REPORT_CC = "aaguasvivas907@gmail.com";
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("POST /api/bug-reports error:", err);
+    reportError(err, "POST /api/bug-reports");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

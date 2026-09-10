@@ -100,7 +100,8 @@
         {
           "userTrackingPermission": "This lets Capi show ads that are more relevant to you. Your games stay on the table."
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "locales": {
       "es": "./locales/es.json"
