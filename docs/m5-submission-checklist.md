@@ -3,10 +3,14 @@
 Work top to bottom. Every item is a hard gate for the next. "Me" = Claude in the
 repo session; "You" = Adelson in consoles or on phones.
 
-State on 2026-08-14: build 16 (pre-audit) is in TestFlight; build 17 carries the
-deep-audit pass (corrected rules, shared rematch, reconnect, presence, sessionless
-join/spectate, deep-link handoff, store honesty, API hardening). Test and submit
-build 17, not 16.
+State on 2026-09-10: builds 16 and 17 were rejected by App Store Connect with
+ITMS-90649 (no iMessage app icon in the bundle). Root cause: the config plugin
+created a generic app extension, so Xcode never compiled the icon set; the
+target is now the `.messages` subtype and the set includes the 29x29 settings
+icons. Build 18 carries that fix plus the claim flow (a silent seat can be
+claimed after 2 minutes), the how-to-play page, store previews, typed callout
+payloads, the "Te toca" quick phrase, the app version in bug reports, and
+Sentry wiring (off until a DSN exists). Test and submit build 18.
 
 ## A. Code gates (Me)
 
@@ -47,14 +51,22 @@ build 17, not 16.
          rewrite game state.
 - [ ] B6. Any time: run supabase/migrations/004_realtime_publication.sql in the
       SQL Editor (idempotent; records the realtime setup in the schema).
+- [ ] B7. Error reporting, any time: create a Sentry account with one org and
+      two projects (Next.js and React Native). Vercel: NEXT_PUBLIC_SENTRY_DSN,
+      SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN, then redeploy.
+      EAS (Production): EXPO_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT and
+      the secret SENTRY_AUTH_TOKEN; then delete SENTRY_DISABLE_AUTO_UPLOAD from
+      eas.json's production profile and tell me, I kick the next build. Until
+      then the apps run with reporting off; nothing breaks.
 
 ## C. Production build (Me)
 
 - [x] Real AdMob ids swapped in, prebuild, sim smoke, committed, pushed.
 - [x] Build 16 kicked, submitted to TestFlight (pre-audit).
 - [x] Build 17 (audit pass, EAS id 83ce7a17) built and submitted to App Store
-      Connect (submission 75c4c902); it shows in TestFlight after Apple's
-      processing.
+      Connect (submission 75c4c902); rejected by ITMS-90649 like build 16.
+- [ ] Build 18 (icon fix + September features): local sim pass, EAS build,
+      submit; the ITMS email must not come back.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
 
@@ -74,7 +86,7 @@ build 17, not 16.
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
 - [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select build 17 for the 1.1 version (not 16).
+- [ ] D8. Select build 18 for the 1.1 version (16 and 17 have no iMessage icon).
 
 ## E. TestFlight matrix (You + me, two phones, build 17)
 
@@ -103,6 +115,18 @@ build 17, not 16.
       ends with different pips shows "Jugar en el N" buttons.
 - [ ] Open a full table you are not seated at (any invite link on a third
       device): "Solo mirando" view, no hand, no phantom seat.
+- [ ] Claim: on phone B's turn, close the app on B and wait. Phone A shows
+      "B lleva 1:00 sin jugar" after a minute and "Reclamar la partida" at
+      two; tap it, confirm: A gets "B no volvió a jugar. Ganaste la partida."
+      and B, on return, sees "Dejaste de jugar y el otro lado reclamó la
+      partida." Leaving the table and coming back within two minutes keeps
+      the game.
+- [ ] Messages app drawer shows the Capi icon (the ITMS-90649 fix) and the
+      1.1 bubbles still render.
+- [ ] Store: every row shows its preview (tiles in the skin, felt swatch
+      with tiles), the Todo Capi card shows the six-box strip, nothing clips
+      at 375 points.
+- [ ] Home: "Cómo se juega" opens the rules modal; playcapi.com/rules matches.
 
 ## F. Submit (You)
 

@@ -21,6 +21,8 @@ The app and the listing kit are ready. This is the line-by-line path to submit. 
 - Age rating: 4+ / Everyone. Category: Games > Board. Device: iPhone only.
 - Encryption: `ITSAppUsesNonExemptEncryption: false` is already in app.json, so no export-compliance questions per build.
 - Supabase env values ship via EAS env vars per profile (already pushed; they live in the gitignored apps/mobile/.env locally). `EXPO_PUBLIC_API_BASE` is not needed; the app falls back to https://playcapi.com.
+- Error reporting (Sentry) is wired on both apps and stays off until a DSN exists. To turn it on: create one Sentry organization with two projects (Next.js and React Native), then set on Vercel `NEXT_PUBLIC_SENTRY_DSN` and `SENTRY_DSN` (plus `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps) and redeploy; on EAS set `EXPO_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, and the secret `SENTRY_AUTH_TOKEN`, and delete `SENTRY_DISABLE_AUTO_UPLOAD` from the production profile in eas.json so builds upload source maps and dSYMs. Dev builds never send.
+- The CapiMessages target is a `.messages` app extension (set by plugins/withMessagesExtension.js). That subtype is what makes Xcode compile the "iMessage App Icon" set into the binary; the generic extension type shipped builds 16 and 17 without icons (ITMS-90649). Regenerate the set with `node scripts/gen-imessage-icons.mjs` after changing the mark.
 
 ## iOS
 ```bash
@@ -68,6 +70,6 @@ In Play Console (play.google.com/console):
 
 ## After launch (v1.2 ideas, not now)
 - Ask-for-review prompt after a couple of finished matches (expo-store-review).
-- Sentry on mobile (web already has it) and expo-updates OTA for JS-only fixes.
+- expo-updates OTA for JS-only fixes (Sentry is wired on both apps since 1.1; see prerequisites for the DSN setup).
 - Cross-promo with Anota: Capi is the online table, Anota is the scorekeeper for the physical one. A quiet link in each, nothing loud.
 - The most-requested gap will be solo play vs AI; that is a feature decision, not a listing tweak. Copy stays honest until it ships.
