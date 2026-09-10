@@ -13,7 +13,7 @@ Sentry.init({
   // Prevents noisy logs and accidental quota usage in personal envs.
   enabled: !!dsn,
 
-  // Errors only — no performance tracing, no session replay.
+  // Errors only: no performance tracing, no session replay.
   // Both eat the free-tier quota fast and aren't needed for v1.
   tracesSampleRate: 0,
   replaysSessionSampleRate: 0,

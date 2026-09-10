@@ -223,6 +223,8 @@ Also new, the Capi shop:
 • Todo Capi unlocks everything, and Remove Ads keeps the table clean
 
 A small banner may appear on the home screen. Never during a game, that is sacred.
+
+Also in this update: if the other side goes quiet for two minutes, you can claim the game instead of waiting forever. The rules are in the app under "How to play", every design shows itself in the shop, and "Your turn!" joined the quick chat.
 ```
 
 **Español:**
@@ -235,4 +237,6 @@ También nueva, la tienda de Capi:
 • Todo Capi lo desbloquea todo, y Quitar anuncios deja la mesa limpia
 
 Puede salir un banner pequeño en la pantalla de inicio. Nunca durante la partida, eso es sagrado.
+
+También en esta versión: si el otro lado se queda callado dos minutos, puedes reclamar la partida en vez de esperar sin fin. Las reglas están en la app en "Cómo se juega", cada diseño se muestra en la tienda, y "¡Te toca!" llegó al chat rápido.
 ```

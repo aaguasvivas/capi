@@ -21,8 +21,8 @@ create table if not exists public.bug_reports (
 alter table public.bug_reports enable row level security;
 
 -- Two-gate insert access:
---   1) Postgres GRANT — does the role have the basic INSERT privilege?
---   2) RLS policy    — does any policy say "this row is allowed"?
+--   1) Postgres GRANT: does the role have the basic INSERT privilege?
+--   2) RLS policy: does any policy say "this row is allowed"?
 -- Supabase auto-grants INSERT to anon/authenticated for tables created
 -- via the Table Editor UI but not always via raw SQL, so we grant explicitly.
 grant insert on public.bug_reports to anon, authenticated;

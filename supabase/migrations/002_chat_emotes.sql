@@ -1,5 +1,5 @@
 -- ============================================================
--- Capi — Dominican Dominoes  |  Chat & Emotes
+-- Capi, Dominican Dominoes: chat and emotes
 -- ============================================================
 
 create table if not exists public.chat_emotes (

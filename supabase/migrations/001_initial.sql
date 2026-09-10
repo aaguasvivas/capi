@@ -1,5 +1,5 @@
 -- ============================================================
--- Capi — Dominican Dominoes  |  Initial Schema
+-- Capi, Dominican Dominoes: initial schema
 -- Run this entire file in the Supabase SQL Editor.
 -- ============================================================
 

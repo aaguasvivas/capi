@@ -1,5 +1,5 @@
 // Edge runtime Sentry init. Used by routes/handlers that run on Vercel
-// Edge — currently the opengraph-image, icon, apple-icon endpoints.
+// Edge: currently the opengraph-image, icon, apple-icon endpoints.
 
 import * as Sentry from "@sentry/nextjs";
 

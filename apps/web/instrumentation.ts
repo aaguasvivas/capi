@@ -1,4 +1,4 @@
-// Next.js instrumentation hook — runs once at server startup BEFORE any
+// Next.js instrumentation hook. Runs once at server startup BEFORE any
 // request handler. We use it to wire up Sentry for both the Node.js
 // runtime (API routes, RSCs) and the Edge runtime (OG image, icons).
 
