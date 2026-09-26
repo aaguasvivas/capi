@@ -31,21 +31,26 @@ import {
 
 const STORAGE_KEY = "@capi/iap_v1";
 
-// A fresh install of an ad-free buyer must not flash a banner before the
-// launch restore answers, but a wedged store must not hold ads back forever.
-const RECONCILE_CAP_MS = 3000;
+// A fresh install of an ad-free buyer must not flash a banner or ask ATT
+// before the launch restore answers, but a wedged store must not hold ads back
+// forever. On a fresh install the restore is the only source of ownership and
+// StoreKit may first sync the purchase history, so the cap leaves room for a
+// slow network; a normal launch settles well inside it.
+const RECONCILE_CAP_MS = 8000;
 
-// i18n key for the purchase failure alert. The store layer only emits stable
-// codes; raw store strings stay in the console.
+// i18n key for the purchase alert. The store layer only emits stable codes;
+// raw store strings stay in the console.
 export type PurchaseErrorKey =
   | "purchaseErrorProduct"
   | "purchaseErrorStore"
-  | "purchaseFailed";
+  | "purchaseFailed"
+  | "purchasePending";
 
 const ERROR_KEYS: Record<PurchaseFailure, PurchaseErrorKey> = {
   "product-unavailable": "purchaseErrorProduct",
   "store-unavailable": "purchaseErrorStore",
   failed: "purchaseFailed",
+  deferred: "purchasePending",
 };
 
 interface EntitlementsCtx {
@@ -156,9 +161,9 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
       await buyProduct(id);
       return true;
     } catch {
-      // buyProduct rejects on cancellation and failure alike; real failures
-      // already reached lastError through the onFailure callback, so this
-      // path only clears the spinner and never raises its own error.
+      // buyProduct rejects on cancellation, deferral and failure alike; the
+      // store layer already reported failures and deferrals through the
+      // onFailure callback, so this path only clears the spinner.
       setBuying(null);
       return false;
     }

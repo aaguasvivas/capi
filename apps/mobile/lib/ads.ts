@@ -1,11 +1,15 @@
 // Google Mobile Ads bootstrap: gather consent (UMP handles the EEA form),
 // request App Tracking Transparency explicitly, then start the SDK. Follows
 // the same philosophy as the IAP layer: ads can fail forever and the app stays
-// fully usable, and NOTHING in this chain may block forever. Every step is
-// bounded; a hung step degrades to non-personalized or no ads, never to a
-// missing ATT prompt. Ported from Anota's review-hardened flow.
+// fully usable, and NOTHING in this chain may block forever. Every step that
+// waits on the network is bounded; only the consent form and the ATT prompt
+// wait for the user. A hung step degrades to no ads, never to a missing ATT
+// prompt. Ported from Anota's review-hardened flow.
 import { AppState, Platform } from "react-native";
-import mobileAds, { AdsConsent } from "react-native-google-mobile-ads";
+import mobileAds, {
+  AdsConsent,
+  AdsConsentPrivacyOptionsRequirementStatus,
+} from "react-native-google-mobile-ads";
 import {
   getTrackingPermissionsAsync,
   requestTrackingPermissionsAsync,
@@ -55,29 +59,27 @@ function whenActiveBounded(maxMs: number): Promise<void> {
 
 async function start(): Promise<boolean> {
   await whenActiveBounded(8000);
-  let consentErrored = false;
-  try {
-    // UMP fetches consent requirements from Google. On filtered or slow
-    // networks (App Review environments included) this can stall; a stall
-    // must not stop the ATT prompt from appearing.
-    // Dev builds run Google's SAMPLE app id, which has no UMP configuration:
-    // gatherConsent presents an EMPTY native form that never loads and eats
-    // every touch (the JS timeout cannot dismiss a presented sheet). Skip
-    // consent in dev; ATT and initialize below still run. Production (real
-    // app id) keeps the full flow.
-    if (!__DEV__) {
-      await withTimeout(AdsConsent.gatherConsent(), 15000);
-    } else {
-      // With consent skipped, UMP reports canRequestAds=false without any
-      // error; mark the flow as errored so the fail-open rule below still
-      // initializes test ads in dev.
-      consentErrored = true;
+  // Dev builds run Google's SAMPLE app id, which has no UMP configuration:
+  // the consent form comes up EMPTY, never loads and eats every touch (a JS
+  // timeout cannot dismiss a presented sheet). Skip consent in dev; ATT and
+  // initialize below still run. Production (real app id) keeps the full flow.
+  if (!__DEV__) {
+    try {
+      // UMP fetches consent requirements from Google. On filtered or slow
+      // networks (App Review environments included) this can stall; a stall
+      // must not stop the ATT prompt from appearing, so this step is capped.
+      await withTimeout(AdsConsent.requestInfoUpdate(), 15000);
+      // Not capped: this resolves when the user closes the form, and a timer
+      // here used to fire while an EEA user was still reading it, which put
+      // ATT over the form and started ads before any choice. It resolves at
+      // once where no form is needed, and UMP bounds the form load itself
+      // (it fails with a timeout error), so it cannot hang before showing.
+      await AdsConsent.loadAndShowConsentFormIfRequired();
+    } catch {
+      // Consent info or form unavailable (offline, blocked, no UMP message).
+      // Google's rule after an error: request ads only if canRequestAds says
+      // so, which the check below does.
     }
-  } catch {
-    // Consent info unavailable (offline, blocked, or no UMP message). Outside
-    // the EEA ads may still serve, so fall through and let the canRequestAds
-    // check decide.
-    consentErrored = true;
   }
   // Apple requires the ATT prompt BEFORE any data that could track the user
   // is collected, and App Review verifies it appears. The UMP flow above only
@@ -98,15 +100,47 @@ async function start(): Promise<boolean> {
     }
   }
   try {
-    const info = await withTimeout(AdsConsent.getConsentInfo(), 5000);
-    // Respect an explicit "no": if the consent flow completed and says ads
-    // cannot be requested, stay dark. Only fail open when the flow itself
-    // errored before producing an answer.
-    if (!info.canRequestAds && !consentErrored) return false;
+    // canRequestAds is false until consent was gathered where it is needed
+    // (this session or an earlier one) or UMP said none is needed. Stay dark
+    // otherwise; initAds forgets a dark run, so the next banner mount retries.
+    // A choice made in the form, "Do not consent" included, reaches the SDK
+    // on each ad request through the stored IAB TCF string. Dev skipped
+    // consent above, so UMP would say false there; test ads start anyway.
+    if (!__DEV__) {
+      const info = await withTimeout(AdsConsent.getConsentInfo(), 5000);
+      if (!info.canRequestAds) return false;
+    }
     await withTimeout(mobileAds().initialize(), 15000);
     return true;
   } catch {
     return false;
+  }
+}
+
+// Google requires an in-app way to change ad consent wherever UMP says one is
+// needed (EEA and UK). UMP knows that only after this session's consent info
+// update, which the ads flow runs before the first banner. Ad-free owners
+// never start that flow and are not asked (the store sheet skips them).
+export async function adPrivacyOptionsRequired(): Promise<boolean> {
+  if (!ADS_CONFIGURED) return false;
+  try {
+    const info = await withTimeout(AdsConsent.getConsentInfo(), 5000);
+    return (
+      info.privacyOptionsRequirementStatus ===
+      AdsConsentPrivacyOptionsRequirementStatus.REQUIRED
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Opens UMP's privacy options form. It presents from the root view
+// controller, so the caller must first close any sheet shown on top of it.
+export async function showAdPrivacyOptions(): Promise<void> {
+  try {
+    await AdsConsent.showPrivacyOptionsForm();
+  } catch {
+    // Form unavailable (offline); the entry point stays for another try.
   }
 }
 

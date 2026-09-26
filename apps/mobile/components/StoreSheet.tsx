@@ -4,6 +4,7 @@ import {
   Alert,
   Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { adPrivacyOptionsRequired, showAdPrivacyOptions } from "../lib/ads";
 import { useEntitlements } from "../lib/entitlements";
 import { useI18n } from "../lib/i18n";
 import {
@@ -24,11 +26,11 @@ import { THEME, THEMES } from "../theme";
 import TileDisplay from "./TileDisplay";
 
 // Page-sheet store: Todo Capi hero, remove ads, 3 mesas, 3 fichas, restore,
-// privacy link. Every product shows what it sells: real tiles in the skin,
-// the felt of the mesa, a struck-out ad tag. Owned states derive from ent so
-// a mid-sheet purchase updates rows live. Prices come from the store only;
-// until they arrive every buy button shows a neutral "see price" pill, never
-// a guessed amount.
+// privacy link, and the ad privacy options link where UMP requires one. Every
+// product shows what it sells: real tiles in the skin, the felt of the mesa,
+// a struck-out ad tag. Owned states derive from ent so a mid-sheet purchase
+// updates rows live. Prices come from the store only; until they arrive every
+// buy button shows a neutral "see price" pill, never a guessed amount.
 export default function StoreSheet({
   visible,
   onClose,
@@ -62,10 +64,49 @@ export default function StoreSheet({
     }
     if (alertedErrorRef.current === lastError) return;
     alertedErrorRef.current = lastError;
-    if (lastError === "purchaseFailed") Alert.alert(s.purchaseFailed);
-    else Alert.alert(s.purchaseFailed, s[lastError]);
+    // A deferred (Ask to Buy) purchase is not a failure: its note stands alone.
+    if (lastError === "purchaseFailed" || lastError === "purchasePending") {
+      Alert.alert(s[lastError]);
+    } else {
+      Alert.alert(s.purchaseFailed, s[lastError]);
+    }
     clearError();
   }, [lastError, clearError, s]);
+
+  // Google requires a way to change ad consent where UMP says one is needed.
+  // Checked each time the sheet opens, since the ads flow may have learned it
+  // after launch. Ad-free owners get no ads, so the consent SDK stays
+  // untouched for them and the link stays hidden.
+  const adFree = ent.adFree;
+  const [adPrivacyRequired, setAdPrivacyRequired] = useState(false);
+  useEffect(() => {
+    if (!visible || adFree) return;
+    let active = true;
+    adPrivacyOptionsRequired().then((required) => {
+      if (active) setAdPrivacyRequired(required);
+    });
+    return () => {
+      active = false;
+    };
+  }, [visible, adFree]);
+
+  // UMP presents its form from the root view controller, which cannot present
+  // while this page sheet is up, so on iOS the form opens once the sheet has
+  // closed (Modal onDismiss is iOS only).
+  const adPrivacyAfterCloseRef = useRef(false);
+  function openAdPrivacyOptions() {
+    if (Platform.OS !== "ios") {
+      showAdPrivacyOptions();
+      return;
+    }
+    adPrivacyAfterCloseRef.current = true;
+    onClose();
+  }
+  function handleDismiss() {
+    if (!adPrivacyAfterCloseRef.current) return;
+    adPrivacyAfterCloseRef.current = false;
+    showAdPrivacyOptions();
+  }
 
   // The launch warm-up can miss (offline, slow store). Try again each time the
   // sheet opens without prices; once a retry also comes back empty, say so.
@@ -97,6 +138,7 @@ export default function StoreSheet({
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={onClose}
+      onDismiss={handleDismiss}
     >
       {/* iOS page sheets sit below the status bar already (top inset 0);
           Android shows the modal full screen, so the header needs the inset. */}
@@ -308,6 +350,25 @@ export default function StoreSheet({
               {s.privacyPolicy}
             </Text>
           </Pressable>
+
+          {adPrivacyRequired && !adFree ? (
+            <Pressable
+              onPress={openAdPrivacyOptions}
+              accessibilityRole="button"
+              accessibilityLabel={s.adPrivacyOptions}
+              style={{ alignItems: "center", paddingVertical: 10 }}
+            >
+              <Text
+                style={{
+                  color: "#9ca3af",
+                  fontSize: 12,
+                  textDecorationLine: "underline",
+                }}
+              >
+                {s.adPrivacyOptions}
+              </Text>
+            </Pressable>
+          ) : null}
 
           {__DEV__ ? (
             <Pressable

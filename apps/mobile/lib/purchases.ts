@@ -4,9 +4,10 @@
 // Anota's review-hardened wrapper. No purchase server: ownership is read back
 // from the store.
 //
-// The purchase RESULT is delivered through the event listeners, not the return
-// value of requestPurchase. buyProduct fires the purchase and settles when a
-// listener reports success or failure. Every store call has a timeout so a
+// A successful purchase is delivered through the purchase listener, not the
+// return value of requestPurchase. A failure arrives as the error event on
+// Android and only as the requestPurchase rejection on iOS, so buyProduct
+// settles on whichever comes first. Every store call has a timeout so a
 // wedged connection can never freeze the app.
 import {
   endConnection,
@@ -35,10 +36,24 @@ let lastStoreError = "";
 // chased the generic message for two review cycles before learning this.
 // "store-unavailable": the connection could not be opened at all.
 // "failed": the store reported an error while a purchase was in flight.
+// "deferred": not a failure. Ask to Buy sent the request to a parent; the
+// item unlocks through the purchase listener once it is approved.
 export type PurchaseFailure =
   | "product-unavailable"
   | "store-unavailable"
-  | "failed";
+  | "failed"
+  | "deferred";
+
+// What the user should hear about a store error that ended an in-flight buy.
+// null: the user cancelled, which stays silent by design.
+export function buyErrorOutcome(error: unknown): PurchaseFailure | null {
+  const e = error as { code?: unknown; message?: unknown } | null;
+  const code = String(e?.code ?? "");
+  const message = String(e?.message ?? "");
+  if (code === "E_DEFERRED_PAYMENT") return "deferred";
+  if (/cancel/i.test(code) || /cancel/i.test(message)) return null;
+  return "failed";
+}
 
 // When a purchase is in flight, the listeners settle this resolver. Only the
 // product being bought settles it; ownership of anything else that arrives
@@ -120,8 +135,8 @@ export async function initIap(): Promise<boolean> {
       if (!pendingBuy) return;
       // Any error, including user cancellation, ends the in-flight buy.
       settleBuy(null, false);
-      const cancelled = /cancel/i.test(code) || /cancel/i.test(message);
-      if (!cancelled) reportFailure("failed");
+      const outcome = buyErrorOutcome(error);
+      if (outcome) reportFailure(outcome);
     });
     await ensureConnected();
     return true;
@@ -165,23 +180,40 @@ export async function fetchPrices(): Promise<Map<ProductId, string>> {
   return prices;
 }
 
+// Product ids a purchase history proves the account owns. A refunded purchase,
+// or one withdrawn from Family Sharing, carries a revocation date and does not
+// count; a later purchase of the same product still does.
+export function ownedFromPurchases(purchases: readonly unknown[]): ProductId[] {
+  const owned = new Set<ProductId>();
+  for (const p of purchases) {
+    if ((p as { revocationDateIos?: unknown } | null)?.revocationDateIos != null) {
+      continue;
+    }
+    const id = purchasedId(p);
+    if (id) owned.add(id);
+  }
+  return [...owned];
+}
+
 // Owned product ids as the store reports them. null means the store could not
 // be reached (offline, timeout, no connection); an empty array means it
 // answered and the account owns nothing.
 export async function restoreOwned(): Promise<ProductId[] | null> {
   try {
     await ensureConnected();
+    // iOS: the default (active items only) keeps an owned transaction only if
+    // its product is already in expo-iap's product cache, which starts empty
+    // at initConnection and fills only through getProducts. The launch restore
+    // runs before any price fetch, so on a fresh install it returned nothing
+    // and a paying user got ATT, ads and locked designs. The full history
+    // does not depend on that cache; ownedFromPurchases drops revoked items.
+    // Android ignores the flag.
     const purchases = await withTimeout(
-      getAvailablePurchases(),
+      getAvailablePurchases({ onlyIncludeActiveItems: false }),
       10000,
       "getAvailablePurchases"
     );
-    const owned = new Set<ProductId>();
-    for (const p of purchases ?? []) {
-      const id = purchasedId(p);
-      if (id) owned.add(id);
-    }
-    return [...owned];
+    return ownedFromPurchases(purchases ?? []);
   } catch (e) {
     console.warn("[iap] getAvailablePurchases failed", e);
     return null;
@@ -241,13 +273,24 @@ export async function buyProduct(id: ProductId): Promise<void> {
         else reject(new Error("purchase-not-completed"));
       },
     };
-    // Fire the purchase; the result arrives via the listeners in initIap.
+    // Fire the purchase; success arrives via the listeners in initIap.
     // 2.6.3 flat request: iOS reads sku, Android reads skus.
     Promise.resolve(
       requestPurchase({
         request: { sku: id, skus: [id] },
         type: "inapp",
       })
-    ).catch(() => settleBuy(id, false));
+    ).catch((e: unknown) => {
+      // On iOS a failed, cancelled or deferred (Ask to Buy) buy arrives only
+      // as this rejection: expo-iap sends no error event for it. On Android
+      // the error event usually lands first and has already settled the buy,
+      // so the check below keeps one failure from alerting twice.
+      if (pendingBuy?.sku !== id) return;
+      const err = e as { code?: unknown; message?: unknown } | null;
+      lastStoreError = `${String(err?.code ?? "")}: ${String(err?.message ?? "")}`;
+      settleBuy(id, false);
+      const outcome = buyErrorOutcome(e);
+      if (outcome) reportFailure(outcome);
+    });
   });
 }
