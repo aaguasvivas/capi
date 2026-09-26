@@ -4,9 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 // are per isolate and reset when it recycles: a brake against scripts and
 // stuck clients, not a hard quota. The game itself never comes close.
 const WINDOW_MS = 60_000;
-const LIMITS: Array<{ test: (path: string) => boolean; max: number }> = [
+// `bucket` names a budget shared by every game from one IP; without one the
+// path is its own budget.
+const LIMITS: Array<{ test: (path: string) => boolean; max: number; bucket?: string }> = [
   { test: (p) => p === "/api/games" || p === "/api/bug-reports", max: 12 },
-  { test: (p) => p.endsWith("/rematch") || p.endsWith("/join"), max: 20 },
+  { test: (p) => p.endsWith("/rematch") || p.endsWith("/join"), max: 20, bucket: "seat" },
+  // Quick chat taps get their own budget, so mashing emotes can never use up
+  // the one moves depend on.
+  { test: (p) => p.startsWith("/api/games/") && p.endsWith("/chat"), max: 60, bucket: "chat" },
+  { test: (p) => p.startsWith("/api/games/"), max: 90, bucket: "game" },
   { test: () => true, max: 90 },
 ];
 
@@ -30,7 +36,7 @@ export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const rule = LIMITS.find((r) => r.test(path))!;
-  if (limited(`${ip}:${rule.max}:${path.startsWith("/api/games/") ? "game" : path}`, rule.max)) {
+  if (limited(`${ip}:${rule.bucket ?? path}`, rule.max)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
   return NextResponse.next();

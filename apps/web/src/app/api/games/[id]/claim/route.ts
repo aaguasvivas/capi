@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { reportError } from "@/lib/report";
+import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
 import { claimCheck } from "@capi/engine";
 import type { GameState, Seat } from "@capi/engine";
 
@@ -24,9 +25,7 @@ export async function POST(
       .select("id, status, state_version, game_state")
       .eq("id", params.id)
       .single();
-    if (gameError || !game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
+    if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/claim");
 
     const { data: player } = await db
       .from("players")
@@ -51,16 +50,16 @@ export async function POST(
     }
 
     const newVersion = game.state_version + 1;
-    const { data: updated } = await db
+    const { data: updated, error: updateError } = await db
       .from("games")
       .update({ game_state: check.newState, state_version: newVersion, status: "finished" })
       .eq("id", params.id)
       .eq("state_version", game.state_version)
       .select("id")
       .maybeSingle();
-    if (!updated) {
-      // A move landed in between: the seat is back, nothing to claim now.
-      return NextResponse.json({ error: "State conflict - refetch", stale: true }, { status: 409 });
+    if (updateError || !updated) {
+      // Usually a move landed in between: the seat is back, nothing to claim.
+      return unwrittenUpdate(db, params.id, game.state_version, "POST /api/games/[id]/claim", updateError);
     }
 
     return NextResponse.json({

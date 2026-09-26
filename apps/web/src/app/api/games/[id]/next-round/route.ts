@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { startNewRound } from "@capi/engine";
 import type { GameState, Seat } from "@capi/engine";
 import { reportError } from "@/lib/report";
+import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
 
 export async function POST(
   req: NextRequest,
@@ -30,9 +31,7 @@ export async function POST(
       .eq("id", params.id)
       .single();
 
-    if (gameError || !game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
+    if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/next-round");
 
     // Only players in this game may advance the round
     const { data: player, error: playerError } = await db
@@ -88,10 +87,7 @@ export async function POST(
       .single();
 
     if (updateError || !updated) {
-      return NextResponse.json(
-        { error: "State conflict - refetch", stale: true },
-        { status: 409 }
-      );
+      return unwrittenUpdate(db, params.id, stateVersion, "POST /api/games/[id]/next-round", updateError);
     }
 
     return NextResponse.json({

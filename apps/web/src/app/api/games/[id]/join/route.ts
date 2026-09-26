@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Seat } from "@capi/engine";
-import { buildStartedState, maxPlayersFor, type GameRow } from "@/lib/gameStart";
+import { buildStartedState, maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
 import { cleanAvatarColor, cleanNickname } from "@/lib/validation";
 import { reportError } from "@/lib/report";
+import { gameLookupFailed } from "@/lib/gameDb";
 
 export async function POST(
   req: NextRequest,
@@ -26,9 +27,7 @@ export async function POST(
       .eq("id", params.id)
       .single();
 
-    if (gameError || !game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
+    if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/join");
 
     if (game.status !== "waiting") {
       return NextResponse.json({ error: "Game already started" }, { status: 409 });
@@ -50,36 +49,44 @@ export async function POST(
       return NextResponse.json({ error: "Game is full" }, { status: 409 });
     }
 
-    // Assign next seat deterministically: 1v1 → n,s; 2v2 → n,e,s,w
+    // Assign the next free seat: 1v1 → n,s; 2v2 → n,e,s,w. The list above
+    // can be stale when several people join at once, so a seat lost to the
+    // unique (game_id, seat) index moves on to the next free one; the table
+    // is full only when no seat is left.
     const seatOrder: Seat[] = is2v2 ? ["n", "e", "s", "w"] : ["n", "s"];
     const takenSeats = new Set(existingPlayers.map((p) => p.seat));
-    const nextSeat = seatOrder.find((s) => !takenSeats.has(s));
-    if (!nextSeat) {
-      return NextResponse.json({ error: "Game is full" }, { status: 409 });
-    }
-
-    const { data: newPlayer, error: playerError } = await db
-      .from("players")
-      .insert({
-        game_id: params.id,
-        seat: nextSeat,
-        nickname,
-        avatar_color: avatarColor,
-      })
-      .select()
-      .single();
-
-    if (playerError || !newPlayer) {
-      // Two people grabbing the last seat at once: the unique (game_id, seat)
-      // index rejects the loser, which is a full table, not a server fault.
-      if (playerError?.code === "23505") {
+    let newPlayer: PlayerRow | null = null;
+    let nextSeat: Seat | undefined;
+    while (!newPlayer) {
+      nextSeat = seatOrder.find((s) => !takenSeats.has(s));
+      if (!nextSeat) {
         return NextResponse.json({ error: "Game is full" }, { status: 409 });
       }
-      console.error("Failed to create joining player:", playerError);
-      return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
+      const { data: inserted, error: playerError } = await db
+        .from("players")
+        .insert({
+          game_id: params.id,
+          seat: nextSeat,
+          nickname,
+          avatar_color: avatarColor,
+        })
+        .select()
+        .single();
+      if (playerError?.code === "23505") {
+        takenSeats.add(nextSeat);
+        continue;
+      }
+      if (playerError || !inserted) {
+        reportError(playerError, "POST /api/games/[id]/join insert");
+        return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
+      }
+      newPlayer = inserted as PlayerRow;
     }
 
-    const allPlayers = [...existingPlayers, newPlayer];
+    // Count from a fresh read: with concurrent joins every request's first
+    // list is short, and the one that fills the table must still start it.
+    const { data: seated } = await db.from("players").select("*").eq("game_id", params.id);
+    const allPlayers = (seated ?? [...existingPlayers, newPlayer]) as PlayerRow[];
 
     // Start the game only when all seats are filled
     if (allPlayers.length < maxPlayers) {
@@ -106,7 +113,7 @@ export async function POST(
       .maybeSingle();
 
     if (updateError) {
-      console.error("Failed to start game:", updateError);
+      reportError(updateError, "POST /api/games/[id]/join start");
       return NextResponse.json({ error: "Failed to start game" }, { status: 500 });
     }
     // A concurrent join already dealt the round; this seat is still valid and

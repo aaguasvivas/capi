@@ -57,7 +57,7 @@ export async function POST(
     });
 
     if (insertError) {
-      console.error("chat insert error:", insertError);
+      reportError(insertError, "POST /api/games/[id]/chat insert");
       return NextResponse.json(
         { error: "Failed to save chat" },
         { status: 500 }

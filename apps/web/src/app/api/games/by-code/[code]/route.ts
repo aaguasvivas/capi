@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { reportError } from "@/lib/report";
+import { gameLookupFailed } from "@/lib/gameDb";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,7 @@ export async function GET(
       .eq("invite_code", params.code.toUpperCase())
       .single();
 
-    if (error || !data) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
+    if (error || !data) return gameLookupFailed(error, "GET /api/games/by-code/[code]");
 
     return NextResponse.json({ gameId: data.id });
   } catch (err) {

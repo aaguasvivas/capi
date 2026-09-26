@@ -15,6 +15,10 @@ export async function POST(req: NextRequest) {
     if (targetScore !== 100 && targetScore !== 200) {
       return NextResponse.json({ error: "targetScore must be 100 or 200" }, { status: 400 });
     }
+    // Every current client names its mode: the apps and the web form send
+    // "live", the iMessage extension sends "turn_based" (no claim window).
+    // The default stays "turn_based", the column default, so an older binary
+    // that sends no mode keeps the behavior it shipped with.
     const mode = isMode(body.mode) ? body.mode : "turn_based";
     const theme = isTheme(body.theme) ? body.theme : "barberia";
     const avatarColor = cleanAvatarColor(body.avatarColor, "#6366f1");
@@ -36,7 +40,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (gameError || !game) {
-      console.error("Failed to create game:", gameError);
+      reportError(gameError, "POST /api/games insert game");
       return NextResponse.json({ error: "Failed to create game" }, { status: 500 });
     }
 
@@ -53,7 +57,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (playerError || !player) {
-      console.error("Failed to create player:", playerError);
+      reportError(playerError, "POST /api/games insert player");
       return NextResponse.json({ error: "Failed to create player" }, { status: 500 });
     }
 

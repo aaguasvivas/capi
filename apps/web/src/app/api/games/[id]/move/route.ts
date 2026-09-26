@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { applyMove } from "@capi/engine";
 import type { GameState, Seat, MoveIntent } from "@capi/engine";
 import { reportError } from "@/lib/report";
+import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
 
 export async function POST(
   req: NextRequest,
@@ -30,20 +31,19 @@ export async function POST(
       .eq("id", params.id)
       .single();
 
-    if (gameError || !game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
-    }
+    if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/move");
 
-    if (game.status !== "playing") {
-      return NextResponse.json({ error: "Game is not in play" }, { status: 409 });
-    }
-
-    // Verify the client's state_version matches; if not, they are stale
+    // Version before status: a client that missed a round end or a claim is
+    // stale, and only the stale answer makes it refetch instead of retrying.
     if (game.state_version !== stateVersion) {
       return NextResponse.json(
         { error: "State is stale - refetch", stale: true },
         { status: 409 }
       );
+    }
+
+    if (game.status !== "playing") {
+      return NextResponse.json({ error: "Game is not in play" }, { status: 409 });
     }
 
     // Verify the player exists and owns this seat
@@ -93,11 +93,7 @@ export async function POST(
       .single();
 
     if (updateError || !updated) {
-      // Another request beat us - the client should refetch
-      return NextResponse.json(
-        { error: "State conflict - refetch", stale: true },
-        { status: 409 }
-      );
+      return unwrittenUpdate(db, params.id, stateVersion, "POST /api/games/[id]/move", updateError);
     }
 
     // Record the move for audit
