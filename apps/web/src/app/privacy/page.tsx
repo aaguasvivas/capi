@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacidad / Privacy",
   description:
-    "Política de privacidad de Capi: sin cuentas, sin anuncios, sin rastreo. Capi privacy policy: no accounts, no ads, no tracking.",
+    "Política de privacidad de Capi: sin cuentas, anuncios solo en la app y siempre bajo tu control. Capi privacy policy: no accounts, ads only in the app, and always under your control.",
 };
 
 const GOLD = "#b8860b";
@@ -79,8 +79,8 @@ export default function PrivacyPage() {
               Política de privacidad
             </h2>
             <p className="text-xs font-medium text-gray-400">
-              Vigente desde el 24 de julio de 2026 · Aplica a playcapi.com y a
-              la app de Capi para iOS y Android
+              Vigente desde el 26 de septiembre de 2026 · Aplica a playcapi.com
+              y a la app de Capi para iOS y Android
             </p>
             <p className="text-sm leading-relaxed text-gray-600">
               Capi es un juego de dominó dominicano en línea. Esta página
@@ -111,28 +111,112 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="Reportes de errores">
+          <Section title="Anuncios en la app">
             <p>
-              Los reportes son opcionales. Si usas el botón de reportar un
-              problema dentro del juego, el reporte incluye el estado actual de
-              la partida y datos básicos del dispositivo (sistema operativo,
-              tamaño de pantalla e idioma) para poder corregir el problema.
+              Desde la versión 1.1, la app muestra un anuncio pequeño en la
+              pantalla de inicio y en la sala de espera, nunca durante la
+              partida. Los anuncios los sirve Google AdMob. Para mostrar y
+              medir anuncios, el SDK de Google puede usar el identificador de
+              publicidad del dispositivo, datos de interacción con los
+              anuncios, datos de diagnóstico y rendimiento, y tu dirección IP,
+              con la que estima tu ubicación aproximada (ciudad o región). La
+              app no pide permiso de ubicación, así que Google no recibe tu
+              ubicación exacta. En las regiones que lo requieren, Google te
+              pide tu consentimiento antes. El identificador de publicidad solo
+              se usa si permites el rastreo en el aviso de iOS; si no lo
+              permites, Google no lo recibe. La web playcapi.com y el juego
+              dentro de iMessage no muestran anuncios. Si compras &quot;Quitar
+              anuncios&quot; o &quot;Todo Capi&quot;, la app deja de cargar el
+              SDK de anuncios. La política de Google está en
+              policies.google.com/privacy.
+            </p>
+          </Section>
+
+          <Section title="Compras">
+            <p>
+              Las compras dentro de la app (diseños de mesa y fichas, Quitar
+              anuncios, Todo Capi) las procesa Apple. Capi no recibe tu nombre,
+              tu correo ni tus datos de pago; solo sabe qué artículos están
+              desbloqueados en tu dispositivo.
+            </p>
+          </Section>
+
+          <Section title="Reportar un problema">
+            <p>
+              Los reportes son opcionales. Si usas el botón &quot;Reportar un
+              problema&quot; dentro del juego, el reporte incluye el mensaje
+              que escribes, el estado de la partida (con los apodos y las
+              fichas de la mesa), los identificadores de la partida y de tu
+              asiento, y datos básicos del dispositivo (navegador o sistema,
+              versión de la app, dirección de la página, tamaño de pantalla e
+              idioma). El servidor guarda el reporte y Resend se lo envía por
+              correo al desarrollador. Los otros jugadores nunca lo ven.
+            </p>
+          </Section>
+
+          <Section title="Reportes automáticos de errores">
+            <p>
+              Cuando algo falla, la web playcapi.com (y con ella el juego
+              dentro de iMessage) envía a Sentry un reporte técnico del error:
+              el mensaje de error, el navegador y el sistema, y la página donde
+              pasó. La app puede enviar reportes parecidos (tipo de
+              dispositivo, versión del sistema y de la app, y el error técnico)
+              cuando se cierra por un fallo. Capi no añade a estos reportes tu
+              apodo ni el contenido de tus partidas, y Sentry no graba tu
+              pantalla.
             </p>
           </Section>
 
           <Section title="Infraestructura">
             <p>
               Capi funciona sobre Supabase (base de datos y tiempo real) y
-              Vercel (alojamiento). Los registros estándar del servidor pueden
-              incluir direcciones IP por motivos de seguridad y operación.
+              Vercel (alojamiento). Sentry recibe los reportes automáticos de
+              errores y Resend entrega por correo los reportes de problemas.
+              Desde la versión 1.1, Google AdMob sirve los anuncios de la app.
+              Los registros estándar del servidor pueden incluir direcciones IP
+              por motivos de seguridad y operación. Capi solo les da a estos
+              proveedores los datos que necesitan para prestar su servicio, y
+              cada uno los protege al menos como describe esta política.
+            </p>
+          </Section>
+
+          <Section title="Tus opciones">
+            <p>Puedes cambiar de opinión cuando quieras:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>
+                Rastreo: en iOS, ve a Ajustes &gt; Privacidad y seguridad &gt;
+                Rastreo y apaga Capi. Desde ese momento Google no recibe el
+                identificador de publicidad.
+              </li>
+              <li>
+                Consentimiento de anuncios: en las regiones donde Google pide
+                consentimiento, abre la tienda de la app y toca &quot;Opciones
+                de privacidad de anuncios&quot; para cambiar tu elección.
+              </li>
+              <li>
+                Sin anuncios: &quot;Quitar anuncios&quot; o &quot;Todo
+                Capi&quot; apagan el SDK de anuncios.
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="Borrar tus datos">
+            <p>
+              No hay cuentas, así que tus datos se identifican por el código de
+              la partida. Para pedir que borremos una partida, tu apodo en ella
+              o un reporte que enviaste, escribe a <Email /> con el código de
+              la partida y tu apodo. Borramos esos datos y te lo confirmamos
+              por correo.
             </p>
           </Section>
 
           <Section title="Lo que no hacemos">
             <p>
-              No hay anuncios, ni SDKs de analítica, ni rastreo. No vendemos ni
-              compartimos tus datos. Los datos de las partidas existen solo
-              para operar el juego y pueden borrarse con el tiempo.
+              No vendemos tus datos. No hay chat de texto libre entre
+              jugadores. Fuera de los anuncios de la app descritos arriba, no
+              hay rastreo ni SDKs de analítica. Los datos de las partidas
+              existen solo para operar el juego y pueden borrarse con el
+              tiempo.
             </p>
           </Section>
 
@@ -165,8 +249,8 @@ export default function PrivacyPage() {
               Privacy Policy
             </h2>
             <p className="text-xs font-medium text-gray-400">
-              Effective July 24, 2026 · Applies to playcapi.com and the Capi
-              iOS and Android app
+              Effective September 26, 2026 · Applies to playcapi.com and the
+              Capi iOS and Android app
             </p>
             <p className="text-sm leading-relaxed text-gray-600">
               Capi is an online Dominican dominoes game. This page explains
@@ -197,27 +281,106 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="Bug reports">
+          <Section title="Ads in the app">
             <p>
-              Bug reports are optional. If you use the in-app bug report
-              button, the report includes the current game state and basic
-              device info (OS, screen size, language) so problems can be fixed.
+              Since version 1.1, the app shows one small ad on the home screen
+              and in the waiting room, never during a game. Ads are served by
+              Google AdMob. To show and measure ads, Google&apos;s SDK may use
+              the device advertising identifier, ad interaction data,
+              diagnostics and performance data, and your IP address, which it
+              uses to estimate your approximate location (city or region). The
+              app never asks for location permission, so Google does not get
+              your exact location. In regions that require it, Google asks for
+              your consent first. The advertising identifier is used only if
+              you allow tracking in the iOS prompt; if you do not, Google does
+              not receive it. The playcapi.com website and the game inside
+              iMessage show no ads. If you buy &quot;Remove Ads&quot; or
+              &quot;Todo Capi&quot;, the app stops loading the ads SDK.
+              Google&apos;s policy is at policies.google.com/privacy.
+            </p>
+          </Section>
+
+          <Section title="Purchases">
+            <p>
+              In-app purchases (table and tile designs, Remove Ads, Todo Capi)
+              are processed by Apple. Capi never receives your name, email, or
+              payment details; it only knows which items are unlocked on your
+              device.
+            </p>
+          </Section>
+
+          <Section title="Report a problem">
+            <p>
+              Reports are optional. If you use the &quot;Report a
+              problem&quot; button inside the game, the report includes the
+              message you type, the game state (with the nicknames and tiles at
+              the table), the game and seat identifiers, and basic device info
+              (browser or operating system, app version, page address, screen
+              size, and language). The server stores the report and Resend
+              emails it to the developer. Other players never see it.
+            </p>
+          </Section>
+
+          <Section title="Error reports">
+            <p>
+              When something breaks, the playcapi.com website (and with it the
+              game inside iMessage) sends Sentry a technical report of the
+              error: the error message, the browser and operating system, and
+              the page where it happened. The app may send similar reports
+              (device type, OS and app version, and the technical error) when
+              it crashes. Capi does not add your nickname or your games to
+              these reports, and Sentry does not record your screen.
             </p>
           </Section>
 
           <Section title="Infrastructure">
             <p>
               Capi runs on Supabase (database and realtime) and Vercel
-              (hosting). Standard server logs may include IP addresses for
-              security and operations.
+              (hosting). Sentry receives automatic error reports, and Resend
+              delivers problem reports by email. Since version 1.1, Google
+              AdMob serves the ads in the app. Standard server logs may include
+              IP addresses for security and operations. Capi gives these
+              providers only the data they need to provide their service, and
+              each of them protects it at least as well as this policy
+              describes.
+            </p>
+          </Section>
+
+          <Section title="Your choices">
+            <p>You can change your mind at any time:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>
+                Tracking: on iOS, go to Settings &gt; Privacy &amp; Security
+                &gt; Tracking and turn Capi off. From then on Google does not
+                receive the advertising identifier.
+              </li>
+              <li>
+                Ad consent: in regions where Google asks for consent, open the
+                store in the app and tap &quot;Ad privacy options&quot; to
+                change your choice.
+              </li>
+              <li>
+                No ads: &quot;Remove Ads&quot; or &quot;Todo Capi&quot; turns
+                the ads SDK off.
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="Deleting your data">
+            <p>
+              There are no accounts, so your data is identified by the game
+              code. To ask us to delete a game, your nickname in it, or a
+              report you sent, email <Email /> with the game code and your
+              nickname. We delete that data and confirm by email.
             </p>
           </Section>
 
           <Section title="What we don't do">
             <p>
-              No ads, no analytics SDKs, no tracking. We never sell or share
-              your data. Game data exists only to operate the game and may be
-              deleted over time.
+              We never sell your data. There is no free-text chat between
+              players. Apart from the in-app ads described above, there is no
+              tracking and there are no analytics SDKs. Game data exists only
+              to operate the game and may be deleted over time.
             </p>
           </Section>
 

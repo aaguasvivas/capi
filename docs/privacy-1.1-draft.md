@@ -1,4 +1,4 @@
-# Privacy policy update for 1.1 (draft, needs Adelson's approval)
+# Privacy policy update for 1.1 (approved 2026-09-26, live)
 
 The live page at playcapi.com/privacy (apps/web/src/app/privacy/page.tsx) says
 "no ads, no analytics SDKs, no tracking" and names only Supabase and Vercel.

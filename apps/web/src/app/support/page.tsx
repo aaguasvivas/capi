@@ -64,7 +64,7 @@ export default function SupportPage() {
             </h2>
             <p className="text-sm leading-relaxed text-gray-600">
               Capi es un juego de dominó dominicano en línea, 1v1 o 2v2, sin
-              cuenta y gratis.
+              cuenta y gratis, con compras opcionales de diseños en la app.
             </p>
           </div>
           <div className="space-y-2 text-sm leading-relaxed text-gray-600">
@@ -73,12 +73,17 @@ export default function SupportPage() {
             </h3>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>
-                Lo más rápido es el botón de reportar un problema dentro del
-                juego. Envía el estado de la partida para poder reproducirlo.
+                Lo más rápido es el botón &quot;Reportar un problema&quot;
+                dentro del juego. Le llega al equipo de Capi, no a tu oponente,
+                con el estado de la partida para poder reproducir el problema.
               </li>
               <li>
                 También puedes escribir a <Email />. Si tienes un código de
                 partida, inclúyelo en el mensaje.
+              </li>
+              <li>
+                Para borrar tus datos de una partida, escribe a <Email /> con
+                el código de la partida.
               </li>
             </ul>
           </div>
@@ -95,20 +100,26 @@ export default function SupportPage() {
               Support
             </h2>
             <p className="text-sm leading-relaxed text-gray-600">
-              Capi is an online Dominican dominoes game, 1v1 or 2v2, free and
-              with no account.
+              Capi is an online Dominican dominoes game, 1v1 or 2v2, free, with
+              no account, and with optional design purchases in the app.
             </p>
           </div>
           <div className="space-y-2 text-sm leading-relaxed text-gray-600">
             <h3 className="text-sm font-bold text-gray-900">Need help?</h3>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>
-                The fastest way is the bug report button inside the game. It
-                sends the game state along so the problem can be reproduced.
+                The fastest way is the &quot;Report a problem&quot; button
+                inside the game. It goes to the Capi team, not to your
+                opponent, with the game state attached so the problem can be
+                reproduced.
               </li>
               <li>
                 You can also email <Email />. If you have a game code, include
                 it in your message.
+              </li>
+              <li>
+                To delete your data from a game, email <Email /> with the game
+                code.
               </li>
             </ul>
           </div>
