@@ -10,7 +10,12 @@ target is now the `.messages` subtype and the set includes the 29x29 settings
 icons. Build 19 carries that fix plus the claim flow (a silent seat can be
 claimed after 2 minutes), the how-to-play page, store previews, typed callout
 payloads, the "Te toca" quick phrase, the app version in bug reports, and
-Sentry wiring (off until a DSN exists). Test and submit build 19.
+Sentry wiring (the app stays off until EAS has a DSN).
+
+State on 2026-09-26: the polish pass (docs/polish-pass-1.1-2026-09-26.md)
+changes app code and the bundled rules text after build 19. Build 19 is
+superseded: cut a new production build once the pass lands. "The polish-pass
+build" below means that build; test and submit it, not 19.
 
 ## A. Code gates (Me)
 
@@ -46,9 +51,19 @@ Sentry wiring (off until a DSN exists). Test and submit build 19.
          redeploy (Deployments > Redeploy latest). Also add it to
          apps/web/.env.local for local runs. Verify: POST
          https://playcapi.com/api/games with {"nickname":"Probe"} still works.
+         This probe passes with or without the key, so it only shows that the
+         redeploy is healthy; step 3 is the real check.
       2. Only then run supabase/migrations/005_lock_direct_writes.sql in the SQL
          Editor. From that moment the API is the only writer; devtools cannot
          rewrite game state.
+      3. Right after 005, verify against playcapi.com: create a game in one
+         browser, join it from a second browser or phone, and play one move.
+         All three must succeed, and the move must stay on the board after a
+         reload. If any step fails (or the move snaps back), the API is not
+         using the service key: re-create the policies 005 dropped (copy their
+         create policy / grant lines from 001_initial.sql, 002_chat_emotes.sql
+         and 003_bug_reports.sql) in the SQL Editor, fix the Vercel variable,
+         redeploy, and repeat steps 2 and 3.
 - [ ] B6. Any time: run supabase/migrations/004_realtime_publication.sql in the
       SQL Editor (idempotent; records the realtime setup in the schema).
 - [ ] B7. Error reporting, any time: create a Sentry account with one org and
@@ -56,8 +71,15 @@ Sentry wiring (off until a DSN exists). Test and submit build 19.
       SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN, then redeploy.
       EAS (Production): EXPO_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT and
       the secret SENTRY_AUTH_TOKEN; then delete SENTRY_DISABLE_AUTO_UPLOAD from
-      eas.json's production profile and tell me, I kick the next build. Until
-      then the apps run with reporting off; nothing breaks.
+      eas.json's production profile and tell me, I kick the next build. The
+      web half is already live: the production bundle on playcapi.com carries a
+      Sentry DSN, so the website and the iMessage game view report errors now
+      (confirm the Vercel source-map variables). The app runs with reporting
+      off until the EAS half is done; nothing breaks.
+- [ ] B8. Before D3: approve docs/privacy-1.1-draft.md. I apply it to
+      /privacy and /support, deploy, and check both pages live. The live
+      privacy page still says no ads and no tracking, which contradicts the
+      ATT prompt and D3.
 
 ## C. Production build (Me)
 
@@ -71,26 +93,52 @@ Sentry wiring (off until a DSN exists). Test and submit build 19.
       email must not come back for it; build 18 is a cancelled build.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
+- [ ] The polish-pass build: built after the 2026-09-26 polish pass lands,
+      simulator pass on iPhone SE and a 6.1-inch iPhone, submitted to App Store
+      Connect. Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
+- [ ] D0. Open the app in App Store Connect. If the sidebar under iOS App has
+      no 1.1.0 entry, create it: the (+) next to iOS App, version 1.1.0. The
+      version must match app.json (1.1.0) or the build will not attach.
 - [ ] D1. Create the 8 IAPs per docs/m5-asc-iap-setup.md (if not already done).
 - [ ] D2. On the 1.1 version page: attach ALL 8 IAPs in the In-App Purchases
       section, upload the matching screenshot from store-assets/iap on each.
 - [ ] D3. App Privacy: keep the existing Name / Gameplay Content / Customer
       Support entries and ADD: Identifiers > Device ID, used for Advertising,
       Tracking = YES; Usage Data > Product Interaction + Advertising Data;
-      Diagnostics > Crash Data + Performance Data (all from the AdMob SDK,
-      matching Anota's accepted declarations).
+      Location > Coarse Location, purpose Third-Party Advertising (AdMob
+      estimates a general location from the IP address); Diagnostics > Crash
+      Data + Performance Data + Other Diagnostic Data (all from the AdMob
+      SDK). Anota's accepted label had no Coarse Location or Other Diagnostic
+      Data; the shipped SDK's own privacy manifest (Google Mobile Ads 12.2.0)
+      declares both. That manifest marks Device ID, Product Interaction,
+      Advertising Data and Coarse Location as linked to the user and the
+      diagnostics as not linked; only Device ID is tracking. The linked
+      answers are your call.
+      App Privacy edits stay a draft until you press Publish at the top of
+      the App Privacy page; without it the store keeps the old label.
 - [ ] D4. Age rating questionnaire: the ads question flips to YES; everything
       else unchanged (Messaging and Chat stays YES).
 - [ ] D5. What's New: paste EN and ES from docs/store-listing.md "Version 1.1".
+      Also paste the App Store description in both languages: it now names
+      the iMessage extension (guideline 4.4) and drops "nobody can cheat".
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
 - [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select build 19 for the 1.1 version (16 and 17 have no iMessage icon).
+- [ ] D8. Select the polish-pass build for the 1.1 version (16 and 17 have no
+      iMessage icon; 19 predates the polish pass).
+- [ ] D9. Version Release: choose "Manually release this version" (you press
+      release after approval) or "Automatically release this version" (it
+      goes live as soon as review approves it).
 
-## E. TestFlight matrix (You + me, two phones, build 19)
+## E. TestFlight matrix (You + me, two phones, the polish-pass build)
+
+Sign the two phones into two different Apple IDs (TestFlight and sandbox).
+Messages needs two iMessage accounts to exchange bubbles, and purchases
+follow the Apple ID: with one ID, phone B's restore would also return phone
+A's Todo Capi and the restore test proves nothing.
 
 - [ ] iMessage: create from Messages on phone A, join from phone B's bubble,
       play with live-watch both directions, "Open in Capi" seats you in the app
@@ -132,6 +180,6 @@ Sentry wiring (off until a DSN exists). Test and submit build 19.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 17 selected, then
-      submit. Review typically takes 1 to 3 days. If rejected, paste the
-      message to me and I turn the fix around same day.
+- [ ] Add for Review with the 8 IAPs attached and the polish-pass build
+      selected, then submit. Review typically takes 1 to 3 days. If rejected,
+      paste the message to me and I turn the fix around same day.

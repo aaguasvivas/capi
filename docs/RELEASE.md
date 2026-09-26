@@ -15,13 +15,13 @@ The app and the listing kit are ready. This is the line-by-line path to submit. 
 - Support URL: https://playcapi.com/support
 - Marketing URL: https://playcapi.com
 - Listing copy (EN + ES): docs/store-listing.md
-- Screenshots (6.7", 1290x2796): OPEN ITEM. Generate from the iOS simulator with staged games (a pretty board mid-round, a capicúa callout, the 2v2 table, the create screen in ES).
+- Screenshots (6.7", 1290x2796): the 1.0 set carries over to 1.1, so new shots are OPTIONAL for 1.1. A refresh could show the iMessage extension or a premium table; generate from the iOS simulator with staged games (a pretty board mid-round, a capicúa callout, the 2v2 table, the create screen in ES).
 - Bundle id / package: dev.capi.app
 - Privacy answers (App Store App Privacy and Play Data Safety): docs/m5-submission-checklist.md section D3 is the single source of truth. Capi has a server and, since 1.1, the AdMob SDK, so "no data" is never the answer (see PLAYBOOK.md, Privacy truth).
 - Age rating: 4+ / Everyone. Category: Games > Board. Device: iPhone only.
 - Encryption: `ITSAppUsesNonExemptEncryption: false` is already in app.json, so no export-compliance questions per build.
 - Supabase env values ship via EAS env vars per profile (already pushed; they live in the gitignored apps/mobile/.env locally). `EXPO_PUBLIC_API_BASE` is not needed; the app falls back to https://playcapi.com.
-- Error reporting (Sentry) is wired on both apps and stays off until a DSN exists. To turn it on: create one Sentry organization with two projects (Next.js and React Native), then set on Vercel `NEXT_PUBLIC_SENTRY_DSN` and `SENTRY_DSN` (plus `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps) and redeploy; on EAS set `EXPO_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, and the secret `SENTRY_AUTH_TOKEN`, and delete `SENTRY_DISABLE_AUTO_UPLOAD` from the production profile in eas.json so builds upload source maps and dSYMs. Dev builds never send.
+- Error reporting (Sentry) is wired on both apps. The website already reports: the production bundle on playcapi.com carries a DSN, so the iMessage game view reports too. The app stays off until EAS has a DSN. Full setup: create one Sentry organization with two projects (Next.js and React Native), then set on Vercel `NEXT_PUBLIC_SENTRY_DSN` and `SENTRY_DSN` (plus `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps) and redeploy; on EAS set `EXPO_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, and the secret `SENTRY_AUTH_TOKEN`, and delete `SENTRY_DISABLE_AUTO_UPLOAD` from the production profile in eas.json so builds upload source maps and dSYMs. Dev builds never send.
 - The CapiMessages target is a `.messages` app extension (set by plugins/withMessagesExtension.js). That subtype is what makes Xcode compile the "iMessage App Icon" set into the binary; the generic extension type shipped builds 16 and 17 without icons (ITMS-90649). Regenerate the set with `node scripts/gen-imessage-icons.mjs` after changing the mark.
 
 ## iOS
@@ -40,7 +40,7 @@ The extension's MARKETING_VERSION and CURRENT_PROJECT_VERSION come from the reso
 Then in App Store Connect (appstoreconnect.apple.com):
 1. Open the app record "Capi: Dominican Dominoes" (bundle id dev.capi.app). Its `ascAppId` is already in apps/mobile/eas.json, so `eas submit` runs without prompts.
 2. Paste name, subtitle, keywords, promotional text, and description from docs/store-listing.md. Add the Spanish (es-MX) localization with the ES copy.
-3. Upload the 6.7" screenshots.
+3. Screenshots: 1.0 uploaded the 6.7" set. For 1.1, uploading new ones is optional.
 4. App Privacy: answer exactly per docs/m5-submission-checklist.md section D3, the single source of truth. Paste the privacy URL.
 5. Set age rating 4+, category Games > Board, availability iPhone only.
 6. In App Review notes, paste the review note from docs/store-listing.md (native multiplayer game, not a wrapper, predefined chat only) and add: reviewers can create a game with any nickname, no account or demo credentials exist. Suggest testing with two devices or one device + a browser at playcapi.com using the invite code.
@@ -64,7 +64,7 @@ In Play Console (play.google.com/console):
 7. Future updates can use `eas submit --platform android` (after a one-time Google service-account key setup).
 
 ## Open items (what remains after these docs)
-1. **App Store screenshots** - 6.7 inch, 1290x2796, from the simulator with staged games. Can be produced now.
+1. **App Store screenshots (optional for 1.1)** - the 1.0 set stays on the listing. New 6.7 inch shots (1290x2796, from the simulator with staged games) are only needed to show the 1.1 features.
 2. **TestFlight install pass on a real phone** - only you can do this: install, play a full game vs the browser, check sounds/haptics/safe areas.
 3. **Google Play account confirmation** - only you can do this: confirm account standing, and whether the 12-tester/14-day closed test applies.
 

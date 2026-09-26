@@ -1,8 +1,8 @@
 import type { Lang } from "./strings";
 
 // The "how to play" page, in both languages. Every line states a rule the
-// engine actually enforces (packages/engine/src/reducer.ts, validate.ts and
-// scoring.ts); when the code changes, this copy changes with it.
+// engine actually enforces (packages/engine/src/reducer.ts, validate.ts,
+// scoring.ts and forfeit.ts); when the code changes, this copy changes with it.
 
 export interface RulesSection {
   title: string;
@@ -66,7 +66,9 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "Capicúa",
         items: [
-          "Si tu última ficha pega por las dos puntas de la mesa, es capicúa: +25 puntos extra.",
+          "Si las dos puntas de la mesa tienen números distintos y tu última ficha lleva esos dos números, es capicúa: +25 puntos extra.",
+          "Ejemplo: las puntas son 3 y 5, y te quedas sin fichas con el 3-5.",
+          "Si las dos puntas tienen el mismo número, no hay capicúa, aunque tu ficha pegue por los dos lados.",
           "Un doble nunca es capicúa.",
         ],
       },
@@ -76,6 +78,8 @@ export const RULES: Record<Lang, RulesContent> = {
           "Si nadie puede jugar, la mesa se tranca: trancao.",
           "En 1v1, la mesa se tranca cuando los dos jugadores pasan seguidos, con el pozo vacío.",
           "En 2v2, la mesa se tranca cuando los cuatro jugadores pasan seguidos.",
+          "En 2v2, antes del tranque siempre hay pase corrido: al tercer pase, el lado que jugó último gana +25. Si ese jugador también pasa, el cuarto pase tranca la mesa.",
+          "Ese +25 se queda, aunque ese lado pierda el tranque.",
           "Gana el lado con menos pintas en la mano y se lleva todas las pintas que quedan en la mesa.",
           "Si empatan, gana el lado que salió en esa ronda.",
         ],
@@ -92,10 +96,12 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "La partida",
         items: [
-          "La partida es a 100 puntos. Al crear la mesa puedes ponerla a 200.",
+          "La partida es a 100 puntos. Si creas la mesa en la app o en playcapi.com, puedes ponerla a 200.",
           "Los puntos se acumulan de ronda en ronda.",
           "Gana el lado que llega a la meta cuando termina una ronda.",
           "Un +25 a mitad de ronda no cierra la partida: la ronda se juega hasta el final.",
+          "Si el jugador de turno lleva 2 minutos sin jugar, el otro lado puede reclamar la partida y la gana.",
+          "Las partidas que empiezan en iMessage van por turnos y no se pueden reclamar.",
         ],
       },
       {
@@ -156,7 +162,9 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "Capicúa",
         items: [
-          "If your last tile fits both open ends of the table, that is a capicúa: +25 extra points.",
+          "If the two open ends show different numbers and your last tile carries both of them, that is a capicúa: +25 extra points.",
+          "Example: the ends are 3 and 5, and you go out with the 3-5.",
+          "If both ends show the same number, there is no capicúa, even when your tile fits both ends.",
           "A double never counts as capicúa.",
         ],
       },
@@ -166,6 +174,8 @@ export const RULES: Record<Lang, RulesContent> = {
           "When nobody can play, the table is locked: trancao.",
           "In 1v1, the table locks when both players pass in a row, with the boneyard empty.",
           "In 2v2, the table locks when all four players pass in a row.",
+          "In 2v2, a pase corrido always comes first: on the third pass, the side that played last gets +25. If that player passes too, the fourth pass locks the table.",
+          "That +25 stays, even if that side loses the tranque.",
           "The side with fewer pips in hand wins and takes every pip left on the table.",
           "A tie goes to the side that opened the round.",
         ],
@@ -182,10 +192,12 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "The game",
         items: [
-          "The game is played to 100 points. You can set it to 200 when you create the table.",
+          "The game is played to 100 points. When you create the table in the app or at playcapi.com, you can set it to 200.",
           "Points carry over from round to round.",
           "The side that reaches the target when a round ends wins the game.",
           "A mid-round +25 never ends the game on its own. The round is played out first.",
+          "If the player on turn goes 2 minutes without a move, the other side can claim the game and wins it.",
+          "Games started in iMessage go turn by turn and cannot be claimed.",
         ],
       },
       {

@@ -11,12 +11,12 @@
 
 **Capi is app #2** in the app factory. **Anota (app #1) is its sibling, not its competitor:** Anota keeps score when your people are around a physical table; Capi *is* the table when they are not. A cross-promo between the two is natural (Anota → "playing remote? get Capi"; Capi → "playing in person? get Anota"), but v1 store copy stays clean; wire cross-promo later in-app or on the websites.
 
-The big architectural difference from Anota: Anota is local-first with no backend; **Capi is server-authoritative**. Every move is validated on the server before it is applied, so no client can cheat. Clients render state; the engine decides.
+The big architectural difference from Anota: Anota is local-first with no backend; **Capi is server-authoritative**. Every move is checked against the rules on the server before it is applied. Clients render state; the engine decides.
 
 ### Principles
 
 1. **Quality is non-negotiable.** Tasteful UI, real haptics, no jank, no broken layouts on any device.
-2. **The rules must be the real rules.** Capicúa bonus, paso, tranque decided by pip count, 25 points for making every opponent pass, all table pips to the round winner. A Dominican player must nod, not squint.
+2. **The rules must be the real rules.** Capicúa bonus, paso, tranque decided by pip count, 25 points in parejas when the other three pass after your tile, all table pips to the round winner. A Dominican player must nod, not squint.
 3. **Server-authoritative, always.** Never trust a client with game state transitions. The engine lives in `packages/engine` and runs on the server.
 4. **No accounts.** Nickname + avatar color + a 6-letter invite code. Friction kills a game night.
 5. **Bilingual ES/EN with an authentic Dominican voice.** Parity enforced by TypeScript in `packages/i18n`.
@@ -46,10 +46,14 @@ capi/
 
 ## PINNED mobile stack (never bump without explicit approval)
 
-- **Expo SDK 52.** Not 53, not 56.
-- **React 18.3.1 exactly**, hoisted identical with `apps/web`. SDK 56 / React 19 broke the web build once; the monorepo hoists one React and both apps must agree.
-- **NativeWind 4 + Tailwind 3** (not Tailwind 4).
-- `react-native-svg`, `expo-av` (sounds), `expo-linear-gradient`, `@react-native-async-storage/async-storage`, `expo-haptics`, `expo-router`.
+- **Expo SDK 52**, **React Native 0.76.9**. Not SDK 53, not 56.
+- **React 18.3.1 exactly** in `apps/mobile`; `apps/web` declares `^18.3.1` and resolves to the same hoisted copy. SDK 56 / React 19 broke the web build once; the monorepo hoists one React and both apps must agree.
+- **Styling:** the app uses React Native style objects (NativeWind was removed in b095b66). The web uses **Tailwind 3** (not Tailwind 4).
+- **M5 (1.1) pins, exact where marked:**
+  - `expo-iap` **2.6.3 exactly** (2.7.0+ needs Kotlin 2.1 and breaks the SDK 52 Android build; see RELEASE.md).
+  - `react-native-google-mobile-ads` **14.11.0 exactly** (14.x is the SDK 52 ceiling; it bundles the Google Mobile Ads iOS SDK 12.2.0).
+  - `expo-tracking-transparency` ~5.1.1, `@sentry/react-native` ~6.10.0, `expo-keep-awake` ~14.0.3.
+- `react-native-svg`, `expo-av` (sounds), `expo-linear-gradient`, `@react-native-async-storage/async-storage`, `expo-haptics`, `expo-router`. `apps/mobile/package.json` is the full list.
 - **Node 20 for everything Expo/EAS**, and always from `apps/mobile`, never the repo root:
 
 ```bash
@@ -79,20 +83,25 @@ All four green or it is not done.
 
 ---
 
-## v1 feature truth (what any copy may claim)
+## 1.1 feature truth (what any copy may claim)
 
 The listing, review notes, and marketing may claim exactly this and nothing more:
 
-- Authentic Dominican rules: capicúa bonus (+25), paso, tranque decided by pip count, 25 points when you make every opponent pass, and when someone dominates the round every pip left on the table counts for the winner.
+- Authentic Dominican rules: capicúa bonus (+25 when the two open ends show different numbers and your last tile carries both), paso, tranque decided by pip count, 25 points in 2v2 when the other three pass after your tile, and when someone dominates the round every pip left in the hands counts for the winner. `packages/i18n/src/rules.ts` has the exact wording.
 - 1v1 and 2v2 en parejas (con tu frente). In 1v1 there is a boneyard draw; in 2v2 all 28 tiles are dealt.
-- Create a game and share a 6-letter invite code. No account, no sign-up.
-- Three table themes: Barbería, Colmado, Patio, each with a Dominican watermark.
-- Quick chat with Dominican phrases + emotes. **Predefined only, no free text.** The only free text a user ever enters is their nickname.
+- Create a game and share a 6-letter invite code. No account, no sign-up. Games go to 100, or 200 when created in the app or on the web.
+- Three free table themes: Barbería, Colmado, Patio, each with a Dominican watermark.
+- The shop (iOS app): three premium tables (Quisqueya, Larimar, Capi Noche), three tile designs with flag backs (RD, PR, Jamaica), the Todo Capi bundle, Remove Ads, and Restore Purchases. Every design shows a preview.
+- Ads (iOS app): one AdMob banner on the home screen and in the waiting room, never during play or on the round and game overlays. UMP consent plus the ATT prompt. Remove Ads or Todo Capi stops the ads SDK from loading.
+- iMessage extension (iPhone): start a game from Messages, the invite is a bubble, and games there are turn-based. After your move the drawer collapses and a bubble tells the other side it is their turn; tapping a bubble opens the live table. No ads, no purchases, and no store links in the extension.
+- Claim: when the player on turn goes 2 minutes without a move, the other side can claim the game and wins it. Games started in iMessage are turn-based and cannot be claimed.
+- How to play: the full rules page in the app and at playcapi.com/rules.
+- Quick chat with Dominican phrases + emotes, including "¡Te toca!", "¿Tú ta' ahí?", "¡Apúrate!" and "¡Buena mano!". **Predefined only, no free text between players.** The only free text a user types is their nickname and an optional problem report, which goes to the developer by email and never to other players.
 - Tile slam sounds and haptics, with a persisted mute.
 - Fully bilingual Spanish / English.
 - Cross-play with the web at playcapi.com.
 
-**Never claim:** AI opponents, solo play, matchmaking, free-text chat, or offline play. Capi needs the internet and real friends. If a claim is not in the list above, it does not go in copy.
+**Never claim:** AI opponents, solo play, matchmaking, free-text chat, offline play, or that nobody can cheat. Capi needs the internet and real friends. If a claim is not in the list above, it does not go in copy.
 
 ---
 
@@ -122,7 +131,8 @@ Anota's "collects no data" story does not apply here; Capi has a server. The hon
 
 - No accounts, no sign-in. Players pick a nickname per game.
 - The server stores: nickname, avatar color, game moves/scores, and quick-chat selections (predefined phrases). Games are identified by random codes; nothing is linked to a real identity.
-- Optional bug reports include the game state plus basic device info to reproduce issues.
+- Optional problem reports carry the typed message, the game state, and basic device info. The server stores them and emails them to the developer through Resend.
+- The website (and so the iMessage game view, which loads it) reports errors to Sentry. The app reports only once EAS has a Sentry DSN.
 - Since 1.1 the mobile app ships the AdMob SDK: one banner on calm surfaces (home screen and waiting room), UMP consent, and the ATT prompt. The iMessage extension shows no ads.
 - Store privacy answers (App Store App Privacy, Play Data Safety): `docs/m5-submission-checklist.md` section D3 is the single source of truth. Do not restate the labels anywhere else.
 
