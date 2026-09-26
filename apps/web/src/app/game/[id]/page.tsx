@@ -19,7 +19,7 @@ import {
   SpectatorScoreBar,
   SpectatorSeats,
 } from "@/components/game/SessionGate";
-import type { Tile, Seat, Theme } from "@capi/engine";
+import type { CalloutPayload, Tile, Seat, Theme } from "@capi/engine";
 import { getTeam, getOpponentTeam, getSeatsForGame } from "@capi/engine";
 import { chatText, errorKeyFor } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
@@ -47,6 +47,17 @@ interface Toast {
 interface ChatBubble extends ChatMessage {
   phase: "in" | "out";
 }
+
+// What the round-over card shows. startNewRound clears the callout payload,
+// so a round another seat already advanced past is kept as a copy.
+interface RoundSummary {
+  roundIndex: number;
+  payload: CalloutPayload | null;
+  scores: [number, number];
+}
+
+// How long "Ana passed" stays up before it fades (about 2.5 s in total).
+const PASS_TOAST_MS = 2200;
 
 const SEATS: readonly string[] = ["n", "e", "s", "w"];
 const THEMES: readonly string[] = [
@@ -133,7 +144,7 @@ function GameContent({ id }: { id: string }) {
   const searchParams = useSearchParams();
   // Embed mode hides share chrome because bubble taps replace invite links.
   const embedded = isImessageEmbed(searchParams);
-  const { s, setLang } = useI18n();
+  const { s, lang, setLang } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
@@ -152,10 +163,21 @@ function GameContent({ id }: { id: string }) {
   // Timer refs per bubble for cleanup
   const bubbleTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Refs for detecting changes
-  const prevBoardLenRef = useRef(0);
+  // Refs for detecting changes. The slam watches the board per round: null
+  // until the first state arrives, so rejoining mid-round is silent, and a
+  // new round starts its baseline at an empty board so the opener sounds.
+  const boardWatchRef = useRef<{ round: number; len: number } | null>(null);
   const prevOppHandLenRef = useRef(-1);
   const prevRoundRef = useRef(-1);
+  // Pass notices already shown, by the hook's lastPass key.
+  const shownPassKeyRef = useRef<number | null>(null);
+
+  // Round summary: the live one is copied while the round is over; if the
+  // next deal arrives because another seat advanced, the copy stays on
+  // screen until this player taps it away.
+  const roundSnapRef = useRef<RoundSummary | null>(null);
+  const advancedRoundRef = useRef<number | null>(null);
+  const [heldRound, setHeldRound] = useState<RoundSummary | null>(null);
 
   useEffect(() => {
     loadMuteState();
@@ -193,6 +215,8 @@ function GameContent({ id }: { id: string }) {
     errorKey,
     connection,
     presence,
+    presenceSeen,
+    lastPass,
     lastCallout,
     lastCalloutPayload,
     chatMessages,
@@ -221,17 +245,17 @@ function GameContent({ id }: { id: string }) {
     return key === "errMoveFailed" ? fallback : s[key];
   }
 
-  const showToast = useCallback((message: string) => {
+  const showToast = useCallback((message: string, visibleMs = 2000) => {
     const tid = ++toastId;
     setToasts((prev) => [...prev, { id: tid, message, phase: "in" }]);
     setTimeout(() => {
       setToasts((prev) =>
         prev.map((t) => (t.id === tid ? { ...t, phase: "out" } : t))
       );
-    }, 2000);
+    }, visibleMs);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== tid));
-    }, 2300);
+    }, visibleMs + 300);
   }, []);
 
   // Spawn chat bubbles from incoming chatMessages
@@ -279,12 +303,12 @@ function GameContent({ id }: { id: string }) {
   }, []);
 
   // Stable handlers so the memoized Hand and Board skip re-renders caused by
-  // toasts and chat bubbles.
+  // toasts and chat bubbles. The slam for my own play comes from the board
+  // watch below (the optimistic board grows at once), not from here.
   const handlePlay = useCallback(
     (tile: Tile, end: "left" | "right") => {
       if (!mySeat) return;
       setPendingTile(null);
-      playSlam();
       void submitMove({ type: "play", tile, end });
     },
     [mySeat, submitMove]
@@ -301,6 +325,15 @@ function GameContent({ id }: { id: string }) {
     void submitMove({ type: "draw" });
   }, [mySeat, submitMove]);
 
+  // The hook broadcasts the phrase in this language so 1.0 receivers, which
+  // print the payload as is, show a real phrase.
+  const handleSendChat = useCallback(
+    (type: "quick_chat" | "emote", payload: string) => {
+      void sendChat(type, payload, lang);
+    },
+    [sendChat, lang]
+  );
+
   function toggleMute() {
     const next = !muted;
     setMutedState(next);
@@ -314,6 +347,8 @@ function GameContent({ id }: { id: string }) {
 
   async function handleNextRound() {
     if (!session || !gameState) return;
+    // This player chose to move on, so the new deal must not hold the card.
+    advancedRoundRef.current = gameState.roundIndex;
     setNextRoundLoading(true);
     try {
       const res = await fetch(`/api/games/${id}/next-round`, {
@@ -343,14 +378,70 @@ function GameContent({ id }: { id: string }) {
     }
   }
 
-  // Detect board changes (a tile landed) to play the slam sound
-  const boardLen = gameState?.board.length ?? 0;
+  // Single source for the slam sound: the board grew. Covers my optimistic
+  // play, a remote play, and the opening tile of a new round.
   useEffect(() => {
-    if (prevBoardLenRef.current > 0 && boardLen > prevBoardLenRef.current) {
-      playSlam();
+    if (!gameState) return;
+    const len = gameState.board.length;
+    const prev = boardWatchRef.current;
+    if (prev) {
+      const prevLen = prev.round === gameState.roundIndex ? prev.len : 0;
+      if (len > prevLen) playSlam();
     }
-    prevBoardLenRef.current = boardLen;
-  }, [boardLen]);
+    boardWatchRef.current = { round: gameState.roundIndex, len };
+  }, [gameState]);
+
+  // "Ana passed" for every pass but my own, each pass once.
+  useEffect(() => {
+    if (!lastPass || lastPass.key === shownPassKeyRef.current) return;
+    shownPassKeyRef.current = lastPass.key;
+    if (lastPass.seat === mySeat) return;
+    const seatNames: Record<Seat, string> = {
+      n: s.seatNorth,
+      e: s.seatEast,
+      s: s.seatSouth,
+      w: s.seatWest,
+    };
+    const name =
+      players.find((p) => p.seat === lastPass.seat)?.nickname ??
+      seatNames[lastPass.seat];
+    showToast(s.passed(name), PASS_TOAST_MS);
+  }, [lastPass, mySeat, players, s, showToast]);
+
+  // Copy the round summary while the round is over. When the next deal
+  // arrives and this player did not ask for it, keep the copy on screen.
+  useEffect(() => {
+    if (!gameState) return;
+    if (gameState.phase === "round_over") {
+      roundSnapRef.current = {
+        roundIndex: gameState.roundIndex,
+        payload: gameState.lastCalloutPayload ?? lastCalloutPayload,
+        scores: gameState.scores,
+      };
+      setHeldRound(null);
+      return;
+    }
+    if (gameState.phase === "finished") setHeldRound(null);
+    const snap = roundSnapRef.current;
+    roundSnapRef.current = null;
+    if (
+      snap &&
+      gameState.phase === "playing" &&
+      gameState.roundIndex > snap.roundIndex &&
+      advancedRoundRef.current !== snap.roundIndex &&
+      gameState.currentTurn !== mySeat
+    ) {
+      setHeldRound(snap);
+    }
+  }, [gameState, lastCalloutPayload, mySeat]);
+
+  // The held card never covers this player's own turn: once the new round
+  // reaches this seat it closes for good (the claim clock is running).
+  useEffect(() => {
+    if (heldRound && gameState?.phase === "playing" && gameState.currentTurn === mySeat) {
+      setHeldRound(null);
+    }
+  }, [heldRound, gameState?.phase, gameState?.currentTurn, mySeat]);
 
   // Detect opponent drawing tiles to show toast (1v1 only - no boneyard in
   // 2v2). A new deal refills every hand, so the comparison restarts per round.
@@ -404,11 +495,12 @@ function GameContent({ id }: { id: string }) {
   }, [roundOverVisible, gameState, myTeam, roundWinnerTeam, id]);
 
   // Claim the game once the seat on turn has been silent past the window.
-  // The server re-checks with its own clock; a refusal shows as a toast.
+  // TablePresence has already asked for confirmation in the page (no
+  // window.confirm: the iMessage webview answers it with Cancel). The server
+  // re-checks with its own clock; a refusal shows as a toast.
   const [claiming, setClaiming] = useState(false);
   async function handleClaim() {
     if (!session || claiming) return;
-    if (!window.confirm(s.claimWinConfirm)) return;
     setClaiming(true);
     try {
       const res = await fetch(`/api/games/${id}/claim`, {
@@ -545,15 +637,21 @@ function GameContent({ id }: { id: string }) {
                       </div>
                       <span className="text-sm font-medium text-gray-800 truncate min-w-0">
                         {p.nickname}
-                        {isMe && <span className="text-[10px] text-gray-400 ml-1">{s.youTag}</span>}
                       </span>
+                      {/* Outside the truncating name, so a long name never
+                          hides the only marker of your own seat. */}
+                      {isMe && (
+                        <span className="-ml-1 text-[11px] text-gray-500 flex-shrink-0">
+                          {s.youTag}
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 justify-center min-w-0">
                       <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-400 text-xs">?</span>
+                        <span aria-hidden className="text-gray-500 text-xs">?</span>
                       </div>
-                      <span className="text-sm text-gray-400 truncate min-w-0">
+                      <span className="text-sm text-gray-500 truncate min-w-0">
                         {seatLabels[seat]}
                       </span>
                     </div>
@@ -564,7 +662,7 @@ function GameContent({ id }: { id: string }) {
           </div>
 
           {is2v2 && (
-            <div className="flex justify-center gap-4 text-[10px] text-gray-400">
+            <div className="flex justify-center gap-4 text-[11px] text-gray-500">
               <span>N-S: {s.team1}</span>
               <span>E-W: {s.team2}</span>
             </div>
@@ -608,7 +706,7 @@ function GameContent({ id }: { id: string }) {
               {/* Secondary: the short code, for typing in by hand */}
               {inviteCode && (
                 <div className="space-y-1.5">
-                  <p className="text-xs text-gray-400">{s.orShareCode}</p>
+                  <p className="text-xs text-gray-500">{s.orShareCode}</p>
                   <button
                     onClick={async () => {
                       try {
@@ -636,20 +734,23 @@ function GameContent({ id }: { id: string }) {
             </>
           )}
 
-          <p className="text-xs text-gray-400">{s.autoRefresh}</p>
+          <p className="text-xs text-gray-500">{s.autoRefresh}</p>
 
-          <div className="flex items-center justify-center gap-4 text-xs font-semibold">
+          <div className="flex items-center justify-center gap-2 text-xs font-semibold">
             <button
               type="button"
               onClick={() => {
                 void refetch();
               }}
-              className="text-indigo-600 hover:text-indigo-800"
+              className="min-h-[44px] px-3 inline-flex items-center text-indigo-600 hover:text-indigo-800"
             >
               {s.refresh}
             </button>
             {!embedded && (
-              <Link href="/" className="text-gray-400 hover:text-gray-600">
+              <Link
+                href="/"
+                className="min-h-[44px] px-3 inline-flex items-center text-gray-500 hover:text-gray-700"
+              >
                 {s.leaveTable}
               </Link>
             )}
@@ -685,7 +786,11 @@ function GameContent({ id }: { id: string }) {
 
   const isRoundOver = gameState.phase === "round_over";
   const isFinished = gameState.phase === "finished";
-  const isGameEnded = isRoundOver || isFinished;
+  // A round this player has not tapped away yet while another seat already
+  // dealt the next one. The table keeps its round-end layout (no hand, no
+  // rails) until the card is closed, so the card and its button stay visible.
+  const holdingRound = !isRoundOver && heldRound !== null && gameState.phase === "playing";
+  const isGameEnded = isRoundOver || isFinished || holdingRound;
 
   // Team A is mine when seated (team 0 for a spectator), team B the other.
   // In 1v1 N=team0, S=team1. In 2v2 N+S=team0 vs E+W=team1.
@@ -707,22 +812,33 @@ function GameContent({ id }: { id: string }) {
   const teamAName = teamLabel(teamA);
   const teamBName = teamLabel(teamB);
 
+  // The round-over card: the round that just ended, or the held one above.
+  const roundCard: RoundSummary | null =
+    isRoundOver && !lastCallout
+      ? { roundIndex: gameState.roundIndex, payload, scores: gameState.scores }
+      : holdingRound
+        ? heldRound
+        : null;
+  const cardPayload = roundCard?.payload ?? null;
+  const cardWinnerTeam: 0 | 1 | null =
+    cardPayload?.winningTeam === 0 ? 0 : cardPayload?.winningTeam === 1 ? 1 : null;
+
   // A seated player gets won/lost wording only when the winner is known.
-  const roundOutcomeKnown = myTeam !== null && roundWinnerTeam !== null;
-  const iWonRound = roundOutcomeKnown && roundWinnerTeam === myTeam;
+  const roundOutcomeKnown = myTeam !== null && cardWinnerTeam !== null;
+  const iWonRound = roundOutcomeKnown && cardWinnerTeam === myTeam;
 
   // Points credited this round (dominó/capicúa carry pipsAwarded [+bonus],
   // trancao carries pts) and who they went to, headlined in the round-over
   // modal so the pips table can't be misread as the score.
   const roundAward =
-    (typeof payload?.pipsAwarded === "number"
-      ? payload.pipsAwarded
-      : typeof payload?.pts === "number"
-        ? payload.pts
+    (typeof cardPayload?.pipsAwarded === "number"
+      ? cardPayload.pipsAwarded
+      : typeof cardPayload?.pts === "number"
+        ? cardPayload.pts
         : 0) +
-    (typeof payload?.capicuaBonus === "number" ? payload.capicuaBonus : 0);
+    (typeof cardPayload?.capicuaBonus === "number" ? cardPayload.capicuaBonus : 0);
   const pipsFor = (team: 0 | 1): string => {
-    const value = team === 0 ? payload?.team0Pips : payload?.team1Pips;
+    const value = team === 0 ? cardPayload?.team0Pips : cardPayload?.team1Pips;
     return typeof value === "number" ? String(value) : "-";
   };
 
@@ -757,10 +873,16 @@ function GameContent({ id }: { id: string }) {
   const bannerTeamName =
     roundWinnerTeam === null ? null : teamLabel(roundWinnerTeam);
 
+  // Turn-based games (iMessage) have no claim window, so no stall notice,
+  // warning, or claim.
+  const turnBased = gameState.mode === "turn_based";
+
   return (
+    // touch-manipulation stops double-tap zoom on the table; pinch zoom
+    // stays available.
     <div
       data-theme={gameState.theme}
-      className="h-screen h-[100dvh] overflow-hidden flex flex-col bg-theme-page theme-pattern select-game-none"
+      className="h-screen h-[100dvh] overflow-hidden flex flex-col bg-theme-page theme-pattern select-game-none touch-manipulation"
     >
       {/* Callout: mid-round bonus banner vs round-ending overlay */}
       {lastCallout &&
@@ -812,12 +934,15 @@ function GameContent({ id }: { id: string }) {
       <TablePresence
         connection={connection}
         presence={presence}
+        presenceSeen={presenceSeen}
         currentTurn={gameState.currentTurn}
         playing={gameState.phase === "playing"}
         mySeat={mySeat}
         players={players}
         lastMoveAt={gameState.lastMoveAt}
+        turnBased={turnBased}
         canClaim={
+          !turnBased &&
           myTeam !== null &&
           gameState.phase === "playing" &&
           getTeam(gameState.currentTurn, is2v2) !== myTeam
@@ -850,11 +975,13 @@ function GameContent({ id }: { id: string }) {
                 stateVersion={stateVersion}
               />
               <button
+                type="button"
                 onClick={toggleMute}
                 className="w-11 h-11 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
                 title={muted ? s.enableSound : s.muteSound}
+                aria-label={muted ? s.enableSound : s.muteSound}
               >
-                {muted ? "🔇" : "🔊"}
+                <span aria-hidden>{muted ? "🔇" : "🔊"}</span>
               </button>
             </div>
           )}
@@ -863,7 +990,7 @@ function GameContent({ id }: { id: string }) {
           {!embedded && mySeat && !isGameEnded && (
             <div className="absolute bottom-2 left-2 z-[3]">
               <QuickChat
-                onSend={sendChat}
+                onSend={handleSendChat}
                 disabled={false}
               />
             </div>
@@ -1017,7 +1144,7 @@ function GameContent({ id }: { id: string }) {
           )}
 
           {/* ── Round Over overlay ── */}
-          {isRoundOver && !lastCallout && (
+          {roundCard && (
             <div className="absolute inset-0 bg-black/60 flex overflow-y-auto py-6 px-6 z-10">
               <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-4">
                 <p className="text-5xl">
@@ -1035,11 +1162,11 @@ function GameContent({ id }: { id: string }) {
                     below reads like a scoreboard and the loser's counted
                     pips look like points credited to the loser. Hidden when
                     the winner is unknown rather than guessed. */}
-                {roundWinnerTeam !== null && (
+                {cardWinnerTeam !== null && (
                   <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
                     +{roundAward}
                     <span className="block text-xs font-bold opacity-70 mt-0.5">
-                      {s.awardedTo} {teamLabel(roundWinnerTeam)}
+                      {s.awardedTo} {teamLabel(cardWinnerTeam)}
                     </span>
                   </p>
                 )}
@@ -1065,19 +1192,31 @@ function GameContent({ id }: { id: string }) {
 
                 {/* Score update */}
                 <div className="flex items-center justify-center gap-6 text-2xl font-black tabular-nums">
-                  <span>{gameState.scores[teamA]}</span>
+                  <span>{roundCard.scores[teamA]}</span>
                   <span className="text-sm font-normal opacity-50">·</span>
-                  <span>{gameState.scores[teamB]}</span>
+                  <span>{roundCard.scores[teamB]}</span>
                 </div>
 
-                {mySeat && (
+                {/* A held card only closes: the next round is already dealt. */}
+                {holdingRound ? (
                   <button
-                    onClick={handleNextRound}
-                    disabled={nextRoundLoading}
-                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
+                    type="button"
+                    onClick={() => setHeldRound(null)}
+                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95"
                   >
-                    {nextRoundLoading ? s.nextRoundLoading : s.nextRound}
+                    {s.nextRound}
                   </button>
+                ) : (
+                  mySeat && (
+                    <button
+                      type="button"
+                      onClick={handleNextRound}
+                      disabled={nextRoundLoading}
+                      className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {nextRoundLoading ? s.nextRoundLoading : s.nextRound}
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -1181,8 +1320,24 @@ function GameContent({ id }: { id: string }) {
                               gameId: data.gameId,
                             })
                           );
+                          // Inside Messages the extension must follow the new
+                          // table, or later bubbles link the finished game.
+                          if (embedded) {
+                            postToExtension({
+                              type: "rematch",
+                              gameId: data.gameId,
+                              code: data.inviteCode,
+                              playerId: data.playerId,
+                              seat: data.seat,
+                            });
+                          }
                           navigating = true;
-                          router.push(`/game/${data.gameId}`);
+                          // Keep every query parameter (embed, lang) so the
+                          // new table opens in the same mode.
+                          const query = searchParams.toString();
+                          router.push(
+                            `/game/${data.gameId}${query ? `?${query}` : ""}`
+                          );
                         } else {
                           showToast(apiErrorText(data.error, s.failedCreate));
                         }
@@ -1222,7 +1377,7 @@ function GameContent({ id }: { id: string }) {
               }}
             >
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-[var(--hand-text)] uppercase tracking-wider">
                   {s.yourHand}
                 </p>
                 {isMyTurn && (

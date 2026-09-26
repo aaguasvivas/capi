@@ -85,7 +85,7 @@ export default function CreateGameForm() {
       const res = await fetch("/api/games", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), avatarColor, theme, is2v2, targetScore }),
+        body: JSON.stringify({ nickname: nickname.trim(), avatarColor, theme, is2v2, targetScore, mode: "live" }),
       });
 
       const data = await res.json();
@@ -115,10 +115,14 @@ export default function CreateGameForm() {
   return (
     <form onSubmit={handleCreate} className="space-y-5">
       <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+        <label
+          htmlFor="create-name"
+          className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5"
+        >
           {s.yourName}
         </label>
         <input
+          id="create-name"
           type="text"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
@@ -128,16 +132,20 @@ export default function CreateGameForm() {
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      {/* The choice groups below are buttons, not inputs, so each heading
+          names its group and every button says whether it is selected. */}
+      <div role="group" aria-labelledby="create-color">
+        <p id="create-color" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.yourColor}
-        </label>
+        </p>
         <div className="flex gap-2.5">
-          {AVATAR_COLORS.map((c) => (
+          {AVATAR_COLORS.map((c, i) => (
             <button
               key={c}
               type="button"
               onClick={() => setAvatarColor(c)}
+              aria-label={`${s.yourColor} ${i + 1}`}
+              aria-pressed={avatarColor === c}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
                 avatarColor === c
                   ? "border-gray-900 scale-110 shadow-md"
@@ -149,16 +157,17 @@ export default function CreateGameForm() {
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      <div role="group" aria-labelledby="create-table">
+        <p id="create-table" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.table}
-        </label>
+        </p>
         <div className="grid grid-cols-3 gap-2">
           {themes.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTheme(t.id)}
+              aria-pressed={theme === t.id}
               className={`py-3 px-2 rounded-xl border-2 transition-all text-center ${
                 theme === t.id
                   ? "border-gray-900 shadow-md bg-gray-50"
@@ -166,6 +175,7 @@ export default function CreateGameForm() {
               }`}
             >
               <div
+                aria-hidden
                 className="w-full h-8 rounded-lg mb-1.5"
                 style={{
                   background: `linear-gradient(135deg, ${t.color}, ${t.accent})`,
@@ -174,20 +184,21 @@ export default function CreateGameForm() {
               <span className="text-xs font-semibold text-gray-800 block">
                 {t.label}
               </span>
-              <span className="text-[10px] text-gray-400">{t.desc}</span>
+              <span className="text-[11px] text-gray-500">{t.desc}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      <div role="group" aria-labelledby="create-mode">
+        <p id="create-mode" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.mode}
-        </label>
+        </p>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setIs2v2(false)}
+            aria-pressed={!is2v2}
             className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
               !is2v2
                 ? "border-gray-900 shadow-md bg-gray-50"
@@ -200,6 +211,7 @@ export default function CreateGameForm() {
           <button
             type="button"
             onClick={() => setIs2v2(true)}
+            aria-pressed={is2v2}
             className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
               is2v2
                 ? "border-gray-900 shadow-md bg-gray-50"
@@ -208,19 +220,20 @@ export default function CreateGameForm() {
           >
             <ModeGlyph mode="2v2" />
             <span className="text-xs font-semibold text-gray-800 block mt-1.5">2v2</span>
-            <span className="text-[10px] text-gray-400">{s.conTuFrente}</span>
+            <span className="text-[11px] text-gray-500">{s.conTuFrente}</span>
           </button>
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      <div role="group" aria-labelledby="create-target">
+        <p id="create-target" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.firstTo}
-        </label>
+        </p>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setTargetScore(100)}
+            aria-pressed={targetScore === 100}
             className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
               targetScore === 100
                 ? "border-gray-900 shadow-md bg-gray-50"
@@ -232,6 +245,7 @@ export default function CreateGameForm() {
           <button
             type="button"
             onClick={() => setTargetScore(200)}
+            aria-pressed={targetScore === 200}
             className={`flex-1 py-3 px-3 rounded-xl border-2 transition-all text-center ${
               targetScore === 200
                 ? "border-gray-900 shadow-md bg-gray-50"

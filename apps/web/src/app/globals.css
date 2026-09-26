@@ -17,6 +17,11 @@
   --accent: #c0392b;
   --accent-light: #e74c3c;
   --hand-bg: #ebe4d4;
+  /* Text, borders and hover fill on the hand panel. Every light hand panel
+     inherits these from :root; a dark one (noche) overrides them. */
+  --hand-text: #4b5563;
+  --hand-line: #d1d5db;
+  --hand-hover: rgba(0, 0, 0, 0.05);
 }
 
 /* ── Colmado ──────────────────────────────────────────────
@@ -94,6 +99,10 @@
   --accent: #6366f1;
   --accent-light: #8b8df5;
   --hand-bg: #1d1d3a;
+  /* Same hand text as the native app (theme.ts handText), 6.9:1 on hand-bg. */
+  --hand-text: #a5a8c9;
+  --hand-line: rgba(165, 168, 201, 0.35);
+  --hand-hover: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Page background patterns ─────────────────────────── */
@@ -436,6 +445,16 @@ html, body {
   max-height: 38dvh;
 }
 
+/* ── Quick chat tray ──────────────────────────────────────
+   The tray opens upward from the chat button at the bottom of the felt.
+   The hand takes at most 38dvh, so the felt ends at 62dvh or lower; minus
+   the button and its offsets (about 4rem), this is the room above it. The
+   phrase list scrolls inside the cap and the emote row stays on screen. */
+.chat-tray-cap {
+  max-height: calc(62vh - 4rem);
+  max-height: calc(62dvh - 4rem);
+}
+
 /* A tapped tile that fits neither end: a quick sideways shake with a dip in
    opacity, then back where it was. */
 @keyframes tile-shake {
@@ -463,4 +482,17 @@ html, body {
 .end-pulse {
   border-radius: 0.5rem;
   animation: end-pulse 0.9s ease-in-out infinite;
+}
+
+/* iOS zooms into any text field under 16px on focus and stays zoomed after
+   blur, which leaves the fixed-height table cut off. Pinch zoom is allowed
+   again, so small fields get 16px on phones instead of blocking zoom. */
+@media (max-width: 640px) {
+  input.text-sm,
+  input.text-xs,
+  textarea.text-sm,
+  textarea.text-xs,
+  select.text-sm {
+    font-size: 16px;
+  }
 }

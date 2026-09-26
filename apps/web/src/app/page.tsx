@@ -139,6 +139,8 @@ async function lookupResume(key: string, gameId: string): Promise<ResumeEntry | 
   }
 }
 
+// The pill keeps its compact look; each button's ::after reaches 44px tall
+// so the tap target meets the minimum.
 function LangToggle() {
   const { lang, setLang } = useI18n();
   return (
@@ -146,8 +148,10 @@ function LangToggle() {
       {(["es", "en"] as Lang[]).map((l) => (
         <button
           key={l}
+          type="button"
           onClick={() => setLang(l)}
-          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${
+          aria-pressed={lang === l}
+          className={`relative min-w-[44px] px-3 py-1 text-xs font-bold rounded-full transition-all after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-[''] ${
             lang === l
               ? "bg-gray-900 text-white shadow-sm"
               : "text-gray-500 hover:text-gray-700"
@@ -273,21 +277,25 @@ function HomeContent() {
           {/* Tabs */}
           <div className="flex border-b border-gray-200">
             <button
+              type="button"
               onClick={() => setTab("create")}
+              aria-pressed={tab === "create"}
               className={`flex-1 py-3.5 text-sm font-bold transition-colors ${
                 tab === "create"
                   ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-400 hover:text-gray-600"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {s.createGame}
             </button>
             <button
+              type="button"
               onClick={() => setTab("join")}
+              aria-pressed={tab === "join"}
               className={`flex-1 py-3.5 text-sm font-bold transition-colors ${
                 tab === "join"
                   ? "text-gray-900 border-b-2 border-gray-900"
-                  : "text-gray-400 hover:text-gray-600"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {s.joinGame}
@@ -316,33 +324,34 @@ function HomeContent() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 font-medium">
+        <p className="text-center text-xs text-gray-600 font-medium">
           {s.noAccount}
         </p>
 
-        {/* Footer */}
-        <footer className="flex items-center justify-center gap-3 pt-1 text-[11px] font-medium text-gray-400">
+        {/* Footer: gray-600 holds contrast down to the gradient's darkest
+            stop, and each link is a full 44px tap target. */}
+        <footer className="flex items-center justify-center gap-1 text-xs font-medium text-gray-600">
           <Link
             href="/rules"
-            className="hover:text-gray-600 transition-colors"
+            className="min-h-[44px] px-2 inline-flex items-center hover:text-gray-900 transition-colors"
           >
             {s.howToPlay}
           </Link>
-          <span aria-hidden className="text-gray-300">
+          <span aria-hidden className="text-gray-400">
             ·
           </span>
           <Link
             href="/privacy"
-            className="hover:text-gray-600 transition-colors"
+            className="min-h-[44px] px-2 inline-flex items-center hover:text-gray-900 transition-colors"
           >
             {s.footerPrivacy}
           </Link>
-          <span aria-hidden className="text-gray-300">
+          <span aria-hidden className="text-gray-400">
             ·
           </span>
           <Link
             href="/support"
-            className="hover:text-gray-600 transition-colors"
+            className="min-h-[44px] px-2 inline-flex items-center hover:text-gray-900 transition-colors"
           >
             {s.footerSupport}
           </Link>

@@ -4,13 +4,44 @@ import { supabase } from "../lib/supabase";
 import { API_BASE } from "../theme";
 import type { CalloutPayload, GameState, Seat, Tile } from "@capi/engine";
 import { getNextSeat, placeTileOnBoard, removeTileFromHand } from "@capi/engine";
-import { errorKeyFor, normalizeChatPayload, type ErrorKey } from "@capi/i18n";
+import {
+  chatText,
+  errorKeyFor,
+  normalizeChatPayload,
+  type ErrorKey,
+  type Lang,
+} from "@capi/i18n";
 import type { PlayerSession } from "../lib/session";
 
 export type ConnectionState = "live" | "reconnecting" | "offline";
 
+// A seat that passed, as seen in the confirmed state. The key changes on
+// every pass so the screen can react to the same seat passing twice.
+export interface LastPass {
+  seat: Seat;
+  key: number;
+}
+
 // Fallback cadence while realtime is down or the table is still forming.
 const POLL_INTERVAL_MS = 10_000;
+
+// The seat that passed between two confirmed states, or null. A pass keeps
+// the round, the board and the passer's hand as they were, moves the turn
+// on, and adds to the pass count.
+function passedSeat(prev: GameState | null, next: GameState | null): Seat | null {
+  if (!prev || !next) return null;
+  const seat = prev.currentTurn;
+  if (
+    next.roundIndex === prev.roundIndex &&
+    next.board?.length === prev.board?.length &&
+    next.hands?.[seat]?.length === prev.hands?.[seat]?.length &&
+    next.currentTurn !== seat &&
+    next.consecutivePasses > prev.consecutivePasses
+  ) {
+    return seat;
+  }
+  return null;
+}
 
 interface PlayerRecord {
   id: string;
@@ -56,6 +87,10 @@ export function useRealtimeGame(
   const [connection, setConnection] = useState<ConnectionState>("live");
   // Seats currently connected to the table, from channel presence.
   const [presence, setPresence] = useState<Partial<Record<Seat, boolean>>>({});
+  // Seats that have shown up in presence at least once for this game. The
+  // 1.0 app never joins presence, so a seat never seen is unknown, not away.
+  const [presenceSeen, setPresenceSeen] = useState<Partial<Record<Seat, boolean>>>({});
+  const [lastPass, setLastPass] = useState<LastPass | null>(null);
   const [gameSettings, setGameSettings] = useState<{ is2v2: boolean; targetScore: number } | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [lastCallout, setLastCallout] = useState<string | null>(null);
@@ -69,6 +104,15 @@ export function useRealtimeGame(
   // depending on gameState (which would re-run every effect built on it).
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
+
+  // Whether a fetch for this game has succeeded. Before that a failure is
+  // the error screen; after it, a failure is a connection blip.
+  const loadedRef = useRef(false);
+  // The game channel is joined, so a fetch that succeeds means "live".
+  const gameChannelLiveRef = useRef(false);
+  // The last confirmed state adopted, to spot passes between two of them.
+  const serverStateRef = useRef<GameState | null>(null);
+  const passKeyRef = useRef(0);
 
   // The game this render belongs to. Async work compares against it so a
   // response for a game the screen already left never lands in the next one.
@@ -112,11 +156,15 @@ export function useRealtimeGame(
     setErrorKey(null);
     setConnection("live");
     setPresence({});
+    setPresenceSeen({});
+    setLastPass(null);
     setGameSettings(null);
     setInviteCode(null);
     setLastCallout(null);
     setLastCalloutPayload(null);
     setChatMessages([]);
+    loadedRef.current = false;
+    serverStateRef.current = null;
     preOptimisticRef.current = null;
     moveInFlightRef.current = false;
     calloutVersionRef.current = 0;
@@ -166,26 +214,45 @@ export function useRealtimeGame(
   const adoptState = useCallback((gs: GameState | null, sv: number) => {
     preOptimisticRef.current = null;
     versionRef.current = sv;
+    const passer = passedSeat(serverStateRef.current, gs);
+    serverStateRef.current = gs;
     setGameState(gs);
     setStateVersion(sv);
+    if (passer) {
+      passKeyRef.current += 1;
+      setLastPass({ seat: passer, key: passKeyRef.current });
+    }
   }, []);
 
   const fetchGame = useCallback(async () => {
     const stale = () => activeGameRef.current !== gameId;
-    const fail = (sticky: ErrorKey) => {
-      // With a board on screen a failed refetch is a blip, not a dead end.
-      if (gameStateRef.current) showTransientError("connectionError");
-      else setErrorKey(sticky);
+    // Once the game has loaded, a failed refetch (poll, resync, foreground)
+    // is a blip: the lobby or table stays, and the connection pill says so.
+    // Only a failed first load shows the error screen.
+    const fail = (key: ErrorKey) => {
+      if (loadedRef.current) setConnection("reconnecting");
+      else setErrorKey(key);
     };
     try {
       const res = await fetch(`${API_BASE}/api/games/${gameId}`, { cache: "no-store" });
       if (stale()) return;
       if (!res.ok) {
-        fail("gameNotFound");
+        const body = await res.json().catch(() => null);
+        if (stale()) return;
+        fail(
+          errorKeyFor(
+            body?.error,
+            res.status === 404 ? "gameNotFound" : "connectionError"
+          )
+        );
         return;
       }
       const data = await res.json();
       if (stale()) return;
+      loadedRef.current = true;
+      // The server answered: with the socket joined, the table is live again
+      // even if an earlier refetch marked it degraded.
+      if (gameChannelLiveRef.current) setConnection("live");
       setPlayers(data.players);
       if (data.game.settings) {
         setGameSettings(data.game.settings);
@@ -207,7 +274,7 @@ export function useRealtimeGame(
     } finally {
       if (!stale()) setLoading(false);
     }
-  }, [gameId, adoptState, surfaceCallout, showTransientError]);
+  }, [gameId, adoptState, surfaceCallout]);
 
   useEffect(() => {
     fetchGame();
@@ -267,6 +334,7 @@ export function useRealtimeGame(
       )
       .subscribe((status) => {
         if (!active) return;
+        gameChannelLiveRef.current = status === "SUBSCRIBED";
         setConnection(status === "SUBSCRIBED" ? "live" : "reconnecting");
         // A rejoin after a drop may have missed events: resync from the server.
         if (status === "SUBSCRIBED") {
@@ -277,6 +345,7 @@ export function useRealtimeGame(
 
     return () => {
       active = false;
+      gameChannelLiveRef.current = false;
       supabase.removeChannel(channel);
     };
   }, [gameId, fetchGame, adoptState, surfaceCallout]);
@@ -375,6 +444,11 @@ export function useRealtimeGame(
           }
         }
         setPresence(next);
+        setPresenceSeen((prev) =>
+          (Object.keys(next) as Seat[]).every((seat) => prev[seat])
+            ? prev
+            : { ...prev, ...next }
+        );
       })
       .subscribe((status) => {
         if (!active) return;
@@ -460,16 +534,20 @@ export function useRealtimeGame(
           return false;
         }
 
-        adoptState(data.gameState, data.stateVersion);
-        setErrorKey(null);
-
-        if (data.callout) {
-          surfaceCallout(
-            data.callout,
-            data.calloutPayload ?? null,
-            data.stateVersion
-          );
+        // Accepted. Apply unless a newer version already landed through
+        // realtime while this response was in flight: a late response must
+        // never roll the table back.
+        if (data.stateVersion >= versionRef.current) {
+          adoptState(data.gameState, data.stateVersion);
+          if (data.callout) {
+            surfaceCallout(
+              data.callout,
+              data.calloutPayload ?? null,
+              data.stateVersion
+            );
+          }
         }
+        setErrorKey(null);
 
         // State fast-path: hand the confirmed state to the other players
         // directly, since they'd otherwise wait on the postgres_changes fanout.
@@ -497,22 +575,28 @@ export function useRealtimeGame(
   );
 
   const sendChat = useCallback(
-    async (type: "quick_chat" | "emote", payload: string) => {
+    async (type: "quick_chat" | "emote", payload: string, lang: Lang) => {
       if (!session) return;
       const canonical = normalizeChatPayload(type, payload);
       if (!canonical) return;
 
+      // The wire carries the phrase text in the sender's language, because
+      // the 1.0 app prints the payload as is. Newer receivers map the text
+      // back to the id.
       const broadcastPayload: ChatBroadcastPayload = {
         playerId: session.playerId,
         seat: session.seat,
         type,
-        payload: canonical,
+        payload: chatText(type, canonical, lang),
       };
 
       // Add to local state immediately (sender sees their own message)
       const msg: ChatMessage = {
         id: `${Date.now()}-${Math.random()}`,
-        ...broadcastPayload,
+        playerId: session.playerId,
+        seat: session.seat,
+        type,
+        payload: canonical,
         isMe: true,
       };
       setChatMessages((prev) => [...prev, msg].slice(-3));
@@ -563,6 +647,8 @@ export function useRealtimeGame(
     errorKey,
     connection,
     presence,
+    presenceSeen,
+    lastPass,
     lastCallout,
     lastCalloutPayload,
     chatMessages,

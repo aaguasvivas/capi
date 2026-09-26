@@ -54,9 +54,36 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
   return (
     <div ref={containerRef} className="relative">
       {open && (
-        <div className="absolute bottom-full mb-2 left-0 w-[248px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 animate-chat-tray-in">
-          <div className="bg-[#1a1208]/95 backdrop-blur-sm p-3 space-y-3">
-            <div className="flex items-center justify-between">
+        // Capped to the room above the button (chat-tray-cap): the phrase
+        // grid scrolls, and the emote row sits last, nearest the button, so
+        // it stays reachable on short and landscape screens.
+        <div className="absolute bottom-full mb-2 left-0 w-[280px] max-w-[calc(100vw-1rem)] chat-tray-cap flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 animate-chat-tray-in">
+          <div className="bg-[#1a1208]/95 backdrop-blur-sm p-3 flex flex-col gap-3 min-h-0">
+            <div
+              className="grid grid-cols-2 gap-1.5 min-h-0 overflow-y-auto overscroll-contain"
+              onScroll={resetInactivity}
+            >
+              {QUICK_PHRASES.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => handleSend("quick_chat", p.id)}
+                  className={`min-h-[44px] text-left text-sm font-bold leading-tight px-2.5 py-1.5 rounded-xl transition-all duration-150 select-none
+                    text-amber-200
+                    ${tapped === p.id
+                      ? "scale-95 bg-amber-500/30"
+                      : "scale-100 hover:bg-white/10 active:scale-95"
+                    }
+                  `}
+                >
+                  {p[lang]}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-px bg-white/10 flex-shrink-0" />
+
+            <div className="flex items-center justify-between flex-shrink-0">
               {EMOTES.map((e) => (
                 <button
                   key={e}
@@ -71,27 +98,6 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
                   aria-label={e}
                 >
                   {e}
-                </button>
-              ))}
-            </div>
-
-            <div className="h-px bg-white/10" />
-
-            <div className="flex flex-col gap-1.5">
-              {QUICK_PHRASES.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => handleSend("quick_chat", p.id)}
-                  className={`text-left text-sm font-bold px-3 py-1.5 rounded-xl transition-all duration-150 select-none
-                    text-amber-200
-                    ${tapped === p.id
-                      ? "scale-95 bg-amber-500/30"
-                      : "scale-100 hover:bg-white/10 active:scale-95"
-                    }
-                  `}
-                >
-                  {p[lang]}
                 </button>
               ))}
             </div>

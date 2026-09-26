@@ -25,7 +25,7 @@ interface Props {
 const SMALL_HAND_AT = 9;
 
 const END_BUTTON =
-  "min-h-[40px] px-4 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold hover:brightness-110 transition-all active:scale-95";
+  "min-h-[44px] px-4 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold hover:brightness-110 transition-all active:scale-95";
 
 function matchesEnd(tile: Tile, pip: number): boolean {
   return tile[0] === pip || tile[1] === pip;
@@ -197,7 +197,7 @@ function Hand({
               type="button"
               onClick={() => select(null)}
               aria-label={s.closeTray}
-              className="min-w-[40px] min-h-[40px] px-3 text-sm rounded-xl border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors"
+              className="min-w-[44px] min-h-[44px] px-3 text-sm rounded-xl border border-[var(--hand-line)] text-[var(--hand-text)] hover:bg-[var(--hand-hover)] transition-colors"
             >
               ✕
             </button>
@@ -213,7 +213,7 @@ function Hand({
           <button
             type="button"
             onClick={onDraw}
-            className="min-h-[40px] px-6 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
+            className="min-h-[44px] px-6 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
           >
             {s.draw(boneyardCount)}
           </button>
@@ -221,12 +221,12 @@ function Hand({
           <button
             type="button"
             onClick={onPass}
-            className="min-h-[40px] px-6 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
+            className="min-h-[44px] px-6 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
           >
             {s.pass}
           </button>
         ) : !isMyTurn ? (
-          <p className="text-sm text-gray-500 select-none">{s.waitingTurn}</p>
+          <p className="text-sm text-[var(--hand-text)] select-none">{s.waitingTurn}</p>
         ) : null}
       </div>
     </div>

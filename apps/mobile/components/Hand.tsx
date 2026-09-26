@@ -1,9 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Animated, Pressable, ScrollView, Text, View } from "react-native";
 import type { Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "../lib/i18n";
-import { THEME } from "../theme";
 
 interface Props {
   tiles: Tile[];
@@ -11,6 +17,12 @@ interface Props {
   boardLeftEnd: number;
   boardRightEnd: number;
   boneyardCount: number;
+  /** Shown in the action row while another seat is on turn. */
+  waitingLabel: string;
+  /** Table palette: the panel behind the hand, its accent and muted text. */
+  accent: string;
+  panelBg: string;
+  mutedText: string;
   onPlay: (tile: Tile, end: "left" | "right") => void;
   onPass: () => void;
   onDraw: () => void;
@@ -21,6 +33,31 @@ interface Props {
 // The row above the strip keeps this height in every state (end chooser,
 // draw, pass, waiting, or empty) so the tiles never move under a thumb.
 const ACTION_ROW_HEIGHT = 40;
+
+const INK_DARK = "#111827";
+const INK_LIGHT = "#ffffff";
+
+// WCAG relative luminance of a #rrggbb color.
+function luminance(hex: string): number {
+  const n = parseInt(hex.slice(1, 7), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+// Label color on an accent fill: white where it reads, dark on the light
+// accents (gold, teal) where white would not.
+function inkOn(fill: string): string {
+  return contrast(INK_LIGHT, fill) >= 3 ? INK_LIGHT : INK_DARK;
+}
 
 function tileMatchesEnd(tile: Tile, pip: number): boolean {
   return tile[0] === pip || tile[1] === pip;
@@ -69,6 +106,10 @@ export default function Hand({
   boardLeftEnd,
   boardRightEnd,
   boneyardCount,
+  waitingLabel,
+  accent,
+  panelBg,
+  mutedText,
   onPlay,
   onPass,
   onDraw,
@@ -79,6 +120,27 @@ export default function Hand({
   // Tile to flash after a tap that fits nowhere. The counter makes a repeat
   // tap on the same tile flash again.
   const [pulse, setPulse] = useState<{ key: string; n: number } | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+
+  // A draw appends to the end of the hand and stops on a playable tile, so
+  // on a narrow phone that tile lands past the visible strip. When the hand
+  // grows on my turn, the next content layout scrolls the end into view.
+  // Layout effect: the flag must be set before the size event arrives.
+  const prevCountRef = useRef(tiles.length);
+  const revealEndRef = useRef(false);
+  useLayoutEffect(() => {
+    revealEndRef.current = isMyTurn && tiles.length > prevCountRef.current;
+    prevCountRef.current = tiles.length;
+  }, [tiles.length, isMyTurn]);
+
+  // The pass outline and label use the accent where it reads on the panel,
+  // otherwise the panel's own ink.
+  const passInk =
+    contrast(accent, panelBg) >= 3
+      ? accent
+      : contrast(INK_DARK, panelBg) >= contrast(INK_LIGHT, panelBg)
+      ? INK_DARK
+      : INK_LIGHT;
 
   // Clear any stale tile selection when it's no longer my turn or a new
   // round starts with an empty board.
@@ -145,6 +207,7 @@ export default function Hand({
           <>
             <EndButton
               label={s.playOnEnd(boardLeftEnd)}
+              fill={accent}
               onPress={() => handleEndPress("left")}
             />
             <Pressable
@@ -153,17 +216,19 @@ export default function Hand({
               accessibilityLabel={s.closeTray}
               hitSlop={8}
               style={{
-                paddingHorizontal: 10,
-                paddingVertical: 9,
+                minHeight: ACTION_ROW_HEIGHT,
+                paddingHorizontal: 12,
                 borderRadius: 12,
                 borderWidth: 1,
-                borderColor: "#d1d5db",
+                borderColor: mutedText,
+                justifyContent: "center",
               }}
             >
-              <Text style={{ fontSize: 14, color: "#6b7280" }}>✕</Text>
+              <Text style={{ fontSize: 14, color: mutedText }}>✕</Text>
             </Pressable>
             <EndButton
               label={s.playOnEnd(boardRightEnd)}
+              fill={accent}
               onPress={() => handleEndPress("right")}
             />
           </>
@@ -172,10 +237,11 @@ export default function Hand({
             onPress={onDraw}
             accessibilityRole="button"
             style={{
+              minHeight: ACTION_ROW_HEIGHT,
               paddingHorizontal: 24,
-              paddingVertical: 9,
               borderRadius: 12,
               backgroundColor: "#f59e0b",
+              justifyContent: "center",
             }}
           >
             <Text style={{ fontSize: 14, color: "#fff", fontWeight: "700" }}>
@@ -187,27 +253,37 @@ export default function Hand({
             onPress={onPass}
             accessibilityRole="button"
             style={{
+              minHeight: ACTION_ROW_HEIGHT,
               paddingHorizontal: 24,
-              paddingVertical: 8,
               borderRadius: 12,
               borderWidth: 2,
-              borderColor: THEME.accent,
+              borderColor: accent,
+              justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 14, color: THEME.accent, fontWeight: "700" }}>
+            <Text style={{ fontSize: 14, color: passInk, fontWeight: "700" }}>
               {s.pass}
             </Text>
           </Pressable>
         ) : !isMyTurn ? (
-          <Text style={{ textAlign: "center", fontSize: 14, color: "#6b7280" }}>
-            {s.waitingTurn}
+          <Text
+            numberOfLines={1}
+            style={{ textAlign: "center", fontSize: 14, color: mutedText }}
+          >
+            {waitingLabel}
           </Text>
         ) : null}
       </View>
 
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
+        onContentSizeChange={() => {
+          if (!revealEndRef.current) return;
+          revealEndRef.current = false;
+          scrollRef.current?.scrollToEnd({ animated: true });
+        }}
         contentContainerStyle={{
           flexDirection: "row",
           gap: 6,
@@ -298,22 +374,31 @@ function HandTile({
   );
 }
 
-function EndButton({ label, onPress }: { label: string; onPress: () => void }) {
+function EndButton({
+  label,
+  fill,
+  onPress,
+}: {
+  label: string;
+  fill: string;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       style={{
         flexShrink: 1,
+        minHeight: ACTION_ROW_HEIGHT,
         paddingHorizontal: 14,
-        paddingVertical: 9,
         borderRadius: 12,
-        backgroundColor: THEME.accent,
+        backgroundColor: fill,
+        justifyContent: "center",
       }}
     >
       <Text
         numberOfLines={1}
-        style={{ fontSize: 14, color: "#fff", fontWeight: "600" }}
+        style={{ fontSize: 14, color: inkOn(fill), fontWeight: "600" }}
       >
         {label}
       </Text>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useI18n } from "@/lib/i18n/context";
 
 interface Props {
@@ -23,6 +24,7 @@ export default function BugReportButton({
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -36,11 +38,32 @@ export default function BugReportButton({
     }
   }, [open]);
 
-  // Close on Escape
+  // Escape closes; Tab cycles inside the dialog so focus never lands on
+  // the table controls behind the backdrop.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          "button:not([disabled]), textarea:not([disabled])"
+        )
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const inside = dialogRef.current.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -94,88 +117,99 @@ export default function BugReportButton({
         </span>
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4 animate-fade-in"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && status !== "sending")
-              setOpen(false);
-          }}
-        >
+      {/* Portaled to body: the button sits in a z-[3] cluster on the felt,
+          and rendered there the modal could not paint above the quick chat
+          button, its tray, or the chat bubbles. */}
+      {open &&
+        createPortal(
           <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="bug-report-title"
-            className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4 animate-fade-in"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && status !== "sending")
+                setOpen(false);
+            }}
           >
-            <div className="flex items-start justify-between">
-              <h2
-                id="bug-report-title"
-                className="font-black text-lg text-gray-900"
-              >
-                🐞 {s.reportBugTitle}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                disabled={status === "sending"}
-                className="w-11 h-11 -m-2.5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 text-lg leading-none disabled:opacity-50"
-                aria-label={s.reportBugCancel}
-              >
-                ✕
-              </button>
-            </div>
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="bug-report-title"
+              className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4"
+            >
+              <div className="flex items-start justify-between">
+                <h2
+                  id="bug-report-title"
+                  className="font-black text-lg text-gray-900"
+                >
+                  🐞 {s.reportBugTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  disabled={status === "sending"}
+                  className="w-11 h-11 -m-2.5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 text-lg leading-none disabled:opacity-50"
+                  aria-label={s.reportBugCancel}
+                >
+                  ✕
+                </button>
+              </div>
 
-            <p className="text-sm text-gray-500 leading-snug">
-              {s.reportBugPrompt}
-            </p>
-
-            <textarea
-              ref={taRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={4}
-              maxLength={2000}
-              disabled={status === "sending" || status === "sent"}
-              placeholder={s.reportBugPlaceholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 disabled:bg-gray-50"
-            />
-
-            {status === "error" && (
-              <p className="text-xs text-red-600 font-medium">
-                {s.reportBugFailed}
+              <p className="text-sm text-gray-600 leading-snug">
+                {s.reportBugPrompt}
               </p>
-            )}
 
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                disabled={status === "sending"}
-                className="min-h-[44px] px-3 text-sm text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50"
-              >
-                {s.reportBugCancel}
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={
-                  !message.trim() ||
-                  status === "sending" ||
-                  status === "sent"
-                }
-                className="min-h-[44px] px-4 text-sm bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {status === "sending"
-                  ? s.reportBugSending
-                  : status === "sent"
-                    ? `✓ ${s.reportBugSent}`
-                    : s.reportBugSend}
-              </button>
+              {/* Players took this form for a chat; say plainly where chat is. */}
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 leading-snug">
+                {s.reportBugNotChat}
+              </p>
+
+              <textarea
+                ref={taRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                maxLength={2000}
+                disabled={status === "sending" || status === "sent"}
+                placeholder={s.reportBugPlaceholder}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 disabled:bg-gray-50"
+              />
+
+              {status === "error" && (
+                <p className="text-xs text-red-600 font-medium">
+                  {s.reportBugFailed}
+                </p>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  disabled={status === "sending"}
+                  className="min-h-[44px] px-3 text-sm text-gray-500 font-medium hover:text-gray-700 disabled:opacity-50"
+                >
+                  {s.reportBugCancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={
+                    !message.trim() ||
+                    status === "sending" ||
+                    status === "sent"
+                  }
+                  className="min-h-[44px] px-4 text-sm bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {status === "sending"
+                    ? s.reportBugSending
+                    : status === "sent"
+                      ? `✓ ${s.reportBugSent}`
+                      : s.reportBugSend}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

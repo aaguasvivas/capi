@@ -58,12 +58,12 @@ export const metadata: Metadata = {
   },
 };
 
+// Pinch zoom stays available everywhere (low-vision players, small table
+// labels). The game table stops double-tap zoom with touch-action instead.
 export const viewport: Viewport = {
   themeColor: "#f5f0e8",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({

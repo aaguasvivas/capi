@@ -16,6 +16,8 @@ const LIVE_PILL_MS = 2_000;
 interface Props {
   connection: ConnectionState;
   presence: Partial<Record<Seat, boolean>>;
+  /** Seats seen in presence at least once since this page joined. */
+  presenceSeen: Partial<Record<Seat, boolean>>;
   currentTurn: Seat;
   /** True while tiles are in play; turn and away states only matter then. */
   playing: boolean;
@@ -24,6 +26,9 @@ interface Props {
   players: Array<{ seat: string; nickname: string }>;
   /** Server clock of the last move; drives the stall notice and the claim. */
   lastMoveAt?: string;
+  /** Turn-based games (iMessage) have no claim window: no stall notice,
+   *  away line, warning, or claim. */
+  turnBased: boolean;
   /** True when my side may claim once the window closes (seated, other side on turn). */
   canClaim: boolean;
   claiming: boolean;
@@ -31,18 +36,21 @@ interface Props {
 }
 
 // Status line right under the score bar: connection state, whose turn it is,
-// a warning once the seat on turn has been gone for a while, and the claim
-// once that seat has been silent past the window. It reserves its height so
-// the board never jumps when a state comes or goes, and mirrors the turn text
-// into a polite live region for screen readers.
+// a warning once the seat on turn has been gone for a while, a warning to me
+// when my own turn runs long, and the claim once the seat on turn has been
+// silent past the window. It reserves its height so the board never jumps
+// when a state comes or goes, and mirrors the turn text into a polite live
+// region for screen readers.
 export default function TablePresence({
   connection,
   presence,
+  presenceSeen,
   currentTurn,
   playing,
   mySeat,
   players,
   lastMoveAt,
+  turnBased,
   canClaim,
   claiming,
   onClaim,
@@ -51,6 +59,9 @@ export default function TablePresence({
   const [showLive, setShowLive] = useState(false);
   const [away, setAway] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  // Claim is two taps: the first asks, the second claims. An in-page step,
+  // because window.confirm returns false in the iMessage webview.
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     if (connection !== "live") {
@@ -62,36 +73,54 @@ export default function TablePresence({
     return () => clearTimeout(t);
   }, [connection]);
 
+  const myTurn = playing && currentTurn === mySeat;
+
   // Restart the clock whenever the turn moves or the seat shows up again.
+  // Only a seat seen in presence during this visit can be away: the 1.0 app
+  // never joins presence, so a seat never seen is unknown, not gone.
   const turnAbsent =
-    playing && currentTurn !== mySeat && presence[currentTurn] !== true;
+    playing &&
+    !turnBased &&
+    !myTurn &&
+    presenceSeen[currentTurn] === true &&
+    presence[currentTurn] !== true;
   useEffect(() => {
     setAway(false);
     if (!turnAbsent) return;
     const t = setTimeout(() => setAway(true), AWAY_AFTER_MS);
     return () => clearTimeout(t);
   }, [turnAbsent, currentTurn]);
+  // The flag resets in an effect; this keeps a stale one off the render in
+  // between (the turn just moved, or the seat just came back).
+  const awayNow = away && turnAbsent;
 
-  // One tick per second while the other side is on turn, so the stall notice
-  // and the claim unlock on their own.
-  const watching = playing && currentTurn !== mySeat && !!lastMoveAt;
+  // One tick per second during a live game, so the stall notice, my own
+  // warning, and the claim all appear on their own.
+  const clockOn = playing && !turnBased && !!lastMoveAt;
   useEffect(() => {
-    if (!watching) return;
+    if (!clockOn) return;
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1_000);
     return () => clearInterval(t);
-  }, [watching, lastMoveAt]);
+  }, [clockOn, lastMoveAt]);
 
   const lastMove = lastMoveAt ? Date.parse(lastMoveAt) : NaN;
-  const stalled = watching && !Number.isNaN(lastMove) ? Math.max(0, now - lastMove) : 0;
-  const stallNotice = stalled >= STALL_NOTICE_MS;
+  const stalled = clockOn && !Number.isNaN(lastMove) ? Math.max(0, now - lastMove) : 0;
+  const stallNotice = !myTurn && stalled >= STALL_NOTICE_MS;
+  // The seat on turn hears about the claim before the other side can use it.
+  const warnMe = myTurn && stalled >= STALL_NOTICE_MS;
   const claimReady = canClaim && stalled >= CLAIM_AFTER_MS;
+
+  // A half-finished confirm never outlives the claim window it was for.
+  useEffect(() => {
+    if (!claimReady) setConfirming(false);
+  }, [claimReady]);
 
   const turnName =
     players.find((p) => p.seat === currentTurn)?.nickname ?? s.opponent;
   const turnText = !playing
     ? ""
-    : currentTurn === mySeat
+    : myTurn
       ? s.yourTurn
       : s.turnOf(turnName);
 
@@ -100,7 +129,7 @@ export default function TablePresence({
     body = <Pill tone="red">{s.connectionOffline}</Pill>;
   } else if (connection === "reconnecting") {
     body = <Pill tone="amber">{s.connectionReconnecting}</Pill>;
-  } else if (away || stallNotice) {
+  } else if (awayNow || stallNotice) {
     body = (
       <div className="leading-tight py-1 space-y-1">
         <p className="font-bold text-amber-300">
@@ -109,20 +138,49 @@ export default function TablePresence({
             : s.waitingFor(turnName)}
         </p>
         {claimReady ? (
-          <button
-            type="button"
-            onClick={onClaim}
-            disabled={claiming}
-            className="px-3 py-1 rounded-full bg-amber-400 text-gray-900 text-[11px] font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-60"
-          >
-            {s.claimWin}
-          </button>
+          confirming ? (
+            <div className="space-y-1">
+              <p className="text-[11px] font-medium">{s.claimWinConfirm}</p>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  disabled={claiming}
+                  className="min-h-[44px] px-4 rounded-full bg-white/10 text-xs font-bold hover:bg-white/20 active:scale-95 transition-all disabled:opacity-60"
+                >
+                  {s.cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClaim}
+                  disabled={claiming}
+                  className="min-h-[44px] px-4 rounded-full bg-amber-400 text-gray-900 text-xs font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-60"
+                >
+                  {s.claimWin}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="min-h-[44px] px-4 rounded-full bg-amber-400 text-gray-900 text-xs font-bold hover:brightness-110 active:scale-95 transition-all"
+            >
+              {s.claimWin}
+            </button>
+          )
         ) : (
           <p className="text-[10px] font-medium opacity-60">
-            {away ? s.awayHint : canClaim ? s.claimHint : null}
+            {awayNow ? s.awayHint : canClaim ? s.claimHint : null}
           </p>
         )}
       </div>
+    );
+  } else if (warnMe) {
+    body = (
+      <p className="font-bold text-amber-300 leading-tight py-1">
+        {s.claimWarnMe}
+      </p>
     );
   } else if (showLive) {
     body = <Pill tone="green">{s.connectionLive}</Pill>;
@@ -130,7 +188,7 @@ export default function TablePresence({
     body = (
       <span
         className={
-          currentTurn === mySeat
+          myTurn
             ? "font-bold text-[var(--accent-light)]"
             : "opacity-70"
         }
@@ -146,7 +204,7 @@ export default function TablePresence({
         {body}
       </div>
       <div aria-live="polite" className="sr-only">
-        {turnText}
+        {warnMe ? s.claimWarnMe : turnText}
       </div>
     </>
   );

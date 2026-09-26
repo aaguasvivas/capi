@@ -15,6 +15,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
@@ -26,7 +27,12 @@ import {
   formatStall,
   getTeam,
 } from "@capi/engine";
-import { chatText, errorKeyFor, type ErrorKey } from "@capi/i18n";
+import {
+  chatText,
+  errorKeyFor,
+  type ErrorKey,
+  type QuickChatKind,
+} from "@capi/i18n";
 import {
   useRealtimeGame,
   type ChatMessage,
@@ -80,6 +86,16 @@ const AVATAR_COLORS = [
 const AWAY_AFTER_MS = 45_000;
 const ERROR_FLASH_MS = 3500;
 const LIVE_FLASH_MS = 2000;
+const PASS_NOTICE_MS = 2500;
+
+// This device's copy of a finished round's card. Any seat's Next round tap
+// deals the next round for everyone, so the copy keeps the card up here
+// until this player dismisses it.
+interface RoundSummary {
+  round: number;
+  payload: CalloutPayload | null;
+  scores: [number, number];
+}
 
 function isSeat(v: unknown): v is Seat {
   return v === "n" || v === "e" || v === "s" || v === "w";
@@ -179,6 +195,13 @@ function GameTable({
   // the in-flight state of the claim itself.
   const [now, setNow] = useState(() => Date.now());
   const [claiming, setClaiming] = useState(false);
+  // Set once my own turn has run past the stall notice in a live game.
+  const [warnMe, setWarnMe] = useState(false);
+  // Seat whose pass is on screen for a moment.
+  const [passNoticeSeat, setPassNoticeSeat] = useState<Seat | null>(null);
+  const [roundSummary, setRoundSummary] = useState<RoundSummary | null>(null);
+  // Round index whose card this player has dismissed (or advanced past).
+  const [dismissedRound, setDismissedRound] = useState(-1);
   const [topRowHeight, setTopRowHeight] = useState(0);
 
   // Slam plays on board growth from any source: my optimistic play, a remote
@@ -240,6 +263,8 @@ function GameTable({
     errorKey,
     connection,
     presence,
+    presenceSeen,
+    lastPass,
     lastCallout,
     lastCalloutPayload,
     chatMessages,
@@ -329,28 +354,98 @@ function GameTable({
 
   // Away detection: the seat holding the turn has been out of presence for
   // AWAY_AFTER_MS without a break. Any presence flip or turn change restarts
-  // the clock. My own seat never counts.
+  // the clock. My own seat never counts, and neither does a seat never seen
+  // in presence: the 1.0 app does not join it, so its absence means nothing.
   const turnSeat: Seat | null =
     gameState?.phase === "playing" ? gameState.currentTurn : null;
   const turnPresent = turnSeat ? presence[turnSeat] === true : true;
+  const turnSeen = turnSeat ? presenceSeen[turnSeat] === true : false;
   const sessionSeat = session?.seat ?? null;
+  // In a turn-based (iMessage) game a closed drawer is normal, so the away
+  // pill would be constant noise; web hides it there too.
+  const turnBasedGame = gameState?.mode === "turn_based";
   useEffect(() => {
     setAwaySeat(null);
-    if (!turnSeat || turnPresent || turnSeat === sessionSeat) return;
+    if (turnBasedGame || !turnSeat || !turnSeen || turnPresent || turnSeat === sessionSeat) {
+      return;
+    }
     const t = setTimeout(() => setAwaySeat(turnSeat), AWAY_AFTER_MS);
     return () => clearTimeout(t);
-  }, [turnSeat, turnPresent, sessionSeat]);
+  }, [turnBasedGame, turnSeat, turnSeen, turnPresent, sessionSeat]);
+
+  // Claims exist only in live games: a turn-based (iMessage) game has no
+  // stall notice, claim button, or warning.
+  const liveMode = gameState?.mode !== "turn_based";
+  const lastMoveAt = gameState?.lastMoveAt ?? null;
 
   // Stall clock: ticks while the other side is on turn so the notice and the
   // claim button unlock on their own. Restarts with every accepted move.
-  const lastMoveAt = gameState?.lastMoveAt ?? null;
-  const watchingStall = !!turnSeat && turnSeat !== sessionSeat && !!lastMoveAt;
+  const watchingStall =
+    liveMode && !!turnSeat && turnSeat !== sessionSeat && !!lastMoveAt;
   useEffect(() => {
     if (!watchingStall) return;
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1_000);
     return () => clearInterval(t);
   }, [watchingStall, lastMoveAt]);
+
+  // The seat on turn gets one warning at the stall notice mark, before the
+  // other side can claim. A single timer, not the clock: my own turn should
+  // not re-render the table every second.
+  const myTurnLive =
+    liveMode && !!turnSeat && turnSeat === sessionSeat && !!lastMoveAt;
+  useEffect(() => {
+    setWarnMe(false);
+    if (!myTurnLive || !lastMoveAt) return;
+    const elapsed = Date.now() - Date.parse(lastMoveAt);
+    const t = setTimeout(() => {
+      setWarnMe(true);
+      Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Warning
+      ).catch(() => {});
+    }, Math.max(0, STALL_NOTICE_MS - elapsed));
+    return () => clearTimeout(t);
+  }, [myTurnLive, lastMoveAt]);
+
+  // Passes change nothing on the board, so name the seat that passed for a
+  // moment. My own pass needs no notice.
+  useEffect(() => {
+    if (!lastPass || lastPass.seat === sessionSeat) return;
+    setPassNoticeSeat(lastPass.seat);
+    const t = setTimeout(() => setPassNoticeSeat(null), PASS_NOTICE_MS);
+    return () => {
+      clearTimeout(t);
+      setPassNoticeSeat(null);
+    };
+  }, [lastPass, sessionSeat]);
+
+  // Keep this device's copy of the round card while the round is over.
+  useEffect(() => {
+    if (gameState?.phase !== "round_over") return;
+    setRoundSummary({
+      round: gameState.roundIndex,
+      payload: gameState.lastCalloutPayload ?? lastCalloutPayload,
+      scores: gameState.scores,
+    });
+  }, [gameState, lastCalloutPayload]);
+  // The copy outlives its round when another seat dealt the next one before
+  // this seated player dismissed the card. It never covers this player's own
+  // turn: the moment the new round reaches this seat, the card is dismissed
+  // for good (the claim clock is already running for them).
+  const heldCandidate =
+    session &&
+    roundSummary &&
+    gameState?.phase === "playing" &&
+    gameState.roundIndex > roundSummary.round &&
+    dismissedRound < roundSummary.round
+      ? roundSummary
+      : null;
+  const myTurnNow =
+    !!session && gameState?.phase === "playing" && gameState.currentTurn === session.seat;
+  useEffect(() => {
+    if (heldCandidate && myTurnNow) setDismissedRound(heldCandidate.round);
+  }, [heldCandidate, myTurnNow]);
+  const heldSummary = heldCandidate && !myTurnNow ? heldCandidate : null;
 
   const flashError = useCallback((key: ErrorKey) => {
     if (localErrorTimerRef.current) clearTimeout(localErrorTimerRef.current);
@@ -412,6 +507,13 @@ function GameTable({
 
   async function handleNextRound() {
     if (!session || !gameState) return;
+    if (gameState.phase !== "round_over") {
+      // Another seat already dealt the next round: the tap only closes this
+      // device's copy of the card.
+      if (heldSummary) setDismissedRound(heldSummary.round);
+      return;
+    }
+    setDismissedRound(gameState.roundIndex);
     setNextRoundLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/games/${id}/next-round`, {
@@ -532,6 +634,13 @@ function GameTable({
     }
   }
 
+  const handleSendChat = useCallback(
+    (type: QuickChatKind, payload: string) => {
+      void sendChat(type, payload, lang);
+    },
+    [sendChat, lang]
+  );
+
   function trackTimer(t: ReturnType<typeof setTimeout>) {
     copyTimersRef.current.push(t);
   }
@@ -570,17 +679,23 @@ function GameTable({
   };
 
   // The edge swipe must not pop a live game; every other phase may go back.
+  // The status bar follows the screen: dark content on the light loading,
+  // error and waiting pages, light content over the table's dark score bar.
+  // The last mounted StatusBar wins, and home's dark one stays mounted under
+  // this screen, so each return sets its own.
   const screen = (
     <Stack.Screen
       options={{ gestureEnabled: gameState?.phase !== "playing" }}
     />
   );
+  const lightPageBar = <StatusBar style="dark" />;
 
   // ── Loading ──
   if (!sessionLoaded || (loading && !gameState)) {
     return (
       <>
         {screen}
+        {lightPageBar}
         <View style={centerScreen}>
           <ActivityIndicator size="large" color={THEME.scoreBg} />
           <Text style={{ marginTop: 12, color: "#6b7280", fontSize: 14 }}>
@@ -596,13 +711,15 @@ function GameTable({
     return (
       <>
         {screen}
+        {lightPageBar}
         <View style={centerScreen}>
           <Text style={{ color: "#dc2626", fontWeight: "500", fontSize: 16 }}>
             {s[errorKey]}
           </Text>
           <Pressable
             onPress={() => router.replace("/")}
-            hitSlop={8}
+            hitSlop={12}
+            accessibilityRole="button"
             style={{ marginTop: 16 }}
           >
             <Text
@@ -635,6 +752,7 @@ function GameTable({
     return (
       <>
         {screen}
+        {lightPageBar}
         <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -781,6 +899,11 @@ function GameTable({
                   <Pressable
                     onPress={handleJoin}
                     disabled={joinDisabled}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      disabled: joinDisabled,
+                      busy: joinLoading,
+                    }}
                     style={{
                       width: "100%",
                       paddingVertical: 14,
@@ -819,6 +942,7 @@ function GameTable({
                   {/* Copy invite link */}
                   <Pressable
                     onPress={copyInviteLink}
+                    accessibilityRole="button"
                     style={{
                       width: "100%",
                       paddingVertical: 14,
@@ -843,6 +967,8 @@ function GameTable({
                       </Text>
                       <Pressable
                         onPress={copyCode}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${s.inviteCode} ${inviteCode}`}
                         style={{
                           paddingHorizontal: 20,
                           paddingVertical: 8,
@@ -887,7 +1013,11 @@ function GameTable({
                 >
                   {s.autoRefresh}
                 </Text>
-                <Pressable onPress={() => refetch()} hitSlop={8}>
+                <Pressable
+                  onPress={() => refetch()}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                >
                   <Text
                     style={{
                       fontSize: 13,
@@ -955,16 +1085,19 @@ function GameTable({
   const isRoundOver = gameState.phase === "round_over";
   const isFinished = gameState.phase === "finished";
   const isGameEnded = isRoundOver || isFinished;
+  // A held round card keeps the table as it looked at round end (no hands,
+  // no chat) until it is dismissed, so nothing shifts under it.
+  const tableClosed = isGameEnded || heldSummary !== null;
 
   // Team the table is drawn from (mine, or N-S for a spectator) and the other.
   const viewTeam = getTeam(viewSeat, is2v2);
   const otherTeam: 0 | 1 = viewTeam === 0 ? 1 : 0;
 
   const payload = gameState.lastCalloutPayload ?? lastCalloutPayload;
-  const roundWinnerTeam =
-    payload && typeof payload.winningTeam === "number"
-      ? (payload.winningTeam as number)
-      : null;
+  // The round card reads the held copy while it outlives its round.
+  const cardPayload = heldSummary ? heldSummary.payload : payload;
+  const cardScores = heldSummary ? heldSummary.scores : gameState.scores;
+  const roundWinnerTeam = winningTeamOf(cardPayload);
   const roundWinnerKnown = roundWinnerTeam !== null;
   const iWonRound = !spectating && roundWinnerTeam === viewTeam;
 
@@ -984,13 +1117,13 @@ function GameTable({
   // trancao carries pts) and who they went to, headlined in the round-over
   // modal so the pips table can't be misread as the score.
   const roundAward =
-    (typeof payload?.pipsAwarded === "number"
-      ? (payload.pipsAwarded as number)
-      : typeof payload?.pts === "number"
-      ? (payload.pts as number)
+    (typeof cardPayload?.pipsAwarded === "number"
+      ? (cardPayload.pipsAwarded as number)
+      : typeof cardPayload?.pts === "number"
+      ? (cardPayload.pts as number)
       : 0) +
-    (typeof payload?.capicuaBonus === "number"
-      ? (payload.capicuaBonus as number)
+    (typeof cardPayload?.capicuaBonus === "number"
+      ? (cardPayload.capicuaBonus as number)
       : 0);
   const roundWinnerName =
     roundWinnerTeam === viewTeam ? viewTeamName : otherTeamName;
@@ -1014,6 +1147,7 @@ function GameTable({
       : 0;
   const stallNotice = stalledMs >= STALL_NOTICE_MS;
   const canClaim =
+    liveMode &&
     mySeat !== null &&
     gameState.phase === "playing" &&
     getTeam(gameState.currentTurn, gameState.is2v2) !==
@@ -1043,10 +1177,11 @@ function GameTable({
   // the board free for their next play. Round-ending callouts use the overlay.
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
+  const bannerTeam = winningTeamOf(payload);
   const bannerTeamName =
-    roundWinnerTeam === null
+    bannerTeam === null
       ? null
-      : roundWinnerTeam === viewTeam
+      : bannerTeam === viewTeam
       ? viewTeamName
       : otherTeamName;
 
@@ -1063,9 +1198,15 @@ function GameTable({
     ? players.find((p) => p.seat === awaySeat)
     : null;
   const awayName = awaySeat ? awayPlayer?.nickname ?? seatLabels[awaySeat] : "";
+  const showWarnMe = warnMe && isMyTurn && gameState.phase === "playing";
+  // The mid-round VEINTICINCO banner already says the table passed.
+  const passSeat =
+    passNoticeSeat && gameState.phase === "playing" && !isMidRoundCallout
+      ? passNoticeSeat
+      : null;
   // Transient pills sit just under the top hand row so they never cover the
   // opponent's name, and never take layout space from the board.
-  const floatingTop = (isGameEnded ? 0 : topRowHeight) + 6;
+  const floatingTop = (tableClosed ? 0 : topRowHeight) + 6;
 
   const stripText = {
     fontSize: 11,
@@ -1077,6 +1218,7 @@ function GameTable({
   return (
     <>
       {screen}
+      <StatusBar style="light" />
       {gameState.phase === "playing" ? <KeepAwake /> : null}
       <View style={{ flex: 1, backgroundColor: palette.feltMid }}>
         {/* Score bar (top, respects notch). Long-press reveals the invite
@@ -1100,7 +1242,8 @@ function GameTable({
             />
           </Pressable>
 
-          {/* Table strip: leave (left), connection (center), code (right) */}
+          {/* Table strip: leave (left), connection (center), report and code
+              (right) */}
           <View
             style={{
               flexDirection: "row",
@@ -1112,7 +1255,7 @@ function GameTable({
           >
             <Pressable
               onPress={confirmLeave}
-              hitSlop={8}
+              hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={s.leaveTable}
             >
@@ -1123,10 +1266,21 @@ function GameTable({
                 <ConnectionPill label={connectionLabel} tone={connection} />
               ) : null}
             </View>
+            {/* Report a problem sits here, away from the chat button on the
+                felt, so it does not read as a way to talk to the table. */}
+            <View style={{ marginRight: inviteCode ? 24 : 0 }}>
+              <BugReportButton
+                gameId={id}
+                playerId={session?.playerId}
+                gameState={gameState}
+                stateVersion={stateVersion}
+                tint={palette.scoreText}
+              />
+            </View>
             {inviteCode ? (
               <Pressable
                 onPress={codeShown ? copyCode : () => setCodeShown(true)}
-                hitSlop={8}
+                hitSlop={12}
                 accessibilityRole="button"
                 accessibilityLabel={s.inviteCode}
               >
@@ -1150,9 +1304,7 @@ function GameTable({
                     : `${s.inviteCode} ›`}
                 </Text>
               </Pressable>
-            ) : (
-              <View />
-            )}
+            ) : null}
           </View>
         </View>
 
@@ -1195,7 +1347,7 @@ function GameTable({
               notice with its claim button. Absolute, so the board never
               shifts when they appear; box-none so the board still gets every
               touch outside the pills while the claim button stays tappable. */}
-          {bannerKey || awaySeat || stallSeat ? (
+          {bannerKey || awaySeat || stallSeat || showWarnMe || passSeat ? (
             <View
               pointerEvents="box-none"
               style={{
@@ -1214,6 +1366,34 @@ function GameTable({
                     style={{ color: "#fff", fontSize: 13, textAlign: "center" }}
                   >
                     {s[bannerKey]}
+                  </Text>
+                </View>
+              ) : null}
+              {passSeat ? (
+                <View style={awayPill}>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 13,
+                      fontWeight: "700",
+                      textAlign: "center",
+                    }}
+                  >
+                    {s.passed(seatName(passSeat))}
+                  </Text>
+                </View>
+              ) : null}
+              {showWarnMe ? (
+                <View style={warnPill}>
+                  <Text
+                    style={{
+                      color: "#111827",
+                      fontSize: 13,
+                      fontWeight: "700",
+                      textAlign: "center",
+                    }}
+                  >
+                    {s.claimWarnMe}
                   </Text>
                 </View>
               ) : null}
@@ -1277,16 +1457,13 @@ function GameTable({
             </View>
           ) : null}
 
-          {/* Bottom-right utility cluster: mute + bug report */}
+          {/* Bottom-right utility: mute */}
           <View
             style={{
               position: "absolute",
               right: 8,
               bottom: 8,
               zIndex: 3,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 6,
             }}
           >
             <Pressable
@@ -1305,21 +1482,15 @@ function GameTable({
             >
               <Text style={{ fontSize: 15 }}>{muted ? "🔇" : "🔊"}</Text>
             </Pressable>
-            <BugReportButton
-              gameId={id}
-              playerId={session?.playerId}
-              gameState={gameState}
-              stateVersion={stateVersion}
-            />
           </View>
 
           {/* QuickChat toggle, floating bottom-left of the felt. Seated only:
               a spectator has no seat to speak from. */}
-          {!isGameEnded && !spectating ? (
+          {!tableClosed && !spectating ? (
             <View
               style={{ position: "absolute", left: 8, bottom: 8, zIndex: 3 }}
             >
-              <QuickChat onSend={sendChat} />
+              <QuickChat onSend={handleSendChat} />
             </View>
           ) : null}
 
@@ -1374,7 +1545,7 @@ function GameTable({
           </View>
 
           {/* Top hand row (face-down): partner in 2v2, opponent in 1v1 */}
-          {!isGameEnded ? (
+          {!tableClosed ? (
             <View
               onLayout={(e) => setTopRowHeight(e.nativeEvent.layout.height)}
               style={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }}
@@ -1454,7 +1625,7 @@ function GameTable({
           ) : null}
 
           {/* Board, flanked by opponent side rails in 2v2 */}
-          {is2v2 && !isGameEnded ? (
+          {is2v2 && !tableClosed ? (
             <View style={{ flex: 1, flexDirection: "row" }}>
               <SideRail
                 player={leftPlayer}
@@ -1501,9 +1672,10 @@ function GameTable({
           ) : null}
 
           {/* ── Round Over overlay ── */}
-          {isRoundOver && !lastCallout ? (
+          {(isRoundOver && !lastCallout) || heldSummary ? (
             <View style={overlayBackdrop}>
               <View
+                accessibilityViewIsModal
                 style={[overlayCard, { backgroundColor: palette.scoreBg }]}
               >
                 <Text style={{ fontSize: 48 }}>{roundEmoji}</Text>
@@ -1556,12 +1728,12 @@ function GameTable({
                   </Text>
                   <PipRow
                     name={viewTeamName}
-                    value={pipFor(payload, viewTeam)}
+                    value={pipFor(cardPayload, viewTeam)}
                     color={palette.scoreText}
                   />
                   <PipRow
                     name={otherTeamName}
-                    value={pipFor(payload, otherTeam)}
+                    value={pipFor(cardPayload, otherTeam)}
                     color={palette.scoreText}
                   />
                 </View>
@@ -1576,13 +1748,13 @@ function GameTable({
                   }}
                 >
                   <Text style={[bigScore, { color: palette.scoreText }]}>
-                    {gameState.scores[viewTeam]}
+                    {cardScores[viewTeam]}
                   </Text>
                   <Text style={{ color: palette.scoreText, opacity: 0.5 }}>
                     –
                   </Text>
                   <Text style={[bigScore, { color: palette.scoreText }]}>
-                    {gameState.scores[otherTeam]}
+                    {cardScores[otherTeam]}
                   </Text>
                 </View>
 
@@ -1592,6 +1764,11 @@ function GameTable({
                   <Pressable
                     onPress={handleNextRound}
                     disabled={nextRoundLoading}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      disabled: nextRoundLoading,
+                      busy: nextRoundLoading,
+                    }}
                     style={{
                       ...overlayButton,
                       backgroundColor: palette.accent,
@@ -1613,6 +1790,7 @@ function GameTable({
           {isFinished && !lastCallout ? (
             <View style={overlayBackdrop}>
               <View
+                accessibilityViewIsModal
                 style={[overlayCard, { backgroundColor: palette.scoreBg }]}
               >
                 <Text style={{ fontSize: 56 }}>
@@ -1691,6 +1869,11 @@ function GameTable({
                   <Pressable
                     onPress={handleRematch}
                     disabled={rematchLoading}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      disabled: rematchLoading,
+                      busy: rematchLoading,
+                    }}
                     style={{
                       ...overlayButton,
                       backgroundColor: palette.accent,
@@ -1713,7 +1896,7 @@ function GameTable({
 
         {/* Bottom panel (respects home indicator): my hand, or the spectator
             strip when this device has no seat at the table. */}
-        {isGameEnded ? null : mySeat ? (
+        {tableClosed ? null : mySeat ? (
           <View
             style={{
               backgroundColor: palette.handBg,
@@ -1761,6 +1944,10 @@ function GameTable({
               boardLeftEnd={boardLeftEnd}
               boardRightEnd={boardRightEnd}
               boneyardCount={gameState.boneyard?.length ?? 0}
+              waitingLabel={s.turnOf(turnName)}
+              accent={palette.accent}
+              panelBg={palette.handBg}
+              mutedText={palette.handText}
               onPlay={handlePlay}
               onPass={handlePass}
               onDraw={handleDraw}
@@ -2065,6 +2252,12 @@ function SideRail({
   );
 }
 
+function winningTeamOf(payload: CalloutPayload | null): 0 | 1 | null {
+  return payload && typeof payload.winningTeam === "number"
+    ? payload.winningTeam
+    : null;
+}
+
 function pipFor(
   payload: CalloutPayload | null,
   team: 0 | 1
@@ -2170,6 +2363,12 @@ const awayPill = {
   maxWidth: 300,
   alignItems: "center" as const,
   gap: 2,
+};
+
+// Amber, like the claim button it warns about.
+const warnPill = {
+  ...awayPill,
+  backgroundColor: "rgba(251,191,36,0.95)",
 };
 
 const overlayBackdrop = {

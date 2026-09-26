@@ -29,7 +29,7 @@ import { useI18n } from "../lib/i18n";
 import { clearSession, saveSession } from "../lib/session";
 import { TILE_SKINS, useTileSkin, type TileSkinId } from "../lib/tileSkins";
 import { API_BASE, THEME } from "../theme";
-import type { Lang } from "@capi/i18n";
+import { errorKeyFor, type ErrorKey, type Lang } from "@capi/i18n";
 
 const LANGS: Lang[] = ["es", "en"];
 
@@ -111,6 +111,12 @@ function productIdForFichas(id: PremiumFichasId): ProductId {
       return PRODUCT_IDS.fichasKingston;
   }
 }
+
+// Floating pills are about 23pt tall; the slop brings each to a 44pt target.
+// Only the outer edge of a pair gets horizontal slop, so neighbors never
+// share a strip of the other's target.
+const PILL_SLOP_V = 11;
+const PILL_SLOP_H = 8;
 
 // Which locked picker card opened the store, so the matching purchase can
 // select that design and dismiss the sheet.
@@ -239,7 +245,10 @@ export default function Index() {
   const [targetScore, setTargetScore] = useState<100 | 200>(100);
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState<"create" | "join" | null>(null);
-  const [error, setError] = useState("");
+  // A string key, so the message follows a language switch.
+  const [errorKey, setErrorKey] = useState<ErrorKey | "networkError" | null>(
+    null
+  );
   const [storeOpen, setStoreOpen] = useState(false);
   const storeTargetRef = useRef<StoreTarget | null>(null);
   const [resumable, setResumable] = useState<ResumableGame[]>([]);
@@ -315,7 +324,7 @@ export default function Index() {
   async function handleCreate() {
     if (!nickname.trim() || loading) return;
     setLoading("create");
-    setError("");
+    setErrorKey(null);
     try {
       const res = await fetch(`${API_BASE}/api/games`, {
         method: "POST",
@@ -329,9 +338,9 @@ export default function Index() {
           targetScore,
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? s.failedCreate);
+        setErrorKey(errorKeyFor(data.error, "failedCreate"));
         return;
       }
       await saveSession({
@@ -341,7 +350,7 @@ export default function Index() {
       });
       router.push(`/game/${data.gameId}`);
     } catch {
-      setError(s.networkError);
+      setErrorKey("networkError");
     } finally {
       setLoading(null);
     }
@@ -350,12 +359,20 @@ export default function Index() {
   async function handleJoin() {
     if (!nickname.trim() || inviteCode.trim().length !== 6 || loading) return;
     setLoading("join");
-    setError("");
+    setErrorKey(null);
     try {
       const code = inviteCode.trim().toUpperCase();
       const lookupRes = await fetch(`${API_BASE}/api/games/by-code/${code}`);
       if (!lookupRes.ok) {
-        setError(s.gameNotFound);
+        // Only a 404 means a wrong code; a server failure is not the
+        // player's typo.
+        const body = await lookupRes.json().catch(() => ({}));
+        setErrorKey(
+          errorKeyFor(
+            body.error,
+            lookupRes.status === 404 ? "gameNotFound" : "failedJoin"
+          )
+        );
         return;
       }
       const { gameId } = await lookupRes.json();
@@ -365,9 +382,9 @@ export default function Index() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nickname: nickname.trim(), avatarColor }),
       });
-      const data = await joinRes.json();
+      const data = await joinRes.json().catch(() => ({}));
       if (!joinRes.ok) {
-        setError(data.error ?? s.failedJoin);
+        setErrorKey(errorKeyFor(data.error, "failedJoin"));
         return;
       }
       await saveSession({
@@ -377,7 +394,7 @@ export default function Index() {
       });
       router.push(`/game/${gameId}`);
     } catch {
-      setError(s.networkError);
+      setErrorKey("networkError");
     } finally {
       setLoading(null);
     }
@@ -403,6 +420,7 @@ export default function Index() {
           onPress={() => openStore(null)}
           accessibilityRole="button"
           accessibilityLabel={s.store}
+          hitSlop={{ top: PILL_SLOP_V, bottom: PILL_SLOP_V, left: PILL_SLOP_H }}
           style={{
             paddingHorizontal: 12,
             paddingVertical: 5,
@@ -420,6 +438,7 @@ export default function Index() {
           onPress={() => router.push("/rules")}
           accessibilityRole="button"
           accessibilityLabel={s.howToPlay}
+          hitSlop={{ top: PILL_SLOP_V, bottom: PILL_SLOP_V, right: PILL_SLOP_H }}
           style={{
             paddingHorizontal: 12,
             paddingVertical: 5,
@@ -441,13 +460,19 @@ export default function Index() {
           { right: 20, top: insets.top + 12, flexDirection: "row" },
         ]}
       >
-        {LANGS.map((l) => (
+        {LANGS.map((l, i) => (
           <Pressable
             key={l}
             onPress={() => setLang(l)}
             accessibilityRole="button"
             accessibilityLabel={l === "es" ? "ES" : "EN"}
             accessibilityState={{ selected: lang === l }}
+            hitSlop={{
+              top: PILL_SLOP_V,
+              bottom: PILL_SLOP_V,
+              left: i === 0 ? PILL_SLOP_H : 0,
+              right: i === LANGS.length - 1 ? PILL_SLOP_H : 0,
+            }}
             style={{
               paddingHorizontal: 12,
               paddingVertical: 5,
@@ -595,13 +620,14 @@ export default function Index() {
           <View style={{ gap: 8 }}>
             <Text style={labelStyle}>{s.yourColor}</Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              {AVATAR_COLORS.map((c) => (
+              {AVATAR_COLORS.map((c, i) => (
                 <Pressable
                   key={c}
                   onPress={() => setAvatarColor(c)}
                   hitSlop={6}
                   accessibilityRole="button"
-                  accessibilityLabel={s.yourColor}
+                  // Numbered so VoiceOver tells the six swatches apart.
+                  accessibilityLabel={`${s.yourColor} ${i + 1}`}
                   accessibilityState={{ selected: avatarColor === c }}
                   style={{
                     width: 32,
@@ -873,9 +899,9 @@ export default function Index() {
             </View>
           </View>
 
-          {error ? (
+          {errorKey ? (
             <Text style={{ color: "#dc2626", fontSize: 14, fontWeight: "500" }}>
-              {error}
+              {s[errorKey]}
             </Text>
           ) : null}
 
