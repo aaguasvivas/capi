@@ -14,7 +14,15 @@ export type ErrorKey =
   | "errGameFull"
   | "errGameStarted"
   | "errNotInPlay"
-  | "errClaimTooEarly";
+  | "errClaimTooEarly"
+  | "errClaimOwnSide"
+  | "errClaimTurnBased"
+  | "errRematchNotFinished"
+  | "errNicknameRequired"
+  | "errServer"
+  | "failedRematch"
+  | "failedCreate"
+  | "failedJoin";
 
 const EXACT: Record<string, ErrorKey> = {
   "Not your turn": "errNotYourTurn",
@@ -34,6 +42,18 @@ const EXACT: Record<string, ErrorKey> = {
   "State is stale - refetch": "errStale",
   "State conflict - refetch": "errStale",
   "Too early to claim": "errClaimTooEarly",
+  "No move on record yet": "errClaimTooEarly",
+  "Your side is on turn": "errClaimOwnSide",
+  "Claim is not available in turn-based games": "errClaimTurnBased",
+  "Game is not finished": "errRematchNotFinished",
+  "Failed to create rematch": "failedRematch",
+  "Nickname is required": "errNicknameRequired",
+  "Player not in game": "errNotAtTable",
+  "Failed to join game": "failedJoin",
+  "Failed to create game": "failedCreate",
+  "Failed to create player": "failedCreate",
+  "Game has no host": "gameNotFound",
+  "Internal server error": "errServer",
   "Connection error": "connectionError",
 };
 

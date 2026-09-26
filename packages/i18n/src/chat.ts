@@ -1,9 +1,10 @@
 import type { Lang } from "./strings";
 
-// Quick chat is predefined-only, end to end: clients send a phrase id, the
-// server accepts only ids from this list, and every receiver renders the
-// phrase in its own language. Raw display strings from older clients are
-// still recognized (mapped back to their id) so mixed versions keep talking.
+// Quick chat is predefined-only, end to end. On the wire (the chat-<gameId>
+// broadcast) a phrase travels as its display text in the sender's language,
+// because the 1.0 app prints the payload as is. Every newer receiver maps the
+// text back to its id with normalizeChatPayload and renders it in its own
+// language; the server stores the id.
 
 export type QuickChatKind = "quick_chat" | "emote";
 
@@ -16,11 +17,14 @@ export interface QuickPhrase {
 export const QUICK_PHRASES: readonly QuickPhrase[] = [
   { id: "dale", es: "¡Dale!", en: "Let's go!" },
   { id: "te_toca", es: "¡Te toca!", en: "Your turn!" },
+  { id: "ta_ahi", es: "¿Tú ta' ahí?", en: "You there?" },
+  { id: "apurate", es: "¡Apúrate!", en: "Hurry up!" },
   { id: "tranquilo", es: "¡Tranquilo!", en: "Chill out!" },
   { id: "aguanta", es: "¡Aguanta!", en: "Hold up!" },
   { id: "eso_e", es: "¡Eso e'!", en: "That's crazy!" },
   { id: "vamo_alla", es: "¡Vamo' allá!", en: "We outside!" },
   { id: "que_lo_que", es: "¡Qué lo qué!", en: "Say less!" },
+  { id: "buena_mano", es: "¡Buena mano!", en: "Nice hand!" },
 ];
 
 export const EMOTES: readonly string[] = ["🔥", "😂", "😤", "💀", "👑"];

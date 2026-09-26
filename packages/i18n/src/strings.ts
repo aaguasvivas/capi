@@ -159,11 +159,14 @@ export interface Strings {
   reportBugSent: string;
   reportBugCancel: string;
   reportBugFailed: string;
+  // Shown in the report form: the form is not a chat to the opponent.
+  reportBugNotChat: string;
 
   // Footer
   footerPrivacy: string;
   footerSupport: string;
   howToPlay: string;
+  notFoundTitle: string;
   back: string;
 
   // Round-over award clarity
@@ -181,6 +184,10 @@ export interface Strings {
   // Claim window: the seat on turn has been silent; the other side may end it.
   stalledFor: (name: string, time: string) => string;
   claimHint: string;
+  // Warning to the seat on turn once the other side can claim soon.
+  claimWarnMe: string;
+  // A seat passed (other players' view).
+  passed: (name: string) => string;
   claimWin: string;
   claimWinConfirm: string;
   wonByForfeit: (name: string) => string;
@@ -218,6 +225,11 @@ export interface Strings {
   errMustPlay: string;
   errMustDraw: string;
   errClaimTooEarly: string;
+  errClaimOwnSide: string;
+  errClaimTurnBased: string;
+  errRematchNotFinished: string;
+  errNicknameRequired: string;
+  errServer: string;
   errTileMismatch: string;
   errMoveFailed: string;
   errStale: string;
@@ -230,6 +242,8 @@ export interface Strings {
   storeUnavailable: string;
   restoreFailed: string;
   priceUnknown: string;
+  purchasePending: string;
+  adPrivacyOptions: string;
   purchaseErrorProduct: string;
   purchaseErrorStore: string;
 
@@ -366,12 +380,13 @@ export const es: Strings = {
   score100: "100 puntos",
   score200: "200 puntos",
 
-  reportBug: "Reportar bug",
-  reportBugTitle: "¿Algo salió mal?",
+  reportBug: "Reportar un problema",
+  reportBugTitle: "Reportar un problema",
   reportBugPrompt:
-    "Cuéntame qué pasó. Este mensaje le llega al equipo de Capi, no a tu oponente. Mando el estado del juego para reproducirlo.",
+    "Esto le llega al equipo de Capi, no a tu oponente. Cuéntanos qué pasó; mandamos el estado de la partida para poder arreglarlo.",
+  reportBugNotChat: "Para hablarle a tu oponente, usa el chat 💬 de la mesa.",
   reportBugPlaceholder: "Ej: Mis fichas desaparecieron después de pasar…",
-  reportBugSend: "Enviar",
+  reportBugSend: "Enviar a Capi",
   reportBugSending: "Enviando…",
   reportBugSent: "¡Gracias! Reporte recibido.",
   reportBugCancel: "Cancelar",
@@ -380,6 +395,7 @@ export const es: Strings = {
   footerPrivacy: "Privacidad",
   footerSupport: "Soporte",
   howToPlay: "Cómo se juega",
+  notFoundTitle: "Esta página no existe",
   back: "Volver",
 
   pipsInHand: "Pintas en mano",
@@ -394,6 +410,8 @@ export const es: Strings = {
   awayHint: "Parece que se desconectó",
   stalledFor: (name, time) => `${name} lleva ${time} sin jugar`,
   claimHint: "A los 2 minutos sin jugada puedes reclamar la partida.",
+  claimWarnMe: "Juega pronto: a los 2 minutos sin jugada, el otro lado puede reclamar la partida.",
+  passed: (name) => `${name} pasó`,
   claimWin: "Reclamar la partida",
   claimWinConfirm:
     "La partida termina aquí y tu lado gana por abandono. ¿Seguro?",
@@ -429,6 +447,11 @@ export const es: Strings = {
   errMustPlay: "Tienes ficha para jugar",
   errMustDraw: "Primero jala del pozo",
   errClaimTooEarly: "Todavía no. Espera a que pasen 2 minutos sin jugada.",
+  errClaimOwnSide: "Le toca a tu lado, así que no hay nada que reclamar.",
+  errClaimTurnBased: "Las partidas de iMessage no se reclaman: cada quien juega a su ritmo.",
+  errRematchNotFinished: "La partida todavía no termina.",
+  errNicknameRequired: "Escribe tu nombre.",
+  errServer: "Algo falló en el servidor. Intenta de nuevo.",
   errTileMismatch: "Esa ficha no pega ahí",
   errMoveFailed: "No se pudo jugar",
   errStale: "La mesa cambió, actualizando…",
@@ -440,6 +463,8 @@ export const es: Strings = {
   storeUnavailable: "La tienda no responde ahora",
   restoreFailed: "No se pudo conectar con la App Store",
   priceUnknown: "Ver precio",
+  purchasePending: "Tu compra está esperando aprobación. Se desbloquea cuando la aprueben.",
+  adPrivacyOptions: "Opciones de privacidad de anuncios",
   purchaseErrorProduct: "Ese producto no está disponible todavía",
   purchaseErrorStore: "La App Store no respondió",
 
@@ -574,13 +599,14 @@ export const en: Strings = {
   score100: "100 pts",
   score200: "200 pts",
 
-  reportBug: "Report bug",
-  reportBugTitle: "Something off?",
+  reportBug: "Report a problem",
+  reportBugTitle: "Report a problem",
   reportBugSent: "Thanks - got it.",
   reportBugPrompt:
-    "Tell me what happened. This goes to the Capi team, not to your opponent. I send the game state along so I can repro it.",
+    "This goes to the Capi team, not to your opponent. Tell us what happened; the game state is attached so we can fix it.",
+  reportBugNotChat: "To talk to your opponent, use the 💬 chat on the table.",
   reportBugPlaceholder: "e.g. My tiles disappeared after I passed…",
-  reportBugSend: "Send",
+  reportBugSend: "Send to Capi",
   reportBugSending: "Sending…",
   reportBugCancel: "Cancel",
   reportBugFailed: "Couldn't send. Try again.",
@@ -588,6 +614,7 @@ export const en: Strings = {
   footerPrivacy: "Privacy",
   footerSupport: "Support",
   howToPlay: "How to play",
+  notFoundTitle: "This page does not exist",
   back: "Back",
 
   pipsInHand: "Pips left in hand",
@@ -602,6 +629,8 @@ export const en: Strings = {
   awayHint: "Looks like they disconnected",
   stalledFor: (name, time) => `${name} hasn't played in ${time}`,
   claimHint: "After 2 minutes without a move you can claim the win.",
+  claimWarnMe: "Play soon: after 2 minutes without a move, the other side can claim the game.",
+  passed: (name) => `${name} passed`,
   claimWin: "Claim the win",
   claimWinConfirm:
     "The game ends here and your side wins by forfeit. Sure?",
@@ -637,6 +666,11 @@ export const en: Strings = {
   errMustPlay: "You have a tile you can play",
   errMustDraw: "Draw from the boneyard first",
   errClaimTooEarly: "Not yet. Wait until 2 minutes pass without a move.",
+  errClaimOwnSide: "It is your side's turn, so there is nothing to claim.",
+  errClaimTurnBased: "iMessage games can't be claimed: everyone plays at their own pace.",
+  errRematchNotFinished: "The game is not over yet.",
+  errNicknameRequired: "Enter your name.",
+  errServer: "Something went wrong on the server. Try again.",
   errTileMismatch: "That tile does not fit there",
   errMoveFailed: "Could not play that",
   errStale: "The table changed, syncing…",
@@ -648,6 +682,8 @@ export const en: Strings = {
   storeUnavailable: "The store is not responding right now",
   restoreFailed: "Could not reach the App Store",
   priceUnknown: "See price",
+  purchasePending: "Your purchase is waiting for approval. It unlocks once it is approved.",
+  adPrivacyOptions: "Ad privacy options",
   purchaseErrorProduct: "That item is not available yet",
   purchaseErrorStore: "The App Store did not respond",
 
