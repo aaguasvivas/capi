@@ -90,6 +90,13 @@ describe("claimCheck", () => {
     expect(canClaim(playing(), "n", T0 + CLAIM_AFTER_MS)).toBe(true);
   });
 
+  it("never lets anyone claim a turn-based game, however long the seat is silent", () => {
+    const state = playing({ mode: "turn_based" });
+    const res = claimCheck(state, "n", T0 + 24 * 60 * 60 * 1000);
+    expect(res).toMatchObject({ ok: false, error: CLAIM_ERRORS.turnBased, status: 409 });
+    expect(canClaim(state, "n", T0 + CLAIM_AFTER_MS)).toBe(false);
+  });
+
   it("lets either partner of the other side claim in 2v2, never the silent side", () => {
     const base = createInitialState({
       mode: "live",

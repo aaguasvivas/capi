@@ -4,6 +4,8 @@ import { getTeam } from "./types";
 // A table cannot wait forever for a seat that stopped playing. Once the seat
 // on turn has been silent this long (measured from the server clock the API
 // stores in `lastMoveAt`), any player on the other side may claim the game.
+// Turn-based games (the iMessage extension creates them) are played over
+// hours, so silence there is normal and they can never be claimed.
 export const CLAIM_AFTER_MS = 120_000;
 
 // The table starts saying how long the seat has been silent from here on.
@@ -15,6 +17,7 @@ export const CLAIM_ERRORS = {
   ownSide: "Your side is on turn",
   noClock: "No move on record yet",
   tooEarly: "Too early to claim",
+  turnBased: "Claim is not available in turn-based games",
 } as const;
 
 export type ClaimCheck =
@@ -37,6 +40,9 @@ export function canClaim(state: GameState, seat: Seat, now: number): boolean {
 }
 
 export function claimCheck(state: GameState, claimer: Seat, now: number): ClaimCheck {
+  if (state.mode === "turn_based") {
+    return { ok: false, error: CLAIM_ERRORS.turnBased, status: 409 };
+  }
   if (state.phase !== "playing") {
     return { ok: false, error: CLAIM_ERRORS.notInPlay, status: 409 };
   }
