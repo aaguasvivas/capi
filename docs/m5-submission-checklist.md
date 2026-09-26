@@ -177,6 +177,18 @@ A's Todo Capi and the restore test proves nothing.
       with tiles), the Todo Capi card shows the six-box strip, nothing clips
       at 375 points.
 - [ ] Home: "Cómo se juega" opens the rules modal; playcapi.com/rules matches.
+- [ ] Polish-pass behaviors: an opponent's pass shows "X pasó" for a moment;
+      the player on turn sees "Juega pronto..." after a minute; if the other
+      phone taps Siguiente ronda first, your round card stays until you close
+      it (and closes by itself when it is your turn); the problem-report form
+      opens from the score strip, says it goes to the Capi team, and its Send
+      button stays above the keyboard; the quick chat tray shows 10 phrases in
+      two columns; the status bar is light on the game screen.
+- [ ] iMessage: no stall notice and no claim button in a Messages game; a
+      rematch from the drawer stays inside Messages, and the next bubble opens
+      the new table.
+- [ ] Mixed versions: a phone still on 1.0 (App Store) at the same table as
+      the new build shows quick-chat phrases as words, not ids like "eso_e".
 
 ## F. Submit (You)
 
