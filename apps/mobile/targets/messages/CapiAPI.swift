@@ -2,7 +2,8 @@ import Foundation
 
 // Thin client of the same REST API the web and apps use. Bodies and shapes
 // mirror apps/web/src/components/CreateGameForm.tsx and
-// apps/web/src/app/api/games/[id]/join/route.ts exactly.
+// apps/web/src/app/api/games/[id]/join/route.ts, except that create asks for
+// a turn-based table.
 enum CapiAPI {
     #if DEBUG
     static let base = URL(string: "http://localhost:3000")!
@@ -18,9 +19,11 @@ enum CapiAPI {
     // only consulted to tell the two 409 reasons apart and is never shown.
     enum Failure: Error { case server(status: Int, message: String); case network }
 
+    // Games in a Messages thread are played over hours, so they are created
+    // turn-based: the server never lets a silent seat be claimed in them.
     static func create(nickname: String, avatarColor: String, is2v2: Bool, theme: String = "barberia", targetScore: Int = 100) async throws -> CreateResponse {
         try await post(path: "/api/games", body: [
-            "nickname": nickname, "avatarColor": avatarColor,
+            "nickname": nickname, "avatarColor": avatarColor, "mode": "turn_based",
             "theme": theme, "is2v2": is2v2, "targetScore": targetScore,
         ])
     }

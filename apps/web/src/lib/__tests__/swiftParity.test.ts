@@ -24,6 +24,7 @@ const mirrored: Record<string, keyof Strings> = {
   create: "createGame",
   yourName: "yourName",
   connectionError: "connectionError",
+  cancel: "cancel",
 };
 
 describe("CapiStrings.swift mirrors packages/i18n", () => {

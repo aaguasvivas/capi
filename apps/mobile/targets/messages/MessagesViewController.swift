@@ -163,11 +163,14 @@ final class MessagesViewController: MSMessagesAppViewController {
         // Restamps lastSeen, so a table in use is never pruned.
         CapiStore.save(session)
         let web = GameWebView(gameId: gameId, session: session)
-        web.onBridgeEvent = { [weak self] event in self?.handleBridge(event, gameId: gameId) }
+        web.onBridgeEvent = { [weak self, weak web] event, shownId in
+            guard let self, let web else { return }
+            self.handleBridge(event, gameId: shownId, web: web)
+        }
         web.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(web)
         pin(web)
-        addGameButtons(gameId: gameId, session: session)
+        addGameButtons()
         currentGameId = gameId
     }
 
@@ -187,12 +190,13 @@ final class MessagesViewController: MSMessagesAppViewController {
         send(caption: caption, sub: code, gameId: gameId, code: code, session: session, via: .stage)
     }
 
-    private func handleBridge(_ event: [String: Any], gameId: String) {
+    private func handleBridge(_ event: [String: Any], gameId: String, web: GameWebView) {
         // The page is remote content: every field is type-checked and the
         // scores are clamped before anything reaches a bubble.
         guard let game = currentRef, game.gameId == gameId,
-              let type = event["type"] as? String,
-              let myRaw = event["myScore"] as? Int, let oppRaw = event["oppScore"] as? Int else { return }
+              let type = event["type"] as? String else { return }
+        if type == "rematch" { return followRematch(event, web: web) }
+        guard let myRaw = event["myScore"] as? Int, let oppRaw = event["oppScore"] as? Int else { return }
         let my = min(max(myRaw, 0), 999)
         let opp = min(max(oppRaw, 0), 999)
         let caption: String
@@ -226,6 +230,24 @@ final class MessagesViewController: MSMessagesAppViewController {
         // since a synchronous call here lands mid-transaction (during the
         // webview's touch handling) and gets silently ignored.
         DispatchQueue.main.async { [weak self] in self?.requestPresentationStyle(.compact) }
+    }
+
+    // "Play again" seated this player at a new table and the page moved there
+    // on its own. Save that seat and make the new table the current game, so
+    // the next bubble links to it instead of the finished one. No bubble here:
+    // the first move at the new table posts one.
+    private func followRematch(_ event: [String: Any], web: GameWebView) {
+        guard let gameId = event["gameId"] as? String, GameRef.isValidId(gameId),
+              let code = event["code"] as? String, code.count <= 12,
+              code.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber) }),
+              let playerId = event["playerId"] as? String, GameRef.isValidId(playerId),
+              let seat = event["seat"] as? String, ["n", "e", "s", "w"].contains(seat) else { return }
+        let session = CapiSession(playerId: playerId, seat: seat, gameId: gameId)
+        CapiStore.save(session)
+        currentRef = GameRef(gameId: gameId, code: code)
+        currentGameId = gameId
+        lastBubble = nil
+        web.follow(gameId: gameId, session: session)
     }
 
     // Invites are staged with insert (the user reviews and taps send);
@@ -265,12 +287,15 @@ final class MessagesViewController: MSMessagesAppViewController {
         hc.didMove(toParent: self)
     }
 
-    private func addGameButtons(gameId: String, session: CapiSession) {
+    private func addGameButtons() {
         var open = UIButton.Configuration.gray()
         open.title = CapiStrings.openInCapi
+        // Reads the game at tap time: a rematch changes it under the buttons.
         let openButton = UIButton(configuration: open, primaryAction: UIAction { [weak self] _ in
-            guard let url = Self.appLink(gameId: gameId, session: session) else { return }
-            self?.extensionContext?.open(url, completionHandler: nil)
+            guard let self, let gameId = self.currentGameId,
+                  let session = CapiStore.session(for: gameId),
+                  let url = Self.appLink(gameId: gameId, session: session) else { return }
+            self.extensionContext?.open(url, completionHandler: nil)
         })
         var fresh = UIButton.Configuration.plain()
         fresh.title = CapiStrings.newGame

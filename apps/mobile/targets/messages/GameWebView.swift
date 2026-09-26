@@ -3,28 +3,32 @@ import WebKit
 
 // Expanded-mode game surface: the playcapi.com game page in embed mode with
 // the session handed over via URL fragment. Bridge messages arrive on the
-// "capi" handler and are forwarded to the shell for bubble refreshes.
-final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate {
+// "capi" handler and are forwarded to the shell for bubble refreshes, tagged
+// with the game the page is showing.
+final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     private let webView: WKWebView
-    private let pageURL: URL
+    // The game on screen. A rematch moves the page to a new table by itself;
+    // follow(gameId:session:) keeps this and pageURL in step with it.
+    private(set) var gameId: String
+    private var pageURL: URL
     // Covers the table when the page cannot load; Retry reloads pageURL.
     private let offlineView = UIView()
-    var onBridgeEvent: (([String: Any]) -> Void)?
+    var onBridgeEvent: ((_ event: [String: Any], _ gameId: String) -> Void)?
+    // The open alert or confirm and its WebKit callback. WebKit raises if a
+    // dialog callback is dropped without being called, so teardown answers it.
+    private weak var dialog: UIAlertController?
+    private var answerDialog: ((Bool) -> Void)?
 
     init(gameId: String, session: CapiSession) {
-        var comps = URLComponents(url: CapiAPI.base.appendingPathComponent("/game/\(gameId)"), resolvingAgainstBaseURL: false)!
-        comps.queryItems = [
-            URLQueryItem(name: "embed", value: "imessage"),
-            URLQueryItem(name: "lang", value: CapiStrings.es ? "es" : "en"),
-        ]
-        comps.fragment = "s=\(session.playerId).\(session.seat)"
-        pageURL = comps.url!
+        self.gameId = gameId
+        pageURL = GameWebView.makePageURL(gameId: gameId, session: session)
         webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
         super.init(frame: .zero)
         // The controller retains its handlers strongly, and a direct self
         // would cycle through webView.configuration and leak every webview.
         webView.configuration.userContentController.add(WeakScriptMessageHandler(self), name: "capi")
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
         pin(webView)
@@ -35,15 +39,86 @@ final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate {
     required init?(coder: NSCoder) { fatalError() }
 
     deinit {
+        // A collapsed drawer tears this view down under an open dialog.
+        dialog?.dismiss(animated: false)
+        finishDialog(false)
         webView.stopLoading()
         webView.navigationDelegate = nil
+        webView.uiDelegate = nil
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "capi")
+    }
+
+    private static func makePageURL(gameId: String, session: CapiSession) -> URL {
+        var comps = URLComponents(url: CapiAPI.base.appendingPathComponent("/game/\(gameId)"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [
+            URLQueryItem(name: "embed", value: "imessage"),
+            URLQueryItem(name: "lang", value: CapiStrings.es ? "es" : "en"),
+        ]
+        comps.fragment = "s=\(session.playerId).\(session.seat)"
+        return comps.url!
+    }
+
+    // The page already navigated to the new table; this only retargets the
+    // bridge tag and what Retry reloads.
+    func follow(gameId: String, session: CapiSession) {
+        self.gameId = gameId
+        pageURL = GameWebView.makePageURL(gameId: gameId, session: session)
     }
 
     // MARK: bridge
 
     func userContentController(_ c: WKUserContentController, didReceive message: WKScriptMessage) {
-        if let body = message.body as? [String: Any] { onBridgeEvent?(body) }
+        if let body = message.body as? [String: Any] { onBridgeEvent?(body, gameId) }
+    }
+
+    // MARK: JavaScript dialogs
+
+    // Without these, WebKit answers alert() at once and confirm() with false,
+    // so a page action that asks first (claiming the win) silently did nothing.
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        presentDialog(message: message, cancellable: false) { _ in completionHandler() }
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        presentDialog(message: message, cancellable: true, answer: completionHandler)
+    }
+
+    private func presentDialog(message: String, cancellable: Bool, answer: @escaping (Bool) -> Void) {
+        // One dialog at a time, and only when there is a controller free to
+        // present it; otherwise answer as a cancel so the page never hangs.
+        guard answerDialog == nil, let host = hostController(), host.presentedViewController == nil else {
+            return answer(false)
+        }
+        answerDialog = answer
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        if cancellable {
+            alert.addAction(UIAlertAction(title: CapiStrings.cancel, style: .cancel) { [weak self] _ in
+                self?.finishDialog(false)
+            })
+        }
+        alert.addAction(UIAlertAction(title: CapiStrings.ok, style: .default) { [weak self] _ in
+            self?.finishDialog(true)
+        })
+        dialog = alert
+        host.present(alert, animated: true)
+    }
+
+    private func finishDialog(_ confirmed: Bool) {
+        guard let answer = answerDialog else { return }
+        answerDialog = nil
+        dialog = nil
+        answer(confirmed)
+    }
+
+    private func hostController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let next = responder?.next {
+            if let controller = next as? UIViewController { return controller }
+            responder = next
+        }
+        return nil
     }
 
     // MARK: navigation

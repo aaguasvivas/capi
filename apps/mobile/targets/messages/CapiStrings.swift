@@ -3,10 +3,10 @@ import Foundation
 // The only strings duplicated from packages/i18n/src/strings.ts (bubbles must
 // render without the webview). Mirrored one to one: yourTurnGeneric, roundWon,
 // gameWon, invite1v1, invite2v2, tableFull, gameStarted, openInCapi, yourName,
-// connectionError; under another name: join (joinGame), create (createGame).
-// apps/web/src/lib/__tests__/swiftParity.test.ts reads this file and fails
-// when a mirrored literal drifts. tableNotFound, newGame, cannotLoad and
-// retry exist only here.
+// connectionError, cancel; under another name: join (joinGame), create
+// (createGame). apps/web/src/lib/__tests__/swiftParity.test.ts reads this file
+// and fails when a mirrored literal drifts. tableNotFound, newGame,
+// cannotLoad, retry and ok exist only here.
 enum CapiStrings {
     static var es: Bool { Locale.preferredLanguages.first?.hasPrefix("es") ?? false }
 
@@ -26,4 +26,7 @@ enum CapiStrings {
     static var connectionError: String { es ? "Error de conexión" : "Connection dropped" }
     static var cannotLoad: String { es ? "No se pudo cargar la mesa" : "Could not load the table" }
     static var retry: String { es ? "Reintentar" : "Retry" }
+    // Buttons of the page's JavaScript alert and confirm dialogs.
+    static var cancel: String { es ? "Cancelar" : "Cancel" }
+    static var ok: String { es ? "Aceptar" : "OK" }
 }
