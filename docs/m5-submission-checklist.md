@@ -32,7 +32,8 @@ which the new engine breaks on a tie. The What's New in docs/store-listing.md
 names the pase de salida, so 1.1 cannot ship on build 20 with those notes. Cut
 a new production build once the rules update lands and the server runs it.
 "The rules-update build" below means that build; test it, select it in App
-Store Connect, and submit it, not 16, 17, 19, or 20.
+Store Connect, and submit it, not 16, 17, 19, or 20. It is build 21 (EAS id
+b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
 
 ## A. Code gates (Me)
 
@@ -117,13 +118,15 @@ Store Connect, and submit it, not 16, 17, 19, or 20.
       The .ipa's extension declares CFBundleIcons and version 1.1.0 (20).
       Submitted to App Store Connect on 2026-09-27 (submission b562ae8c).
       Confirm no ITMS email comes back for it. Superseded by the rules update.
-- [ ] The rules-update build: cut from the tree with the rules update after
-      main deploys it. Production-config simulator pass on the iPhone SE and
-      14 Plus: "How to play" has the Pase de salida section and the tie
-      sentence; a 2v2 pase de salida shows "¡PASE DE SALIDA!" +25 for the
-      opener's side. The .ipa's extension declares CFBundleIcons and version
-      1.1.0. Submit it to App Store Connect and record its build number and
-      EAS id here.
+- [x] The rules-update build, build 21 (EAS id b5e46d7f, commit 9d2377b).
+      The production-config simulator build of the same commit (EAS
+      c4dd0222) passed on the 14 Plus against playcapi.com: a crafted 2v2
+      opening showed "¡PASE DE SALIDA!" +25 for Norte & Sur, a tied tranque
+      showed "Empate: gana Norte, que salió", and "Cómo se juega" has the
+      Pase de salida section and the new tie lines. The .ipa's extension
+      declares CFBundleIcons and version 1.1.0 (21). Submitted to App Store
+      Connect on 2026-09-27 (submission 9a48e179). Confirm no ITMS email
+      comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
@@ -155,7 +158,7 @@ Store Connect, and submit it, not 16, 17, 19, or 20.
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
 - [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select the rules-update build for the 1.1 version (16 and 17 have no
+- [ ] D8. Select build 21 (the rules-update build) for the 1.1 version (16 and 17 have no
       iMessage icon; 19 predates the polish pass; 20 predates the rules
       update).
 - [ ] D9. Version Release: choose "Manually release this version" (you press
@@ -229,6 +232,6 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and the rules-update build
-      selected, then submit. Review typically takes 1 to 3 days. If
+- [ ] Add for Review with the 8 IAPs attached and build 21 selected, then
+      submit. Review typically takes 1 to 3 days. If
       rejected, paste the message to me and I turn the fix around same day.
