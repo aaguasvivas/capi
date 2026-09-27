@@ -51,10 +51,15 @@ final class MessagesViewController: MSMessagesAppViewController {
     override func didTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
         super.didTransition(to: presentationStyle)
         if presentationStyle == .compact {
-            // Every collapse, ours after a move or the user's, empties the
-            // drawer so the staged bubble is what shows; nothing re-expands
-            // until a bubble tap or the user's own expand.
-            clearChildren()
+            // A collapse from the table, ours after a move or the user's,
+            // tears the table down so the staged bubble is what shows, and
+            // leaves one button to bring it back; nothing re-expands on its
+            // own. A create or join card stays: iOS 26 reports the drawer's
+            // first appearance as a transition to compact, and clearing the
+            // card there left the drawer blank.
+            if currentGameId != nil {
+                host(TableCard { [weak self] in self?.requestPresentationStyle(.expanded) })
+            }
             return
         }
         if let convo = activeConversation { render(for: convo, tapped: nil) }
@@ -167,10 +172,21 @@ final class MessagesViewController: MSMessagesAppViewController {
             guard let self, let web else { return }
             self.handleBridge(event, gameId: shownId, web: web)
         }
+        // The buttons get their own bar above the page: laid over it, they
+        // covered the page's turn line under the score bar.
+        let bar = gameButtons()
+        view.addSubview(bar)
         web.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(web)
-        pin(web)
-        addGameButtons()
+        NSLayoutConstraint.activate([
+            bar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 2),
+            bar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+            bar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+            web.topAnchor.constraint(equalTo: bar.bottomAnchor, constant: 4),
+            web.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            web.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            web.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
         currentGameId = gameId
     }
 
@@ -287,7 +303,7 @@ final class MessagesViewController: MSMessagesAppViewController {
         hc.didMove(toParent: self)
     }
 
-    private func addGameButtons() {
+    private func gameButtons() -> UIStackView {
         var open = UIButton.Configuration.gray()
         open.title = CapiStrings.openInCapi
         // Reads the game at tap time: a rematch changes it under the buttons.
@@ -304,15 +320,10 @@ final class MessagesViewController: MSMessagesAppViewController {
             self?.startNewGame()
         })
         let row = UIStackView(arrangedSubviews: [newButton, openButton])
-        row.spacing = 4
+        row.distribution = .equalSpacing
         row.alignment = .center
         row.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(row)
-        NSLayoutConstraint.activate([
-            // 64: sits below the embedded page's score bar.
-            row.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 64),
-            row.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-        ])
+        return row
     }
 
     // capi://game/<gameId>?p=<playerId>&seat=<seat>: the app seats this

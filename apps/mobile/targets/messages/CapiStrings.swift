@@ -6,7 +6,7 @@ import Foundation
 // connectionError, cancel; under another name: join (joinGame), create
 // (createGame). apps/web/src/lib/__tests__/swiftParity.test.ts reads this file
 // and fails when a mirrored literal drifts. tableNotFound, newGame,
-// cannotLoad, retry and ok exist only here.
+// backToTable, cannotLoad, retry and ok exist only here.
 enum CapiStrings {
     static var es: Bool { Locale.preferredLanguages.first?.hasPrefix("es") ?? false }
 
@@ -22,6 +22,7 @@ enum CapiStrings {
     static var tableNotFound: String { es ? "Esa mesa ya no existe" : "That table no longer exists" }
     static var openInCapi: String { es ? "Abrir en Capi" : "Open in Capi" }
     static var newGame: String { es ? "Nueva partida" : "New game" }
+    static var backToTable: String { es ? "Volver a la mesa" : "Back to the table" }
     static var yourName: String { es ? "Tu nombre" : "Your name" }
     static var connectionError: String { es ? "Error de conexión" : "Connection dropped" }
     static var cannotLoad: String { es ? "No se pudo cargar la mesa" : "Could not load the table" }

@@ -57,6 +57,20 @@ struct JoinCard: View {
     }
 }
 
+// The collapsed drawer after the table: the staged bubble sits above it, and
+// one tap brings the live table back.
+struct TableCard: View {
+    let onBack: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Capi").font(.system(size: 28, weight: .heavy))
+            Button(CapiStrings.backToTable, action: onBack)
+                .buttonStyle(.borderedProminent)
+        }.padding()
+    }
+}
+
 // The card's one action: spins and ignores taps while a request is in flight.
 struct SubmitButton: View {
     let title: String
