@@ -98,10 +98,12 @@ table's turn line). Select build 20 in App Store Connect, not 16, 17, or 19.
       email must not come back for it; build 18 is a cancelled build.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
-- [ ] The polish-pass build, build 20 (EAS id 9dc17f6a): the production-config
+- [x] The polish-pass build, build 20 (EAS id 9dc17f6a): the production-config
       simulator build of the same code passed on the iPhone SE and 14 Plus;
       the extension fix was checked with a Release build of the extension.
-      Submitted to App Store Connect. Confirm no ITMS email comes back for it.
+      The .ipa's extension declares CFBundleIcons and version 1.1.0 (20).
+      Submitted to App Store Connect on 2026-09-27 (submission b562ae8c).
+      Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
