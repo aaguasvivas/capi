@@ -2,10 +2,9 @@
 
 Status: every "fix now" item below is implemented, reviewed, and green on
 all four gates. Web and server changes are deployed and checked on
-playcapi.com. App and extension changes are typechecked and unit tested but
-not yet seen in the simulator: Xcode 27 needs its license accepted first
-(see "What only you can do"). The new build waits for that and for your
-answers.
+playcapi.com. App and extension changes are checked in the simulator, and the
+final ship audit (2026-09-27, below) found and fixed three iMessage drawer
+defects before the new production build.
 
 Baseline: all four PLAYBOOK gates green before any change (engine 141, web 28,
 mobile 7 tests; typecheck clean; `next build` and `expo export` pass).
@@ -153,9 +152,13 @@ Six were real and are fixed:
   posting the bridge event, no claim UI on a turn-based table (the API answers
   409), the held round card staying readable and closing without a second
   next-round request, the problem-report form, the 404 page, the home page.
-- Not verified yet: every app and extension change in the simulator, the
-  store sheet with the ad privacy link, the IAP review screenshots, and the
-  EAS production-config build. All wait for the Xcode license.
+- Simulator (after the Xcode license, 2026-09-26 and 27): every app change on
+  the iPhone 14 Plus with Metro, then the production-config EAS simulator build
+  (ATT prompt on a fresh install on the SE and the 14 Plus, the banner on home,
+  no DEV button in the store sheet, the Capi icon in the Messages app list).
+  The 8 IAP review screenshots come from that build's store sheet.
+- Not seen: the ad privacy link in the store sheet, which appears only where
+  the consent form requires it (EEA and UK), so a US simulator never shows it.
 
 ## Rules update (owner decisions after the research)
 
@@ -182,3 +185,49 @@ took all 108 points):
   deliberate rule breaks each caught with a printed seed). A fresh review
   found two real issues (the saved-game case above and the store listing
   capicúa line), both fixed.
+
+## Final ship audit (2026-09-27)
+
+Run on the final state: the production-config build in the simulator, the
+live site, the store copy, and the engine.
+
+Found and fixed:
+
+- **The iMessage drawer opened blank.** Opening Capi from the Messages app
+  menu showed an empty drawer; only expanding it showed the create card. iOS 26
+  reports the drawer's first appearance as a transition to compact, and the
+  compact handler cleared the view. The bug dates from 2026-09-02 and was in
+  build 19. Earlier checks reached the drawer through a bubble tap or an
+  expand, which re-render. Fixed in the extension (commit 43dd021).
+- **The drawer's buttons covered the page.** "New game" and "Open in Capi"
+  sat at a fixed offset over the web view, on top of the turn line under the
+  score bar. They now have their own bar above the page.
+- **The collapsed drawer after a move was an empty panel.** It now shows
+  "Volver a la mesa" / "Back to the table", which expands back to the live
+  table.
+- **The table name on the felt wrapped at 375 points** and its first letter
+  ran off the screen. It now stays on one line (live on playcapi.com).
+- **What's New said the drawer closes after a move.** It now says the drawer
+  gets small and the bubble is ready to send.
+
+Checked in the simulator with a Release build of the extension: a cold open
+shows the create card in compact; create stages the invite; the bubble opens
+the table with the bar above it; a move stages "Your turn" and shows the card;
+the other side's move appears live; "Back to the table" restores the table.
+
+Also checked:
+
+- Rules text against the engine, executed on 13 boundary inputs: capicúa on
+  3 and 5 and on 5 and 5, a double going out, a tile in a hand or in the
+  boneyard that keeps the table open, a tranque tie for each opener, locking
+  with the last tile, and the +25 at 74 and at 75 of 100. All match.
+- The 1.0 app and the new tranque: 1.0 reads the callout, the winning side,
+  and the points from the stored game state after every update, and the new
+  payload keeps those fields, so 1.0 players see the right result.
+- The embedded table at 375x570 (the drawer's height on an iPhone SE once the
+  bar takes its row) in Spanish: everything fits.
+- The IAP review screenshots show the current store sheet, with no dev UI.
+
+Not checked: the iMessage drawer on the iPhone SE simulator (driving it needs
+your one-time simulator access for "Capi SE"), and two real phones, which is
+your TestFlight matrix.

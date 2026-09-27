@@ -17,6 +17,11 @@ changes app code and the bundled rules text after build 19. Build 19 is
 superseded: cut a new production build once the pass lands. "The polish-pass
 build" below means that build; test and submit it, not 19.
 
+State on 2026-09-27: the polish-pass build is build 20 (EAS id 9dc17f6a, commit
+c7e8f1b). It also carries the final ship-audit fixes to the iMessage drawer
+(it opened blank from the Messages app menu, and its buttons covered the
+table's turn line). Select build 20 in App Store Connect, not 16, 17, or 19.
+
 ## A. Code gates (Me)
 
 - [x] `grep -rn "3940256099942544\|PENDING_ADMOB" apps/mobile` returns NOTHING
@@ -93,9 +98,10 @@ build" below means that build; test and submit it, not 19.
       email must not come back for it; build 18 is a cancelled build.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
       product id). iMessage screenshots on request if ASC shows that section.
-- [ ] The polish-pass build: built after the 2026-09-26 polish pass lands,
-      simulator pass on iPhone SE and a 6.1-inch iPhone, submitted to App Store
-      Connect. Confirm no ITMS email comes back for it.
+- [ ] The polish-pass build, build 20 (EAS id 9dc17f6a): the production-config
+      simulator build of the same code passed on the iPhone SE and 14 Plus;
+      the extension fix was checked with a Release build of the extension.
+      Submitted to App Store Connect. Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
@@ -143,7 +149,10 @@ A's Todo Capi and the restore test proves nothing.
 - [ ] iMessage: create from Messages on phone A, join from phone B's bubble,
       play with live-watch both directions, "Open in Capi" seats you in the app
       (the deep link now carries the session), "New game" in the drawer works,
-      collapsing the drawer stays collapsed, airplane mode shows the retry view.
+      airplane mode shows the retry view. Opening Capi from the Messages app
+      menu shows the create card right away (not a blank drawer); the drawer's
+      buttons sit above the table, not over the turn line; after a move the
+      small drawer shows "Volver a la mesa" and it brings the table back.
 - [ ] Rematch: finish a game, tap "Jugar otra vez" on phone A; phone B's button
       turns into "Ir a la revancha" and both land at the same table in the same
       seats.
@@ -192,6 +201,6 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and the polish-pass build
-      selected, then submit. Review typically takes 1 to 3 days. If rejected,
+- [ ] Add for Review with the 8 IAPs attached and build 20 selected, then
+      submit. Review typically takes 1 to 3 days. If rejected,
       paste the message to me and I turn the fix around same day.
