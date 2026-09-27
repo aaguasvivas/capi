@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { createInitialState, applyMove, startNewRound } from "../src/reducer";
 import { hasLegalPlay } from "../src/validate";
-import { handPips, CAPICUA_BONUS, VEINTICINCO_BONUS } from "../src/scoring";
+import { handPips, CAPICUA_BONUS, VEINTICINCO_BONUS, SALIDA_BONUS } from "../src/scoring";
 import { getNextSeat, getSeatsForGame, getTeam } from "../src/types";
 import type { GameState, MoveIntent, Seat, Tile } from "../src/types";
 
@@ -81,15 +81,29 @@ function boardLocked(state: GameState): boolean {
 }
 
 // Tranque comparison, recomputed: the blocker against the next seat, fewer
-// pips wins, a tie goes to the side that opened the round.
+// pips wins, a tie goes to the player who opened the round.
 function expectedTranque(ended: GameState, blocker: Seat): { winnerSeat: Seat; rival: Seat } {
   const rival = getNextSeat(blocker, ended.is2v2);
   const bp = handPips(ended.hands[blocker] ?? []);
   const rp = handPips(ended.hands[rival] ?? []);
-  const openers = getTeam(ended.starterThisRound, ended.is2v2);
-  const winnerSeat =
-    bp < rp ? blocker : rp < bp ? rival : getTeam(blocker, ended.is2v2) === openers ? blocker : rival;
+  const winnerSeat = bp < rp ? blocker : rp < bp ? rival : ended.starterThisRound;
   return { winnerSeat, rival };
+}
+
+// Pase de salida shape, recomputed before a move: parejas, the opening tile
+// alone on the board, and exactly one pass since the opener placed it. The
+// seat that acts next in that shape is the opener's partner (across the table).
+function salidaShape(prev: GameState): boolean {
+  return (
+    prev.is2v2 &&
+    prev.board.length === 1 &&
+    prev.lastPlayedBy === prev.starterThisRound &&
+    prev.passesSinceLastPlay === 1
+  );
+}
+function partnerOf(seat: Seat): Seat {
+  const order: Seat[] = ["n", "e", "s", "w"];
+  return order[(order.indexOf(seat) + 2) % 4];
 }
 
 function chooseIntent(state: GameState, rng: () => number): MoveIntent {
@@ -115,9 +129,12 @@ function assertDealInvariants(state: GameState, label: string): void {
   expect(seats.includes(state.currentTurn), `${label}: turn is an active seat`).toBe(true);
 }
 
-// Which rule paths the seeded games reached. An invariant that never fires
-// proves nothing, so each suite checks that its paths were exercised.
-const reached = new Set<string>();
+// How often the seeded games reached each rule path. An invariant that never
+// fires proves nothing, so each suite checks that its paths were exercised.
+const reached = new Map<string, number>();
+function reach(path: string): void {
+  reached.set(path, (reached.get(path) ?? 0) + 1);
+}
 
 /** The battery: structural truths that must hold across every transition. */
 function assertTransition(
@@ -128,6 +145,12 @@ function assertTransition(
   seedLabel: string
 ): void {
   const L = (m: string) => `${seedLabel} [${intent.type} by ${seat}]: ${m}`;
+
+  // The engine's own +25 callouts, read from its output (every move clears
+  // the previous callout, so a veinticinco here was set by this move).
+  if (next.lastCallout === "veinticinco") {
+    reach(next.lastCalloutPayload?.salida ? "engine paid a salida" : "engine paid a pase corrido");
+  }
 
   // Tile conservation, every step of every round.
   const keys = collectKeys(next);
@@ -189,7 +212,26 @@ function assertTransition(
     if (next.phase === "playing") {
       expect(next.currentTurn, L("turn advances after play")).toBe(getNextSeat(seat, prev.is2v2));
       expect(next.consecutivePasses, L("play resets passes")).toBe(0);
-      expect(delta0 + delta1, L("no score change mid-round play")).toBe(0);
+      // Pase de salida: the opener's partner plays after the next seat passed
+      // on the opening tile. It pays 25 to the opener's side while that leaves
+      // the side below the target. Any other mid-round play scores nothing.
+      const salida = salidaShape(prev) && seat === partnerOf(prev.starterThisRound);
+      const team = getTeam(prev.starterThisRound, prev.is2v2);
+      const paid = salida && prev.scores[team] + SALIDA_BONUS < prev.targetScore;
+      if (salida) reach(paid ? "pase de salida paid" : "pase de salida not paid at the target");
+      if (paid) {
+        expect(next.lastCallout, L("pase de salida travels as veinticinco")).toBe("veinticinco");
+        expect(next.lastCalloutPayload, L("pase de salida payload")).toMatchObject({
+          winningTeam: team,
+          veinticincoBonus: SALIDA_BONUS,
+          salida: true,
+        });
+        expect(team === 0 ? delta0 : delta1, L("pase de salida pays 25")).toBe(SALIDA_BONUS);
+        expect(team === 0 ? delta1 : delta0, L("pase de salida pays one side")).toBe(0);
+      } else {
+        expect(next.lastCallout, L("a plain play carries no callout")).toBeNull();
+        expect(delta0 + delta1, L("no score change mid-round play")).toBe(0);
+      }
     } else if (next.hands[seat].length === 0) {
       // Going out is a DOMINÓ, or a CAPICÚA when the tile is no double and
       // fits both ends as they were before it was placed. It wins over a lock.
@@ -201,7 +243,7 @@ function assertTransition(
       expect(next.lastCallout, L("capicúa iff the last tile fits both ends")).toBe(
         capicua ? "capicua" : "domino"
       );
-      if (capicua) reached.add(left === right ? "capicua on equal ends" : "capicua");
+      if (capicua) reach(left === right ? "capicua on equal ends" : "capicua");
       const winningTeam = getTeam(seat, prev.is2v2);
       const losingDelta = winningTeam === 0 ? delta1 : delta0;
       const winningDelta = winningTeam === 0 ? delta0 : delta1;
@@ -225,8 +267,14 @@ function assertTransition(
       expect(payload?.pts, L("trancao pts = every pip in the hands")).toBe(allPips);
       expect(winner === 0 ? delta0 : delta1, L("trancao credits winner")).toBe(allPips);
       expect(winner === 0 ? delta1 : delta0, L("trancao pays one side")).toBe(0);
-      reached.add(winnerSeat === seat ? "tranque won by blocker" : "tranque won by rival");
-      if (payload?.blockerPips === payload?.rivalPips) reached.add("tranque tie");
+      expect(payload?.winnerSeat, L("tranque names its winner")).toBe(winnerSeat);
+      const tie = payload?.blockerPips === payload?.rivalPips;
+      if (tie) {
+        reach("tranque tie");
+        if (winnerSeat !== seat && winnerSeat !== rival) reach("tranque tie won by an opener who did not compare");
+      } else {
+        reach(winnerSeat === seat ? "tranque won by blocker" : "tranque won by rival");
+      }
     }
   }
 
@@ -260,7 +308,15 @@ function assertTransition(
       prev.passesSinceLastPlay + 1 === 3;
     const team = forcer ? getTeam(forcer, prev.is2v2) : 0;
     const paid = cycle && prev.scores[team] + VEINTICINCO_BONUS < prev.targetScore;
-    if (cycle) reached.add(paid ? "pase corrido paid" : "pase corrido not paid at the target");
+    if (cycle) reach(paid ? "pase corrido paid" : "pase corrido not paid at the target");
+    // The partner's pass cancels the pase de salida; if the fourth seat then
+    // passes too, the pase corrido pays the opening 25 once.
+    if (salidaShape(prev) && seat === partnerOf(prev.starterThisRound)) {
+      reach("pase de salida cancelled by the partner");
+    }
+    if (paid && prev.board.length === 1 && forcer === prev.starterThisRound) {
+      reach("salida cancelled then pase corrido");
+    }
     if (paid) {
       expect(next.lastCallout, L("pase corrido fires")).toBe("veinticinco");
       expect(team === 0 ? delta0 : delta1, L("veinticinco pays 25")).toBe(VEINTICINCO_BONUS);
@@ -362,23 +418,98 @@ describe("invariant fuzz: full random games through the real reducer", () => {
     "tranque won by rival",
     "tranque tie",
   ];
+  // Parejas rules. The oracle tallies these only in 2v2, so they are checked
+  // for reach in the 2v2 runs only.
+  const PAREJAS_PATHS = [
+    "pase corrido paid",
+    "pase corrido not paid at the target",
+    "pase de salida paid",
+    "pase de salida cancelled by the partner",
+    "pase de salida not paid at the target",
+    "salida cancelled then pase corrido",
+    "tranque tie won by an opener who did not compare",
+  ];
+  // The engine's +25 callouts, tallied from its output, not the oracle's.
+  const ENGINE_BONUS_PATHS = ["engine paid a pase corrido", "engine paid a salida"];
 
   it("1v1: 60 seeded games hold every invariant at every step", () => {
     reached.clear();
     for (let i = 0; i < 60; i++) {
       playFullGame({ seed: 1000 + i, is2v2: false, targetScore: TARGETS[i % TARGETS.length] });
     }
-    for (const path of SHARED_PATHS) expect(reached, `1v1 seeds reach: ${path}`).toContain(path);
-    expect(reached, "no pase corrido heads-up").not.toContain("pase corrido paid");
+    for (const path of SHARED_PATHS) expect(reached.has(path), `1v1 seeds reach: ${path}`).toBe(true);
+    // Heads-up the engine pays no +25 mid-round. The salida shape does not
+    // come up in these deals (the next seat draws instead of passing), so
+    // rules.salida-and-tie.test.ts covers a heads-up pass on the opening tile.
+    for (const path of ENGINE_BONUS_PATHS) expect(reached.has(path), `never heads-up: ${path}`).toBe(false);
   });
 
-  it("2v2: 60 seeded games hold every invariant at every step", () => {
+  // Deals where the holder of the 6-6 holds all seven sixes: the only way
+  // nobody follows the opening tile without locking the board, so the
+  // partner's pass is followed by the pase corrido. Found by a seed search
+  // (about one deal in 300,000).
+  const WHOLE_SUIT_SEEDS = [59313, 83322, 282144, 645301];
+
+  it("2v2: 64 seeded games hold every invariant at every step", () => {
     reached.clear();
     for (let i = 0; i < 60; i++) {
       playFullGame({ seed: 2000 + i, is2v2: true, targetScore: TARGETS[i % TARGETS.length] });
     }
-    for (const path of [...SHARED_PATHS, "pase corrido paid", "pase corrido not paid at the target"]) {
-      expect(reached, `2v2 seeds reach: ${path}`).toContain(path);
+    WHOLE_SUIT_SEEDS.forEach((seed, i) => {
+      playFullGame({ seed, is2v2: true, targetScore: [100, 50, 200, 25][i] });
+    });
+    for (const path of [...SHARED_PATHS, ...PAREJAS_PATHS, ...ENGINE_BONUS_PATHS]) {
+      expect(reached.has(path), `2v2 seeds reach: ${path}`).toBe(true);
+    }
+  });
+
+  // The pase de salida lives in the opening, so this drill replays many round
+  // openings: the auto-placed 6-6 of round 1 and a free opening dealt by
+  // startNewRound, each from scores near and far from the target (75 + 25
+  // lands exactly on it).
+  it("2v2: 2000 seeded round openings hold every invariant", () => {
+    reached.clear();
+    const SCORES: [number, number][] = [[0, 0], [74, 0], [0, 74], [75, 75], [40, 90]];
+    const seats = getSeatsForGame(true);
+    for (let i = 0; i < 1000; i++) {
+      const seed = 50000 + i;
+      const dealRng = mulberry32(seed);
+      const choiceRng = mulberry32(seed ^ 0x9e3779b9);
+      const scores = SCORES[i % SCORES.length];
+      const first: GameState = {
+        ...createInitialState({ mode: "live", theme: "patio", is2v2: true, targetScore: 100, rng: dealRng }),
+        scores,
+      };
+      const ended: GameState = {
+        ...first,
+        phase: "round_over",
+        lastCallout: "domino",
+        lastCalloutPayload: { winningTeam: 0, team0Pips: 0, team1Pips: 0 },
+        lastPlayedBy: seats[i % 4],
+      };
+      const free = startNewRound(ended, ended.players, dealRng);
+      for (const [name, start] of [["round 1", first], ["free opening", free]] as const) {
+        const label = `seed=${seed} 2v2 ${name} scores=${scores.join("-")}`;
+        let state = start;
+        // Play past the opening: until a third tile lands or the round ends.
+        while (state.phase === "playing" && state.board.length < 3) {
+          const seat = state.currentTurn;
+          const intent = chooseIntent(state, choiceRng);
+          deepFreeze(state);
+          const result = applyMove(state, seat, intent);
+          expect(result.success, `${label}: legal intent accepted (${result.error ?? ""})`).toBe(true);
+          assertTransition(state, result.newState, seat, intent, label);
+          state = result.newState;
+        }
+      }
+    }
+    for (const path of [
+      "pase de salida paid",
+      "pase de salida cancelled by the partner",
+      "pase de salida not paid at the target",
+      "engine paid a salida",
+    ]) {
+      expect(reached.has(path), `2v2 openings reach: ${path}`).toBe(true);
     }
   });
 });

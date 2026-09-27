@@ -21,6 +21,7 @@ import {
   teamPips,
   CAPICUA_BONUS,
   VEINTICINCO_BONUS,
+  SALIDA_BONUS,
 } from "./scoring";
 
 const ALL_TILES: Tile[] = (() => {
@@ -261,6 +262,7 @@ function endRoundWithTrancao(state: GameState, blockerSeat: Seat): GameState {
       rivalSeat: t.rivalSeat,
       blockerPips: t.blockerPips,
       rivalPips: t.rivalPips,
+      winnerSeat: t.winnerSeat,
     },
   };
 }
@@ -328,6 +330,47 @@ export function applyMove(
       lastCallout: null,
       lastCalloutPayload: null,
     };
+
+    // PASE DE SALIDA (parejas only): the opening tile is alone on the board,
+    // the seat after the opener passed on it, and the opener's partner now
+    // plays. The opener's side gets +25 mid-round. If the partner passes
+    // instead, nothing is paid here (a fourth pass is a pase corrido). Like
+    // the pase corrido, it counts only while it leaves the side below the
+    // target, and it travels as a VEINTICINCO callout marked `salida`.
+    const opener = state.starterThisRound;
+    if (
+      state.is2v2 &&
+      state.board.length === 1 &&
+      state.lastPlayedBy === opener &&
+      state.passesSinceLastPlay === 1 &&
+      seat === getNextSeat(getNextSeat(opener, true), true)
+    ) {
+      const openerTeam = getTeam(opener, true);
+      if (state.scores[openerTeam] + SALIDA_BONUS < state.targetScore) {
+        const payload: CalloutPayload = {
+          winningTeam: openerTeam,
+          veinticincoBonus: SALIDA_BONUS,
+          salida: true,
+          team0Pips: teamPips(placed, 0),
+          team1Pips: teamPips(placed, 1),
+        };
+        const paid: GameState = {
+          ...newState,
+          scores: [
+            state.scores[0] + (openerTeam === 0 ? SALIDA_BONUS : 0),
+            state.scores[1] + (openerTeam === 1 ? SALIDA_BONUS : 0),
+          ],
+          lastCallout: "veinticinco",
+          lastCalloutPayload: payload,
+        };
+        return {
+          success: true,
+          newState: paid,
+          callout: "veinticinco",
+          calloutPayload: payload,
+        };
+      }
+    }
     return { success: true, newState };
   }
 
@@ -376,7 +419,9 @@ export function applyMove(
     // locked, and nobody else can follow). It can fire more than once in a
     // round. The bonus only counts while it leaves the team below the target:
     // a game is won by winning a round, never by a bonus. When it would reach
-    // the target, the pass is a plain pass.
+    // the target, the pass is a plain pass. After a pase de salida cancelled
+    // by the partner's pass, the fourth pass is this pase corrido, so an
+    // opening that nobody follows pays 25 once.
     if (
       state.lastPlayedBy !== null &&
       nextTurn === state.lastPlayedBy &&
@@ -431,7 +476,8 @@ export function applyMove(
 /**
  * Determine which seat won the round and should start next.
  * DOMINÓ/CAPICÚA → the player who went out (the last to play).
- * TRANCAO → whoever won the comparison: the blocker or the rival.
+ * TRANCAO → the payload's winnerSeat: the blocker or the rival, or on equal
+ * pips the player who opened the round.
  */
 function getRoundWinningSeat(state: GameState): Seat {
   const callout = state.lastCallout;
@@ -442,7 +488,10 @@ function getRoundWinningSeat(state: GameState): Seat {
 
   if (callout === "trancao") {
     const payload = state.lastCalloutPayload;
+    if (payload?.winnerSeat) return payload.winnerSeat;
     const winningTeam = payload?.winningTeam ?? 0;
+    // A tranque saved before winnerSeat existed: the compared seat on the
+    // winning side opens, as it did then.
     if (payload?.blockerSeat && payload.rivalSeat) {
       return getTeam(payload.blockerSeat, state.is2v2) === winningTeam
         ? payload.blockerSeat

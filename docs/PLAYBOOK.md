@@ -16,7 +16,7 @@ The big architectural difference from Anota: Anota is local-first with no backen
 ### Principles
 
 1. **Quality is non-negotiable.** Tasteful UI, real haptics, no jank, no broken layouts on any device.
-2. **The rules must be the real rules.** Capicúa bonus, paso, tranque decided by pip count, 25 points in parejas when the other three pass after your tile, all table pips to the round winner. A Dominican player must nod, not squint.
+2. **The rules must be the real rules.** Capicúa bonus, paso, tranque decided by pip count, 25 points in parejas when the other three pass after your tile or on a pase de salida, all table pips to the round winner. A Dominican player must nod, not squint.
 3. **Server-authoritative, always.** Never trust a client with game state transitions. The engine lives in `packages/engine` and runs on the server.
 4. **No accounts.** Nickname + avatar color + a 6-letter invite code. Friction kills a game night.
 5. **Bilingual ES/EN with an authentic Dominican voice.** Parity enforced by TypeScript in `packages/i18n`.
@@ -87,7 +87,7 @@ All four green or it is not done.
 
 The listing, review notes, and marketing may claim exactly this and nothing more:
 
-- Authentic Dominican rules: capicúa bonus (+25 when your last tile fits both open ends, never with a double), paso, tranque decided by pip count between the player who locked the table and the player to his right, 25 points in 2v2 when the other three pass after your tile (only while it leaves that side below the target), and when someone dominates the round every pip left in the hands counts for the winner. A game is won only by winning a round. `packages/i18n/src/rules.ts` has the exact wording.
+- Authentic Dominican rules: capicúa bonus (+25 when your last tile fits both open ends, never with a double), paso, tranque decided by pip count between the player who locked the table and the player to his right (on equal pips the player who opened the round wins), 25 points in 2v2 when the other three pass after your tile, and 25 on a pase de salida (the player after the opener cannot play on the first tile and the opener's partner then plays; void if the partner passes too), each only while it leaves that side below the target, and when someone dominates the round every pip left in the hands counts for the winner. A game is won only by winning a round. `packages/i18n/src/rules.ts` has the exact wording.
 - 1v1 and 2v2 en parejas (con tu frente). In 1v1 there is a boneyard draw; in 2v2 all 28 tiles are dealt.
 - Create a game and share a 6-letter invite code. No account, no sign-up. Games go to 100, or 200 when created in the app or on the web.
 - Three free table themes: Barbería, Colmado, Patio, each with a Dominican watermark.

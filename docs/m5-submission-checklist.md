@@ -20,14 +20,27 @@ build" below means that build; test and submit it, not 19.
 State on 2026-09-27: the polish-pass build is build 20 (EAS id 9dc17f6a, commit
 c7e8f1b). It also carries the final ship-audit fixes to the iMessage drawer
 (it opened blank from the Messages app menu, and its buttons covered the
-table's turn line). Select build 20 in App Store Connect, not 16, 17, or 19.
+table's turn line).
+
+Later on 2026-09-27: the rules update (the pase de salida and the tranque tie
+to the player who opened the round, docs/research/rules-2026-09/README.md)
+changes the bundled rules text in packages/i18n and app code in apps/mobile
+(the "¡PASE DE SALIDA!" banner title and the tranque tie line) after build 20.
+Build 20 is superseded. Its "How to play" has no pase de salida section, and it
+says the next opener after a tranque is the blocker or the player to his right,
+which the new engine breaks on a tie. The What's New in docs/store-listing.md
+names the pase de salida, so 1.1 cannot ship on build 20 with those notes. Cut
+a new production build once the rules update lands and the server runs it.
+"The rules-update build" below means that build; test it, select it in App
+Store Connect, and submit it, not 16, 17, 19, or 20.
 
 ## A. Code gates (Me)
 
 - [x] `grep -rn "3940256099942544\|PENDING_ADMOB" apps/mobile` returns NOTHING
       (real AdMob ids landed 2026-08-14).
-- [x] All suites green via `npm run verify` (engine 141, web 28, mobile 7, no em
-      dashes), `npm run typecheck` clean, `npm run build:web` passes.
+- [x] All suites green via `npm run verify` (engine 180, web 84, mobile 35, no
+      em dashes), `npm run typecheck` clean, `npm run build:web` passes (rules
+      update tree, 2026-09-27).
 - [x] Build gate passed: prebuild + simulator xcodebuild BUILD SUCCEEDED with the
       real GADApplicationIdentifier, ATT strings, 50 SKAdNetworkItems, and
       PlugIns/CapiMessages.appex present.
@@ -103,7 +116,14 @@ table's turn line). Select build 20 in App Store Connect, not 16, 17, or 19.
       the extension fix was checked with a Release build of the extension.
       The .ipa's extension declares CFBundleIcons and version 1.1.0 (20).
       Submitted to App Store Connect on 2026-09-27 (submission b562ae8c).
-      Confirm no ITMS email comes back for it.
+      Confirm no ITMS email comes back for it. Superseded by the rules update.
+- [ ] The rules-update build: cut from the tree with the rules update after
+      main deploys it. Production-config simulator pass on the iPhone SE and
+      14 Plus: "How to play" has the Pase de salida section and the tie
+      sentence; a 2v2 pase de salida shows "¡PASE DE SALIDA!" +25 for the
+      opener's side. The .ipa's extension declares CFBundleIcons and version
+      1.1.0. Submit it to App Store Connect and record its build number and
+      EAS id here.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
@@ -135,13 +155,14 @@ table's turn line). Select build 20 in App Store Connect, not 16, 17, or 19.
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
 - [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select the polish-pass build for the 1.1 version (16 and 17 have no
-      iMessage icon; 19 predates the polish pass).
+- [ ] D8. Select the rules-update build for the 1.1 version (16 and 17 have no
+      iMessage icon; 19 predates the polish pass; 20 predates the rules
+      update).
 - [ ] D9. Version Release: choose "Manually release this version" (you press
       release after approval) or "Automatically release this version" (it
       goes live as soon as review approves it).
 
-## E. TestFlight matrix (You + me, two phones, the polish-pass build)
+## E. TestFlight matrix (You + me, two phones, the rules-update build)
 
 Sign the two phones into two different Apple IDs (TestFlight and sandbox).
 Messages needs two iMessage accounts to exchange bubbles, and purchases
@@ -200,9 +221,14 @@ A's Todo Capi and the restore test proves nothing.
       the new table.
 - [ ] Mixed versions: a phone still on 1.0 (App Store) at the same table as
       the new build shows quick-chat phrases as words, not ids like "eso_e".
+- [ ] Rules update, 2v2: when the player after the opener cannot play on the
+      first tile and the opener's partner plays, the new build shows
+      "¡PASE DE SALIDA!" and a 1.0 phone at the same table shows
+      "¡VEINTICINCO!", each +25 for the opener's side. "Cómo se juega" has the
+      Pase de salida section.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 20 selected, then
-      submit. Review typically takes 1 to 3 days. If rejected,
-      paste the message to me and I turn the fix around same day.
+- [ ] Add for Review with the 8 IAPs attached and the rules-update build
+      selected, then submit. Review typically takes 1 to 3 days. If
+      rejected, paste the message to me and I turn the fix around same day.

@@ -334,6 +334,7 @@ describe("applyMove - TRANCAO on placement (1v1)", () => {
       rivalSeat: "s",
       blockerPips: 2,
       rivalPips: 9,
+      winnerSeat: "n",
     });
     // The boneyard stays as it was.
     expect(result.newState.boneyard).toEqual([[0, 0], [1, 2]]);
@@ -723,6 +724,7 @@ describe("2v2 - TRANCAO on placement: the blocker against the player to his righ
       rivalSeat: "e",
       blockerPips: 1,
       rivalPips: 8,
+      winnerSeat: "n",
     });
   });
 
@@ -796,7 +798,7 @@ describe("2v2 - TRANCAO on placement: the blocker against the player to his righ
     expect(r.newState.scores).toEqual([0, 10 + 2 + 4 + 7]);
   });
 
-  it("a tie goes to the pair that opened the round, and its player opens next", () => {
+  it("a tie goes to the player who opened the round, and he opens next", () => {
     const hands: GameState["hands"] = {
       n: [[6, 6], [0, 5]], // 5
       e: [[4, 1]], // 5
@@ -813,10 +815,11 @@ describe("2v2 - TRANCAO on placement: the blocker against the player to his righ
     expect(eOpened.newState.scores).toEqual([0, 12]);
     expect(startNewRound(eOpened.newState, eOpened.newState.players).currentTurn).toBe("e");
 
+    // S opened: he is neither the blocker nor the rival, and he opens next.
     const sOpened = lockBy("n", hands, { starterThisRound: "s" });
-    expect(sOpened.newState.lastCalloutPayload?.winningTeam).toBe(0);
+    expect(sOpened.newState.lastCalloutPayload).toMatchObject({ winningTeam: 0, winnerSeat: "s" });
     expect(sOpened.newState.scores).toEqual([12, 0]);
-    expect(startNewRound(sOpened.newState, sOpened.newState.players).currentTurn).toBe("n");
+    expect(startNewRound(sOpened.newState, sOpened.newState.players).currentTurn).toBe("s");
   });
 
   it("locking the board with the last tile is a dominó, not a tranque", () => {
@@ -1101,9 +1104,14 @@ describe("2v2 - play resets consecutivePasses", () => {
 //   any hand or the boneyard fits either end. The player who placed it is the
 //   blocker; he compares his own hand pips with the next player (to his
 //   right, always an opponent). Fewer pips wins for that player's side, which
-//   takes every pip left in every hand. A tie goes to the side that opened the
-//   round. The winner of the comparison opens the next round. Going out with
-//   the locking tile is a DOMINÓ.
+//   takes every pip left in every hand. On a tie the player who opened the
+//   round wins, even when he is neither of the two. The winner opens the next
+//   round. Going out with the locking tile is a DOMINÓ.
+//
+//   PASE DE SALIDA is a parejas rule too: when the seat after the opener
+//   passes on the opening tile and the opener's partner then plays, +25 goes
+//   to the opener's side mid-round, under the same target cap. A partner's
+//   pass cancels it; a fourth pass is then a pase corrido.
 //
 //   Game end: only a round end (DOMINÓ, CAPICÚA, or TRANCAO) finishes the
 //   game, and only for the side that won the round, once it reaches

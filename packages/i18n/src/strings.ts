@@ -106,6 +106,17 @@ export interface Strings {
   // The tranque comparison: the blocker and the player to his right, with
   // the pips each one holds.
   tranqueCompare: (blocker: string, blockerPips: number, rival: string, rivalPips: number) => string;
+  // Under the tranque comparison on equal pips: the player who opened the
+  // round wins it.
+  tranqueTie: (opener: string) => string;
+  // Callout titles: the words players shout at the table, the same in both
+  // languages. Veinticinco is the pase corrido banner, salida the pase de
+  // salida banner (both a mid-round +25).
+  calloutDomino: string;
+  calloutTrancao: string;
+  calloutCapicua: string;
+  calloutVeinticinco: string;
+  calloutSalida: string;
   tapToContinue: string;
 
   // Round over
@@ -347,6 +358,12 @@ export const es: Strings = {
   capicuaBonus: "bonus Capicúa",
   tranqueCompare: (blocker, blockerPips, rival, rivalPips) =>
     `Tranque: ${blocker} ${blockerPips} · ${rival} ${rivalPips}`,
+  tranqueTie: (opener) => `Empate: gana ${opener}, que salió`,
+  calloutDomino: "¡DOMINÓ!",
+  calloutTrancao: "¡TRANCAO!",
+  calloutCapicua: "¡CAPICÚA!",
+  calloutVeinticinco: "¡VEINTICINCO!",
+  calloutSalida: "¡PASE DE SALIDA!",
   tapToContinue: "Toca para continuar",
 
   wonRound: "¡Ganaste la ronda!",
@@ -568,6 +585,12 @@ export const en: Strings = {
   capicuaBonus: "Capicúa bonus",
   tranqueCompare: (blocker, blockerPips, rival, rivalPips) =>
     `Tranque: ${blocker} ${blockerPips} · ${rival} ${rivalPips}`,
+  tranqueTie: (opener) => `Tie goes to ${opener}, who opened`,
+  calloutDomino: "¡DOMINÓ!",
+  calloutTrancao: "¡TRANCAO!",
+  calloutCapicua: "¡CAPICÚA!",
+  calloutVeinticinco: "¡VEINTICINCO!",
+  calloutSalida: "¡PASE DE SALIDA!",
   tapToContinue: "Tap to keep it moving",
 
   wonRound: "You took that round!",

@@ -1,0 +1,2031 @@
+{
+ "date": "2026-09-27",
+ "questions": "Dominican patio tranque tie and every detail of the pase de salida",
+ "method": "five sweeps by source kind (Spanish web, forums and video, apps and code, tournaments, English web), each sweep's decisive claims re-opened by a fact checker, one synthesis, one completeness critic",
+ "synthesis": {
+  "answers": [
+   {
+    "question": "tie",
+    "conclusion": "The evidence does not support the owner's belief that a tie goes to the blocker as the documented Dominican rule. Only two apps say it: FichaFlow, which labels it its own house rule, and the Phamton140 hobby engine. Neither cites a source. The only Dominican prose source that gives a tie rule next to the blocker-vs-right comparison is DR1 '25, 50, Capicua!'. It gives the tie to the player who placed the first tile of the hand (la mano), and his team takes the points. Its scope is ambiguous: the sentence follows both 'tranquar con el de abajo' and 'tranquar con todo el mundo'. Every Dominican source with a tie rule for the pair-vs-pair tranque also gives the tie to the pair that opened the hand: Wikipedia es regla general (reglamentos-deportes is a copy of it), Domino RD, and La Mesa (patio). Pair-vs-pair variant: the opening pair wins under Dominican regla general. The federation and tournament form (FID, USA federation, Santiago 2019 municipal tournament, 2mino code) scores nothing and redeals. Blocker-wins-ties is Colombian and generic (Kapiku, a Wikipedia regional alternative), not Dominican. The Capi engine already applies the opener rule (packages/engine/src/scoring.ts scoreTrancao: on equal pips, the side that opened the round wins).",
+    "confidence": "low",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (Wayback 2022-10-14, confirmed; tie goes to the player who placed the first tile; scope ambiguous): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó, section Dominó dominicano, bullet Tranque (confirmed; regla general, pair totals, tie goes to the pair that opened; no patio tie rule given): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Reglamentos Deportes, Reglamento de Dominó p.5 (confirmed; copy of the Wikipedia text, not independent): https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "La Mesa: Dominó Latino, app rules page (unverified sweep; patio, pair totals, tie goes to the pair that opened): https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "Domino RD, app rules page (unverified sweep; pair totals, tie goes to the player or team that opened): https://dominord.com/rules",
+     "Capi engine already implements this: /Users/Adelson/Desktop/personal/capi/packages/engine/src/scoring.ts (scoreTrancao)"
+    ],
+    "contrary": [
+     "FichaFlow, Complete Dominican Domino Guide (confirmed; self-described house rule: a tie favors the blocker): https://fichaflow.com/learn/guide",
+     "Phamton140/domino_dominicano round.dart _resolveTranque (confirmed; hobby code, 'Empate: gana quien provocó el tranque'): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "Santiago 2019 municipal tournament (earlier research; pair vs pair, a tie scores nothing, reshuffle): momentodeportivord.com/?p=17503",
+     "franciscoapvst-hue/2mino logic.ts (unverified; pair totals, a tie scores nothing): https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts",
+     "USA Domino Federation Rule 9 and FID (non-Dominican federation; a tie is a draw): https://usadomino.com/r/",
+     "Wikipedia (es), Dominó colombiano, and Kapiku Mesas (non-Dominican; the team that closed wins the tie): https://kapikumesas.wixsite.com/kapiku/reglas-del-domino"
+    ],
+    "recommendationForCapi": "Keep the current rule. When the locking tile is placed, compare the blocker's own hand pips with the pips of the next seat to his right. Fewer pips wins the round for that seat's side. On equal pips, the side of the seat that placed the opening tile of this hand (starterThisRound) wins. In 1v1 that is the opener. The winner scores every pip left in all hands. Owner's decision: switching to 'a tie goes to the blocker' follows only the FichaFlow and Phamton140 app convention. The change is one line in the tie branch of scoreTrancao, plus a test."
+   },
+   {
+    "question": "tie_next_opener",
+    "conclusion": "Dominican sources agree that the winner of a hand opens the next one: the Wikipedia es Salida bullet, Domino RD, and La Mesa ('la salida no rota'). For a tie, Wikipedia es (Dominican regla general) says the pair that opened the tied hand wins it and opens the next hand. It names the pair, not one player. Phamton140 lets the tie winner (the blocker) open, which follows from its blocker-wins tie rule. The rotating opener (USA federation, FID, dominoarteociencia, Wikipedia's international norm) is federation and generic practice, not Dominican patio. 2mino gives the next hand to the player after the blocker, but only in its nobody-scores variant. Capi's getRoundWinningSeat already has the tie winner open: of the two compared seats, the one on the opening side.",
+    "confidence": "medium",
+    "supporting": [
+     "Wikipedia (es), Dominó, Dominó dominicano, Tranque bullet (confirmed; 'será la que saldrá la siguiente mano'): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Wikipedia (es), Dominó dominicano, Salida bullet (sweep; later hands opened by the winner of the previous hand): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "La Mesa: Dominó Latino (unverified; the team that won the previous hand opens): https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "Domino RD (unverified; the winner of the previous hand opens): https://dominord.com/rules",
+     "Phamton140/domino_dominicano round.dart _finishTranque (confirmed; the tranque winner opens next): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart"
+    ],
+    "contrary": [
+     "USA Domino Federation Rule 9 (non-Dominican; the rotation continues after a tied tranque): https://usadomino.com/r/",
+     "El Sombrero del Búho, FID rules (non-Dominican; the opening always rotates): https://sombrerodelbuho.home.blog/2020/01/13/dominando-el-domino/",
+     "dominoarteociencia, El cierre o la tranca (generic; 'corre el turno de salida'): https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+     "franciscoapvst-hue/2mino logic.ts (unverified; after a tie the player after the blocker opens): https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts"
+    ],
+    "recommendationForCapi": "The seat that wins the tie opens the next hand and chooses his tile freely. Under the opening-side tie rule, that is whichever of the two compared seats (the blocker or the next seat) is on the side that opened the tied hand. That seat may not be the player who placed the tied hand's opening tile. This is the current getRoundWinningSeat behavior in reducer.ts, so no change is needed. If the owner switches the tie to the blocker, the blocker opens the next hand."
+   },
+   {
+    "question": "salida_trigger",
+    "conclusion": "The pase de salida is a real Dominican patio rule, as the owner said. It triggers when the opening tile of a hand is the only tile on the board and the next player (the opponent to the opener's right) cannot play on it and passes. Wikipedia es scopes it to patio (informal) play and gives no equivalent under regla general. A pass later in the hand does not count. It is not universal: the 2025 La Guáyiga municipal tournament rules and the DR1 forum thread do not mention it.",
+    "confidence": "high",
+    "supporting": [
+     "Wikipedia (es), Dominó, Dominó dominicano, Puntos de salida, patio (confirmed): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; after the first player plays, the next player cannot play): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Santiago 2019 municipal tournament (earlier research; 'paso a la salida' 25): momentodeportivord.com/?p=17503",
+     "FichaFlow, Complete Dominican Domino Guide (confirmed): https://fichaflow.com/learn/guide",
+     "FichaFlow, What Is Pase de Salida in Domino? (sweep; a pass later in the hand is not a pase de salida): https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "Phamton140/domino_dominicano round.dart _evaluateStartPassBonus (confirmed; checked only while moves count is 1): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "dominoarteociencia (earlier research; the opening tile makes the second player pass)"
+    ],
+    "contrary": [
+     "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó 2025 (unverified; its rules list has no salida bonus): https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "DR1.com forum, Rules for Dominican Dominoes? (unverified; names points for making everyone pass and capicua, but no salida): https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/"
+    ],
+    "recommendationForCapi": "2v2 only. The trigger is a pass by seat getNextSeat(starterThisRound) while the board holds exactly one tile, the opening tile placed by starterThisRound. That pass makes a pase de salida pending for the opener's team. In reducer state, a pending salida is board.length === 1, passesSinceLastPlay === 1, and the turn on the opener's partner. No new saved field is needed. No other pass in the hand triggers it. Passes are already forced (validate.ts rejects a pass when a legal play exists), so the pass means the player truly cannot play."
+   },
+   {
+    "question": "salida_cancel",
+    "conclusion": "Yes. Two independent Dominican sources say the salida is cancelled when the opener's partner also cannot play. DR1 says: if the next player after that also has no piece, the points are not counted, and the fourth player plays if he can. Wikipedia es patio says: 'si la pareja tampoco puede jugar entonces se anulan los puntos de salida'. DR1 settles the ambiguous 'la pareja': it means the opener's partner, who plays after the passing opponent. Neither source gives any other cancel condition. Phamton140 cancels only after a double opening and pays 60 when all three pass, but that is one uncited hobby engine. FichaFlow never cancels and calls this its own implementation choice.",
+    "confidence": "high",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; 'can be nullified... the points aren't counted'): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó, Dominó dominicano, Puntos de salida, patio (confirmed; 'se anulan los puntos de salida'): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Phamton140/domino_dominicano scoring_rules.dart determineStartBonus (confirmed; 'Se pierde el pase de salida', double openings only): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart"
+    ],
+    "contrary": [
+     "FichaFlow, What Is Pase de Salida in Domino? (confirmed; does not implement the partner cancel, by its own choice): https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "FichaFlow, Complete Dominican Domino Guide (confirmed; awards 25 immediately, no cancel): https://fichaflow.com/learn/guide"
+    ],
+    "recommendationForCapi": "When the opener's partner (the seat two after starterThisRound) passes on the one-tile board, the pending salida is cancelled and scores nothing. The turn then goes to the fourth seat as usual. Nothing else cancels it apart from the target cap (see salida_target). Apply the cancel to every opening tile, double or not. Do not copy Phamton140's split by double and non-double."
+   },
+   {
+    "question": "salida_forced_opening",
+    "conclusion": "A forced opening counts. No source excludes it. Wikipedia es and DR1 define the trigger as the first tile placed, with no exception for the double six that must open the first hand. FichaFlow's worked example is a 6-6 opening that pays the salida. Phamton140 has no exception for the first-hand double six. The evidence is two apps plus the silence of the prose sources, so this is not a stated rule.",
+    "confidence": "medium",
+    "supporting": [
+     "FichaFlow, What Is Pase de Salida in Domino? (sweep; worked example: 6-6 opening, the next player has no six, 25 credited): https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "Phamton140/domino_dominicano round.dart start (sweep; the double six opens the first hand, and the start bonus has no exception for it): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "Wikipedia (es), Dominó dominicano, Puntos de salida (confirmed; 'al momento de colocarse la primera ficha', no exception): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; 'when the first domino piece is thrown down', no exception): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml"
+    ],
+    "contrary": [],
+    "recommendationForCapi": "Apply the same check whether the opening tile was auto-placed or chosen. The first hand auto-places the highest double: startGame in reducer.ts puts it on the board, and currentTurn is already the next seat. Later hands open with the previous winner's free choice. The check therefore has to work from the initial state of the first hand, where the next seat's first action can already be the triggering pass."
+   },
+   {
+    "question": "salida_every_hand",
+    "conclusion": "It applies at the start of every hand. DR1 says the play can only occur in the initial play of a hand, when the first domino is thrown down. DR1's earlier phrase 'In an initial game' is best read as the start of a hand, because DR1 uses 'game' to mean a hand elsewhere: its tie sentence calls the player who placed the first domino of the hand 'the player who began the game'. Wikipedia es ties the trigger to the first tile placed, with no first-hand limit. Phamton140 resets the check on every deal. FichaFlow applies it to the first opposing pass after any opening tile.",
+    "confidence": "high",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; 'initial play of a hand'): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó dominicano, Puntos de salida (confirmed): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Phamton140/domino_dominicano round.dart pass and deal (sweep; the flag resets each deal): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "FichaFlow, What Is Pase de Salida in Domino? (sweep): https://fichaflow.com/learn/what-is-pase-de-salida-in-domino"
+    ],
+    "contrary": [
+     "DR1.com 'In an initial game' wording (confirmed but ambiguous; could be read as the first hand of the game only): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml"
+    ],
+    "recommendationForCapi": "Evaluate the salida at the start of every hand, at most once per hand. It can only fire while the board holds exactly one tile."
+   },
+   {
+    "question": "salida_value",
+    "conclusion": "25 has the most support. Wikipedia es patio gives '25 o 30 puntos dependiendo de las reglas' and uses the same '25 o 30' for paso corrido and capicúa. It lists targets of 100 or 200, which are Capi's targets, and does not scale the value to the target. DR1 gives 25 for games to 500. The Santiago 2019 tournament uses 25, dominoarteociencia says normally 25, and FichaFlow defaults to 25. The support for 30 is weaker: the Wikipedia alternative, one App Store review (Republica domino), DomiKapikua, and Phamton140 (30 after a double, 60 after a non-double, a split no other source uses). Only DR1 links the value to the target: 10 for games to 200 or 250, 25 for 500. FichaFlow's '10 or 25' repeats DR1 and is not independent.",
+    "confidence": "medium",
+    "supporting": [
+     "Wikipedia (es), Dominó dominicano, Puntos de salida, patio (confirmed; 25 or 30, no link to target): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Reglamentos Deportes p.5 (confirmed; same text, targets 100 or 200, not independent): https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "Santiago 2019 municipal tournament (earlier research; 'paso a la salida' 25): momentodeportivord.com/?p=17503",
+     "FichaFlow, Dominican Domino Sayings (confirmed; default Pase de Salida 25): https://fichaflow.com/learn/dominican-domino-sayings",
+     "dominoarteociencia (earlier research; normally 25)"
+    ],
+    "contrary": [
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; 10 for games to 200 or 250, 25 only for games to 500): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "FichaFlow, Complete Dominican Domino Guide (confirmed; 'Dominican variants use 10 or 25', repeats DR1): https://fichaflow.com/learn/guide",
+     "Phamton140/domino_dominicano scoring_rules.dart (confirmed; 30 after a double, 60 after a non-double, target 200): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "Republica domino App Store review and DomiKapikua (earlier research; 30)"
+    ],
+    "recommendationForCapi": "+25 flat for both the 100 and 200 targets. This matches Capi's CAPICUA_BONUS and VEINTICINCO_BONUS (both 25), following Wikipedia's parallel '25 o 30' wording for all three bonuses. Add one constant next to them in scoring.ts. Do not split the value by double or non-double opening. Owner's decision: DR1's smaller value (10 for games to 200 or less) is the only target-scaled alternative, and one source supports it."
+   },
+   {
+    "question": "salida_all_pass",
+    "conclusion": "Under the Dominican prose sources, the opener gets the pase corrido only, not the salida. The partner's pass already cancels the salida (DR1, Wikipedia es). If the fourth player also cannot play, DR1's pase corrido applies: 25 to the last player's team, and he plays again. No source describes the all-pass opening in words. This conclusion combines the two stated rules. The apps disagree. FichaFlow pays the salida at once without cancel and scores paso redondo separately, so it pays both. Phamton140 pays 60 when a double opening makes all three pass, plus a separate pase redondo 30.",
+    "confidence": "medium",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; the partner's pass cancels, 'the next player plays his piece, if he can'; the pase corrido is 25 and the last player plays again): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó dominicano, Puntos de salida (confirmed; partner pass cancels): https://es.wikipedia.org/wiki/Domin%C3%B3"
+    ],
+    "contrary": [
+     "Phamton140/domino_dominicano scoring_rules.dart determineStartBonus (confirmed; double opening with all three passing pays 60, plus pase redondo 30): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "FichaFlow, Complete Dominican Domino Guide and Sayings (confirmed; salida never cancelled, and Paso Redondo 25 is a separate bonus): https://fichaflow.com/learn/guide"
+    ],
+    "recommendationForCapi": "No stacking. The partner's pass cancels the pending salida. The fourth seat's pass then fires the existing pase corrido: +25 to the opener's team if it stays below the target, and the opener plays again. An all-pass opening pays at most 25. The existing VEINTICINCO branch in reducer.ts needs no change."
+   },
+   {
+    "question": "salida_1v1",
+    "conclusion": "No source addresses the pase de salida in 1v1. Every description is in pair terms: the opener's team, and the cancel by the opener's partner. The Wikipedia es 1v1 (pila) bullet does not mention it. Domino RD's 1v1 has no boneyard and no salida. With Capi's boneyard, the opponent draws until he can play and passes only on an empty boneyard. A pass on the opening tile therefore needs a double opening where the opener holds the rest of that suit and the whole boneyard is drawn. That almost never happens, and there is no partner for the cancel rule.",
+    "confidence": "low",
+    "supporting": [
+     "Wikipedia (es), Dominó dominicano, Pila bullet (sweep; 1v1 with a pile, no salida mentioned): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Domino RD (sweep; 1v1 has no draw and no pase de salida): https://dominord.com/rules",
+     "DR1.com and Wikipedia es salida text, both in pair terms (confirmed)"
+    ],
+    "contrary": [],
+    "recommendationForCapi": "2v2 only, like pase corrido (veinticincoThreshold is Infinity in 1v1). In 1v1 a draw or pass after the opening tile scores nothing. Owner's decision, with no source either way: keep it 2v2-only (recommended), or invent a 1v1 form such as paying when the opponent must draw. No source supports the second option."
+   },
+   {
+    "question": "salida_target",
+    "conclusion": "No Dominican prose source says whether a salida can reach or pass the target. Two hobby engines disagree. Phamton140 pays salida and pase redondo only while the team is below 170 of 200, and such a bonus can then take the team to 200 and win. 2mino has no salida, but it blocks winning by a pase corrido bonus ('no se puede ganar la partida de pura suerte por un bono'). Capi's existing rule for pase corrido is the same idea as 2mino: a game is won only by winning a round.",
+    "confidence": "low",
+    "supporting": [
+     "Capi engine pase corrido cap: /Users/Adelson/Desktop/personal/capi/packages/engine/src/reducer.ts (VEINTICINCO branch: pays only if scores[team] + 25 < targetScore)",
+     "franciscoapvst-hue/2mino logic.ts (unverified; a bonus cannot win the game): https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts"
+    ],
+    "contrary": [
+     "Phamton140/domino_dominicano game.dart applyPendingBonuses (confirmed; bonuses paid only below 170, but a paid bonus can reach 200 and win): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/game.dart"
+    ],
+    "recommendationForCapi": "Use the same cap as pase corrido. At the moment of payment, pay +25 only if scores[openerTeam] + 25 < targetScore. Otherwise drop it: no deferral and no partial payment. A pase de salida never wins the game and never puts a pair at or over the target."
+   },
+   {
+    "question": "salida_timing",
+    "conclusion": "The Dominican sources make the salida depend on the partner's action. DR1 says it 'can be nullified', and Wikipedia es says 'se anulan', so the bonus is final only when the opener's partner plays. Neither source says when the scorekeeper writes it down. FichaFlow pays at the pass and never cancels, which its own page calls a deviation from DR1. Phamton140 credits at the pass, but it decides the result by checking the partner's hand in advance, which gives the same outcome as waiting.",
+    "confidence": "medium",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua!' (Wayback, confirmed; 'can be nullified'): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó dominicano, Puntos de salida (confirmed; 'se anulan'): https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Phamton140/domino_dominicano round.dart ImmediateBonus and _evaluateStartPassBonus (confirmed; credits at the pass, with a look-ahead at the partner's hand): https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart"
+    ],
+    "contrary": [
+     "FichaFlow, Complete Dominican Domino Guide and What Is Pase de Salida (confirmed; pays 25 immediately, never cancels, by its own choice): https://fichaflow.com/learn/what-is-pase-de-salida-in-domino"
+    ],
+    "recommendationForCapi": "The next seat's pass on the one-tile board changes no score and shows no points callout. Pay at the moment the opener's partner places his tile: if board.length === 1 and passesSinceLastPlay === 1 when the partner plays, add +25 to the opener's team, subject to the target check at that moment. Emit a mid-round callout with the payload, like veinticinco. The partner's pass cancels it. Passes are forced, so a look-ahead would give the same result. Paying on the partner's play keeps his hand hidden until he acts, and the state already holds everything needed, so no new saved field is required."
+   },
+   {
+    "question": "other",
+    "conclusion": "No other opening bonus has support. 'Manito' (Acento.com.do, earlier research) is the name for the opener's partner after the opponent to the opener's right passes, and it carries no points. Neither list has evidence for 'salida matadora' or 'pase de mano'. Other checks agree with Capi. The blocker compares with the player below him ('tranquar con el de abajo') in DR1, Wikipedia es patio, and the 2025 La Guáyiga municipal tournament ('Se tranca con el jugador de abajo'). Pase corrido is 25 in DR1, and the player plays again, with no limit on repeats. La Guáyiga uses 30 for pase corrido and capicúa. FichaFlow says a full block is not a paso redondo, which matches Capi ending the round when the locking tile is placed. The double six opens the first hand, the winner opens later hands, and play goes to the right (Wikipedia es; the DR1 forum says anticlockwise). The Dominican false-pass penalty (pase con ficha, Wikipedia es) cannot happen in Capi, because passes are forced. Phamton140's 30/60 split by double and non-double appears in no other source.",
+    "confidence": "medium",
+    "supporting": [
+     "DR1.com, '25, 50, Capicua!' (Wayback; 'tranquar con el de abajo', and pase corrido 25 with a replay): http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "Wikipedia (es), Dominó dominicano, Tranque, Salida, Pase con ficha bullets: https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó 2025 (unverified; tranque with the player below, paso corrido 30, capicúa 30): https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "FichaFlow, Complete Dominican Domino Guide (a full block is not a Paso Redondo): https://fichaflow.com/learn/guide",
+     "DR1.com forum, Rules for Dominican Dominoes? (double six opens, anticlockwise, to 200): https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+     "Acento.com.do (earlier research; 'manito', no points)"
+    ],
+    "contrary": [
+     "Phamton140/domino README and scoring_rules.dart (30 after a double, 60 after a non-double; one uncited source): https://github.com/Phamton140/domino"
+    ],
+    "recommendationForCapi": "Add only the pase de salida. Give no bonus for manito, salida matadora, or pase de mano. Keep the tranque against the next seat (con el de abajo), pase corrido +25 repeatable in 2v2, the forced first-hand highest-double opening, the winner's free choice in later hands, and forced passes."
+   }
+  ],
+  "openRisks": [
+   "The tie decision belongs to the owner. The Capi engine already gives a tranque tie to the side that opened the round (packages/engine/src/scoring.ts scoreTrancao), and the evidence supports that. The owner believes the tie goes to the blocker, and only two apps (FichaFlow as a house rule, Phamton140) support that. The one Dominican prose source for the blocker-vs-right form (DR1) gives the tie to the opener, but its scope is ambiguous. If the owner still wants blocker-wins, it is a one-line change, and it would move away from the better-sourced rule.",
+   "The salida value is uncertain. DR1 scales it to 10 for games to 200 or 250, and Capi plays to 100 or 200. At target 100, a flat +25 is a quarter of the target. Wikipedia es (25 or 30, targets 100/200, no scaling) supports 25, but the owner may prefer DR1's 10.",
+   "All-pass stacking has no explicit source. The recommendation (the partner's pass cancels the salida, then pase corrido only) combines two stated rules. FichaFlow and Phamton140 both pay two bonuses in that case.",
+   "The 1v1 salida and the salida target cap have no Dominican source. Both recommendations follow Capi's existing pase corrido design (2v2 only, a bonus never reaches the target), not documented patio practice.",
+   "DR1's live URL is dead (it returns 'conn'). All DR1 evidence comes from Wayback snapshots (2015 and 2022-10-14).",
+   "Implementation: the salida adds a new mid-round callout type and payload (types.ts CalloutType), a string in packages/i18n (and the CapiStrings.swift mirror if the Messages extension renders callouts), and a fuzz-invariant update so the scoring-math check includes the new bonus. Per the project rules, real-time behavior needs a four-seat 2v2 test with more than one client.",
+   "Saved games in progress when this ships: the recommended check reads only existing fields (board length, passesSinceLastPlay, starterThisRound). An old save paused between the next seat's pass and the partner's play would pay the salida on resume. Confirm that this matches the project's save rules.",
+   "Not checked here: the list B paraphrase of DR1 says the tranque winner takes 'the opponent's points'. Capi scores every pip in all hands. That matches Phamton140, but no confirmed Dominican prose source was re-read on this point."
+  ]
+ },
+ "critic": {
+  "problems": [
+   {
+    "question": "tie",
+    "problem": "The conclusion is stronger than the evidence. (1) The claim that every Dominican source with a pair-vs-pair tie rule gives the tie to the opening pair is false. The Santiago 2019 municipal tournament is Dominican and pair vs pair, and a tie there scores nothing. The synthesis moves it to 'federation and tournament form' only on this question. (2) The Wikipedia 'regla general' tie sentence is called 'Dominican regla general', but the evidence note says the page calls regla general 'más bien la modalidad latina', and the same sentence appears under 'Dominó latino'. dominoarteociencia (generic latino) and pagat's Mexican rule also give the tie to the opener. So opener-wins is generic Latin practice too, and that is the same reason the synthesis uses to dismiss blocker-wins as 'Colombian and generic, not Dominican'. (3) Capi does not use pair totals. For Capi's exact comparison (the blocker against the next seat), the direct evidence is DR1 on one side, and its scope is ambiguous: the 2015-snapshot evidence item places the tie sentence under 'tranquar con todo el mundo', not 'con el de abajo'. On the other side are FichaFlow and Phamton140, both uncited. No source settles it. (4) The synthesis lists Capi's own scoreTrancao as supporting evidence. That is circular. openRisks says 'the evidence supports that' and calls the change a move 'away from the better-sourced rule', and both statements overstate the evidence.",
+    "fix": "Restate the conclusion like this: no Dominican source states the tie rule for the blocker-vs-right comparison. Opener-wins is the nearest documented rule, by analogy from DR1's other variant and from regla general, which is Latin. Blocker-wins is the convention in two Dominican-labeled apps. Remove scoreTrancao from the supporting list. Give the owner a real A/B choice and say that no source contradicts his belief for the exact rule Capi uses. Keep the confidence at low."
+   },
+   {
+    "question": "tie_next_opener",
+    "problem": "The recommendation conflicts with the source that Capi's tie rule rests on. DR1 says the player who placed the first tile 'is by default the winner'. It names a player, not a side. Dominican sources agree that the winner opens the next hand, so under DR1 the original opener opens after a tie. getRoundWinningSeat (reducer.ts lines 443-450) picks the compared seat on the opening side instead. That seat differs from the opener whenever the opener's partner is one of the two compared seats: blocker S with rival W, or blocker E with rival S, when N opened. That is half of the 2v2 tie cases. Wikipedia names only the pair. So 'no change needed' is a Capi choice, not the sourced rule, and a confidence of medium is too high for it.",
+    "fix": "Mark this as the owner's decision. If he follows DR1, getRoundWinningSeat returns state.starterThisRound when payload.blockerPips === payload.rivalPips (the payload already carries both). In that case, also change the rules copy 'Después de un tranque, sale el que ganó el tranque: el que trancó o el jugador a su derecha.' and its English line in packages/i18n/src/rules.ts."
+   },
+   {
+    "question": "salida_timing",
+    "problem": "The payment predicate is ambiguous for 1v1. The recommendation says 'if board.length === 1 and passesSinceLastPlay === 1 when the partner plays'. The same state occurs in 1v1: the opponent passes on an empty boneyard, and the turn goes back to the opener, who then plays. If the check reads only the two fields, as the salida_trigger text suggests ('No new saved field is needed'), it pays a 1v1 salida to the opener. That contradicts the salida_1v1 recommendation.",
+    "fix": "State the full guard: state.is2v2 && seat === getNextSeat(getNextSeat(state.starterThisRound, true), true) && state.board.length === 1 && state.passesSinceLastPlay === 1, followed by the target check. Add a 1v1 unit test with exactly that state and assert that no bonus is paid."
+   },
+   {
+    "question": "salida_timing",
+    "problem": "Paying on the partner's play conflicts with code the synthesis does not name. (1) invariants.fuzz.test.ts line 192 asserts 'no score change mid-round play', and this design makes that assertion fail by intent. (2) Both clients hard-code the mid-round banner to veinticinco: apps/web/src/app/game/[id]/page.tsx line 888 and apps/mobile/app/game/[id].tsx line 1187. A new 'salida' callout during play would render as the full-screen round-end CalloutOverlay unless both checks change. (3) The engine runs only on the server (apps/web move route), so the rule goes live for every client at the web deploy. App Store builds that are already installed look up CALLOUT_CONFIG, get nothing, and render no overlay. They still play the callout sound, because playCallout fires on any lastCallout, and the score jumps by 25 with no explanation. openRisks mentions only a new callout type, a string, and a generic fuzz update.",
+    "fix": "Add these items to the implementation plan. Change line 192 to allow exactly +25 to the opener's team under the salida guard. Add 'salida' to both isMidRoundCallout checks and to both CALLOUT_CONFIG maps. Decide the rollout order: either ship the engine change after the mobile build with the banner is live, or accept the unexplained +25 on old builds. Following observation #29, add reach-tally entries (salida paid, cancelled by the partner's pass, capped at the target, cancel followed by pase corrido) and run one mutation per rule."
+   },
+   {
+    "question": "salida_trigger / salida_value",
+    "problem": "The synthesis uses a non-Dominican source as Dominican and classifies sources differently on different questions. dominoarteociencia is generic 'dominó latino' in the earlier research, and the tie_next_opener answer labels it 'generic'. salida_trigger and salida_value still cite it as support, with no label ('normally 25'). The Santiago 2019 tournament supports the patio salida here but is dismissed as 'tournament form' for the tie. The synthesis also omits La Guáyiga 2025 (Dominican, unverified) from salida_value, although it uses 30 for pase corrido and capicúa, which supports 'Wikipedia: 25 or 30' and the case for 30.",
+    "fix": "Use one classification for each source on every question. For 25, the Dominican support is Wikipedia patio ('25 o 30'), the Santiago 2019 tournament (25, target unknown), and the FichaFlow default. Label dominoarteociencia as generic. Add La Guáyiga to the evidence for 30. The recommendation of +25 can stay, with confidence medium."
+   },
+   {
+    "question": "salida_value",
+    "problem": "The synthesis summarizes DR1 as '10 for games to 200 or less'. DR1 names only 200, 250 and 500. It says nothing about games to 100, which is Capi's default target. Applying DR1's scaling at target 100 is an extrapolation.",
+    "fix": "Write 'DR1: 10 for games to 200 or 250, 25 for 500, no value given for 100'. In the owner's decision, say that the DR1 option at target 100 has no source."
+   },
+   {
+    "question": "salida_timing / edge cases",
+    "problem": "The synthesis does not cover a round that ends before the partner plays. In 2v2 nothing can come between the trigger and the payment. The partner acts next. His play cannot be a dominó, because he holds 7 tiles. It cannot be a tranque, because two tiles on the board cannot use up a suit. validate.ts rejects draws in 2v2. The only other exit is a claim (forfeit.ts, 2 minutes of silence, live mode only), and a claim ends the game, so the unpaid salida does not matter. Without this statement, an implementer can add a deferral or cleanup path that is never needed. The synthesis also does not cover turn-based 2v2 games from iMessage. In those games the partner's play can come hours after the pass, and the design shows no pending state.",
+    "fix": "Add a sentence: in 2v2 the payment decision always happens at the partner's next action, and a round cannot end first, so no pending state or cleanup is needed. Add an owner decision: show a 'pase de salida pendiente' notice at the pass (with no points), or show nothing until the partner plays."
+   },
+   {
+    "question": "salida_forced_opening",
+    "problem": "The code pointer is wrong. reducer.ts has no startGame function. The auto-placement is in createInitialState (reducer.ts lines 134-184), which sets board to [starterTile], currentTurn to the next seat, passesSinceLastPlay to 0, and lastPlayedBy to the starter. The synthesis also leaves out a fact it could state: in 2v2 all 28 tiles are dealt, so the first hand always opens with the 6-6. The trigger then fires when the next seat holds no six, which is about 5.5% of first hands (C(15,7)/C(21,7)).",
+    "fix": "Replace 'startGame' with createInitialState. Say that the predicate already holds in the initial state, and add a unit test that starts from createInitialState with a seeded deal where the next seat holds no six."
+   },
+   {
+    "question": "tie / other (implementation scope)",
+    "problem": "The synthesis understates the work. It says a tie switch is 'one line in scoreTrancao, plus a test'. The fuzz suite also encodes the opener tie (expectedTranque, the comment on line 84, the assertion on line 222), and the rules copy states it in both languages: 'Si empatan, gana el lado que salió en esa ronda.' and 'A tie goes to the side that opened the round.' For the salida, openRisks lists only a callout string. packages/i18n/src/rules.ts needs a new rules section (2v2 only, +25, the partner's pass cancels it, it never wins the game, next to 'Un pase corrido nunca da la partida'), and What's New needs an update. The CapiStrings.swift item is conditional in openRisks, but the answer is known: the Messages extension renders callouts through GameWebView (the web page), so no Swift change is needed.",
+    "fix": "List the fuzz expectation, both rules.ts language blocks, and What's New for each change. Remove the Swift mirror item."
+   },
+   {
+    "question": "salida_every_hand",
+    "problem": "The confidence 'high' is stronger than the evidence. DR1's own paragraph opens with 'In an initial game'. Wikipedia's 'al momento de colocarse la primera ficha' does not say whether it means the first tile of the hand or of the game. The other support comes from two apps.",
+    "fix": "Lower the confidence to medium. The recommendation (every hand, at most once, only with one tile on the board) can stay."
+   },
+   {
+    "question": "salida_target",
+    "problem": "The recommendation has no source, but it is presented as settled, while the 1v1 answer, which is in the same position, is marked as an owner decision. The synthesis also lists Phamton140's rule under contrary, although that rule partly agrees: it stops the bonuses near the target (at 170 of 200). It differs only because a bonus paid from below 170 can still win the game.",
+    "fix": "Mark it as an owner decision that follows Capi's existing pase corrido rule. Describe Phamton140 as a different cap, not as the opposite rule."
+   },
+   {
+    "question": "openRisks (tranque points)",
+    "problem": "A question that affects every tranque is still open. Does the winner take every pip in all hands (Capi now) or only the opponents' pips (the DR1 paraphrase in list B)? This question affects more rounds than the salida does. The support for 'all hands' is Phamton140 and Rafael Bras, who writes about Puerto Rican play. Neither is a Dominican prose source.",
+    "fix": "Re-read the tranque paragraph in the DR1 Wayback snapshot before shipping. If it says 'the opponent's points', give the question to the owner. The current rules copy promises all pips."
+   }
+  ],
+  "verdict": "You can act on the pase de salida part once the guards and integration notes above are added. The trigger, the partner's-pass cancel, every hand, +25, 2v2 only, the target cap, and no stacking on an all-pass opening all match the confirmed Dominican evidence or Capi's existing design. I checked the no-new-field claim: passesSinceLastPlay and starterThisRound have no writers outside the engine. Two things need fixing before implementation. First, the payment predicate needs explicit is2v2 and partner-seat guards, or it pays a salida in 1v1. Second, the plan must list the conflicting fuzz invariant (line 192), the veinticinco-only mid-round banner checks in both clients, and the rollout to old App Store builds. Do not show the tranque tie section to the owner as it stands. For the blocker-vs-right comparison that Capi uses, no source settles the tie. Opener-wins rests on analogy from a Latin regla general and from an ambiguous DR1 sentence. Blocker-wins rests on two uncited Dominican apps. The owner's belief is therefore not contradicted, and the choice is his. The next-opener-after-tie behavior also differs from DR1, which names the opening player. Two findings would change this verdict. A Dominican prose source that states the tie rule for 'tranquar con el de abajo' would settle the tie. A source that pays the salida at the pass with no partner cancel would reopen the timing and cancel answers. Observation logged: #33, 'A research synthesis must classify each source the same way on every question and keep analogy apart from direct evidence'."
+ },
+ "sweeps": [
+  {
+   "key": "es-web",
+   "claims": [
+    {
+     "question": "tie",
+     "rule": "Dominican 'regla general': in a tranque tie in points, the pair that opened (salió) that hand wins.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Tranque'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Dominican 'regla general': after a tied tranque, the pair that opened the tied hand also opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Tranque'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican patio tranque differs from regla general only in that the blocker compares his own tiles with the opponent on his right; the article states no separate patio tie rule.",
+     "quote": "La modalidad de patio varía en que quien hizo el tranque compara solo sus fichas con el oponente de la derecha.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Tranque'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "Patio: when the first tile is placed and the immediate opponent (next player) cannot play, the opener gets the salida points.",
+     "quote": "si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "Patio: if the opener's partner also cannot play, the salida points are cancelled.",
+     "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "Patio: the salida bonus is 25 or 30 depending on the table's rules; no link to the target score is stated.",
+     "quote": "al jugador que salió se le suman 25 o 30 puntos dependiendo de las reglas",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican: only the first hand is opened by the double-six holder; the later hands are opened by the winner of the previous hand, and play goes to his right.",
+     "quote": "Las demás partidas las inicia quien haya ganado la partida anterior. La próxima ficha la coloca el jugador a la derecha de este.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Salida'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican false pass (pase con ficha): the points of all tiles after the pass go to the opponents, but if the passer reacts before the next player places a tile, the penalty is only 25 or 30.",
+     "quote": "el jugador que cantó un pase reacciona antes de que el jugador siguiente coloque su ficha solo recibirá una sanción de 25 o 30",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Pase con ficha'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican 1v1 (one player per team): 7 tiles each, the rest form a pile, and a blocked player draws one by one until he can play; a variant deals 10 each with no drawing. The section does not say whether salida points apply in 1v1.",
+     "quote": "En la modalidad de 1 jugador por equipo, los jugadores toman 7 fichas cada uno, quedando las fichas restantes a un lado en la pila",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Pila'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "International norm (cited to Miguel Lugo, Domino Competitivo): a tied cierre has no winner.",
+     "quote": "En caso de empate la norma internacional establece que no hay ganador y en el siguiente juego sale el jugador de turno",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Final del juego'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "International norm: after a tied cierre, the next hand is opened by the player after the one who opened the tied hand.",
+     "quote": "en el siguiente juego sale el jugador de turno, es decir, el siguiente al que salió en la partida actual",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Final del juego'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Regional alternative 1 to the international norm: the tie goes to the pair that opened, or in individual play to the player nearest the opener in the agreed rotation.",
+     "quote": "La pareja que inició el juego, o, en juego individual el jugador más cercano al que salió en el sentido de rotación acordado",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Final del juego'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Regional alternative 2 to the international norm: the tie goes to the player or pair credited with the cierre (the blocker).",
+     "quote": "El jugador o pareja que se le atribuye el «cierre».",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Final del juego'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Colombian 'el que cierra responde' (Bajo Cauca, Antioquia): the player who places the closing tile must individually have fewer points than the opposing players. This is the closest structural match to the Dominican patio blocker comparison.",
+     "quote": "el jugador que pone la última ficha debe tener una puntuación más baja (individualmente) que los jugadores del equipo contrario",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó colombiano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Colombian: in either tranca mode (including 'el que cierra responde'), a tie goes to the team that closed the game.",
+     "quote": "Dado un empate en alguno de los dos casos, el equipo que haya cerrado el juego es el ganador.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó colombiano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Venezuelan pair tranca: on a tie nobody scores, and a 0 is written on the score sheet.",
+     "quote": "En caso de empate, cuando las dos parejas suman la misma cantidad de puntos, ningún equipo se anotará el valor de la tranca",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó venezolano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Maracaibo individual tranca: on a tie between players of the two teams, the opener wins; if neither tied player opened, the one nearest the opener to his right wins.",
+     "quote": "el ganador será quien posea la mano de la salía, es decir, quien haya sido el salidor",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó venezolano' (Maracaibo)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Maracaibo individual tranca: the 'mano' (the opening turn) does not rotate after a tranca.",
+     "quote": "la mano en la tranca no se corre",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó venezolano' (Maracaibo)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Eastern Cuba: players count individually; when a player of each pair ties, the pair that opened wins and opens the next hand.",
+     "quote": "la pareja que salió en esa data será la ganadora y por consiguiente tiene el derecho de salir en la próxima data",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó cubano, Zona oriental'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Mexican: when both pairs tie in points, the pair with fewer tiles wins.",
+     "quote": "En caso de empate, cuando las dos parejas suman la misma cantidad de puntos, gana la pareja con menor cantidad de fichas",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó mexicano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Puerto Rican 'ponceño': the tranque is individual; on a tie nobody takes the hand's points, and only the blocker's team scores its fixed tranque bonus.",
+     "quote": "En caso de empate, nadie tomara puntos (el equipo del jugador que provocó el Tranque son los únicos puntos en la jugada, entonces).",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó ponceño' (Puerto Rico)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Puerto Rican 'ponceño': a pass by your own partner caused by your play is free and scores nothing for the opponents.",
+     "quote": "Si la jugada hace pasar a tu propio compañero, el pase de tu compañero es ‘gratis’, o sea no vale punto para los oponentes.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó ponceño' (Puerto Rico)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Pair-vs-pair cierre: when both pairs have the same points, the player who closed the game wins.",
+     "quote": "Cuando ambas parejas tienen los mismos puntos en un cierre, las reglas indican que el jugador que cerró el juego es el ganador",
+     "url": "https://kapikumesas.wixsite.com/kapiku/reglas-del-domino",
+     "sourceName": "Kapiku Mesas, 'Reglas del dominó'",
+     "sourceKind": "other",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "FID international rules: a tie in unplayed points makes the cierre a draw.",
+     "quote": "En el caso de que ambas parejas tuvieren la misma cantidad de puntos en las fichas no jugadas, el cierre o tranca será empate.",
+     "url": "https://sombrerodelbuho.home.blog/2020/01/13/dominando-el-domino/",
+     "sourceName": "El Sombrero del Búho, 'Dominando el dominó' (FID rules)",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "FID international rules: whatever the result, the next hand is opened by the player to the right of the previous opener.",
+     "quote": "Independientemente del resultado de la ronda, el saque siguiente lo tiene el jugador ubicado a la derecha del salidor y así sucesivamente.",
+     "url": "https://sombrerodelbuho.home.blog/2020/01/13/dominando-el-domino/",
+     "sourceName": "El Sombrero del Búho, 'Dominando el dominó' (FID rules)",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "FichaFlow guide: the pase de salida is triggered when the next player cannot answer the opening tile, and Dominican variants value it at 10 or 25.",
+     "quote": "After the opening tile, the next player cannot answer. Dominican variants use 10 or 25.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow awards the 25 at once and does not take it back if the opener's partner then passes (an implementation choice, not a claim about the traditional rule).",
+     "quote": "FichaFlow awards 25 immediately; it does not cancel the award if the opener's partner later passes.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "FichaFlow guide page (a second page from the same app as the earlier research): the blocker is compared with the next opponent, and a tie goes to the blocker.",
+     "quote": "FichaFlow compares the blocker with the next opponent; lower pips wins and a tie favors the blocker.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "FichaFlow: paso redondo means that the other three players, including your partner, pass and you still have a legal play; a full block is not a paso redondo.",
+     "quote": "the other three players (including your partner) pass and you still have a legal play. A full block is not Paso Redondo.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "The pair that opened the hand wins a tied tranque and opens the next hand. The text matches the Wikipedia Dominican section word for word, so it is probably a copy and not an independent source.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, 'Reglamento de Dominó' page 5",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    }
+   ],
+   "searchesRun": [
+    "tranque empatado dominó dominicano quién gana",
+    "\"pase de salida\" dominó dominicano puntos",
+    "\"puntos de salida\" dominó \"se anulan\" compañero pasa",
+    "dominó dominicano tranque \"empate\" \"el que tranca\" reglas de patio",
+    "Listín Diario OR \"Diario Libre\" dominó \"pase de salida\" OR \"paso de salida\" OR \"tranque\" reglas",
+    "\"dominó dominicano\" \"salida\" 25 puntos \"capicúa\" \"pase\" tranque empate mano",
+    "\"paso de salida\" dominó dominicano",
+    "\"tranque\" \"empate\" dominó \"República Dominicana\" reglas puntos \"sale\" siguiente mano",
+    "dominó reglas \"regla de patio\" tranque \"a la derecha\" empate \"pase de salida\" OR \"salida\" dominicanos",
+    "\"el que trancó\" OR \"el que tranca\" dominó empate gana puntos"
+   ],
+   "notes": "MAIN FINDING. No new source gives a tie rule for the Dominican patio tranque, where the blocker compares with the next player. The Spanish Wikipedia 'Dominó' article (read as raw wikitext, so the quotes are exact) says two things in its Dominican section. Under 'regla general', a tied tranque goes to the pair that opened ('la pareja que salió'), and that pair also opens the next hand. For patio, it says only that the blocker compares his own tiles with the opponent on his right. It gives no separate patio tie rule. Whether the 'pair that opened' tie rule carries over to patio is an open reading; the source does not state it. So the only source that says 'a tie goes to the blocker' for the Dominican blocker-vs-next rule is still FichaFlow (confirmed on its second page, /learn/guide). The closest analog found is Colombian 'el que cierra responde': the closer must have fewer points than the opponents, and a tie goes to the closing team. That supports the user's recollection by analogy only. Other individual-comparison variants give the tie to the opener (Maracaibo, eastern Cuba) or score nothing (Puerto Rican ponceño). The generic Wikipedia rule lists 'opener' and 'blocker' as regional alternatives to the international norm (a draw, and the next player after the opener opens).\n\nPASE DE SALIDA. The Wikipedia Dominican section confirms the trigger (the immediate opponent cannot play on the first tile), the value (25 or 30 'dependiendo de las reglas'), and the cancel rule (the partner also cannot play). It says only 'la primera ficha'. It does not say whether this means every hand or only the first hand of the game, and it does not mention forced openings, 1v1, the target score, or the all-three-pass case. The same section says only the first hand is opened by the double-six holder. Later hands are opened by the previous hand's winner, so later openings are chosen, not forced. FichaFlow's guide says 'Dominican variants use 10 or 25' (this matches DR1). FichaFlow also says it awards the 25 at once and does not cancel it; this is an app implementation note. No source answered salida_forced_opening, salida_every_hand, salida_all_pass, salida_1v1, or salida_target explicitly.\n\nCOULD NOT REACH. dominord.com/rules ('Reglas del Dominó Dominicano') returns a Cloudflare bot challenge (HTTP 403). It was not bypassed and has no Wayback snapshot. comojugardomino.com/es/blog/domino-dominicano returned HTTP 502 twice and has no Wayback snapshot. web.archive.org is blocked for WebFetch. Search-engine summaries attributed two claims to unnamed pages among these: 'Dominican variant: a tie goes to the player or team that started the hand' and 'many patio tables give the tie advantage to la mano'. These claims are unverified and are not in the claims list. A curl re-read of reglamentos-deportes.com returned HTTP 500, so its Dominican label is unconfirmed. Its text matches the Wikipedia Dominican section word for word, which suggests a copy. The dominoarteociencia pages 'La salida en profundidad' and 'tapar la salida' hold strategy only, with no scoring rules. The rafaellbras.substack.com 'Tranque' page is about Puerto Rican dominoes used as a political metaphor and states no tie rule. No Dominican newspaper (Listín Diario, Diario Libre, El Caribe, Hoy) rules article came up for these queries.\n\nSURPRISES. One search summary labeled the Puerto Rican ponceño tie rule ('nadie tomara puntos') as Venezuelan. The Kapiku, Sombrero del Búho, FichaFlow-guide and reglamentos quotes come from WebFetch model output and are not raw text. They may differ slightly from the page wording.\n\nBUDGET. 10 searches. About 14 page fetches: 9 WebFetch attempts, 2 curl page downloads, 1 raw-wikitext read of the Wikipedia page already opened, 1 failed curl re-read of reglamentos-deportes, plus 2 Wayback availability lookups.\n\nTASK-OBSERVER. One observation logged: 0031, 'Verbatim-quote research needs the raw page source, not the fetch tool's summary', at /Users/Adelson/.claude/skill-observations/observation-log/0031-verbatim-quotes-need-the-raw-source-not-a-fetch-summary.md.",
+   "verified": [
+    {
+     "question": "tie",
+     "rule": "Dominican 'regla general': in a tranque tie in points, the pair that opened (salió) that hand wins.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Tranque'",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Checked against the raw wikitext (action=raw). The 'Tranque' bullet under '=== Dominó dominicano ===' says: 'En la modalidad de regla general en caso de tranque o cierre, la pareja que tenga la menor cantidad de puntos será la pareja ganadora. En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano.' The tie rule is scoped to regla general only. For patio the same bullet says only 'quien hizo el tranque compara solo sus fichas con el oponente de la derecha'. It states no patio tie rule and does not say a tie goes to the blocker. The general 'Final del juego' section says the international rule on a tie is no winner. It lists regional alternatives with {{Cita requerida}}."
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Dominican 'regla general': after a tied tranque, the pair that opened the tied hand also opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Tranque'",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim in the raw wikitext, in the regla general 'Tranque' bullet of 'Dominó dominicano'. It agrees with the section's 'Salida' bullet: 'Las demás partidas las inicia quien haya ganado la partida anterior.'"
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "Patio: when the first tile is placed and the immediate opponent (next player) cannot play, the opener gets the salida points.",
+     "quote": "si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim in the raw wikitext. The bullet reads: 'Puntos de salida: En la modalidad de patio (informal), si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos dependiendo de las reglas, si la pareja tampoco puede jugar entonces se anulan los puntos de salida.' The rule is scoped to patio only. The page gives no general-rule equivalent."
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "Patio: if the opener's partner also cannot play, the salida points are cancelled.",
+     "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim in the same 'Puntos de salida' bullet. 'la pareja' is ambiguous. In context it most plausibly means the opener's partner, who plays after the passing opponent. The page does not say whether the cancelled hand then counts as a paso corrido for anyone."
+    },
+    {
+     "question": "salida_value",
+     "rule": "Patio: the salida bonus is 25 or 30 depending on the table's rules; no link to the target score is stated.",
+     "quote": "al jugador que salió se le suman 25 o 30 puntos dependiendo de las reglas",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), article 'Dominó', section 'Dominó dominicano', bullet 'Puntos de salida'",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim. The value is '25 o 30 puntos dependiendo de las reglas', with no link to the 100 or 200 target in the 'Objetivo' bullet. The 'Paso corrido' and 'Capicúa' bullets use the same '25 o 30' wording. The value conflicts with the FichaFlow page, which says Dominican variants use 10 or 25."
+    },
+    {
+     "question": "salida_value",
+     "rule": "FichaFlow guide: the pase de salida is triggered when the next player cannot answer the opening tile, and Dominican variants value it at 10 or 25.",
+     "quote": "After the opening tile, the next player cannot answer. Dominican variants use 10 or 25.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "Checked against the page HTML (curl, HTTP 200, tags stripped). The bonus table row reads: 'Pase de Salida After the opening tile, the next player cannot answer. Dominican variants use 10 or 25. FichaFlow awards 25 immediately; it does not cancel the award if the opener's partner later passes. FichaFlow default +25'. The page cites no source for '10 or 25' and names no variant (general or patio). The value conflicts with Wikipedia es, which says 25 or 30 for patio. The page's visible title is 'Dominican dominoes rules, strategy, scoring, and bonus guide', not 'Complete Dominican Domino Guide'."
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow awards the 25 at once and does not take it back if the opener's partner then passes (an implementation choice, not a claim about the traditional rule).",
+     "quote": "FichaFlow awards 25 immediately; it does not cancel the award if the opener’s partner later passes.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim in the Pase de Salida row, with the curly apostrophe in 'opener’s'. The page presents this as FichaFlow's own behavior. It is opposite to the patio cancellation rule in Wikipedia es ('si la pareja tampoco puede jugar entonces se anulan los puntos de salida'). Treat it as an app implementation choice, not evidence of the traditional rule."
+    },
+    {
+     "question": "tie",
+     "rule": "FichaFlow guide page (a second page from the same app as the earlier research): the blocker is compared with the next opponent, and a tie goes to the blocker.",
+     "quote": "FichaFlow compares the blocker with the next opponent; lower pips wins and a tie favors the blocker.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The quote is verbatim in the bonus table's Tranque row ('Tranque Blocked game. FichaFlow compares the blocker with the next opponent; lower pips wins and a tie favors the blocker. FichaFlow default +0'). The earlier rules text labels it explicitly: 'FichaFlow's house rule compares the blocker with the next opponent; lower pips wins and a tie favors the blocker.' The page calls this a house rule and gives no source for the tie. The blocker-vs-next-opponent comparison matches the Wikipedia es patio text ('quien hizo el tranque compara solo sus fichas con el oponente de la derecha'), but Wikipedia states no patio tie rule. So 'a tie goes to the blocker' comes from one app's house rule only. It is not corroborated as traditional Dominican practice. The only sourced Dominican tie rule (Wikipedia es, regla general) gives the tie to the pair that opened the hand."
+    }
+   ]
+  },
+  {
+   "key": "forums-video",
+   "claims": [
+    {
+     "question": "tie",
+     "rule": "In the 'tranquar con todo el mundo' variant (blocker compares with every player), a tie in pips goes by default to the player who placed the first tile of the hand.",
+     "quote": "In the case of a tie, the player who began the game (placed the first domino on the table) is by default the winner.",
+     "url": "https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, Dominoes article (dominoes_1)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": false
+    },
+    {
+     "question": "other",
+     "rule": "The standard Dominican tranque is 'tranquar con el de abajo': the blocker shows his tiles to the player on his right; fewer pips wins that player's opponents' points, more pips loses them to the opponent (no tie rule stated for this form).",
+     "quote": "the player who executed the tranque shows his pieces to the player to his right (known as \"tranquar con el de abajo\")",
+     "url": "https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, Dominoes article (dominoes_1)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": false
+    },
+    {
+     "question": "tie",
+     "rule": "Pair-vs-pair tranque (pair totals, 1v1 individual totals): on an exact tie in pips, the player or team that started the hand wins.",
+     "quote": "Si hay un empate exacto en los puntos, el ganador es el jugador (o equipo) que inició la mano.",
+     "url": "https://dominord.com/rules",
+     "sourceName": "Domino RD, Reglas del Dominó Dominicano",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": false
+    },
+    {
+     "question": "tie",
+     "rule": "General rule for a pair-vs-pair closed game: on a pip tie the pair with fewer tiles wins; if tile counts are also equal, no points are scored.",
+     "quote": "Gana la pareja con menor cantidad de fichas; no se contabilizan los puntos en caso de que el número de fichas sea el mismo para ambas parejas",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": false
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "After a fully tied closed game (same pips and same tile count), the lead rotates: the next player in turn order opens the following hand.",
+     "quote": "y correrá la mano",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": false
+    },
+    {
+     "question": "tie",
+     "rule": "FichaFlow's full guide confirms its house rule: the blocker compares with the next opponent, fewer pips wins, and a tie goes to the blocker.",
+     "quote": "FichaFlow compares the blocker with the next opponent; lower pips wins and a tie favors the blocker.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "The pase de salida is triggered when the player right after the opener cannot answer the opening tile.",
+     "quote": "After the opening tile, the next player cannot answer.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "Dominican variants value the pase de salida at 10 or 25 points.",
+     "quote": "Dominican variants use 10 or 25.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow writes the 25 down at the moment of the pass and does not take it back if the opener's partner then also passes.",
+     "quote": "FichaFlow awards 25 immediately; it does not cancel the award if the opener's partner later passes.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "FichaFlow's paso redondo needs the other three players (partner included) to pass while the player still has a legal play; a full block does not count as paso redondo.",
+     "quote": "The other three players (including your partner) pass and you still have a legal play. A full block is not Paso Redondo.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "A DR1 forum poster says Dominican players score bonus points for making everyone pass and for a capicua; the thread never mentions a pase de salida.",
+     "quote": "I know you also get points if you can make everyone pass and if you can go out on either end~ Capicua.",
+     "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+     "sourceName": "DR1.com forum, Rules for Dominican Dominoes? (poster PeterInBrat)",
+     "sourceKind": "forum",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "A DR1 forum poster gives the game target as the first pair to 200 points.",
+     "quote": "the first pair to 200 points wins the game.",
+     "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+     "sourceName": "DR1.com forum, Rules for Dominican Dominoes? (poster the gorgon)",
+     "sourceKind": "forum",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican games are usually played to 200, 250 or 500 points, the same targets DR1 uses to scale the salida bonus (10 vs 25).",
+     "quote": "dominoes games here are usually played to 200, 250 or 500 points",
+     "url": "https://extremehotels.com/dominican-dominoes/",
+     "sourceName": "Zen Cabarete (eXtreme Hotels), Dominoes in the Dominican",
+     "sourceKind": "blog",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Puerto Rican tranque is pair-vs-pair: the team with fewer pips in hand wins and takes all (no tie rule given).",
+     "quote": "the winner will be the team with the least number of points in their hands; winner takes all.",
+     "url": "https://rafaellbras.substack.com/p/tranque",
+     "sourceName": "Rafael L. Bras, Tranque (Substack, 2025-07-01)",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    }
+   ],
+   "searchesRun": [
+    "dominó dominicano tranque empate quién gana",
+    "reddit dominican dominoes tranque tie rules",
+    "\"pase de salida\" dominó dominicano youtube",
+    "quora reglas dominó dominicano tranque pase",
+    "\"tranque\" \"empate\" dominó \"el que tranca\" gana",
+    "site:reddit.com Dominican dominoes rules capicua tranque pase",
+    "dominó dominicano \"salida\" pase \"compañero también pasa\" puntos 25 30",
+    "Dominican dominoes \"tranque\" tie \"blocker\" OR \"tranca\" rules forum",
+    "facebook dominó dominicano regla \"pase de salida\" \"no vale\" OR \"se anula\" OR \"se borra\"",
+    "youtube \"tranque\" dominó dominicano empate \"misma cantidad\" puntos quien gana"
+   ],
+   "notes": "I used all 10 searches and 14 fetches. The discussion and video sources returned almost nothing. No Reddit or Quora thread appeared in any result, and a site:reddit.com search returned zero reddit.com pages. Both TikTok pages rendered empty (header only), and the one YouTube Short (youtube.com/shorts/87za4MF9EhA, \"#Domino #Salida\") has no rule text in the results. I did not fetch it. Dead ends: dominord.com/rules returned 403, comojugardomino.com/es/blog/domino-dominicano returned 502 twice, boarden.club/dominican-dominoes returned 503, web.archive.org is blocked for this tool, and dr1.com/articles/dominoes_1.shtml returned only the word \"conn\". The DR1 article claims therefore come from search snippets (fetched=false). That article may be the same DR1 piece as the earlier \"25, 50, Capicua!\" source.\n\nTranque tie: I found no discussion source saying a tie goes to the blocker. FichaFlow is still the only source for that rule. The new DR1 article snippet says the player who placed the first tile wins a tie, but only in the \"tranquar con todo el mundo\" variant (compare with everyone). For the normal \"con el de abajo\" form (blocker vs the player on his right), DR1 gives no tie rule. The Domino RD snippet says the player or team that started the hand wins a tie, but it covers pair-total tranques. I am not sure of its attribution: the same snippet appeared in searches that returned both dominord.com and comojugardomino.com. A generic search summary (source unclear, possibly ast.wikipedia, the museodeljuego PDF, or dominoarteociencia \"elcierreolatranca\") said this: under international rules a tie has no winner and the next player in rotation opens; some regions give the tie to the pair that started. It also said the winner of a tranque is not the player who placed the last tile. I have no verbatim original-language text for that, so I did not record it as a claim.\n\nPase de salida: the only new point is the FichaFlow guide page. It says \"Dominican variants use 10 or 25\" and that FichaFlow writes the 25 down right away and never cancels it. The DR1 forum thread on Dominican rules mentions the bonus for making everyone pass and capicua, but not the pase de salida. The Wikipedia patio text (25 or 30, cancelled if the partner also cannot play) came back again in a search summary, with a possible mirror on reglamentos-deportes.com. That is not new, so I did not record it again. The Doble6 App Store page (explicitly Dominican) shows \"+25, +50, TRANCAO!\" score buttons and the saying \"Doble 6 sale y salida a blanco nunca pierde\", but it states no rules. I found nothing on these questions: salida_forced_opening, salida_every_hand, salida_all_pass, salida_1v1, salida_target, or who opens after a tied Dominican patio tranque.",
+   "verified": [
+    {
+     "question": "tie",
+     "rule": "FichaFlow's full guide confirms its house rule: the blocker compares with the next opponent, fewer pips wins, and a tie goes to the blocker.",
+     "quote": "FichaFlow compares the blocker with the next opponent; lower pips wins and a tie favors the blocker.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Fetched 2026-09-27. The sentence is on the page verbatim (it appears twice). The page presents it as FichaFlow's own house interpretation, not as a documented Dominican standard. Other sources disagree on the tie: DR1 (archived) and es.wikipedia give the tie to the player or pair that opened the hand, not the blocker."
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "The pase de salida is triggered when the player right after the opener cannot answer the opening tile.",
+     "quote": "After the opening tile, the next player cannot answer.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Fetched 2026-09-27. The sentence is on the page verbatim. Independent sources agree: DR1 (archived) says 'if after the first player plays his piece, and the next player cannot play, his team is awarded 10 or 25 points'. es.wikipedia (Dominó dominicano, 'Puntos de salida', patio) says the same with 25 or 30 points."
+    },
+    {
+     "question": "salida_value",
+     "rule": "Dominican variants value the pase de salida at 10 or 25 points.",
+     "quote": "Dominican variants use 10 or 25.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Fetched 2026-09-27. The sentence is on the page verbatim. DR1 (archived) links the value to the game target: 25 in a game to 500, 10 in a game to 200 or 250. es.wikipedia (Dominó dominicano, patio) instead says '25 o 30 puntos dependiendo de las reglas'."
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow writes the 25 down at the moment of the pass and does not take it back if the opener's partner then also passes.",
+     "quote": "FichaFlow awards 25 immediately; it does not cancel the award if the opener's partner later passes.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Fetched 2026-09-27. The sentence is on the page verbatim and is labeled as FichaFlow's own behavior. This is a deviation from the documented Dominican rule. DR1 (archived) says the salida 'can be nullified. If the next player after that also doesn't have a piece to play, the points aren't counted'. es.wikipedia (Dominó dominicano) says 'si la pareja tampoco puede jugar entonces se anulan los puntos de salida'."
+    },
+    {
+     "question": "tie",
+     "rule": "In the 'tranquar con todo el mundo' variant (blocker compares with every player), a tie in pips goes by default to the player who placed the first tile of the hand.",
+     "quote": "In the case of a tie, the player who began the game (placed the first domino on the table) is by default the winner.",
+     "url": "https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, Dominoes article (dominoes_1)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "The live URL returns a 4-byte body ('conn') and has no content. It was verified from a web.archive.org 2015 snapshot (http://www.dr1.com/articles/dominoes_1.shtml). Exact page wording: 'In the case of a tie the player who began the game, (placed the first domino on the table), is by default the winner, and his team is awarded the points.' The sentence follows the 'tranquar con todo el mundo' sentence. The default described just before it is 'tranquar con el de abajo': the blocker shows his tiles to the player on his right, fewer points wins, more points loses. No tie rule is stated for that default case."
+    },
+    {
+     "question": "tie",
+     "rule": "Pair-vs-pair tranque (pair totals, 1v1 individual totals): on an exact tie in pips, the player or team that started the hand wins.",
+     "quote": "Si hay un empate exacto en los puntos, el ganador es el jugador (o equipo) que inició la mano.",
+     "url": "https://dominord.com/rules",
+     "sourceName": "Domino RD, Reglas del Dominó Dominicano",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "unreachable",
+     "note": "WebFetch and curl both got HTTP 403 with a Cloudflare 'Just a moment...' challenge page. WebFetch cannot reach web.archive.org, so no archived copy was checked. The quote is not verified. A similar rule has independent support: es.wikipedia (Dominó dominicano, regla general) says 'la pareja que salió en esa mano será la ganadora'."
+    },
+    {
+     "question": "tie",
+     "rule": "Puerto Rican tranque is pair-vs-pair: the team with fewer pips in hand wins and takes all (no tie rule given).",
+     "quote": "the winner will be the team with the least number of points in their hands; winner takes all.",
+     "url": "https://rafaellbras.substack.com/p/tranque",
+     "sourceName": "Rafael L. Bras, Tranque (Substack, 2025-07-01)",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Fetched 2026-09-27. Page wording: 'The game is over, and the winner will be the team with the least number of points in their hands; winner takes all.' The article is set in Puerto Rican dominoes and states no tie rule. It is not a Dominican source and is correctly marked as such."
+    },
+    {
+     "question": "tie",
+     "rule": "General rule for a pair-vs-pair closed game: on a pip tie the pair with fewer tiles wins; if tile counts are also equal, no points are scored.",
+     "quote": "Gana la pareja con menor cantidad de fichas; no se contabilizan los puntos en caso de que el número de fichas sea el mismo para ambas parejas",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "verdict": "misread",
+     "note": "Verified from the article's raw wikitext on 2026-09-27. The quoted text is real, but it is in the 'Dominó mexicano' section, so it is the Mexican rule, not a general rule. The general rule is in 'Final del juego': 'En caso de empate la norma internacional establece que no hay ganador'. That section lists two regional alternatives: 'La pareja que inició el juego' (in 1v1, the player nearest the opener in turn order), and 'El jugador o pareja que se le atribuye el «cierre»'. The 'Dominó dominicano' section says: 'En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora' (regla general). It adds: 'La modalidad de patio varía en que quien hizo el tranque compara solo sus fichas con el oponente de la derecha'. No patio tie rule is given."
+    }
+   ]
+  },
+  {
+   "key": "apps-code",
+   "claims": [
+    {
+     "question": "tie",
+     "rule": "Engine compares the blocker (who placed the last tile) with the next player in turn order; the lower hand wins for his team and the team scores all pips left in all hands; on an exact tie the blocker wins.",
+     "quote": "// Empate: gana quien provocó el tranque.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (Flutter/Dart engine, round.dart _resolveTranque)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "The tranque winner opens the next hand, so after a tied tranque the blocker opens.",
+     "quote": "nextRoundStarterPlayerId: winner.id,",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart _finishTranque)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "The start bonus is evaluated when the player right after the opener passes while only the opening tile is on the table (moves count is 1).",
+     "quote": "// Se llama cuando el jugador siguiente a la salida pasa.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart _evaluateStartPassBonus)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "Fixed values with a 200 target: double opening and the next player passes but the partner can play = 30; double opening and all three cannot play = 60; non-double opening and the next player passes = 60.",
+     "quote": "static const int bonusSalidaDoble = 30; static const int bonusSalidaCompletaDoble = 60; static const int bonusSalidaNormal = 60;",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart ScoringConstants)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "With a double opening, if the next player and the opener's partner both cannot play but the fourth player can, the pase de salida is lost (0 points); with a non-double opening the partner is not checked.",
+     "quote": "// Se pierde el pase de salida.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart determineStartBonus)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_all_pass",
+     "rule": "If the opening tile is a double and none of the three other players can play, the opener's team gets the full 60-point salida; pase redondo (+30) is a separate check run after three consecutive passes.",
+     "quote": "// Ninguno de los tres jugadores restantes puede jugar. return StartBonusType.double60;",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart determineStartBonus)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_timing",
+     "rule": "The salida and pase redondo bonuses are credited at the moment of the pass, not at the end of the round; the partner cancel is decided at that moment by a look-ahead check of whether the partner and fourth player hold a playable tile.",
+     "quote": "Los pases de salida y los pases redondos otorgan puntos en el momento en que ocurren, no al finalizar la ronda.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart ImmediateBonus doc comment)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_target",
+     "rule": "Salida and pase redondo bonuses apply only while the team has fewer than 170 points (target 200); after a bonus is added the engine runs its game-end check, so a bonus from below 170 can take a team to 200 and end the game.",
+     "quote": "// Regla de los 170: solo se aplican bonos de salida/pase redondo // si el equipo tiene menos de 170 puntos.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/game.dart",
+     "sourceName": "Phamton140/domino_dominicano (game.dart applyPendingBonuses)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_every_hand",
+     "rule": "The start-bonus flag resets on every deal and is checked when the first pass follows the first tile, so the pase de salida applies at the start of every hand, not only the first.",
+     "quote": "if (_movesCount == 1 && !_startBonusEvaluated) {",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart pass and deal)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_forced_opening",
+     "rule": "In the first hand the double-six holder opens; the start-bonus check has no exception for this forced first-hand opening (a double-six opening is scored as a double opening, 30 or 60).",
+     "quote": "Si [starterIndex] es null y es la primera ronda, sale quien tenga el doble seis.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart start)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Capicua and pase redondo are each worth 30 in this Dominican engine, which plays to 200.",
+     "quote": "static const int bonusCapicua = 30; static const int bonusPaseRedondo = 30;",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "A second repo by the same author documents the salida bonus as +30 after a double opening and +60 after a non-double opening when the next player passes and play reaches the partner.",
+     "quote": "First play is Double → partner plays next = +30. First play is Mixed → partner plays next = +60.",
+     "url": "https://github.com/Phamton140/domino",
+     "sourceName": "Phamton140/domino README (Dominican Domino Rules table)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Pase redondo (three others pass, you play again) is +30 for the team, and is not awarded when the team already has 170 or more.",
+     "quote": "3 opponents pass, you can play again → +30 team bonus (NOT if team ≥170).",
+     "url": "https://github.com/Phamton140/domino",
+     "sourceName": "Phamton140/domino README",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Pair-vs-pair variant: the team with fewer total pips wins the tranque and scores all pips on the table; on a tie nobody scores.",
+     "quote": "// Empate → nadie suma.",
+     "url": "https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts",
+     "sourceName": "franciscoapvst-hue/2mino (Dominican domino, React + Fastify, logic.ts)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "After a tranque the blocker opens next only if his team won; after a tie (or a loss) the player after the blocker opens.",
+     "quote": "// Salida próxima: si ganó quien trancó sale él; si no, el siguiente.",
+     "url": "https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts",
+     "sourceName": "franciscoapvst-hue/2mino (logic.ts)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "The +30 'paso a todos' (pase corrido) bonus is paid when the player plays again, is skipped if it would push the team past the target, and ends the game only if it lands on or under the target; this engine has no pase de salida.",
+     "quote": "no se puede ganar la partida de pura suerte por un bono, solo por dominó/capicúa exacta",
+     "url": "https://github.com/franciscoapvst-hue/2mino/blob/63d690675606f0491ecbcd6cc4976048c6472f8f/ms-salas/src/game/logic.ts",
+     "sourceName": "franciscoapvst-hue/2mino (logic.ts aplicarJugada)",
+     "sourceKind": "code",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Domino RD app: the tranque is decided by total pips (1v1 individual, pairs by combined pair total); on an exact tie the player or pair that opened the hand wins.",
+     "quote": "Si hay un empate exacto en los puntos, el ganador es el jugador (o equipo) que inició la mano (la mano es del que salió).",
+     "url": "https://dominord.com/rules",
+     "sourceName": "Domino RD (app rules page, Reglas del Dominó Dominicano)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Domino RD: after the first hand, the winner of the previous hand opens; the page gives no separate rule for ties.",
+     "quote": "En las manos siguientes, inicia el jugador que ganó la mano anterior (el que \"domina\").",
+     "url": "https://dominord.com/rules",
+     "sourceName": "Domino RD (app rules page)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Domino RD 1v1: each player gets 7 tiles and the 14 remaining tiles are not used in that hand (no boneyard draw); the page does not mention any pase de salida.",
+     "quote": "En 1vs1, sobran 14 fichas que no se utilizan en esa mano.",
+     "url": "https://dominord.com/rules",
+     "sourceName": "Domino RD (app rules page)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "La Mesa (patio rules): tranque is decided by pair totals, lower wins; if the two pairs tie, the pair that opened the hand wins.",
+     "quote": "En un tranque, si las dos parejas empatan en puntos, la mano la gana la pareja que hizo la salida.",
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "sourceName": "La Mesa: Dominó Latino (app rules page)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "La Mesa: the opening does not rotate; the team that won the previous hand opens the next one.",
+     "quote": "la salida no rota: la sale el equipo que ganó la mano anterior.",
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "sourceName": "La Mesa: Dominó Latino (app rules page)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "FichaFlow guide says Dominican variants value the pase de salida at 10 or 25.",
+     "quote": "Dominican variants use 10 or 25.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow complete guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow credits the 25-point pase de salida immediately and does not cancel it if the opener's partner later passes.",
+     "quote": "FichaFlow awards 25 immediately; it does not cancel the award if the opener's partner later passes.",
+     "url": "https://fichaflow.com/learn/guide",
+     "sourceName": "FichaFlow complete guide",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "RDomino lets the host of a private table configure how the salida bonus, capicua and paso corrido count, and whether a tranque is decided head to head or by lower team total.",
+     "quote": "how capicúa, paso corrido and salida count, and whether a closed board is decided head to head or by the lower team total",
+     "url": "https://apps.apple.com/us/app/rdomino-dominican-dominoes/id6776026533",
+     "sourceName": "RDomino | Dominican Dominoes (App Store listing)",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Puerto Rican FiveM script: tranque compares by team or by player (configurable), and a tie either annuls the hand or goes to the starter (configurable, README default is annul).",
+     "quote": "modo de tranque ('team' / 'player') y qué pasa si empatan ('annul' / 'starter')",
+     "url": "https://github.com/hellovisualab/Fivem-domino",
+     "sourceName": "hellovisualab/Fivem-domino README (Puerto Rican rules)",
+     "sourceKind": "code",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Puerto Rican FiveM script: the winner of the hand opens next, configurable to rotate instead.",
+     "quote": "sale el que ganó la mano (configurable para que la salida rote)",
+     "url": "https://github.com/hellovisualab/Fivem-domino",
+     "sourceName": "hellovisualab/Fivem-domino README",
+     "sourceKind": "code",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    }
+   ],
+   "searchesRun": [
+    "WebSearch: github domino dominicano \"tranque\" empate código",
+    "WebSearch: \"pase de salida\" dominó reglas app",
+    "WebSearch: dominó dominicano app reglas tranque \"empate\" pase de salida",
+    "WebSearch: apps.apple.com dominó dominicano capicúa tranque \"salida\" puntos",
+    "WebSearch: \"dominó\" \"pase de salida\" \"30 puntos\" OR \"25 puntos\" dominicano",
+    "WebSearch: play.google.com dominó dominicano \"pase de salida\" OR \"paso de salida\" OR \"pase corrido\" reglas",
+    "WebSearch: dominó dominicano \"salida\" \"compañero\" \"no lleva\" 25 puntos regla patio tranque empate trancador",
+    "gh search code: \"pase de salida\" (noise: school exit passes)",
+    "gh search code: tranque (found Phamton140/domino_dominicano, Phamton140/domino, Killswit3h/Cuban-Dominoes)",
+    "gh search code: capicua (HTTP 401, code-search rate limit)",
+    "gh search code: \"salida tranque\" (no domino hits)",
+    "gh search code: \"tranque empate\" (no hits)",
+    "gh search repos: \"domino dominicano\" (found 2mino, Kapikua25, domino-ms-cosi, CGJurado/dominicano, scorekeepers)"
+   ],
+   "notes": "Budget used: 7 web searches plus 6 GitHub searches through gh. Page reads: 11 WebFetch/Browser loads (4 failed) and gh API reads of source files from 2 repos. The user's own repo (aaguasvivas/capi) showed up in results and was excluded.\n\nDead ends: f16rodriguez/Mesa and Taguihelp/La-mesa-de-domino return 404 (repos gone or private). The search snippets claimed that Mesa has a configurable tied-tranque setting and that in La-mesa \"if two tie on top, both lose a point\". Neither claim is verified, so neither is recorded. comojugardomino.com/es/blog/domino-dominicano returned 502 in WebFetch and in a real browser (site down). dominord.com/rules returned 403 and a JS challenge to WebFetch and curl, but it loaded in the Browser pane. literhall/Kapikua25 is an empty repo. Frxn-web/domino-ms-cosi and CGJurado/dominicano (Unity) had no readable rule text. The militian007 domino README says the team with fewer points wins a tranque, gives no tie rule, and was not recorded. Domino Apunte Dominicano (App Store scorekeeper) has no rule text. A search snippet said \"many patio tables give tie advantage to the side with la mano\", but no source was attributed, so it is not recorded.\n\nSurprising results:\n(1) Phamton140/domino_dominicano is the most complete pase de salida implementation found. The value depends on the opening tile, not the target: a double opening gives 30, or 60 if all three others cannot play. A non-double opening gives 60. The partner cancel applies only to double openings, and only when the fourth player can play. The engine decides it at the moment of the first pass by looking ahead at hands. Pass bonuses stop at 170 of 200. This engine also gives a tied blocker-vs-next tranque to the blocker, which matches FichaFlow.\n(2) Every app that uses pair totals gives a tie to the opener (Domino RD and La Mesa, which is explicitly patio) or scores nothing (2mino, and the Puerto Rican FiveM default). None of them gives the tie to the blocker. So the tie rule depends on the comparison method. Blocker-vs-next engines (FichaFlow, Phamton) give the tie to the blocker. Pair-total engines give it to the mano or to nobody.\n(3) Domino RD, La Mesa (rules page and glossary) and 2mino do not implement or mention a pase de salida at all. RDomino exposes the salida as a host-configurable bonus but publishes no value.\n(4) No source addresses the pase de salida in 1v1 with a boneyard (salida_1v1: no claims). Domino RD's 1v1 leaves the 14 remaining tiles unused, with no drawing.\n\ntask-observer: logged observation 0032, \"A fetch tool's 403 or 502 on a bot-challenged page is not an unreachable source\" (/Users/Adelson/.claude/skill-observations/observation-log/0032-fetch-block-page-is-not-an-unreachable-source.md).",
+   "verified": [
+    {
+     "question": "tie",
+     "rule": "Engine compares the blocker (who placed the last tile) with the next player in turn order; the lower hand wins for his team and the team scores all pips left in all hands; on an exact tie the blocker wins.",
+     "quote": "// Empate: gana quien provocó el tranque.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (Flutter/Dart engine, round.dart _resolveTranque)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "Raw file read at the pinned commit (HTTP 200). round.dart line 392 has the exact quote. _resolveTranque (lines 376-397): trancador = players[lastPlayerIndex] (comment: 'El jugador que provocó el tranque es quien hizo la última jugada'), opponent = next index; trancadorScore < opponentScore gives trancador, opponentScore < trancadorScore gives opponent, else the trancador wins. The comparison uses individual hands, not team totals. Points come from ScoringRules.tranquePoints(allHandScores), the sum of all four hands, including the winner's own hand. lastPlayerIndex is correct: after the third consecutive pass, _advanceTurn returns the turn to the last player to place a tile. Before any tranque, the engine checks pase redondo: if that player can still play, the team gets +30 and there is no tranque. README says 'Tranque con comparación directa entre trancador y siguiente jugador'. Caveat: this is one hobby app that calls itself Dominican. It cites no rulebook, so it shows one developer's reading of the rules, not an authoritative source."
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "The tranque winner opens the next hand, so after a tied tranque the blocker opens.",
+     "quote": "nextRoundStarterPlayerId: winner.id,",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart _finishTranque)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "round.dart line 282, inside _finishTranque(Player winner), has 'nextRoundStarterPlayerId: winner.id,'. On a tie, winner is the trancador (line 393). game.dart startNextRound (lines 117-123) finds the player by previousResult.nextRoundStarterPlayerId and calls _startRound(starterIndex: ...), so that player opens. README: 'Rondas posteriores inician con el ganador de la ronda anterior.' The same line also appears in _finishDomination (line 269). Same single-source caveat as the tie claim."
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "The start bonus is evaluated when the player right after the opener passes while only the opening tile is on the table (moves count is 1).",
+     "quote": "// Se llama cuando el jugador siguiente a la salida pasa.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart _evaluateStartPassBonus)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The exact quote is at round.dart line 322. pass() (lines 224-228) runs _evaluateStartPassBonus only if '_movesCount == 1 && !_startBonusEvaluated', then sets the flag, so the check runs at most once per round. With only the opening tile down, the first player who can pass is the player after the opener, because a play by that player makes movesCount 2. Line 330 returns early if that next player can play ('No hay pase de salida.')."
+    },
+    {
+     "question": "salida_value",
+     "rule": "Fixed values with a 200 target: double opening and the next player passes but the partner can play = 30; double opening and all three cannot play = 60; non-double opening and the next player passes = 60.",
+     "quote": "static const int bonusSalidaDoble = 30; static const int bonusSalidaCompletaDoble = 60; static const int bonusSalidaNormal = 60;",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart ScoringConstants)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The quote is on scoring_rules.dart lines 9-11 as three separate lines, next to targetScore = 200, threshold170 = 170, bonusCapicua = 30 and bonusPaseRedondo = 30. determineStartBonus maps a double opening with the next player unable to play and the partner able to play to double30 (30). A double opening where the next, partner and fourth players all cannot play maps to double60 (60). A non-double opening where the next player cannot play maps to normal60 (60), set in pointsForStartBonus. README: 'Pases de salida con doble (30 / 60 puntos) y con ficha normal (60 puntos).' The bonus goes to starter.teamId (round.dart line 345)."
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "With a double opening, if the next player and the opener's partner both cannot play but the fourth player can, the pase de salida is lost (0 points); with a non-double opening the partner is not checked.",
+     "quote": "// Se pierde el pase de salida.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart determineStartBonus)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The exact quote is at scoring_rules.dart line 60. In the double branch, when the next player cannot play and partnerCanPlay is false, the code returns double60 only if afterPartnerCanPlay is also false. Otherwise it falls through to 'Se pierde el pase de salida', returns StartBonusType.none, and pointsForStartBonus gives 0 (round.dart line 343 then sets no bonus). The non-double branch (lines 63-67) tests only nextPlayerCanPlay and ignores partnerCanPlay and afterPartnerCanPlay. In round.dart, partnerIndex = starter+2 and afterPartnerIndex = starter+3, which is the opener's partner and the fourth player."
+    },
+    {
+     "question": "salida_all_pass",
+     "rule": "If the opening tile is a double and none of the three other players can play, the opener's team gets the full 60-point salida; pase redondo (+30) is a separate check run after three consecutive passes.",
+     "quote": "// Ninguno de los tres jugadores restantes puede jugar. return StartBonusType.double60;",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/rules/scoring_rules.dart",
+     "sourceName": "Phamton140/domino_dominicano (scoring_rules.dart determineStartBonus)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "scoring_rules.dart lines 56-57 have the comment and 'return StartBonusType.double60;' on separate lines. The team gets 60 (bonusSalidaCompletaDoble). Pase redondo is separate: round.dart pass() calls _evaluatePaseRedondoOrTranque when _consecutivePasses == 3. If the opener can play again, the opener's team gets a pending +30 'Pase redondo'. Otherwise the round ends in a tranque. Caveat: Round holds one _pendingImmediateBonus slot. The salida 60 is set on the first pass and the pase redondo 30 on the third pass. The two bonuses stack only if the caller runs Game.applyPendingBonuses after each pass, as its doc comment requires ('Debe llamarse después de cada pase que pueda generar una bonificación'). If the caller skips that call, the +30 overwrites the 60."
+    },
+    {
+     "question": "salida_timing",
+     "rule": "The salida and pase redondo bonuses are credited at the moment of the pass, not at the end of the round; the partner cancel is decided at that moment by a look-ahead check of whether the partner and fourth player hold a playable tile.",
+     "quote": "Los pases de salida y los pases redondos otorgan puntos en el momento en que ocurren, no al finalizar la ronda.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/round.dart",
+     "sourceName": "Phamton140/domino_dominicano (round.dart ImmediateBonus doc comment)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The exact sentence is in the ImmediateBonus doc comment, round.dart lines 12-13, split across two '///' lines. Look-ahead: _evaluateStartPassBonus (lines 332-333) calls canPlay(partnerIndex) and canPlay(afterPartnerIndex) when the next player passes. These calls test the hands of the partner and the fourth player against the board with only the opening tile, before those players take their turns. Precision: Round only stores _pendingImmediateBonus. The points reach the team score in Game.applyPendingBonuses, which the caller must run after each pass."
+    },
+    {
+     "question": "salida_target",
+     "rule": "Salida and pase redondo bonuses apply only while the team has fewer than 170 points (target 200); after a bonus is added the engine runs its game-end check, so a bonus from below 170 can take a team to 200 and end the game.",
+     "quote": "// Regla de los 170: solo se aplican bonos de salida/pase redondo // si el equipo tiene menos de 170 puntos.",
+     "url": "https://github.com/Phamton140/domino_dominicano/blob/ba839f33dc6232c854d97d01701a303a8da64a11/lib/engine/game.dart",
+     "sourceName": "Phamton140/domino_dominicano (game.dart applyPendingBonuses)",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "The quote is on game.dart lines 145-146 as two comment lines. The gate is ScoringRules.canReceivePassBonus(team.score), which is 'teamScore < ScoringConstants.threshold170' (170). It checks the score before the bonus is added. isPassBonus is a string match on reason containing 'Pase' or 'pase', and all three bonus reasons match ('Pase de salida con doble', 'Pase de salida con ficha normal', 'Pase redondo'). A gated bonus is cleared, not deferred. Otherwise team.addPoints(bonus.points) runs, then _checkGameEnd(). _checkGameEnd uses Team.reached200, which is 'score >= 200' in models/team.dart, and it does not cap the score. So a team at 140-169 that gets a 60 salida reaches 200 or more and wins, for example 169 + 60 = 229."
+    }
+   ]
+  },
+  {
+   "key": "tournaments",
+   "claims": [
+    {
+     "question": "tie",
+     "rule": "The Dominican section of the general Spanish Wikipedia article, under 'regla general', compares pair against pair: if the pair totals tie in a tranque, the pair that opened the hand (mano) wins. This contradicts FichaFlow's 'tie goes to the blocker'.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Reglamentos-deportes.com repeats the same Dominican 'regla general' text: pair totals are compared, and on a tie the pair that opened the hand wins.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Dominicano, regla general)",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "Puntos de salida exist only in the patio (informal) version: when the first tile is placed and the next opponent cannot play, the opener gets 25 or 30 points. The 'regla general' version has no such bonus.",
+     "quote": "si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (regla de patio)",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "The Dominican section gives the opening bonus as 25 or 30 points, and gives the target as 100 or 200 points. It does not tie the value to the target.",
+     "quote": "al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Dominicano)",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Dominican rule for who opens: the holder of the double six opens the first hand of the game, and the winner of the previous hand opens every later hand.",
+     "quote": "el jugador que posee el seis doble realiza la salida de la primera partida",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "In the 'Dominó latino' section of the same article, on a tranque tie the pair that opened wins and also opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó latino",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "USA Domino Federation: every tranque is scored pair against pair, the pair with fewer points wins, and a tie means nobody wins.",
+     "quote": "Todo tranque será en pareja. Gana la pareja con menos tantos. TRANQUE con EMPATE NADIE GANA y se SIGUE la rotación.",
+     "url": "https://usadomino.com/r/",
+     "sourceName": "USA Domino Federation, Reglamento (Rule 9)",
+     "sourceKind": "federation",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "USA Domino Federation: after a tied tranque, the opening rotation continues, so the next player in the rotation opens.",
+     "quote": "TRANQUE con EMPATE NADIE GANA y se SIGUE la rotación.",
+     "url": "https://usadomino.com/r/",
+     "sourceName": "USA Domino Federation, Reglamento (Rule 9)",
+     "sourceKind": "federation",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "USA Domino Federation: games go to 200 points or 35 minutes, whichever comes first. A player may play consecutively only after saying 'JUGADA CORRIDA'.",
+     "quote": "Los JUEGOS serán de 200 tantos o 35 minutos, lo que ocurra primero.",
+     "url": "https://usadomino.com/r/",
+     "sourceName": "USA Domino Federation, Reglamento (Rules 1 and 17)",
+     "sourceKind": "federation",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Domino Prime league reglamento (Art. 52, Venezuelan 'chas' vocabulary): on a tie in pair totals the cierre is a draw, and a zero goes in the score column of the pair that opened.",
+     "quote": "el cierre se considerará empate y se anotará un cero en la columna de la planilla de anotación correspondiente a la pareja que hubiere salido",
+     "url": "https://dominoprime.com/Reglamento-Deportivo-y-Disciplinario.pdf",
+     "sourceName": "Dominó Prime, Reglamento Deportivo y Disciplinario (Art. 52)",
+     "sourceKind": "tournament",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Domino Prime: the zero is written for the opening pair so that played hands and future openings can be tracked. The opening turn keeps rotating after a tied cierre.",
+     "quote": "esto último para los fines del control de las manos jugadas y las salidas futuras",
+     "url": "https://dominoprime.com/Reglamento-Deportivo-y-Disciplinario.pdf",
+     "sourceName": "Dominó Prime, Reglamento Deportivo y Disciplinario (Art. 52)",
+     "sourceKind": "tournament",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Domino Prime (federation style): the pair that wins a cierre scores only the losing pair's pips, not all pips on the table. Dominican patio scoring counts all hands.",
+     "quote": "la pareja con menos tantos en las chas no jugadas, se anotará los tantos que suman las chas no jugadas de la pareja que la hubiere perdido",
+     "url": "https://dominoprime.com/Reglamento-Deportivo-y-Disciplinario.pdf",
+     "sourceName": "Dominó Prime, Reglamento Deportivo y Disciplinario (Art. 52)",
+     "sourceKind": "tournament",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Domino Arte o Ciencia, cierre page (generic): on a tie in points the hand is void and the opening turn passes on, 'in most rulebooks, uses and customs'.",
+     "quote": "En caso de empate a puntos se da por nula la mano y corre el turno de salida (en la mayoría de reglamentos, usos y costumbres).",
+     "url": "https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+     "sourceName": "Cómo jugar al Dominó (dominoarteociencia), El cierre o la tranca",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "After a tied cierre the opening turn passes to the next player in rotation ('corre el turno de salida').",
+     "quote": "se da por nula la mano y corre el turno de salida",
+     "url": "https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+     "sourceName": "Cómo jugar al Dominó (dominoarteociencia), El cierre o la tranca",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Generic cierre rule: the winner of a tranque is the pair with the lower total, not the player who placed the locking tile. This conflicts with the Dominican blocker-versus-next-player model.",
+     "quote": "Gana el cierre, no quién provoca la situación poniendo la última ficha, sino la pareja cuya suma de puntos pendientes de jugar es menor",
+     "url": "https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+     "sourceName": "Cómo jugar al Dominó (dominoarteociencia), El cierre o la tranca",
+     "sourceKind": "blog",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Kapiku (domino table maker, general Latin American rules): when both pairs tie in points at a cierre, the player who closed the game wins together with his partner. This supports 'tie goes to the blocker', but the source is not Dominican.",
+     "quote": "Cuando ambas parejas tienen los mismos puntos en un cierre, las reglas indican que el jugador que cerró el juego es el ganador",
+     "url": "https://kapikumesas.wixsite.com/kapiku/reglas-del-domino",
+     "sourceName": "Kapiku mesas de dominó, Reglas del dominó",
+     "sourceKind": "other",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Reglamentos-deportes, Colombian section: on a tie the team that closed the game wins.",
+     "quote": "Dado un empate en alguno de los dos casos, el equipo que haya cerrado el juego es el ganador",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Colombiano)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Reglamentos-deportes, Venezuelan section: on a tie no team scores the value of the tranca.",
+     "quote": "ningún equipo se anotará el valor de la tranca",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Venezolano)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Search snippet only (section not confirmed, probably the Mexican modality): on equal points the pair with fewer tiles wins. On equal tiles nobody scores, and the player to the right of the previous opener opens.",
+     "quote": "gana la pareja con menor cantidad de fichas; no se contabilizan los puntos en caso de que el número de fichas sea el mismo",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (search snippet)",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": false
+    },
+    {
+     "question": "other",
+     "rule": "DR1 forum thread on Dominican dominoes: the game starts with the double six and continues anticlockwise (turns to the right). The first pair to 200 wins.",
+     "quote": "the game starts by playing the double six, then continues in an anticlockwise fashion",
+     "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+     "sourceName": "DR1.com forum, Rules for Dominican Dominoes? (user 'the gorgon')",
+     "sourceKind": "forum",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "DR1 forum: Dominican players get bonus points for making everyone pass and for going out on either end (capicua). The post gives no values.",
+     "quote": "you also get points if you can make everyone pass and if you can go out on either end",
+     "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+     "sourceName": "DR1.com forum, Rules for Dominican Dominoes? (user 'PeterInBrat')",
+     "sourceKind": "forum",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_value",
+     "rule": "FichaFlow sayings page: its defaults are Pase de Salida 25 and Paso Redondo 25, listed as two separate bonuses, and Capicúa 25, with 30 also common in Dominican play.",
+     "quote": "FichaFlow defaults: Capicúa 25 (30 is also common in Dominican play), Pase de Salida 25, Paso Redondo 25.",
+     "url": "https://fichaflow.com/learn/dominican-domino-sayings",
+     "sourceName": "FichaFlow, Dominican Domino Sayings",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    }
+   ],
+   "searchesRun": [
+    "reglamento torneo dominó \"paso de salida\" tranque empate República Dominicana",
+    "\"pase de salida\" dominó dominicano \"tranque\" puntos reglas",
+    "\"Federación Dominicana de Dominó\" reglamento tranque empate",
+    "torneo dominó bases \"salida\" \"capicúa\" \"25 puntos\" \"tranque\" Santo Domingo OR Santiago OR \"La Vega\" OR \"Puerto Plata\"",
+    "dominó dominicano \"el que tranca\" empate tranque gana",
+    "\"paso a la salida\" dominó torneo puntos",
+    "dominó \"salida\" \"compañero\" pasa \"se anula\" OR \"no cuenta\" 25 puntos dominicano",
+    "Dominican dominoes rules \"pase de salida\" OR \"paso de salida\" partner cancels blocker tie tranque",
+    "torneo dominó dominicano reglas \"pase de salida\" OR \"paso de salida\" \"tranque\" club Nueva York OR \"New York\" OR Lawrence OR Miami OR \"Nueva Jersey\"",
+    "dominó dominicano \"mano a mano\" pozo \"pase de salida\" OR \"puntos de salida\" OR \"paso a la salida\""
+   ],
+   "notes": "Budget used: 10 searches and 14 fetches. The fetch budget is spent.\n\nMain finding on the tranque tie: no new Dominican source supports 'tie goes to the blocker'. Two Dominican-labelled sources say the pair that opened the hand (mano) wins a tie: the Dominican section of the general es.wikipedia 'Dominó' article and reglamentos-deportes.com, which copies it. Both label this 'regla general' and compare pair totals, not the blocker against the next player. The blocker-wins-tie rule appears only in non-Dominican sources: Kapiku (general Latin American) and the Colombian section of reglamentos-deportes. Federation-style sources say a tie is a draw and the opening rotation continues: USA Domino Federation Rule 9 (US-based, the page does not say it is Dominican), Domino Prime Art. 52 (Venezuelan vocabulary), and dominoarteociencia's cierre page ('in most rulebooks'). No source found describes the patio blocker-versus-next-player tie in the source's own words. FichaFlow remains the only source for that rule.\n\nPase de salida: the es.wikipedia 'Dominó' Dominican section says puntos de salida exist only in the patio (informal) version, not in the 'regla general'. The value is 25 or 30, with targets of 100 or 200. No value-by-target mapping appears beyond the DR1 article already known. No new source addresses these questions: salida_forced_opening, salida_every_hand, salida_1v1, salida_target, salida_timing, salida_all_pass. The partner-cancel rule appeared only in search summaries that repeat the known es.wikipedia text. It is not recorded again.\n\nPossible conflict inside FichaFlow: one search summary said FichaFlow's guide uses 'Pase de Salida' and 'Paso Redondo' as two names for the all-three-pass play. The fetched sayings page instead lists them as separate 25-point defaults. The search summary was not verbatim, so it is not recorded as a claim.\n\nDead ends: dominord.com/rules returned 403. comojugardomino.com returned 502 twice. The kapiku.com page failed on its TLS certificate, and the wixsite mirror was used instead. The Domino Prime PDF could not be parsed by the fetch tool, so its saved binary was read with pdftotext. The arxiv paper (2502.06790) covers Central American max scores and has no salida or tie rules. No page from a Dominican federation, municipal tournament, diaspora club (NY/NJ/Boston/Miami), or Dominican sports media turned up beyond the Santiago 2019 article already known. The searches for 'Federación Dominicana de Dominó' found no Dominican federation rulebook.\n\ntask-observer: no observations logged this session. The one friction point, the fetch tool failing on a PDF, is already covered by open observation 27, and I applied it.",
+   "verified": [
+    {
+     "question": "tie",
+     "rule": "The Dominican section of the general Spanish Wikipedia article, under 'regla general', compares pair against pair: if the pair totals tie in a tranque, the pair that opened the hand (mano) wins. This contradicts FichaFlow's 'tie goes to the blocker'.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Quote is on the page under Dominó dominicano, Modalidad de regla general. The full sentence continues: 'y será la que saldrá la siguiente mano' (that pair also opens the next hand). The winner is the pair that made the salida of that hand, not the pair that caused the tranque. The 'contradicts FichaFlow' part is not on this page; the FichaFlow sayings page (fetched) says nothing about who wins a tranque tie, so that comparison is not supported by either page."
+    },
+    {
+     "question": "tie",
+     "rule": "Reglamentos-deportes.com repeats the same Dominican 'regla general' text: pair totals are compared, and on a tie the pair that opened the hand wins.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Dominicano, regla general)",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Exact sentence is on the page under the 'Dominó dominicano' heading (not under its 'Juego de patio' sub-part). Full page wording: 'En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano.' Text mirrors the Wikipedia section, so it is not an independent source."
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "Puntos de salida exist only in the patio (informal) version: when the first tile is placed and the next opponent cannot play, the opener gets 25 or 30 points. The 'regla general' version has no such bonus.",
+     "quote": "si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (regla de patio)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Checked against the raw wikitext. The patio (Juego de patio / Modalidad de patio, informal) subsection contains the phrase, ending 'dependiendo de las reglas'. The regla general 'Salida' text only says the holder of the double six opens the first game ('el jugador que posee el seis doble realiza la salida de la primera partida') and gives no salida bonus."
+    },
+    {
+     "question": "salida_value",
+     "rule": "The Dominican section gives the opening bonus as 25 or 30 points, and gives the target as 100 or 200 points. It does not tie the value to the target.",
+     "quote": "al jugador que salió se le suman 25 o 30 puntos",
+     "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+     "sourceName": "Reglamentos Deportes, Reglamento de Dominó (Dominó Dominicano)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Page wording under Dominó dominicano, Juego de patio: 'si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar, al jugador que salió se le suman 25 o 30 puntos dependiendo de las reglas.' Target: 'termina cuando una de las parejas alcanza o supera 100 o 200 puntos.' The page does not link the 25/30 value to the 100/200 target; it says only 'dependiendo de las reglas'."
+    },
+    {
+     "question": "salida_value",
+     "rule": "FichaFlow sayings page: its defaults are Pase de Salida 25 and Paso Redondo 25, listed as two separate bonuses, and Capicúa 25, with 30 also common in Dominican play.",
+     "quote": "FichaFlow defaults: Capicúa 25 (30 is also common in Dominican play), Pase de Salida 25, Paso Redondo 25.",
+     "url": "https://fichaflow.com/learn/dominican-domino-sayings",
+     "sourceName": "FichaFlow, Dominican Domino Sayings",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "The sentence is on the page exactly as quoted. This gives the app's own defaults, not a published rulebook. The page does not say who wins a tranque tie; it only defines 'Tranque' as the chain being dead on both ends, then count the hands."
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "In the 'Dominó latino' section of the same article, on a tranque tie the pair that opened wins and also opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), Dominó, section Dominó latino",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "The Dominó latino section says 'En caso de que sumen la misma cantidad de puntos en el cierre, la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano.' It uses 'cierre' where the Dominican section uses 'tranque'. The quoted substring is present. The Dominó dominicano regla general section has the same clause, so the next-opener rule also appears in a Dominican-specific section."
+    },
+    {
+     "question": "tie",
+     "rule": "USA Domino Federation: every tranque is scored pair against pair, the pair with fewer points wins, and a tie means nobody wins.",
+     "quote": "Todo tranque será en pareja. Gana la pareja con menos tantos. TRANQUE con EMPATE NADIE GANA y se SIGUE la rotación.",
+     "url": "https://usadomino.com/r/",
+     "sourceName": "USA Domino Federation, Reglamento (Rule 9)",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Rule 9 text matches verbatim. The page is titled 'REGLAS DE TORNEO DE DOMINO DE LA FEDERACION DE DOMINÓ DE LOS EUA' (tournament rules) and does not say they are Dominican rules. The dominicanSpecific=false label is correct."
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "USA Domino Federation: after a tied tranque, the opening rotation continues, so the next player in the rotation opens.",
+     "quote": "TRANQUE con EMPATE NADIE GANA y se SIGUE la rotación.",
+     "url": "https://usadomino.com/r/",
+     "sourceName": "USA Domino Federation, Reglamento (Rule 9)",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Quote is in Rule 9. The page also says 'La SALIDA es ROTATIVA', and a chip placed to the player's right marks who opens next. These support the reading that the next player in the rotation opens after a tied tranque. The rule does not name the next opener in words; it says only that the rotation continues. These are federation tournament rules, not Dominican-specific rules."
+    }
+   ]
+  },
+  {
+   "key": "en-web",
+   "claims": [
+    {
+     "question": "tie",
+     "rule": "DR1 says that in a tied tranque the player who placed the first tile of the hand (la mano) wins by default and his team gets the points. The sentence follows both the 'con el de abajo' (blocker vs player to his right) rule and the 'con todo el mundo' variant, so it is unclear if it covers one or both.",
+     "quote": "In the case of a tie the player who began the game, (placed the first domino on the table), is by default the winner",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (Wayback snapshot 2022-10-14)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "DR1 says the tranque is settled by the blocker showing his tiles to the player on his right ('tranquar con el de abajo'). Fewer points wins and takes the opponent's points.",
+     "quote": "the player who executed the tranque shows his pieces to the player to his right, known as “tranquar con el de abajo.”",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_every_hand",
+     "rule": "DR1 says the opening-pass bonus applies only to the first tile of a hand. This reads as the first tile of any hand, not only the first hand of the game.",
+     "quote": "this play can only occur in the initial play of a hand, or better yet when the first domino piece is thrown down",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_every_hand",
+     "rule": "The same DR1 paragraph starts with 'In an initial game', which could mean the first hand of the game only. It is ambiguous next to the later 'initial play of a hand' sentence. The value is 10 points (games to 200/250) or 25 (games to 500).",
+     "quote": "In an initial game, if after the first player plays his piece, and the next player cannot play, his team is awarded 10 or 25",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "DR1, read in full: if the opener's partner also cannot play, the salida points do not count, and the fourth player then plays if he can. No other cancel condition is given.",
+     "quote": "If the next player after that also doesn’t have a piece to play, the points aren’t counted",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "DR1 says the pase corrido is the only other way to score from making players pass: 25 to the last player's team, and he plays again. There is no limit on repeated pases corridos.",
+     "quote": "the player who last played receives 25 points towards his team’s total. After collecting his 25 points, this player is allowed to play again.",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "sourceKind": "media",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Spanish Wikipedia 'Dominó', Dominican section: under Regla General (pair vs pair totals), a tied tranque goes to the pair that opened that hand. That pair also opens the next hand. No tie rule is given for the patio blocker-vs-right comparison.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó dominicano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Spanish Wikipedia, Dominican Regla General: after a tied tranque, the pair that opened the tied hand wins it and opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó dominicano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "Spanish Wikipedia: the Dominican patio variant differs from Regla General because the blocker compares only his own tiles with the opponent on his right.",
+     "quote": "La modalidad de patio varía en que quien hizo el tranque compara solo sus fichas con el oponente de la derecha.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó dominicano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "fetched": true
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Spanish Wikipedia, general rules: under the international norm a tied tranque has no winner, and the next hand is opened by the player after the one who opened the tied hand.",
+     "quote": "En caso de empate la norma internacional establece que no hay ganador y en el siguiente juego sale el jugador de turno",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', general 'Tranque' section",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Spanish Wikipedia, general rules (marked 'cita requerida'): some regions give a tied tranque to the pair that opened, or in individual play to the player nearest the opener in rotation. Others give it to the player credited with the block.",
+     "quote": "La pareja que inició el juego, o, en juego individual el jugador más cercano al que salió en el sentido de rotación acordado",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', general 'Tranque' section",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Spanish Wikipedia, Colombian Bajo Cauca variant (blocker must have fewer points than the opposing players): on a tie, the team that closed the game wins.",
+     "quote": "Dado un empate en alguno de los dos casos, el equipo que haya cerrado el juego es el ganador.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó colombiano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "tie",
+     "rule": "Spanish Wikipedia, Venezuelan rules (pair totals): on a tied tranca neither team scores, and a 0 is written down.",
+     "quote": "En caso de empate, cuando las dos parejas suman la misma cantidad de puntos, ningún equipo se anotará el valor de la tranca",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó venezolano'",
+     "sourceKind": "reference",
+     "dominicanSpecific": false,
+     "variant": "general",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "A 2025 Dominican municipal tournament (La Guáyiga) settles the tranque against the player below (to the blocker's right). Its rules list has no pase de salida bonus.",
+     "quote": "Se tranca con el jugador de abajo.",
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "sourceName": "Junta del Distrito Municipal La Guáyiga, 'Gran Torneo de Dominó Regular 3/2' (Oct 2025)",
+     "sourceKind": "tournament",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "other",
+     "rule": "The La Guáyiga tournament sets paso corrido at 30 points, oddly worded 'to the opposing team', and capicúa at 30. The list has no opening-pass bonus.",
+     "quote": "Paso corrido: +30 pts al equipo contrario. Capicúa: +30 pts.",
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "sourceName": "Junta del Distrito Municipal La Guáyiga, 'Gran Torneo de Dominó Regular 3/2' (Oct 2025)",
+     "sourceKind": "tournament",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_forced_opening",
+     "rule": "FichaFlow's worked example gives the pase de salida on a forced 6-6 opening: the next player has no six, passes, and the opener's team gets 25 at once. So in this app a forced opening tile still counts.",
+     "quote": "You open with 6-6. The next player holds no six and passes. With the bonus enabled at 25, FichaFlow credits your team 25 immediately.",
+     "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "sourceName": "FichaFlow, 'What Is Pase de Salida in Domino?'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow credits the pase de salida at the moment of the pass. It says plainly that it does not implement DR1's partner-pass cancellation.",
+     "quote": "FichaFlow currently awards the first opposing opening pass immediately and does not implement that partner-pass cancellation.",
+     "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "sourceName": "FichaFlow, 'What Is Pase de Salida in Domino?'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    },
+    {
+     "question": "salida_trigger",
+     "rule": "FichaFlow limits the pase de salida to the first opposing pass directly after the opening tile. Later passes in the hand do not trigger it.",
+     "quote": "A pass later in the hand is not Pase de Salida.",
+     "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "sourceName": "FichaFlow, 'What Is Pase de Salida in Domino?'",
+     "sourceKind": "app",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "fetched": true
+    }
+   ],
+   "searchesRun": [
+    "Dominican dominoes tranque tie who wins",
+    "\"pase de salida\" dominó dominicano",
+    "Dominican dominoes opening pass bonus 25 points \"partner\" first tile rules",
+    "Dominican dominoes blocked game tie \"la mano\" OR \"hand\" lowest points lock rules",
+    "elCaribe \"Ley del dominó\" capicúa tranque",
+    "torneo dominó \"La Guáyiga\" reglas pase de salida tranque",
+    "\"Dominican\" dominoes rules \"tranque\" \"tie\" player to the right blog",
+    "\"salida\" \"pasa\" dominó dominicano \"puntos\" \"compañero\" anula tranque empate \"mano\"",
+    "Dominican dominoes \"pase de salida\" OR \"opening pass\" OR \"salida\" bonus explained remezcla OR \"Dominican Today\" OR \"dominicanos\"",
+    "dominó dominicano tranque empate \"gana el que\" tranca OR \"gana la mano\" OR \"gana la salida\""
+   ],
+   "notes": "Main new finding: the DR1 article '25, 50, Capicua!' (dr1.com/articles/dominoes_1.shtml) is the same one earlier research cited for pase de salida. It also has a tie rule: a tied tranque goes to the player who placed the first tile (la mano), and his team scores. This contradicts FichaFlow's 'a tie favors the blocker', even though FichaFlow cites DR1 as a source. It agrees with Spanish Wikipedia 'Dominó' (Regla General pair totals: the pair that opened wins the tie and opens the next hand). Spanish Wikipedia gives no tie rule for the patio blocker-vs-right comparison. The DR1 tie sentence comes right after the 'tranquar con todo el mundo' sentence, so it is ambiguous whether it also covers 'con el de abajo'. The DR1 salida paragraph starts 'In an initial game' but later says the bonus happens on 'the initial play of a hand'. That leaves every-hand versus first-hand-only ambiguous. The live dr1.com returns only the word 'conn' to WebFetch and curl. I read it through a Wayback snapshot (20221014152237) with curl; WebFetch cannot reach web.archive.org. Dead ends: dominord.com/rules ('Domino RD' app) is behind a Cloudflare challenge (403). Its search summary said a tied tranque goes to the player or team that started the hand, with team totals, but I could not verify it or get verbatim text, so it is not recorded as a claim. comojugardomino.com/es/blog/domino-dominicano returned 502. boarden.club/dominican-dominoes is under maintenance. BoardGameGeek 'Latin American rules for Dominoes' returned 403. FichaFlow cites an elCaribe explainer 'Ley del dominó' that I could not find. extremehotels.com (Zen Cabarete) has no rule detail. The DR1 forum thread 'Rules for Dominican Dominoes?' (2013) has nothing on tranque ties or salida. One post says you get points for making everyone pass. rafaellbras.substack.com/p/tranque is Puerto Rican and uses dominoes as a metaphor. The La Guáyiga 2025 Dominican municipal tournament lists no pase de salida bonus at all. It uses 30 for paso corrido and capicúa, and 'Se tranca con el jugador de abajo'. No source found addresses salida_all_pass, salida_1v1, or salida_target directly. Spanish Wikipedia's Dominican section does describe 1v1 with a draw pile ('Pila'), but it does not say whether puntos de salida apply there. The task-observer session protocol was not run in this subagent; the parent session owns it. The page-fetch budget was reached, counting curl reads.",
+   "verified": [
+    {
+     "question": "tie",
+     "rule": "DR1 says that in a tied tranque the player who placed the first tile of the hand (la mano) wins by default and his team gets the points. The sentence follows both the 'con el de abajo' (blocker vs player to his right) rule and the 'con todo el mundo' variant, so it is unclear if it covers one or both.",
+     "quote": "In the case of a tie the player who began the game, (placed the first domino on the table), is by default the winner",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (Wayback snapshot 2022-10-14)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Verbatim on the page (fetched with curl from the id_ raw snapshot; WebFetch refuses web.archive.org). Full sentence: 'In the case of a tie the player who began the game, (placed the first domino on the table), is by default the winner, and his team is awarded the points.' It comes right after the 'tranquar con todo el mundo' sentence, which itself follows the 'tranquar con el de abajo' description, so the scope ambiguity is real. The page does NOT say a tie goes to the player who made the tranque; the tie goes to the opener. On the es.wikipedia page, 'the team that closed wins the tie' appears only in the Colombian section ('Dado un empate en alguno de los dos casos, el equipo que haya cerrado el juego es el ganador'), not the Dominican one."
+    },
+    {
+     "question": "salida_every_hand",
+     "rule": "DR1 says the opening-pass bonus applies only to the first tile of a hand. This reads as the first tile of any hand, not only the first hand of the game.",
+     "quote": "this play can only occur in the initial play of a hand, or better yet when the first domino piece is thrown down",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Verbatim: 'Remember this play can only occur in the initial play of a hand, or better yet when the first domino piece is thrown down on the table.' The page does not state 'every hand' in so many words; 'initial play of a hand' is the page's wording and supports the reading. The article describes Dominican dominoes in general; it does not label this rule 'patio'."
+    },
+    {
+     "question": "salida_every_hand",
+     "rule": "The same DR1 paragraph starts with 'In an initial game', which could mean the first hand of the game only. It is ambiguous next to the later 'initial play of a hand' sentence. The value is 10 points (games to 200/250) or 25 (games to 500).",
+     "quote": "In an initial game, if after the first player plays his piece, and the next player cannot play, his team is awarded 10 or 25",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Verbatim: 'In an initial game, if after the first player plays his piece, and the next player cannot play, his team is awarded 10 or 25 points, this depends on the total amount of points the game is being played to. If the game is being played to 500 total points, then this move will benefit you 25 points. If the game is only to 200, or even 250, then you are only allotted 10 points.' Values match the claim. For comparison, es.wikipedia (Dominó dominicano, 'Puntos de salida', patio) gives 25 or 30 points, not 10 or 25."
+    },
+    {
+     "question": "salida_cancel",
+     "rule": "DR1, read in full: if the opener's partner also cannot play, the salida points do not count, and the fourth player then plays if he can. No other cancel condition is given.",
+     "quote": "If the next player after that also doesn’t have a piece to play, the points aren’t counted",
+     "url": "http://web.archive.org/web/20221014152237/https://dr1.com/articles/dominoes_1.shtml",
+     "sourceName": "DR1.com, '25, 50, Capicua!' (Wayback snapshot)",
+     "dominicanSpecific": true,
+     "variant": "patio",
+     "verdict": "confirmed",
+     "note": "Verbatim: 'This play, though beneficial, can be nullified. If the next player after that also doesn’t have a piece to play, the points aren’t counted, and the next player plays his piece, if he can.' No other cancel condition appears. es.wikipedia (Dominó dominicano, patio) states the same cancel: 'si la pareja tampoco puede jugar entonces se anulan los puntos de salida'."
+    },
+    {
+     "question": "tie",
+     "rule": "Spanish Wikipedia 'Dominó', Dominican section: under Regla General (pair vs pair totals), a tied tranque goes to the pair that opened that hand. That pair also opens the next hand. No tie rule is given for the patio blocker-vs-right comparison.",
+     "quote": "En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó dominicano'",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Checked in the raw wikitext. The 'Tranque' bullet of 'Dominó dominicano' reads: 'En la modalidad de regla general en caso de tranque o cierre, la pareja que tenga la menor cantidad de puntos será la pareja ganadora. En caso de que sumen la misma cantidad de puntos en el tranque, la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano. La modalidad de patio varía en que quien hizo el tranque compara solo sus fichas con el oponente de la derecha.' No patio tie rule is given. The Dominican section has no inline citations, and the same tie sentence also appears under 'Dominó latino' (the page says regla general 'es más bien la modalidad latina')."
+    },
+    {
+     "question": "tie_next_opener",
+     "rule": "Spanish Wikipedia, Dominican Regla General: after a tied tranque, the pair that opened the tied hand wins it and opens the next hand.",
+     "quote": "la pareja que salió en esa mano será la ganadora y será la que saldrá la siguiente mano.",
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "sourceName": "Wikipedia (es), 'Dominó', section 'Dominó dominicano'",
+     "dominicanSpecific": true,
+     "variant": "general",
+     "verdict": "confirmed",
+     "note": "Verbatim in the Dominican 'Tranque' bullet, scoped to 'la modalidad de regla general'. It is consistent with the section's 'Salida' bullet: 'Las demás partidas las inicia quien haya ganado la partida anterior.' Unsourced in the article."
+    },
+    {
+     "question": "salida_forced_opening",
+     "rule": "FichaFlow's worked example gives the pase de salida on a forced 6-6 opening: the next player has no six, passes, and the opener's team gets 25 at once. So in this app a forced opening tile still counts.",
+     "quote": "You open with 6-6. The next player holds no six and passes. With the bonus enabled at 25, FichaFlow credits your team 25 immediately.",
+     "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "sourceName": "FichaFlow, 'What Is Pase de Salida in Domino?'",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "misread",
+     "note": "The quote is verbatim, but the page never calls the 6-6 a forced opening and never says the example is the first hand. It does not address forced openings at all. The only related text is a link teaser for another article: 'First hand: whoever holds the 6-6 opens, no exceptions.' The page defines the bonus as 'the first opposing pass directly after the opening tile, with a positive configured value' and says 'the table should settle the value and exceptions before the first hand.' The conclusion that a forced opening still counts is an inference, not a statement. The page calls it 'a Dominican opening-pass bonus', and it is an app's own implementation, not a published ruleset."
+    },
+    {
+     "question": "salida_timing",
+     "rule": "FichaFlow credits the pase de salida at the moment of the pass. It says plainly that it does not implement DR1's partner-pass cancellation.",
+     "quote": "FichaFlow currently awards the first opposing opening pass immediately and does not implement that partner-pass cancellation.",
+     "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+     "sourceName": "FichaFlow, 'What Is Pase de Salida in Domino?'",
+     "dominicanSpecific": true,
+     "variant": "unknown",
+     "verdict": "confirmed",
+     "note": "Verbatim. The sentence before it reads: 'DR1 describes 10 or 25 depending on the game target and a rule cancelling the award if the opener’s partner also passes.' The sentence after it reads: 'Do not assume every published variant is supported.' This describes one app's implementation, not a Dominican rule source."
+    }
+   ]
+  }
+ ]
+}

@@ -47,6 +47,7 @@ import TileDisplay from "../../components/TileDisplay";
 import CalloutOverlay, {
   VeinticincoBanner,
 } from "../../components/CalloutOverlay";
+import { tranqueLines, veinticincoLabel } from "../../lib/callouts";
 import { getSession, saveSession, type PlayerSession } from "../../lib/session";
 import { useI18n } from "../../lib/i18n";
 import {
@@ -1156,14 +1157,10 @@ function GameTable({
   const stallSeat: Seat | null = stallNotice ? gameState.currentTurn : null;
   const seatName = (seat: Seat) =>
     players.find((p) => p.seat === seat)?.nickname ?? seatLabels[seat];
-  // Tranque only: the blocker and the player to his right, with the pips each
-  // held. Tranques from before the comparison fields have no line.
-  const tranqueLine = (p: CalloutPayload | null): string | null => {
-    if (!p?.blockerSeat || !p.rivalSeat) return null;
-    if (typeof p.blockerPips !== "number" || typeof p.rivalPips !== "number") return null;
-    return s.tranqueCompare(seatName(p.blockerSeat), p.blockerPips, seatName(p.rivalSeat), p.rivalPips);
-  };
-  const cardTranqueLine = tranqueLine(cardPayload);
+  // Tranque only: the comparison line, plus who won on equal pips.
+  const tranqueLinesFor = (p: CalloutPayload | null): string[] =>
+    tranqueLines(p, seatName, s);
+  const cardTranqueLines = tranqueLinesFor(cardPayload);
   const forfeitLine = (seat: Seat) => {
     if (spectating) return s.endedByForfeit(seatName(seat));
     if (seat === mySeat) return s.youForfeited;
@@ -1181,8 +1178,9 @@ function GameTable({
     ? s.won
     : s.lost;
 
-  // Mid-round VEINTICINCO shows as a non-blocking banner so the forcer keeps
-  // the board free for their next play. Round-ending callouts use the overlay.
+  // A mid-round +25 (pase corrido, or a pase de salida, which travels as a
+  // veinticinco callout) shows as a non-blocking banner so the board stays
+  // free for the next play. Round-ending callouts use the overlay.
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
   const bannerTeam = winningTeamOf(payload);
@@ -1207,7 +1205,7 @@ function GameTable({
     : null;
   const awayName = awaySeat ? awayPlayer?.nickname ?? seatLabels[awaySeat] : "";
   const showWarnMe = warnMe && isMyTurn && gameState.phase === "playing";
-  // The mid-round VEINTICINCO banner already says the table passed.
+  // The mid-round +25 banner already says the table passed.
   const passSeat =
     passNoticeSeat && gameState.phase === "playing" && !isMidRoundCallout
       ? passNoticeSeat
@@ -1669,13 +1667,17 @@ function GameTable({
 
           {/* ── Callout overlays ── */}
           {lastCallout && isMidRoundCallout ? (
-            <VeinticincoBanner teamName={bannerTeamName} onDone={clearCallout} />
+            <VeinticincoBanner
+              label={veinticincoLabel(lastCalloutPayload, s)}
+              teamName={bannerTeamName}
+              onDone={clearCallout}
+            />
           ) : null}
           {lastCallout && !isMidRoundCallout ? (
             <CalloutOverlay
               callout={lastCallout}
               payload={lastCalloutPayload}
-              compareLine={tranqueLine(lastCalloutPayload)}
+              compareLines={tranqueLinesFor(lastCalloutPayload)}
               onDismiss={clearCallout}
             />
           ) : null}
@@ -1720,17 +1722,22 @@ function GameTable({
                   </View>
                 ) : null}
 
-                {cardTranqueLine ? (
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: "600",
-                      color: palette.scoreText,
-                      textAlign: "center",
-                    }}
-                  >
-                    {cardTranqueLine}
-                  </Text>
+                {cardTranqueLines.length > 0 ? (
+                  <View style={{ alignItems: "center", gap: 2 }}>
+                    {cardTranqueLines.map((line) => (
+                      <Text
+                        key={line}
+                        style={{
+                          fontSize: 13,
+                          fontWeight: "600",
+                          color: palette.scoreText,
+                          textAlign: "center",
+                        }}
+                      >
+                        {line}
+                      </Text>
+                    ))}
+                  </View>
                 ) : null}
 
                 {/* Pip breakdown */}

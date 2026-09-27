@@ -27,6 +27,7 @@ import { isImessageEmbed, embedLang } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
 import type { EmbedSession as Session } from "@/lib/embedSession";
 import { postToExtension } from "@/lib/imessageBridge";
+import { tranqueLines, veinticincoLabel } from "@/lib/callouts";
 import {
   playSlam,
   playDraw as playDrawSound,
@@ -860,11 +861,8 @@ function GameContent({ id }: { id: string }) {
     return iWonGame ? s.wonByForfeit(name) : s.lostByForfeit(name);
   };
 
-  // Tranque only: the blocker and the player to his right, with the pips each
-  // held. Tranques from before the comparison fields have no line.
-  const tranqueLine = (p: CalloutPayload | null): string | null => {
-    if (!p?.blockerSeat || !p.rivalSeat) return null;
-    if (typeof p.blockerPips !== "number" || typeof p.rivalPips !== "number") return null;
+  // Tranque only: the comparison line, plus who won on equal pips.
+  const tranqueLinesFor = (p: CalloutPayload | null): string[] => {
     const names: Record<Seat, string> = {
       n: s.seatNorth,
       e: s.seatEast,
@@ -873,18 +871,18 @@ function GameContent({ id }: { id: string }) {
     };
     const nameOf = (seat: Seat) =>
       players.find((pl) => pl.seat === seat)?.nickname ?? names[seat];
-    return s.tranqueCompare(nameOf(p.blockerSeat), p.blockerPips, nameOf(p.rivalSeat), p.rivalPips);
+    return tranqueLines(p, nameOf, s);
   };
-  const cardTranqueLine = tranqueLine(cardPayload);
+  const cardTranqueLines = tranqueLinesFor(cardPayload);
 
   // Split bubbles by sender position for layout
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
 
-  // VEINTICINCO awarded mid-round (round keeps playing) shows as a passing
-  // banner so it never blocks the forcer's next move. Round-ending callouts
-  // (DOMINÓ, CAPICÚA, TRANCAO) keep the full-screen overlay; a +25 never
-  // ends a game.
+  // A +25 awarded mid-round (pase corrido, or a pase de salida, which travels
+  // as a veinticinco callout) shows as a passing banner so it never blocks
+  // the next move. Round-ending callouts (DOMINÓ, CAPICÚA, TRANCAO) keep the
+  // full-screen overlay; a +25 never ends a game.
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
   const bannerTeamName =
@@ -904,12 +902,16 @@ function GameContent({ id }: { id: string }) {
       {/* Callout: mid-round bonus banner vs round-ending overlay */}
       {lastCallout &&
         (isMidRoundCallout ? (
-          <VeinticincoBanner teamName={bannerTeamName} onDone={clearCallout} />
+          <VeinticincoBanner
+            label={veinticincoLabel(lastCalloutPayload, s)}
+            teamName={bannerTeamName}
+            onDone={clearCallout}
+          />
         ) : (
           <CalloutOverlay
             callout={lastCallout}
             payload={lastCalloutPayload}
-            compareLine={tranqueLine(lastCalloutPayload)}
+            compareLines={tranqueLinesFor(lastCalloutPayload)}
             onDismiss={clearCallout}
           />
         ))}
@@ -1189,8 +1191,14 @@ function GameContent({ id }: { id: string }) {
                   </p>
                 )}
 
-                {cardTranqueLine && (
-                  <p className="text-sm font-semibold break-words">{cardTranqueLine}</p>
+                {cardTranqueLines.length > 0 && (
+                  <div className="space-y-0.5">
+                    {cardTranqueLines.map((line) => (
+                      <p key={line} className="text-sm font-semibold break-words">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 )}
 
                 {/* Pip breakdown */}
@@ -1440,13 +1448,16 @@ export default function GamePage() {
 }
 
 // ─── Mid-round VEINTICINCO banner ────────────────────────────────────────────
-// Non-blocking, auto-dismissing. The round continues underneath; the forcer
-// needs the board free to play their next tile.
+// Non-blocking, auto-dismissing. The round continues underneath; the next
+// player needs the board free to play. The label says ¡VEINTICINCO! for a
+// pase corrido and ¡PASE DE SALIDA! for a pase de salida.
 
 function VeinticincoBanner({
+  label,
   teamName,
   onDone,
 }: {
+  label: string;
   teamName: string | null;
   onDone: () => void;
 }) {
@@ -1462,7 +1473,7 @@ function VeinticincoBanner({
   }, [onDone]);
 
   return (
-    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+    <div className="fixed inset-x-0 top-16 z-50 flex justify-center px-4 pointer-events-none">
       <div
         className={`px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-700 border border-purple-400/70 shadow-2xl flex items-center gap-2.5 ${
           leaving ? "animate-toast-out" : "animate-toast-in"
@@ -1470,9 +1481,7 @@ function VeinticincoBanner({
       >
         <span className="text-2xl drop-shadow">💥</span>
         <div className="text-white">
-          <p className="font-black leading-tight tracking-tight">
-            ¡VEINTICINCO!
-          </p>
+          <p className="font-black leading-tight tracking-tight whitespace-nowrap">{label}</p>
           <p className="text-xs text-purple-100/90 font-semibold leading-tight">
             +25{teamName ? ` · ${teamName}` : ""}
           </p>

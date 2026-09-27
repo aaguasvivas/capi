@@ -56,22 +56,20 @@ export interface TrancaoResult {
  * TRANCAO (regla de patio): the blocker (the player who placed the locking
  * tile) compares the pips in his own hand with the rival, the next player to
  * his right, who is always an opponent. Fewer pips wins the round for that
- * player's side; a tie goes to the side that opened the round. The winning
- * side takes every pip left in every hand, like a dominó.
+ * player. On equal pips the player who opened the round (la mano) wins, even
+ * when he is neither the blocker nor the rival. The winner's side takes every
+ * pip left in every hand, like a dominó, and the winner opens the next round.
  */
 export function scoreTrancao(state: GameState, blockerSeat: Seat): TrancaoResult {
   const rivalSeat = getNextSeat(blockerSeat, state.is2v2);
   const blockerPips = handPips(state.hands[blockerSeat] ?? []);
   const rivalPips = handPips(state.hands[rivalSeat] ?? []);
-  const openingTeam = getTeam(state.starterThisRound, state.is2v2);
   const winnerSeat =
     blockerPips < rivalPips
       ? blockerSeat
       : rivalPips < blockerPips
       ? rivalSeat
-      : getTeam(blockerSeat, state.is2v2) === openingTeam
-      ? blockerSeat
-      : rivalSeat;
+      : state.starterThisRound;
   return {
     winnerSeat,
     winnerTeam: getTeam(winnerSeat, state.is2v2),
@@ -100,3 +98,6 @@ export function isCapicua(
 
 export const CAPICUA_BONUS = 25;
 export const VEINTICINCO_BONUS = 25;
+// Pase de salida: the opener's side, when the seat after him passes on the
+// opening tile and his partner then plays (2v2 only).
+export const SALIDA_BONUS = 25;

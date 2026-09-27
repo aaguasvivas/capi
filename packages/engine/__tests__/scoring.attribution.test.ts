@@ -204,6 +204,7 @@ describe("score attribution: 2v2", () => {
     expect(res.newState.scores).toEqual([20, 0]);
     const payload = res.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(0);
-    expect(payload).toMatchObject({ blockerSeat: "w", rivalSeat: "n", blockerPips: 3, rivalPips: 3 });
+    // s is neither the blocker nor the rival, and he wins the tie.
+    expect(payload).toMatchObject({ blockerSeat: "w", rivalSeat: "n", blockerPips: 3, rivalPips: 3, winnerSeat: "s" });
   });
 });

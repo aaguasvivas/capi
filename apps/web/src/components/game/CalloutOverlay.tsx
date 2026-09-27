@@ -3,19 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import type { CalloutPayload } from "@capi/engine";
 import { useI18n } from "@/lib/i18n/context";
+import type { Strings } from "@capi/i18n";
+import { veinticincoLabel } from "@/lib/callouts";
 
 interface CalloutOverlayProps {
   callout: string;
   payload: CalloutPayload | null;
-  // Tranque only: the blocker and the player to his right with their pips.
-  compareLine?: string | null;
+  // Tranque only: the blocker and the player to his right with their pips,
+  // and on a tie who won it.
+  compareLines?: string[];
   onDismiss: () => void;
 }
 
 const CALLOUT_CONFIG: Record<
   string,
   {
-    label: string;
+    label: (s: Strings, payload: CalloutPayload | null) => string;
     emoji: string;
     bg: string;
     textColor: string;
@@ -24,7 +27,7 @@ const CALLOUT_CONFIG: Record<
   }
 > = {
   domino: {
-    label: "¡DOMINÓ!",
+    label: (s) => s.calloutDomino,
     emoji: "🎯",
     bg: "from-amber-500 via-yellow-400 to-amber-500",
     textColor: "text-amber-950",
@@ -32,7 +35,7 @@ const CALLOUT_CONFIG: Record<
     borderColor: "border-amber-300",
   },
   trancao: {
-    label: "¡TRANCAO!",
+    label: (s) => s.calloutTrancao,
     emoji: "🔒",
     bg: "from-red-700 via-red-600 to-red-700",
     textColor: "text-white",
@@ -40,7 +43,7 @@ const CALLOUT_CONFIG: Record<
     borderColor: "border-red-400",
   },
   capicua: {
-    label: "¡CAPICÚA!",
+    label: (s) => s.calloutCapicua,
     emoji: "🔥",
     bg: "from-orange-600 via-amber-500 to-orange-600",
     textColor: "text-orange-950",
@@ -48,7 +51,7 @@ const CALLOUT_CONFIG: Record<
     borderColor: "border-orange-300",
   },
   veinticinco: {
-    label: "¡VEINTICINCO!",
+    label: (s, payload) => veinticincoLabel(payload, s),
     emoji: "💥",
     bg: "from-purple-700 via-indigo-600 to-purple-700",
     textColor: "text-white",
@@ -60,7 +63,7 @@ const CALLOUT_CONFIG: Record<
 export default function CalloutOverlay({
   callout,
   payload,
-  compareLine,
+  compareLines,
   onDismiss,
 }: CalloutOverlayProps) {
   const { s } = useI18n();
@@ -87,6 +90,7 @@ export default function CalloutOverlay({
 
   const config = CALLOUT_CONFIG[callout];
   if (!config) return null;
+  const label = config.label(s, payload);
 
   return (
     <div
@@ -117,7 +121,7 @@ export default function CalloutOverlay({
           id="callout-title"
           className={`text-5xl font-black tracking-tight ${config.textColor} drop-shadow-sm`}
         >
-          {config.label}
+          {label}
         </h2>
 
         {payload && (
@@ -137,7 +141,11 @@ export default function CalloutOverlay({
             {typeof payload.pts === "number" && payload.pts > 0 && (
               <p>+{payload.pts} {s.points}</p>
             )}
-            {compareLine && <p className="break-words">{compareLine}</p>}
+            {compareLines?.map((line) => (
+              <p key={line} className="break-words">
+                {line}
+              </p>
+            ))}
           </div>
         )}
 

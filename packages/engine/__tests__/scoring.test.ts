@@ -395,12 +395,13 @@ describe("2v2 - scoreTrancao", () => {
     // Tie of the two players: blocker n holds [1,2] = 3, like e.
     const tie: GameState = { ...state, hands: { ...state.hands, n: [[1, 2]] } };
     const r = scoreTrancao(tie, "n");
-    // The pair that opened the round (E, team 1) takes the whole table.
+    // The player who opened the round (E, team 1) wins and his pair takes
+    // the whole table.
     expect(r).toMatchObject({ winnerSeat: "e", winnerTeam: 1, blockerPips: 3, rivalPips: 3 });
     expect(r.pts).toBe(3 + 3 + 4 + 3);
-    // With S opening, the same tie goes to team 0 and the blocker n.
+    // With S opening, the same tie goes to S himself, neither blocker nor rival.
     expect(scoreTrancao({ ...tie, starterThisRound: "s" }, "n")).toMatchObject({
-      winnerSeat: "n",
+      winnerSeat: "s",
       winnerTeam: 0,
     });
   });
