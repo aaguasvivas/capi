@@ -156,3 +156,29 @@ Six were real and are fixed:
 - Not verified yet: every app and extension change in the simulator, the
   store sheet with the ad privacy link, the IAP review screenshots, and the
   EAS production-config build. All wait for the Xcode license.
+
+## Rules update (owner decisions after the research)
+
+Research: `docs/research/rules-2026-09/README.md` (605 source claims, six
+topics, each conclusion re-checked against its sources). Changes, all in
+`packages/engine`, deployed to playcapi.com and verified there with a built
+locked board (blocker 4 pips against the next player's 28: the blocker's pair
+took all 108 points):
+
+- Tranque ends the round the moment the locking tile is placed (no more
+  waiting for four passes, which used to pay a pase corrido before every 2v2
+  tranque). The blocker compares his own pips with the next player's; fewer
+  wins for his pair, which scores every tile left. A tie goes to the pair that
+  opened the round. The comparison winner opens the next round. Locking with
+  your last tile is a domino. Both clients show "Tranque: Ana 12 · Luis 15".
+- A pase corrido +25 only counts when it leaves the pair below the target, and
+  a game is only won by winning a round. Games saved mid-round by the old
+  engine with a side already past the target end when that round ends.
+- Capicúa: the last tile must fit both open ends before the play; a
+  non-double on two equal ends now counts (5-6 on 5 and 5). A double does not,
+  per the Dominican sources (the owner's 2-2 example; one switch if he wants
+  it anyway).
+- Tests: engine 164 (fuzz invariants rewritten for the new rules, five
+  deliberate rule breaks each caught with a printed seed). A fresh review
+  found two real issues (the saved-game case above and the store listing
+  capicúa line), both fixed.

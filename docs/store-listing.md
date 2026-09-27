@@ -230,6 +230,7 @@ A small banner may appear on the home screen and while you wait for players. Nev
 Also in this update:
 • If the other side goes quiet for two minutes, you can claim the game instead of waiting forever (not in iMessage games, which go turn by turn)
 • "How to play" in the app has every rule
+• Patio rules, the way the table plays: the tranque counts the one who locked it against the player on his right, and a pase corrido never wins the game on its own
 • New quick chat phrases: "Your turn!", "You there?", "Hurry up!" and "Nice hand!"
 • "Report a problem" now says it goes to the Capi team, not to your opponent
 ```
@@ -249,6 +250,7 @@ Puede salir un banner pequeño en la pantalla de inicio y mientras esperas que l
 También en esta versión:
 • Si el otro lado se queda callado dos minutos, puedes reclamar la partida en vez de esperar sin fin (no en las partidas de iMessage, que van por turnos)
 • "Cómo se juega" en la app tiene todas las reglas
+• Reglas de patio, como se juega en la mesa: el tranque cuenta al que trancó contra el de su derecha, y un pase corrido nunca gana la partida solo
 • Frases nuevas en el chat rápido: "¡Te toca!", "¿Tú ta' ahí?", "¡Apúrate!" y "¡Buena mano!"
 • "Reportar un problema" ahora dice que le llega al equipo de Capi, no a tu oponente
 ```
