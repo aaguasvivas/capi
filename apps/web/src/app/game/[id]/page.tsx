@@ -860,14 +860,31 @@ function GameContent({ id }: { id: string }) {
     return iWonGame ? s.wonByForfeit(name) : s.lostByForfeit(name);
   };
 
+  // Tranque only: the blocker and the player to his right, with the pips each
+  // held. Tranques from before the comparison fields have no line.
+  const tranqueLine = (p: CalloutPayload | null): string | null => {
+    if (!p?.blockerSeat || !p.rivalSeat) return null;
+    if (typeof p.blockerPips !== "number" || typeof p.rivalPips !== "number") return null;
+    const names: Record<Seat, string> = {
+      n: s.seatNorth,
+      e: s.seatEast,
+      s: s.seatSouth,
+      w: s.seatWest,
+    };
+    const nameOf = (seat: Seat) =>
+      players.find((pl) => pl.seat === seat)?.nickname ?? names[seat];
+    return s.tranqueCompare(nameOf(p.blockerSeat), p.blockerPips, nameOf(p.rivalSeat), p.rivalPips);
+  };
+  const cardTranqueLine = tranqueLine(cardPayload);
+
   // Split bubbles by sender position for layout
   const myBubbles = chatBubbles.filter((b) => b.isMe);
   const oppBubbles = chatBubbles.filter((b) => !b.isMe);
 
   // VEINTICINCO awarded mid-round (round keeps playing) shows as a passing
   // banner so it never blocks the forcer's next move. Round-ending callouts
-  // (DOMINÓ, CAPICÚA, TRANCAO, or a +25 that wins the game) keep the
-  // full-screen overlay.
+  // (DOMINÓ, CAPICÚA, TRANCAO) keep the full-screen overlay; a +25 never
+  // ends a game.
   const isMidRoundCallout =
     lastCallout === "veinticinco" && gameState.phase === "playing";
   const bannerTeamName =
@@ -892,6 +909,7 @@ function GameContent({ id }: { id: string }) {
           <CalloutOverlay
             callout={lastCallout}
             payload={lastCalloutPayload}
+            compareLine={tranqueLine(lastCalloutPayload)}
             onDismiss={clearCallout}
           />
         ))}
@@ -1169,6 +1187,10 @@ function GameContent({ id }: { id: string }) {
                       {s.awardedTo} {teamLabel(cardWinnerTeam)}
                     </span>
                   </p>
+                )}
+
+                {cardTranqueLine && (
+                  <p className="text-sm font-semibold break-words">{cardTranqueLine}</p>
                 )}
 
                 {/* Pip breakdown */}

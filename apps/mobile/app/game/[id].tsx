@@ -1156,6 +1156,14 @@ function GameTable({
   const stallSeat: Seat | null = stallNotice ? gameState.currentTurn : null;
   const seatName = (seat: Seat) =>
     players.find((p) => p.seat === seat)?.nickname ?? seatLabels[seat];
+  // Tranque only: the blocker and the player to his right, with the pips each
+  // held. Tranques from before the comparison fields have no line.
+  const tranqueLine = (p: CalloutPayload | null): string | null => {
+    if (!p?.blockerSeat || !p.rivalSeat) return null;
+    if (typeof p.blockerPips !== "number" || typeof p.rivalPips !== "number") return null;
+    return s.tranqueCompare(seatName(p.blockerSeat), p.blockerPips, seatName(p.rivalSeat), p.rivalPips);
+  };
+  const cardTranqueLine = tranqueLine(cardPayload);
   const forfeitLine = (seat: Seat) => {
     if (spectating) return s.endedByForfeit(seatName(seat));
     if (seat === mySeat) return s.youForfeited;
@@ -1667,6 +1675,7 @@ function GameTable({
             <CalloutOverlay
               callout={lastCallout}
               payload={lastCalloutPayload}
+              compareLine={tranqueLine(lastCalloutPayload)}
               onDismiss={clearCallout}
             />
           ) : null}
@@ -1709,6 +1718,19 @@ function GameTable({
                       {s.awardedTo} {roundWinnerName}
                     </Text>
                   </View>
+                ) : null}
+
+                {cardTranqueLine ? (
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      color: palette.scoreText,
+                      textAlign: "center",
+                    }}
+                  >
+                    {cardTranqueLine}
+                  </Text>
                 ) : null}
 
                 {/* Pip breakdown */}

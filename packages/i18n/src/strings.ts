@@ -103,6 +103,9 @@ export interface Strings {
   points: string;
   bonus: string;
   capicuaBonus: string;
+  // The tranque comparison: the blocker and the player to his right, with
+  // the pips each one holds.
+  tranqueCompare: (blocker: string, blockerPips: number, rival: string, rivalPips: number) => string;
   tapToContinue: string;
 
   // Round over
@@ -342,6 +345,8 @@ export const es: Strings = {
   points: "puntos",
   bonus: "bonus",
   capicuaBonus: "bonus Capicúa",
+  tranqueCompare: (blocker, blockerPips, rival, rivalPips) =>
+    `Tranque: ${blocker} ${blockerPips} · ${rival} ${rivalPips}`,
   tapToContinue: "Toca para continuar",
 
   wonRound: "¡Ganaste la ronda!",
@@ -561,6 +566,8 @@ export const en: Strings = {
   points: "pts",
   bonus: "bonus",
   capicuaBonus: "Capicúa bonus",
+  tranqueCompare: (blocker, blockerPips, rival, rivalPips) =>
+    `Tranque: ${blocker} ${blockerPips} · ${rival} ${rivalPips}`,
   tapToContinue: "Tap to keep it moving",
 
   wonRound: "You took that round!",

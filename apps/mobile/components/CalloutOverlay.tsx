@@ -6,6 +6,8 @@ import { useI18n } from "../lib/i18n";
 interface CalloutOverlayProps {
   callout: string;
   payload: CalloutPayload | null;
+  // Tranque only: the blocker and the player to his right with their pips.
+  compareLine?: string | null;
   onDismiss: () => void;
 }
 
@@ -66,6 +68,7 @@ const CALLOUT_CONFIG: Record<
 export function CalloutOverlay({
   callout,
   payload,
+  compareLine,
   onDismiss,
 }: CalloutOverlayProps) {
   const { s } = useI18n();
@@ -89,6 +92,7 @@ export function CalloutOverlay({
     if (typeof payload.pts === "number" && payload.pts > 0) {
       lines.push(`+${payload.pts} ${s.points}`);
     }
+    if (compareLine) lines.push(compareLine);
   }
 
   return (
@@ -141,7 +145,12 @@ export function CalloutOverlay({
             {lines.map((line, i) => (
               <Text
                 key={i}
-                style={{ fontSize: 16, fontWeight: "600", color: config.subTextColor }}
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: config.subTextColor,
+                  textAlign: "center",
+                }}
               >
                 {line}
               </Text>

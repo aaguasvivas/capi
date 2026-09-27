@@ -44,7 +44,7 @@ export const RULES: Record<Lang, RulesContent> = {
           "Si nadie tiene doble, sale la ficha más alta.",
           "En las demás rondas sale el que ganó la ronda anterior, con la ficha que quiera.",
           "Después de un dominó o una capicúa, sale el jugador que se quedó sin fichas.",
-          "Después de un tranque, sale el jugador del lado ganador con menos pintas en la mano.",
+          "Después de un tranque, sale el que ganó el tranque: el que trancó o el jugador a su derecha.",
         ],
       },
       {
@@ -66,22 +66,23 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "Capicúa",
         items: [
-          "Si las dos puntas de la mesa tienen números distintos y tu última ficha lleva esos dos números, es capicúa: +25 puntos extra.",
+          "Si tu última ficha pega por las dos puntas de la mesa, es capicúa: +25 puntos extra.",
           "Ejemplo: las puntas son 3 y 5, y te quedas sin fichas con el 3-5.",
-          "Si las dos puntas tienen el mismo número, no hay capicúa, aunque tu ficha pegue por los dos lados.",
+          "Con las dos puntas iguales también vale: las puntas son 5 y 5, y sales con el 5-6.",
           "Un doble nunca es capicúa.",
+          "La capicúa es solo en un dominó, nunca en un tranque.",
         ],
       },
       {
         title: "Tranque",
         items: [
-          "Si nadie puede jugar, la mesa se tranca: trancao.",
-          "En 1v1, la mesa se tranca cuando los dos jugadores pasan seguidos, con el pozo vacío.",
-          "En 2v2, la mesa se tranca cuando los cuatro jugadores pasan seguidos.",
-          "En 2v2, antes del tranque siempre hay pase corrido: al tercer pase, el lado que jugó último gana +25. Si ese jugador también pasa, el cuarto pase tranca la mesa.",
-          "Ese +25 se queda, aunque ese lado pierda el tranque.",
-          "Gana el lado con menos pintas en la mano y se lleva todas las pintas que quedan en la mesa.",
+          "La mesa se tranca cuando pones una ficha y ya ninguna ficha pega en las puntas, ni en las manos ni en el pozo.",
+          "La ronda se acaba ahí mismo: trancao. No se espera a que todos pasen.",
+          "El que puso esa ficha trancó. Cuenta sus pintas contra las del jugador a su derecha.",
+          "Solo cuentan las manos de ellos dos, no la de su frente.",
+          "Gana el que tenga menos pintas. Su lado se lleva todas las pintas que quedan en las manos.",
           "Si empatan, gana el lado que salió en esa ronda.",
+          "Si trancas con tu última ficha, es dominó, no tranque.",
         ],
       },
       {
@@ -89,8 +90,9 @@ export const RULES: Record<Lang, RulesContent> = {
         items: [
           "Solo en 2v2.",
           "Si después de tu ficha pasan los otros tres, tu lado gana +25 al momento y te toca jugar otra vez.",
-          "La ronda sigue. Si tú tampoco puedes jugar y pasas, la mesa se tranca.",
+          "La ronda sigue, y tú siempre tienes jugada.",
           "Puede pasar más de una vez en la misma ronda.",
+          "Si esos 25 llevan a tu lado a la meta o más, no cuentan.",
         ],
       },
       {
@@ -98,8 +100,8 @@ export const RULES: Record<Lang, RulesContent> = {
         items: [
           "La partida es a 100 puntos. Si creas la mesa en la app o en playcapi.com, puedes ponerla a 200.",
           "Los puntos se acumulan de ronda en ronda.",
-          "Gana el lado que llega a la meta cuando termina una ronda.",
-          "Un +25 a mitad de ronda no cierra la partida: la ronda se juega hasta el final.",
+          "La partida solo se gana ganando una ronda: gana el lado que gana la ronda y con eso llega a la meta.",
+          "Un pase corrido nunca da la partida.",
           "Si el jugador de turno lleva 2 minutos sin jugar, el otro lado puede reclamar la partida y la gana.",
           "Las partidas que empiezan en iMessage van por turnos y no se pueden reclamar.",
         ],
@@ -140,7 +142,7 @@ export const RULES: Record<Lang, RulesContent> = {
           "If nobody has a double, the highest tile opens.",
           "In later rounds, the winner of the last round opens with any tile.",
           "After a dominó or a capicúa, that is the player who ran out of tiles.",
-          "After a tranque, it is the player on the winning side with the fewest pips in hand.",
+          "After a tranque, it is the player who won the tranque: the blocker or the player to his right.",
         ],
       },
       {
@@ -162,22 +164,23 @@ export const RULES: Record<Lang, RulesContent> = {
       {
         title: "Capicúa",
         items: [
-          "If the two open ends show different numbers and your last tile carries both of them, that is a capicúa: +25 extra points.",
+          "If your last tile fits both open ends of the table, that is a capicúa: +25 extra points.",
           "Example: the ends are 3 and 5, and you go out with the 3-5.",
-          "If both ends show the same number, there is no capicúa, even when your tile fits both ends.",
+          "Two equal ends count too: the ends are 5 and 5, and you go out with the 5-6.",
           "A double never counts as capicúa.",
+          "A capicúa only happens on a dominó, never on a tranque.",
         ],
       },
       {
         title: "Tranque",
         items: [
-          "When nobody can play, the table is locked: trancao.",
-          "In 1v1, the table locks when both players pass in a row, with the boneyard empty.",
-          "In 2v2, the table locks when all four players pass in a row.",
-          "In 2v2, a pase corrido always comes first: on the third pass, the side that played last gets +25. If that player passes too, the fourth pass locks the table.",
-          "That +25 stays, even if that side loses the tranque.",
-          "The side with fewer pips in hand wins and takes every pip left on the table.",
+          "The table locks when you place a tile and no tile left fits either end, in any hand or in the boneyard.",
+          "The round ends right there: trancao. Nobody has to pass first.",
+          "The player who placed that tile is the blocker. He counts his pips against the player to his right.",
+          "Only those two hands count, not the partner's.",
+          "Fewer pips wins. That player's side takes every pip left in the hands.",
           "A tie goes to the side that opened the round.",
+          "If you lock the table with your last tile, it is a dominó, not a tranque.",
         ],
       },
       {
@@ -185,8 +188,9 @@ export const RULES: Record<Lang, RulesContent> = {
         items: [
           "2v2 only.",
           "If the other three players all pass right after your tile, your side gets +25 on the spot and you play again.",
-          "The round goes on. If you cannot play either and pass, the table locks.",
+          "The round goes on, and you always have a play.",
           "It can happen more than once in the same round.",
+          "If those 25 would take your side to the target or past it, they do not count.",
         ],
       },
       {
@@ -194,8 +198,8 @@ export const RULES: Record<Lang, RulesContent> = {
         items: [
           "The game is played to 100 points. When you create the table in the app or at playcapi.com, you can set it to 200.",
           "Points carry over from round to round.",
-          "The side that reaches the target when a round ends wins the game.",
-          "A mid-round +25 never ends the game on its own. The round is played out first.",
+          "You win the game only by winning a round: the side that wins the round and reaches the target with it wins.",
+          "A pase corrido never wins the game.",
           "If the player on turn goes 2 minutes without a move, the other side can claim the game and wins it.",
           "Games started in iMessage go turn by turn and cannot be claimed.",
         ],
