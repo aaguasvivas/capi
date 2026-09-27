@@ -1041,7 +1041,7 @@ function GameContent({ id }: { id: string }) {
 
           {/* Location watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-            <p className="text-white/[0.05] text-2xl sm:text-3xl font-black tracking-[0.25em] uppercase -rotate-2">
+            <p className="text-white/[0.05] text-xl sm:text-3xl font-black tracking-[0.25em] uppercase -rotate-2 whitespace-nowrap">
               {gameState.theme === "barberia" && "BARBERÍA DON RAMÓN"}
               {gameState.theme === "colmado" && "COLMADO LA ESQUINA"}
               {gameState.theme === "patio" && "EL PATIO DE TÍA"}

@@ -217,7 +217,7 @@ Capi 1.0, la primera mano. Dominó dominicano de verdad con tu gente: capicúa, 
 
 **English:**
 ```
-Capi now lives in iMessage. Start a game right from your group chat: the invite is a bubble, and games there go turn by turn. After your move the drawer closes and a new bubble tells the other side it is their turn. Tap the latest bubble to open the table and watch the other side play live. 1v1 or 2v2 con tu frente.
+Capi now lives in iMessage. Start a game right from your group chat: the invite is a bubble, and games there go turn by turn. After your move the drawer gets small and a new bubble, ready to send, tells the other side it is their turn. Tap "Back to the table" or the latest bubble to watch the other side play live. 1v1 or 2v2 con tu frente.
 
 Also new, the Capi shop:
 • Three premium tables: Quisqueya, Larimar and Capi Noche
@@ -237,7 +237,7 @@ Also in this update:
 
 **Español:**
 ```
-Capi ahora vive en iMessage. Empieza la partida desde el chat: la invitación es una burbuja, y allí se juega por turnos. Después de tu jugada el cajón se cierra y una burbuja nueva le avisa al otro lado que le toca. Toca la última burbuja para abrir la mesa y ver al otro lado jugar en vivo. 1v1 o 2v2 con tu frente.
+Capi ahora vive en iMessage. Empieza la partida desde el chat: la invitación es una burbuja, y allí se juega por turnos. Después de tu jugada el cajón se achica y una burbuja nueva, lista para enviar, le avisa al otro lado que le toca. Toca "Volver a la mesa" o la última burbuja para ver al otro lado jugar en vivo. 1v1 o 2v2 con tu frente.
 
 También nueva, la tienda de Capi:
 • Tres mesas premium: Quisqueya, Larimar y Capi Noche
