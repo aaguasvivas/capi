@@ -1,0 +1,893 @@
+[
+ {
+  "rule": "In the informal (patio) Dominican mode, a capicúa is when a player's last tile can be placed on either end. If that last tile is a double, it is not a capicúa.",
+  "quote": "Si la ficha es un doble entonces no hay capicúa.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The player who makes the capicúa gets 25 or 30 points, depending on the agreed rules (patio mode).",
+  "quote": "se le suman 25 o 30 puntos dependiendo de las reglas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa is a 25-point bonus on the last play: the player going out plays a tile that matches the end on the opposite side of the line. The bonus can be nullified.",
+  "quote": "he collects another 25 points, though this play too can also be nullified",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (page 2, Wayback 2015 copy)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The capicúa bonus is nullified if the matching last tile is a blank or a double.",
+  "quote": "does it with either a blank, or with a double, the points are nullified",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa refers only to the last play of the hand, when the player goes out (not to a locked game).",
+  "quote": "This term is in reference to the last play of the game.",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A Dominican linguist (Academia Dominicana de la Lengua member) defines capicúa as when only one tile is left that closes the game and it is a 'head at both ends' (fits both ends).",
+  "quote": "es “cabeza de dos extremos”, se dice que es “capicúa”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, 'Dominó' by Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa is a play that goes out (domina) by either of the two ends. No point value given.",
+  "quote": "Consiste en hacer una jugada para dominar por cualquiera de los dos extremos.",
+  "url": "https://listindiario.com/puntos-de-vista/2019/12/04/594376/el-bueno-el-malo-y-el-feo.html",
+  "sourceName": "Listín Diario, 'El bueno, el malo y el feo' (opinion, 2019)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Winning by capicúa has special prestige: closing the game at both ends with one play.",
+  "quote": "Cerrar el juego por los dos cabos en un solo tranco",
+  "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+  "sourceName": "Diario Libre, 'Dominó | La república de las fichas' by Aníbal de Castro (2026)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In some Dominican playing groups, a capicúa is worth double (the hand counts double) instead of a fixed bonus.",
+  "quote": "En algunos corros vale doble",
+  "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+  "sourceName": "Diario Libre, Aníbal de Castro (2026)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago municipal tournament (2019): capicúa is worth 25 tantos; the paso corrido earns nothing.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO, LA CAPICUA SON 25 TANTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, rules of 1er Torneo de Dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga municipal tournament (Oct 2025): capicúa is worth +30 points.",
+  "quote": "Capicúa: +30 pts.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, 'Gran Torneo de Dominó Regular 3/2' rules",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the Dominican Republic, capicúa is going out with a tile that fits both ends, except when it is a double; such special plays are normally worth 25.",
+  "quote": "dominar con una ficha que pueda ser colocada por ambos extremos, salvo que sea un doble",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia (Spanish blog), Reglas del Dominó, Dominó Latino section",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow (Dominican domino app) requires a non-double last tile that contains both distinct end values; ends 5 and 5 with the 5-5 do not count.",
+  "quote": "Capicúa requires a non-double final tile containing both distinct pre-play end values.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow default capicúa bonus is 25; 30 is also a common Dominican value. Its value page cites elCaribe for 25, La Guáyiga for 30, and a Santiago tournament for 25.",
+  "quote": "FichaFlow defaults: Capicúa 25 (30 is also common in Dominican play)",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Restating DR1: if the last tile matches the opposite end but is not a blank or a double, the player gets 25 points.",
+  "quote": "but isn't a blank or double, that player gets 25 points",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, How to Play Dominican Dominoes (cites DR1)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A Dominican slang dictionary defines capicúa as winning a domino game 'by the 2 ends'.",
+  "quote": "En el juego de dominó ganar por los 2 puntos.",
+  "url": "https://serdominicanoeslomaximo.com/palabras/capicua/",
+  "sourceName": "Ser Dominicano Es Lo Máximo (slang dictionary)",
+  "sourceKind": "other",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: winning with a double that fits either end is called 'dominao' and earns no bonus. Capicú (non-double on either end) is 100 in Quinientos.",
+  "quote": "known as \"dominao\" if the winning double is not the double blank",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "Pagat.com, Partnership Dominoes (Puerto Rico section)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: capicú is when the winning tile can play on either end; it does not apply when the winning tile is a double.",
+  "quote": "Doesn't apply when the winning bone is a double.",
+  "url": "https://caribbeantrading.com/dominoes-rules-in-puerto-rico/",
+  "sourceName": "Caribbean Trading, The Basics of Puerto Rican Dominoes Rules",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuba: capicúa (winner can place the last tile at both ends) doubles the points scored in that hand.",
+  "quote": "Entonces se anota el doble de los tantos alcanzados.",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "Cuba Trendings, 'Capicúa vale doble' (2018)",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Eastern Cuba: capicúa doubles the hand points; a double as last tile is not capicúa.",
+  "quote": "se le suman el doble de los puntos obtenidos en esa data",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó cubano, zona oriental",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Ponce (Puerto Rico) style: no extra points for capicú.",
+  "quote": "No hay puntos adicionales por Capicú",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican section: in the informal (patio) mode, capicúa is going out with a last tile that can be placed on either end. If the last tile is a double, there is no capicúa.",
+  "quote": "Si la ficha es un doble entonces no hay capicúa.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican patio mode: the player who makes capicúa gets 25 or 30 points, depending on the table rules.",
+  "quote": "al jugador que hizo la capicúa se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The capicúa bonus is listed only under the informal (patio) mode. The 'regla general' (formal) Dominican mode has no capicúa bonus in this source.",
+  "quote": "En la modalidad informal, si un jugador coloca su última ficha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa is the last play of the hand. The player who goes out with a tile whose end matches the opposite end of the line gets another 25 points.",
+  "quote": "he collects another 25 points",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa is cancelled (no bonus) if the matching last tile is a double or a blank. By this rule the user's example (ends 2 and 2, going out with the double 2) is not capicúa.",
+  "quote": "does it with either a blank, or with a double, the points are nullified",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Published rules of the 1st Copa Alcaldía de Santiago domino tournament (Santiago, DR, 24 Aug 2019): capicúa is worth 25 tantos.",
+  "quote": "LA CAPICUA SON 25 TANTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 'Alcaldía de Santiago anuncia torneo de Dominó' (rules list, 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Published rules of the municipal tournament of the Distrito Municipal La Guáyiga (DR, 19 Oct 2025): capicúa is worth +30 points. The rules do not define capicúa or say anything about doubles.",
+  "quote": "Capicúa: +30 pts.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, 'Gran Torneo de Dominó Regular 3/2' (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the Dominican Republic there are special scoring plays, normally worth 25 points. Capicúa is going out with a tile that fits both ends, unless it is a double.",
+  "quote": "colocada por ambos extremos, salvo que sea un doble",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican usage: when only one tile is left that closes the game and it is a 'head' on both ends, it is called capicúa.",
+  "quote": "es “cabeza de dos extremos”, se dice que es “capicúa”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Roberto Guzmán, 'Dominó' (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican dominoes: if the last tile matches the opposite end but is not a blank or a double, the player gets 25 points.",
+  "quote": "but isn't a blank or double, that player gets 25 points",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, 'How to Play Dominican Dominoes'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App rule: capicúa needs a non-double last tile that contains both distinct end values. With ends 5 and 5, neither 5-5 nor 5-6 counts. Default bonus is 25, and 30 is also common in Dominican play.",
+  "quote": "Ends 5 and 5 with a last tile of 5-5 are not capicúa",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, 'What Is Capicúa in Domino?'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App definition: capicúa is going out with a tile that matches both open ends at the same time. This definition does not exclude doubles. No bonus value is stated.",
+  "quote": "you go out with a tile that matches both open ends of the chain",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, 'Dominican Dominoes Rules'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: capicú does not apply when the winning tile is a double. A double that fits both ends is called 'Dominao' and gets no bonus. In the 500-point game, capicú or chuchazo gives +100.",
+  "quote": "winning with a double doesn't get the Capicú bonus points",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, 'Domino Games in Puerto Rico' (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: capicú is when the winning tile can play on either open end. It does not apply when the winning tile is a double.",
+  "quote": "Doesn't apply when the winning bone is a double.",
+  "url": "https://caribbeantrading.com/dominoes-rules-in-puerto-rico/",
+  "sourceName": "Caribbean Trading, 'The Basics of Puerto Rican Dominoes Rules'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Eastern Cuba, 'capicúa' modality: a capicúa doubles the points of that hand for the pair. A double is not capicúa.",
+  "quote": "a la pareja que hizo la capicúa se le suman el doble de los puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó cubano, zona oriental",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Ponce (Puerto Rico) style: capicú gives no extra points.",
+  "quote": "No hay puntos adicionales por Capicú",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican patio (informal) rules: capicúa is going out with a last tile that could be placed on either end. A double never counts as capicúa.",
+  "quote": "Si la ficha es un doble entonces no hay capicúa.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa bonus in Dominican patio play is 25 or 30 points, depending on the table rules. It is listed only for the informal (patio) mode.",
+  "quote": "al jugador que hizo la capicúa se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa (last tile matches the end on the opposite side of the line) earns 25 extra points.",
+  "quote": "collect 25 points, is by executing what is called “Capicua.”",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (page 2, read via Wayback snapshot 2022-10-14)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A capicúa made with a double (or with a blank) does not earn the bonus; the points are nullified.",
+  "quote": "does it with either a blank, or with a double, the points are nullified",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua! Dominoes and the Dominican Republic' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa (online Dominican domino game) counts a double as capicúa when both ends show that number: ends 6 and 6, last tile 6-6, is capicúa. Ends 2 and 4 with last tile 2-2 is not. The capicúa tile must be the tile you go out with.",
+  "quote": "También es capicúa: la ficha servía por ambos lados.",
+  "url": "https://lamesa.mercitlabs.com/que-es-capicua/",
+  "sourceName": "La Mesa: Dominó Latino, ¿Qué es la capicúa?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: the capicúa bonus is a patio-rules bonus, typically 25 or 30 extra points by local custom, added to the normal hand points.",
+  "quote": "típicamente 25 o 30 puntos extra",
+  "url": "https://lamesa.mercitlabs.com/que-es-capicua/",
+  "sourceName": "La Mesa: Dominó Latino, ¿Qué es la capicúa?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow (Dominican domino site with bots) requires a non-double last tile that contains both distinct end values. On equal ends (5 and 5) neither the 5-5 nor a 5-6 counts. Default bonus 25; 30 noted as a common Dominican value.",
+  "quote": "Ends 5 and 5 with a last tile of 5-5 are not capicúa",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, What Is Capicúa in Domino? (updated 2026-09-26)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "An earlier indexed version of the same FichaFlow page (seen only in a search snippet) said the opposite: when the ends match, the matching double is capicúa. The live page now excludes doubles.",
+  "quote": "if the ends match, it must be the matching double",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow (search-engine snippet of an older version)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": false
+ },
+ {
+  "rule": "FichaFlow reports that published Dominican sources differ on the amount: elCaribe (2012) gives 25, the La Guáyiga 2025 tournament gives 30; some competitions omit bonuses.",
+  "quote": "The 2012 elCaribe account gives 25; La Guáyiga’s 2025 tournament rules specify 30.",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, What Is Capicúa in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga municipal tournament (Dominican Republic, Oct 2025): capicúa is worth 30 points.",
+  "quote": "Capicúa: +30 pts.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago city tournament rules (2019): capicúa is 25 points and the paso corrido earns nothing.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO, LA CAPICUA SON 25 TANTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden (browser Dominican dominoes) defines capicúa as going out with a tile that matches both open ends, but its scoring section lists no capicúa bonus.",
+  "quote": "you go out with a tile that matches both open ends of the chain",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DomiKapikua (desktop/Android game claiming Dominican rules) awards capicú +30 and has a 30-point pass bonus.",
+  "quote": "Reglas dominicanas — capicú (+30), pase de 30, salida matadora y tranque.",
+  "url": "https://mangeldev.itch.io/domikapikua",
+  "sourceName": "DomiKapikua by MangelDev (itch.io)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Domino Apunte Dominicano (Dominican-style scorekeeper) has quick buttons for a 25-point pase and a 25-point capicúa.",
+  "quote": "Capicúa 25 puntos",
+  "url": "https://play.google.com/store/apps/details?id=com.parkave.dominoesscore&hl=es",
+  "sourceName": "Domino Apunte Dominicano (Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominator (scorekeeper 'made for Dominican domino') offers bonus presets of 25, 30 or 50 for capicúa or pases corridos.",
+  "quote": "Quickly add predefined bonus points (25/30/50) for plays like capicúa or “pases corridos.”",
+  "url": "https://play.google.com/store/apps/details?id=com.dominator&hl=en",
+  "sourceName": "Dominator - apunte de domino (Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Generic rules site: in countries like the Dominican Republic, special plays are normally worth 25, including capicúa, which excludes doubles.",
+  "quote": "pueda ser colocada por ambos extremos, salvo que sea un doble",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican newspaper column: when the one remaining tile that closes the game is a 'head of two ends', it is called capicúa (no amount given).",
+  "quote": "es “cabeza de dos extremos”, se dice que es “capicúa”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, 'Dominó' (language column)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rican app Mesa28: capicú must be a non-double. A double that closes both ends has its own name, 'dominau', with no bonus. Capicú pays 100 only in 500-point games and never in a tranca.",
+  "quote": "Si la ficha final es doble, no es capicú en Mesa28.",
+  "url": "https://www.mesa28.com/capicu-domino",
+  "sourceName": "Mesa28 (Puerto Rican dominó app), Qué es un capicú",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Mesa28 (Puerto Rico): capicú does not apply when the hand ends in a tranca.",
+  "quote": "No es capicú si la mano termina por tranca.",
+  "url": "https://www.mesa28.com/capicu-domino",
+  "sourceName": "Mesa28 (Puerto Rican dominó app)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Eastern Cuba 'capicúa' mode: a capicúa doubles the points of that hand; a double does not count.",
+  "quote": "se le suman el doble de los puntos obtenidos en esa data",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó cubano, zona oriental",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa (informal/patio mode): the player places his last tile and it could be placed on either end; he gets 25 or 30 points depending on the rules. A double never makes capicúa.",
+  "quote": "Si la ficha es un doble entonces no hay capicúa.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa bonus amount in the Dominican informal game is 25 or 30 points, by table rules.",
+  "quote": "se le suman 25 o 30 puntos dependiendo de las reglas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the Dominican Republic capicúa means going out with a tile that fits on both ends, except a double; special plays like this usually pay 25 points.",
+  "quote": "ficha que pueda ser colocada por ambos extremos, salvo que sea un doble",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó (section on special plays in República Dominicana)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicúa: the player who plays his last tile and it matches the opposite end collects 25 more points. If he does it with a blank or with a double, the bonus is cancelled.",
+  "quote": "does it with either a blank, or with a double, the points are nullified",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1 article: the capicúa bonus is 25 points on top of the hand.",
+  "quote": "he collects another 25 points",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum post (1999, DR style): if the last tile can be played at both ends, excluding a double, 25 or 50 more points are awarded.",
+  "quote": "apart from a double (tapicoua) another 25 or 50 points are awarded",
+  "url": "https://dr1.com/forums/threads/the-rules-for-dominoes-dr-style.2622/",
+  "sourceName": "DR1.com forum, The rules for Dominoes (DR style), user allan, 1999",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum post (2009): if the last tile matches both ends the player calls capicúa and his team earns 25 points.",
+  "quote": "his team earns a 25 point bonus",
+  "url": "https://dr1.com/forums/threads/rules-for-playing-domino.44672/page-2",
+  "sourceName": "DR1.com forum, Rules for playing domino, user Mega_Man, 2009",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum post (2009): capicúa is when the tile that ends the game fits at either end of the line.",
+  "quote": "the domino that will end the game and it fits at either end",
+  "url": "https://dr1.com/forums/threads/dominos-really-that-interesting.72383/page-2",
+  "sourceName": "DR1.com forum, Dominos, really that interesting?, user Hillbilly, 2009",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago municipal tournament (2019): capicúa is worth 25 points (tantos).",
+  "quote": "LA CAPICUA SON 25 TANTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga municipal tournament (2025): capicúa is worth 30 points.",
+  "quote": "Capicúa: +30 pts",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dictionary of Americanisms (entry marked Panama, Cuba, Dominican Republic): capicúa is a way of winning with the tile that can be placed on both ends.",
+  "quote": "modo de ganar con la ficha que se puede colocar en los dos extremos",
+  "url": "https://www.asale.org/damer/capic%C3%BAa",
+  "sourceName": "ASALE, Diccionario de americanismos, capicúa",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican columnist: winning by capicúa has special prestige, and in some playing groups it is worth double.",
+  "quote": "En algunos corros vale doble",
+  "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+  "sourceName": "Diario Libre, Aníbal de Castro, Dominó: la república de las fichas (2026)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow (Dominican domino app): capicúa is going out with a non-double that holds both distinct end numbers. Ends 5 and 5 finished with 5-5 is not capicúa. Default 25, 30 also common.",
+  "quote": "Ends 5 and 5 with a last tile of 5-5 are not capicúa",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, What Is Capicua in Dominican Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: capicúa default is 25; 30 is a common Dominican value documented in local tournament rules. No universal value exists.",
+  "quote": "30 is also a common Dominican value, documented in local tournament rules",
+  "url": "https://fichaflow.com/learn/how-many-points-is-capicua-worth-in-domino/",
+  "sourceName": "FichaFlow, How Many Points Is Capicua Worth?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican-titled how-to article: going out with a tile that also matches the opposite end (not a double, not a blank) gives that player 25 points.",
+  "quote": "that player gets 25 points",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, How to Play Dominican Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rican rules: capicú is when the winning tile can play on either open end; it does not apply when the winning tile is a double.",
+  "quote": "Doesn't apply when the winning bone is a double.",
+  "url": "https://caribbeantrading.com/dominoes-rules-in-puerto-rico/",
+  "sourceName": "Caribbean Trading, The Basics of Puerto Rican Dominoes Rules",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico Quinientos (500): capicú bonus of 100 points when the last tile is not a double and fits either end.",
+  "quote": "last tile is not a double and can be played on either end",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "pagat.com, Partnership Dominoes (Puerto Rico variations)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rican (Mesa28): capicú only if the final tile is not a double and could go on either end; +100 only in 500-point games.",
+  "quote": "La ficha final no es doble y podía jugarse por ambos extremos.",
+  "url": "https://www.mesa28.com/reglas-domino-boricua",
+  "sourceName": "Mesa28, Reglas del dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Chicago Puerto Rican-style tournament: capicú excludes a double; worth 50 points there.",
+  "quote": "Doesn't apply when the winning bone is a double.",
+  "url": "https://stayandplaygamecafe.com/domino-tournament-rules",
+  "sourceName": "Stay and Play Game Cafe (Chicago), Domino Tournament Rules",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban custom: capicúa is described as the same number on both ends, and the hand's points count double. This wording is ambiguous about doubles.",
+  "quote": "si el jugador que llega forma capicúa, es decir, misma cifra por ambos extremos",
+  "url": "https://visitcubago.com/domino-cubano-reglas-como-jugar/",
+  "sourceName": "VisitCubaGo, Dominó cubano",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban custom: capicúa (winner's tile can go on both ends) doubles the points of the hand.",
+  "quote": "Entonces se anota el doble de los tantos alcanzados.",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "CubaTrendings, Capicúa vale doble y otras reglas para jugar dominó en Cuba",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Eastern Cuba (and Cuban variants via reglamentos-deportes): capicúa doubles the points; doubles do not qualify.",
+  "quote": "Si un jugador coloca su última ficha, y esta puede ser colocada por ambos extremos",
+  "url": "https://reglamentos-deportes.com/reglamento-de-domino/5/",
+  "sourceName": "Reglamentos-deportes.com, Reglamento de Dominó (page 5)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "In the informal (patio) Dominican game, capicua is when a player places his last tile and that tile can be placed on either end.",
+  "quote": "En la modalidad informal, si un jugador coloca su última ficha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A double does not make capicua in the Dominican game.",
+  "quote": "Si la ficha es un doble entonces no hay capicúa.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Capicua adds 25 or 30 points to the player who made it, depending on the table rules.",
+  "quote": "al jugador que hizo la capicúa se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: capicua (last tile matches the opposite end too) earns 25 points; if it is done with a blank or with a double, the bonus is cancelled.",
+  "quote": "does it with either a blank, or with a double, the points are nullified",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: capicua is one of five ways to score and is worth 25 points.",
+  "quote": "collect 25 points, is by executing what is called “Capicua.”",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A Dominican linguist defines capicua as the last tile that closes the game being the 'head' (last playable tile) of both ends; no exclusion of doubles is stated.",
+  "quote": "queda una ficha que cierra el juego y es “cabeza de dos extremos”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Dominó, by Roberto Guzmán (Academia Dominicana de la Lengua), 2025",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dictionary of Americanisms (Panama, Cuba, DR): capicua is a way of winning with the tile that can go on both ends; it does not mention doubles.",
+  "quote": "modo de ganar con la ficha que se puede colocar en los dos extremos",
+  "url": "https://www.asale.org/damer/capic%C3%BAa",
+  "sourceName": "ASALE, Diccionario de americanismos, capicúa",
+  "sourceKind": "book",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Among Dominican special plays (normally 25 points), capicua is going out with a tile that fits both ends, unless it is a double.",
+  "quote": "por ambos extremos, salvo que sea un doble",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: Arte o Ciencia, Reglas del Dominó (Dominó Latino section)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guayiga (DR) municipal tournament 2025 awards 30 points for capicua.",
+  "quote": "Capicúa: +30 pts.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago city hall tournament 2019 awards 25 points for capicua and gives nothing for paso corrido.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO, LA CAPICUA SON 25 TANTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A 2023 Dominican newspaper column uses 'Capicúa, 25' as a set phrase, showing 25 as the conventional capicua value.",
+  "quote": "¡Capicúa, 25!",
+  "url": "https://eldia.com.do/jugando-domino-en-el-masacre/",
+  "sourceName": "El Día (DR), Jugando dominó en el Masacre (2023)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow (Dominican domino app): capicua needs a non-double last tile that contains both different end values; 25 by default, 30 also common.",
+  "quote": "Capicúa requires a non-double final tile containing both distinct pre-play end values.",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, What Is Capicúa in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: with ends 5 and 5, going out with 5-5 is not capicua, and neither is 5-6.",
+  "quote": "Ends 5 and 5 with a last tile of 5-5 are not capicúa",
+  "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+  "sourceName": "FichaFlow, What Is Capicúa in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "An older version of a FichaFlow page (search snippet only) said that when both ends match, the capicua tile must be the matching double. The live page now says non-double only.",
+  "quote": "if the ends match, it must be the matching double",
+  "url": "https://fichaflow.com/learn/dominican-domino-terms",
+  "sourceName": "FichaFlow, Dominican Domino Terms (search snippet)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": false
+ },
+ {
+  "rule": "Eastern Cuba 'capicúa' mode: capicua doubles the hand's points; a double is not capicua.",
+  "quote": "se le suman el doble de los puntos obtenidos en esa data",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó cubano, zona oriental",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuba: capicua (winner can place the tile on both corners) doubles the tantos of the hand.",
+  "quote": "Entonces se anota el doble de los tantos alcanzados.",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "Cubatrendings, Capicúa vale doble y otras reglas para jugar dominó en Cuba (2018)",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: capicu is when the winning tile can play on either end, and it does not apply to a double.",
+  "quote": "Doesn't apply when the winning bone is a double.",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: a winning double that fits either end is a separate finish called 'dominao', with no bonus.",
+  "quote": "When the winning bone is a double and can play on either open end",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rican Ponce variant gives no extra points for capicu.",
+  "quote": "No hay puntos adicionales por Capicú",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Caribbean partner game (EN Wikipedia): 'key' gives double points when the last tile is the only tile that can play on both ends.",
+  "quote": "your last card is the only card that can be played on both ends",
+  "url": "https://en.wikipedia.org/wiki/Dominoes",
+  "sourceName": "Wikipedia (en), Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ }
+]

@@ -1,0 +1,945 @@
+[
+ {
+  "topic": "capicua",
+  "synthesis": {
+   "topic": "Capicúa: definition, doubles, equal ends, bonus amount, domino only (not tranque)",
+   "consensus": "Capicúa is a bonus on the way a hand ends by domino. A domino means a player plays his last tile and his hand is empty. Test it on the two open end values L and R just before that final play, and on the final tile (a,b). It is capicúa only when all three hold. (1) The play empties the player's hand. It never applies to a tranque, because in a tranque nobody goes out. (2) The tile is not a double (a != b). (3) The tile could legally go on either end: it matches L and it matches R. When L != R, this means {a,b} = {L,R}, for example ends 3 and 5 with last tile 3-5. The end the player actually picks does not matter. Only whether the tile fits both ends matters. For the owner's example (ends 2 and 2, last tile 2-2), the answer is NOT capicúa, because the tile is a double. Every Dominican source that mentions doubles excludes them. The case of ends 5 and 5 with last tile 5-6 (L == R, a non-double that contains L) is disputed and unresolved. The literal \"fits both ends\" wording (Wikipedia, DR1, ASALE) would count it. FichaFlow explicitly does not. No tournament rule decides it. The bonus is 25 points in most sources: DR1, Santiago 2019 tournament, El Día \"Capicúa, 25\", dominoarteociencia, and a Dominican scorekeeper app. 30 is the second common value (La Guáyiga 2025 tournament). Wikipedia says 25 or 30 by table rules. The bonus goes to the side of the player who goes out, on top of the normal domino hand points (DR1: \"another 25 points\"; La Mesa: added to the normal hand points). It is a patio and municipal-tournament bonus only. Federation play has no capicúa. Implementation sketch: isCapicua = handEmptied && a != b && fits(L) && fits(R), where fits(x) = (a == x || b == x). The L == R non-double case is a flag the owner decides (FichaFlow-strict would require L != R). capicuaBonus is configurable: default 25, option 30.",
+   "federationView": "Not covered by the federations. I read the FID rulebooks (2015 via pagat.com, 2024 via fidomino.org) and the FEMUNDO 2025 rulebook (femundo.org/reglamento.html). None of them has a capicúa bonus, and none has a pase de salida or pase corrido bonus. A hand scores only the tiles left, and a match is won only by hand points reaching the target. The Federación Dominicana de Dominó (Fededodo) has no published rulebook that anyone could find. Spanish Wikipedia lists capicúa only under the informal (patio) mode, not under the Dominican \"regla general\" mode. Two Dominican municipal tournaments do use it. The Copa Alcaldía de Santiago 2019 rules say \"LA CAPICUA SON 25 TANTOS\". The La Guáyiga 2025 rules say \"Capicúa: +30 pts.\" Neither tournament defines capicúa or says anything about doubles. Outside the DR, a Chicago tournament that uses Puerto Rican style excludes doubles and pays 50.",
+   "variants": [
+    {
+     "who": "La Mesa: Dominó Latino (online Dominican game, fetched)",
+     "rule": "A double counts when both ends show its number: ends 6 and 6 with last tile 6-6 is capicúa. Ends 2 and 4 with last tile 2-2 is not. This is the only fetched source that matches the owner's view."
+    },
+    {
+     "who": "FichaFlow, older indexed version (search snippet only, fetched=false, now reversed)",
+     "rule": "When the ends match, the capicúa tile must be the matching double. The live page, updated 2026-09-26, says the opposite."
+    },
+    {
+     "who": "FichaFlow live pages (Dominican domino app)",
+     "rule": "Strict rule: a non-double last tile that holds both distinct end values. With ends 5 and 5, neither 5-5 nor 5-6 counts. Default 25, with 30 noted as common."
+    },
+    {
+     "who": "Literal reading of Spanish Wikipedia (DR patio section), DR1, ASALE, Acento",
+     "rule": "Capicúa is any last tile that can be placed on either end. On ends 5 and 5, a 5-6 would qualify. A double is excluded where the source addresses it (Wikipedia, DR1). Acento and ASALE do not mention doubles."
+    },
+    {
+     "who": "DR1.com article (2007/2015 Wayback), restated by Our Pastimes",
+     "rule": "The bonus is also cancelled if the capicúa is made with a blank. The wording does not say whether this means any tile with a 0, the 0-0, or blank ends. No other Dominican source has this rule."
+    },
+    {
+     "who": "DR1, Santiago 2019 tournament, El Día 2023, dominoarteociencia, DR1 forum 2009, Domino Apunte Dominicano app, FichaFlow default",
+     "rule": "Bonus of 25 points."
+    },
+    {
+     "who": "La Guáyiga 2025 municipal tournament, DomiKapikua game",
+     "rule": "Bonus of 30 points."
+    },
+    {
+     "who": "Spanish Wikipedia (DR patio), La Mesa",
+     "rule": "25 or 30, set by the table rules."
+    },
+    {
+     "who": "DR1 forum post (1999); Dominator scorekeeper app",
+     "rule": "25 or 50 (forum); presets of 25, 30 or 50 (app)."
+    },
+    {
+     "who": "Diario Libre column (2026, Dominican); Cuban sources (non-Dominican)",
+     "rule": "In some Dominican playing groups (\"corros\") a capicúa counts double instead of a fixed bonus. In Cuba the points of the hand double."
+    },
+    {
+     "who": "FID, FEMUNDO, Wikipedia DR regla general; Ponce (Puerto Rico) style",
+     "rule": "No capicúa bonus at all."
+    },
+    {
+     "who": "Puerto Rico (pagat, Carrillo, Caribbean Trading, Mesa28; non-Dominican)",
+     "rule": "A non-double on either end is capicú (+100 in 500-point games). A double that fits both ends is a separate finish, 'dominao', with no bonus. There is never a capicú on a tranca."
+    }
+   ],
+   "ownerView": "The owner's view is contradicted on the double and partly supported on equal ends with a non-double. On the double (ends 2 and 2, going out with the 2-2), every Dominican source that addresses doubles excludes it. These are the Wikipedia es DR section, DR1 (2007 and 2015 copies), dominoarteociencia, Our Pastimes, the DR1 1999 forum, and FichaFlow live. Puerto Rican sources agree and give that finish its own name, \"dominao\", with no bonus. The only fetched support is the La Mesa app, which counts 6-6 on ends 6 and 6. An old FichaFlow snippet also supported it, but it was not fetched and the site has since reversed it. The Acento (Academia Dominicana de la Lengua member) and ASALE definitions do not mention doubles. So the owner's reading may reflect real folk usage, but no Dominican rules text counts a double except La Mesa. The federation rulebooks do not cover capicúa at all. The owner's belief also implies that a non-double on equal ends (5-6 on ends 5 and 5) counts. That part is partly supported: the literal \"fits both ends\" wording would count it, and FichaFlow excludes it. The owner is supported on the rest. Capicúa happens only on the last play of a domino, and the bonus is 25 or 30.",
+   "confidence": "medium",
+   "keySources": [
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "The Dominican section defines capicúa as a last tile that fits either end, excludes doubles (\"Si la ficha es un doble entonces no hay capicúa\"), gives 25 or 30, and lists it under patio only."
+    },
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "why": "Dominican media. Capicúa is the last play of the game and pays 25. It is nullified with a double or a blank."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "Santiago 2019 municipal tournament rules: capicúa is 25 tantos. This is the only tournament source with 25."
+    },
+    {
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "why": "La Guáyiga 2025 municipal tournament rules: capicúa is +30. It gives no definition and says nothing about doubles."
+    },
+    {
+     "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+     "why": "Dominican note: a tile that fits both ends, \"salvo que sea un doble\". Special plays normally pay 25."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/que-es-capicua/",
+     "why": "The only fetched Dominican-specific source that counts a double on equal ends (6-6 on ends 6 and 6). It supports the owner."
+    },
+    {
+     "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+     "why": "The strictest rule: it requires a non-double with two distinct end values. It excludes both 5-5 and 5-6 on ends 5 and 5."
+    },
+    {
+     "url": "https://acento.com.do/cultura/domino-9463164.html",
+     "why": "A Dominican linguist's definition (\"cabeza de dos extremos\"). It is silent on doubles."
+    },
+    {
+     "url": "https://www.asale.org/damer/capic%C3%BAa",
+     "why": "The Diccionario de americanismos entry covers the DR: winning with a tile that can go on both ends. It does not mention doubles."
+    },
+    {
+     "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+     "why": "Dominican column: in some groups a capicúa counts double."
+    },
+    {
+     "url": "https://eldia.com.do/jugando-domino-en-el-masacre/",
+     "why": "The set phrase \"¡Capicúa, 25!\" shows 25 as the conventional value."
+    },
+    {
+     "url": "https://www.mesa28.com/capicu-domino",
+     "why": "Puerto Rican (non-Dominican). It says outright that there is no capicú on a tranca and a double is not capicú."
+    },
+    {
+     "url": "https://femundo.org/reglamento.html",
+     "why": "The FEMUNDO 2025 rulebook, which the Dominican federation's world-championship team plays under. It has no capicúa bonus."
+    }
+   ],
+   "openQuestions": [
+    "Ends 5 and 5, last tile 5-6: does it count? The literal 'fits both ends' wording says yes and FichaFlow says no. The owner must decide, and the answer should match his 2-2 ruling. If the double is excluded because equal ends make the finish trivial, the same logic would exclude 5-6.",
+    "DR1's blank exclusion: does 'with a blank' mean any tile with a 0, only the 0-0, or blank ends? Only DR1 (and Our Pastimes, which copies it) states this rule. Most apps and sources ignore it.",
+    "Bonus recipient and stacking: sources say the bonus goes to the player's side on top of the hand points. No source says whether the capicúa bonus can push a team past the target and win the match, or whether it is capped.",
+    "1v1: no source says whether the capicúa bonus applies at a two-player table.",
+    "Scenario overlap: in the owner's example, 'everyone passes' before the final play. That may also trigger a separate paso corrido bonus, which belongs to another topic and has its own rules.",
+    "Unread sources: the elCaribe 'Ley del dominó' page (2012, cited for 25) and dominord.com/rules were blocked (403). A Dominican rules book in the Biblioteca Nacional catalog could not be read. Fededodo publishes no rulebook.",
+    "Edge case from reasoning, not from any source: a last tile that empties the hand and also blocks the board should score as a domino, so the capicúa test still applies."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The consensus holds, with one wording fix and one caveat. Capicúa is a bonus on a hand that ends by domino: the player plays his last tile and his hand is empty. Test it on the two open end values L and R just before the final play, and on the final tile (a,b). It is capicúa only when all three conditions hold. (1) The play empties the hand. It never applies to a tranque. (2) The tile is not a double (a != b). (3) The tile fits both ends: it matches L and it matches R. When L != R, this means {a,b} = {L,R}. For the owner's example (ends 2 and 2, last tile 2-2), the default answer is NOT capicúa, because the tile is a double. Spanish Wikipedia (DR patio section) says outright that a double gives no capicúa, and the other rules texts that address doubles agree. WORDING FIX: do not say that every Dominican source that mentions doubles excludes them. La Mesa: Dominó Latino, a Dominican-specific game, addresses doubles and counts one (6-6 on ends 6 and 6). The accurate statement is that every Dominican rules text that addresses doubles excludes them, except La Mesa. The case of ends 5 and 5 with last tile 5-6 stays disputed. The literal \"can be placed on both ends\" wording (Wikipedia) would count it. FichaFlow excludes it. CAVEAT: FichaFlow states this as its own house rule (\"in FichaFlow's rules\"), and the page was updated on 2026-09-26. So it is weak evidence of general Dominican practice. The bonus is 25 by default, with 30 as the common alternative. Wikipedia and La Mesa both say 25 or 30 by table or local custom, and FichaFlow pays 25 by default and notes 30. The bonus goes to the pair of the player who goes out, on top of the normal hand points (La Mesa). It is a patio bonus. Wikipedia lists it only under patio play, not under the regla general. Implementation: isCapicua = handEmptied && a != b && fits(L) && fits(R), where fits(x) = (a == x || b == x). Make two things configurable. The first is an owner flag for the L == R non-double case (strict FichaFlow mode requires L != R). The second is capicuaBonus, default 25, with 30 as an option.",
+   "sourcesChecked": [
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "The DR section lists capicúa only under patio (informal) play, not under the regla general. It defines capicúa as a last tile that can go on either end, excludes doubles (\"Si la ficha es un doble entonces no hay capicúa\"), and gives 25 or 30 points to the pair, set by the table rules."
+    },
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "supports": "could-not-open",
+     "note": "WebFetch cannot fetch from web.archive.org. The DR1 claims (25 points, void with a double or a blank, 'another 25 points') stay unverified by this check."
+    },
+    {
+     "url": "https://fichaflow.com/learn/what-is-capicua-in-domino",
+     "supports": "yes",
+     "note": "The strict rule is confirmed: the last tile must be a non-double that holds both distinct end values. With ends 5 and 5, neither 5-5 nor 5-6 counts. The bonus is 25 by default, and the page calls 30 a common Dominican value. The page was updated 2026-09-26. It frames the rule as FichaFlow's own rule and does not mention tranque."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/que-es-capicua/",
+     "supports": "yes",
+     "note": "The variant claim is confirmed. A 6-6 on ends 6 and 6 counts as capicúa, and a 2-2 on ends 2 and 4 does not. The bonus is typically 25 or 30 by local custom. The pair scores the normal hand points plus the bonus. Capicúa requires winning the hand, and the page does not mention tranque. This contradicts the consensus sentence that every Dominican source that mentions doubles excludes them."
+    }
+   ],
+   "ownerViewCheck": "The owner-view assessment holds in substance. On the double (ends 2 and 2, going out with the 2-2), the owner is contradicted by the main Dominican rules text I could open. Spanish Wikipedia's DR patio section says a double gives no capicúa. FichaFlow also excludes the double, but as its own house rule. The owner is supported by La Mesa, a Dominican-specific game, which counts a double on matching ends (6-6 on ends 6 and 6). The assessment calls La Mesa the only fetched support, and that is accurate. The assessment is right that the owner's belief implies a non-double on equal ends (5-6 on ends 5 and 5) also counts. It is also right that this case is only partly supported: the literal Wikipedia wording would count it, and FichaFlow excludes it. One correction applies here. The phrase \"every Dominican source that addresses doubles excludes it\" overstates the evidence, because La Mesa addresses doubles and counts them. It should read \"every Dominican rules text except La Mesa\". The owner is supported on the rest. Capicúa happens only on the last tile of a domino, it goes to the pair on top of the hand points, and the bonus is 25 or 30. I could not verify the DR1 claims (the Wayback fetch is blocked), so the blank exclusion and DR1's 25 rest only on the original research.",
+   "confidence": "medium"
+  }
+ },
+ {
+  "topic": "pases",
+  "synthesis": {
+   "topic": "pases: pass bonuses (pase de salida, pase corrido / paso redondo, single pass), amounts, recipients, 1v1 vs parejas, and whether a pass bonus can win the game",
+   "consensus": "Informal (patio) Dominican parejas play has exactly two pass bonuses. Each bonus goes to the TEAM of the player whose tile caused the pass. Play order is to the right (counter-clockwise).\n\n(1) PASE DE SALIDA (also called puntos de salida or paso a la salida). It applies only to the first tile of a hand. Trigger: the player to the opener's right (the next seat) cannot play on the opening tile. Result: the opener's team scores the bonus. Cancellation: if the next player after that (the opener's partner) also cannot play, the bonus is void (Wikipedia es, DR1 article, DR1 forum 1999). Value: 25 is the most common number (Santiago 2019 tournament, dominoarteociencia, FichaFlow default, the Domino Apunte scorekeeper). Other values: 25 or 30 (Wikipedia, \"depending on the rules\"), 10 in games to 200/250 and 25 in games to 500 (DR1), 10 (DR1 forum 2009, Boarden app), 30 (a Republica domino user review).\n\n(2) PASE CORRIDO / PASO REDONDO. Trigger: a player places a tile, then all three other players (both opponents AND the partner) pass in turn, and the turn comes back to that player. Result: that player's team scores 25 (DR1, dominoarteociencia, FichaFlow) or 25 or 30 (Wikipedia). The same player then plays again. DR1 says there is no limit per hand, so the bonus can repeat. It is not awarded when the table is locked (tranque), because a locked hand ends and nobody plays again (FichaFlow).\n\n(3) ANY OTHER PASS scores nothing. This includes a single opponent passing mid-hand, or two players passing and the third one playing. DR1 is explicit that only the salida and the corrido pay.\n\nImplementation sketch: after the opening tile, set salidaPending = true when seat+1 passes. Award it to the opener's team if seat+2 plays; void it if seat+2 passes. For the corrido, keep lastPlacer and a count of consecutive passes. When passes reach 3, the turn is back at lastPlacer, and lastPlacer holds a legal tile (so this is not a tranque), credit the corrido to lastPlacer's team and reset the count.\n\n1v1: no Dominican source defines pass bonuses for 1v1. FichaFlow says the paso redondo does not exist at a two-player table. My own reasoning, not from a source: with the standard 1v1 rules (7 tiles each, draw from the pile), a player who cannot play draws, so a real pass only happens once the pile is empty. A pase de salida can then never happen, because the pile holds 14 tiles on the first turn.\n\nTARGET: no Dominican source says whether a pass bonus can take a team to or past the target. The Dominican wording is that the game ends when a pair \"alcanza o supera\" (reaches or passes) the target, with no written exception for bonuses. Read literally, a bonus that reaches the target ends the game, but no source addresses this case directly.",
+   "federationView": "Federation rulebooks: FID (2015 via pagat, 2024 via fidomino.org) and FEMUNDO 2025 (the world body that Fededodo sends the Dominican team to) have NO pass bonuses of any kind, and no capicua bonus. A hand scores only the tiles left in hand. A match is won only when hand points reach the target (200). FEMUNDO Art. 13 treats a paso corrido only as the same player playing again, not as a move out of turn. FID Art. 80 says that saying \"paso\" counts as making a move. Pase con ficha (passing while holding a playable tile) costs 40% of the target plus a yellow card (FEMUNDO Art. 16, FID Art. 81). FEMUNDO adds that doing it on purpose loses the match 0-200. The researchers found no published rulebook from the Dominican federation (Fededodo / FEDOMDOM).\n\nDominican municipal tournaments: the Santiago 2019 Copa Alcaldia rules pay 25 for the pase de salida, pay 0 for the paso corrido, and treat pase con ficha as a 100-point swing (-50 to the offending pair, +50 to the other pair) followed by a reshuffle. The La Guayiga 2025 rules list \"Paso corrido: +30 pts al equipo contrario\" among their penalty lines. The wording is ambiguous, but most likely it means the team opposite the passers, which is the team of the player who caused the corrido. The same rules give +30 to the other team for pase con ficha. Neither tournament mentions whether bonuses can win the game or are capped at the target.\n\nSummary: in federation play the question does not arise, because no bonuses exist. The bonuses are a patio and municipal-tournament feature.",
+   "variants": [
+    {
+     "who": "DR1.com article '25, 50, Capicua!' (Dominican media, several archived copies, fetched)",
+     "rule": "Pase de salida: 10 in games to 200/250, 25 in games to 500. It applies to the first tile only and is cancelled if the opener's partner also cannot play. Pase corrido: 25 to the last player's team, who plays again, with no limit per hand. No other pass scores."
+    },
+    {
+     "who": "Wikipedia es, Dominican section, patio mode (fetched)",
+     "rule": "Puntos de salida: 25 or 30 to the opener when the next opponent cannot play the first tile, void if the opener's partner also cannot play. Paso corrido: 25 or 30 to the player who caused it."
+    },
+    {
+     "who": "Copa Alcaldia de Santiago 2019 (municipal tournament rules, fetched)",
+     "rule": "Paso a la salida is worth 25. The paso corrido is worth nothing. Pase con ficha is a 100-point swing (-50/+50) with a reshuffle."
+    },
+    {
+     "who": "La Guayiga 2025 municipal tournament (fetched)",
+     "rule": "Paso corrido: +30 'al equipo contrario', listed among the penalties. The direction is ambiguous, most likely the non-passing team. No pase de salida is listed in the claims. Pase con ficha: +30 to the other team."
+    },
+    {
+     "who": "Domino: arte o ciencia (reference site, DR section, fetched)",
+     "rule": "In the DR, special plays are 'normally' 25: pase de salida (second player passes on the opening tile) and pase redondo or corrido (the other three pass)."
+    },
+    {
+     "who": "DR1 forum posts (1999 and 2009, forum)",
+     "rule": "1999: 25 if the next player cannot go, provided your partner can play, and another 25 if nobody else can go. 2009: pase de salida worth 10."
+    },
+    {
+     "who": "FichaFlow app",
+     "rule": "Pase de salida 25 by default. It does not implement the partner-cancel rule, though it notes DR1's rule. Paso redondo 25: the other three, partner included, pass and you can still play. A tranque does not qualify. It does not exist at a two-player table."
+    },
+    {
+     "who": "Boarden app",
+     "rule": "Full pass +25. Opener pass +10, worded as awarded 'in a hand where the winner opened'. Bonuses are capped so they alone cannot win the match. A team must win a hand to cross the target."
+    },
+    {
+     "who": "OurPastimes (restates DR1, reference site)",
+     "rule": "Broader and likely a misreading: any time a player cannot play, the opponent who last played gets 10 (200/250) or 25 (500). 25 if all three cannot play. This conflicts with DR1's own statement that only salida and corrido pay."
+    },
+    {
+     "who": "Republica domino app (App Store user review)",
+     "rule": "A user says the Dominican style should give 30 for the paso a la salida. The app sometimes gives 60."
+    },
+    {
+     "who": "Colonial Zone DR guide (street betting custom)",
+     "rule": "A player who cannot play pays money to the player who laid the tile that made him pass. This is money, not points."
+    },
+    {
+     "who": "Acento (Dominican newspaper language column)",
+     "rule": "If the opener makes the opponent on his right pass, the opener's partner becomes 'manito'. It is a named position, and no points are stated."
+    },
+    {
+     "who": "FID 2015/2024 and FEMUNDO 2025 (federation, non-Dominican bodies)",
+     "rule": "No pass bonuses at all. A paso corrido only means the same player plays again. Pase con ficha: -40% of the target plus a yellow card. Matches are won only by hand points."
+    },
+    {
+     "who": "Non-Dominican Caribbean variants (Puerto Rico Doscientos and Pase Sureno, Ponce, Cuba)",
+     "rule": "Puerto Rico Doscientos / Pase Sureno: 20 for the first pass of the game, then 10 for each later pass, to the team that caused it. Ponce (game to 20): first pass 2 points, later passes 1, partner passes free, so a game can end mid-hand on pass points. Cuba: 'salida vale 20', plus an optional 'no caben' rule under which points that would pass the target are not scored."
+    }
+   ],
+   "ownerView": "Not covered by any Dominican source, and it gets only weak support from elsewhere. The owner's amounts (25 or 30) match the Wikipedia patio values and the La Guayiga 30. The owner's two limits are: (a) a bonus counts only if it does not take the team past the target, and (b) a game can be won only by winning a round. No Dominican media, reference, forum, or tournament source states either limit. The researchers searched for this point specifically and found nothing Dominican.\n\nThe only written source for (a) plus (b) is the Boarden app, which says bonuses are capped and a team must win a hand to cross the target. Boarden does not say whether 'capped' means the bonus is dropped or cut down to the target minus 1. The closest traditional rule is the Cuban 'no caben' rule. That rule is Cuban, optional, and applies to all points, not only bonuses.\n\nThe Dominican wording that does exist leans slightly against the owner. Wikipedia RD says the game ends when a pair reaches or passes ('alcanza o supera') the target, with no exception, but it does not discuss bonuses. Federation rules (FID, FEMUNDO) make (b) true only because they have no bonuses at all. So they give no support to a cap as a Dominican custom.\n\nVerdict: treat the rule as a house rule that the owner chooses and states in the app's rules text. It is not a documented Dominican rule, and it is also not contradicted by any source that addresses the case. Note: the owner's two statements together imply that a bonus which lands a team exactly ON the target also must not end the game. The owner should confirm that edge.",
+   "confidence": "medium",
+   "keySources": [
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "why": "The fullest Dominican media description. It gives the pase de salida at 10 or 25 by target with the partner-cancel rule, the pase corrido at 25 with a replay and no limit, and states that no other pass scores."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "The Dominican patio section gives salida and corrido at 25 or 30 with the partner cancel, and pase con ficha penalties. It is also the source of the 'alcanza o supera' game-end wording, which has no exception for bonuses."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "The Santiago 2019 municipal tournament rules: pase de salida 25, paso corrido worth 0, pase con ficha a 100-point swing. This is the strongest Dominican tournament evidence."
+    },
+    {
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "why": "The La Guayiga 2025 municipal tournament rules: paso corrido +30 with ambiguous direction, pase con ficha +30 to the other team."
+    },
+    {
+     "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+     "why": "FEMUNDO 2025 (Art. 13, 16): no pass bonuses, paso corrido means only that the same player plays again, pase con ficha costs 40% of the target. It is the world body for the Dominican national team."
+    },
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "why": "The FID 2024 rulebook: no bonuses, and matches are won only by hand points. This confirms the federation baseline."
+    },
+    {
+     "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+     "why": "An independent Dominican-specific statement that the salida and the redondo/corrido are 'normally' 25, with a clear definition of the corrido as all three others passing."
+    },
+    {
+     "url": "https://fichaflow.com/learn/what-is-paso-redondo-in-domino",
+     "why": "States that the paso redondo includes the partner, excludes a tranque, and does not exist in 1v1. It also notes that some Dominican competitions exclude pass bonuses."
+    },
+    {
+     "url": "https://boarden.club/how-to-play/dominican-dominoes",
+     "why": "The only source found that matches the owner's view: bonuses are capped and a team must win a hand to cross the target. It is an app, not a Dominican authority."
+    },
+    {
+     "url": "https://dr1.com/forums/threads/the-rules-for-dominoes-dr-style.2622/",
+     "why": "An independent 1999 player account that confirms the salida 25 (only if the partner can play) and the corrido 25."
+    },
+    {
+     "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+     "why": "The Cuban optional 'no caben' rule (points that would pass the target are not scored). It is the nearest traditional analogue to the owner's cap, and it is not Dominican."
+    }
+   ],
+   "openQuestions": [
+    "Can a pass bonus win the game? No Dominican source addresses this. The owner must choose between the literal 'reaches or passes the target ends the game' reading and a cap (the Boarden / owner rule), and state the choice in the rules text.",
+    "If the owner keeps the cap: is the bonus dropped entirely, or cut down to stop at the target minus 1? And does a bonus that lands a team exactly on the target count? The owner's two statements imply that it must not end the game.",
+    "Timing: is the bonus credited the moment it happens, or at the end of the hand? DR1 reads as immediate. Boarden's opener-pass wording ('in a hand where the winner opened') suggests that some implementations award it only at the end, or only when the opener's team wins the hand.",
+    "If the opener's next opponent passes, the partner passes (which voids the salida), and the fourth player also passes, is that a pase corrido for the opener? The definitions imply yes, but no source addresses the case.",
+    "La Guayiga's 'Paso corrido: +30 pts al equipo contrario': which team receives it? The most likely reading is the team of the player who caused it, but the wording is ambiguous.",
+    "1v1: no Dominican source says whether a pase de salida or a single-opponent pass scores in 1v1. FichaFlow says the paso redondo does not exist there. With draw-from-pile rules a salida pass cannot happen. A 10-tile no-draw variant (Wikipedia) could produce one, and its bonus rules are undocumented.",
+    "Which default value: 25 (the most common number) or 30 for both bonuses? DR1 also ties the salida value to the target (10 for 200/250, 25 for 500). The owner should confirm the app's value for each game target.",
+    "No Dominican federation (Fededodo / FEDOMDOM) rulebook was found. The elCaribe 'Ley del domino' article and dominord.com/rules were blocked and could hold relevant Dominican text."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The consensus holds in substance, with four corrections.\n\n1. Two bonuses, verified in the pages I opened. (a) Pase de salida: the next player cannot play on the opening tile. Wikipedia es gives 25 or 30 and voids the bonus if the opener's partner also cannot play. The DR1 forum (1999) gives 25 \"providing your partner can play\". dominoarteociencia says these plays are \"normalmente\" 25. The Santiago 2019 tournament gives 25. (b) Pase corrido / redondo: the other three players pass. Wikipedia gives 25 or 30, dominoarteociencia 25 and the DR1 forum 25. Santiago 2019 pays 0 for it. So \"exactly two bonuses\" describes patio play, not every tournament.\n\n2. Default value: at a 200-point target, both Santiago 2019 (played \"a los 200 tantos\") and the DR1 forum (play to 200) pay 25 for the salida. The DR1 article's figure of 10 for games to 200/250 is the minority value. 25 is the better-supported default for both bonuses.\n\n3. Not verified in this check: the DR1 article was blocked (web.archive.org). These claims still rest on it alone: salida 10 vs 25 by target, \"no limit per hand\", and the explicit statement that only salida and corrido pay. The DR1 forum names no other pass bonus, which is consistent with the article. The rule of play to the right and the FichaFlow tranque exclusion were also not checked.\n\n4. Target: Wikipedia says the game ends when a pair \"alcanza o supera 100 o 200 puntos\". It makes no exception for bonuses and never discusses them. None of the four Dominican sources I opened says whether a pass bonus can win the game. Wikipedia credits the salida to \"al jugador que salió\". In parejas that means the pair's score.\n\nThe 1v1 reasoning and the implementation sketch are unchanged. The sources I opened do not address 1v1.",
+   "sourcesChecked": [
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "supports": "could-not-open",
+     "note": "WebFetch cannot fetch from web.archive.org. The 10/25-by-target values, the no-limit rule and 'only salida and corrido pay' are unverified in this check."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "Puntos de salida are 25 or 30 when the immediate opponent cannot play the first tile, and void if the partner also cannot play. Paso corrido is 25 or 30 'dependiendo de las reglas'. Game ends when a pair 'alcanza o supera 100 o 200 puntos'. Nothing on bonuses at the target."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "supports": "yes",
+     "note": "'El paso a la salida con 25 puntos'. 'NO vale tantos el paso corrido'. Pase con ficha is 100 points (-50/+50) with a reshuffle. Played to 200. Nothing on bonuses at the target."
+    },
+    {
+     "url": "https://boarden.club/how-to-play/dominican-dominoes",
+     "supports": "could-not-open",
+     "note": "HTTP 503. The only claimed written support for the owner's cap is unverified in this check."
+    },
+    {
+     "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+     "supports": "yes",
+     "note": "Pase de salida is the second player passing on the opening tile. Pase redondo/corrido is 'el pase de los otros tres jugadores'. Both are 'normalmente' 25. Nothing on the target."
+    },
+    {
+     "url": "https://dr1.com/forums/threads/the-rules-for-dominoes-dr-style.2622/",
+     "supports": "yes",
+     "note": "1999 post: 25 if the next player cannot go 'providing your partner can play'. Another 25 if nobody else can go. Play to 200. Names no other pass bonus and says nothing on bonuses winning."
+    }
+   ],
+   "ownerViewCheck": "The assessment holds. The owner's rule is a house rule. Dominican sources do not document it, and no source that addresses the case contradicts it. I opened four Dominican sources: Wikipedia es, Santiago 2019, dominoarteociencia and the DR1 forum. None says whether a pass bonus can reach or pass the target. Wikipedia's wording that the game ends when a pair \"alcanza o supera\" the target is confirmed, and it has no bonus exception. That wording leans slightly against the cap, as the assessment says. One change: Boarden returned HTTP 503. So in this check, the claim that a written source for the cap exists (bonuses capped, a team must win a hand to cross) is unverified. Treat it as reported, not confirmed. The edge case still needs the owner's decision: can a bonus that lands exactly on the target end the game? So do two other points: whether a capped bonus is dropped or cut down, and whether a bonus is credited at once or at the end of the hand. The owner should state all of these in the app's rules text.",
+   "confidence": "medium"
+  }
+ },
+ {
+  "topic": "tranque",
+  "synthesis": {
+   "topic": "tranque",
+   "consensus": "Lock detection: the hand ends in a tranque when no player can legally play. In 2v2 all 28 tiles are dealt, so this happens only right after a tile placement that leaves both open ends on the same number N with all 7 tiles containing N on the board (FID Art. 56; the arXiv paper; DR1: all tiles of the needed suits are played). Check after every placement that no hand holds a tile that matches either end. Do not wait for four passes. The blocker is the player who placed that last tile (DR1 \"executed the tranque\", FichaFlow \"placed the blocking tile\").\n\nComparison (Dominican informal/patio rule; this is the most common Dominican-specific statement and the rule in two municipal tournaments): the blocker compares only with \"el de abajo\". That is the next player in turn order, who sits to his right because Dominican play goes counter-clockwise. In 2v2 this seat, (blocker + 1) mod 4 in turn order, is always an opponent. In 1v1 it is the only opponent. Compare pip totals (the sum of both halves of every tile left in each hand), never tile counts. The lower total wins, and the hand goes to that player's pair. The blocker's partner and the fourth player do not affect who wins.\n\nPoints: the winning pair scores the pips left in all four hands, including the winners' own tiles (Wikipedia patio per the research notes, Santiago 2019, FichaFlow worked example 8+11+7+14=40; FID and FEMUNDO also count all four hands in pair mode). DR1's wording (\"points in his opponent's hands\") and the Wikipedia regla general (per the notes) give the opponents' pips only. A programmer must choose between these two options.\n\nTie (equal totals): the sources give no single rule. Dominican-specific sources give the hand to the pair of the player who placed the first tile of the hand, and that pair scores (DR1, Wikipedia regla general, La Mesa). Tournaments and federations score nothing and give the lead to the next opener in rotation (Santiago 2019 also reshuffles; FID, FEMUNDO, USA Domino Federation). FichaFlow gives the tie to the blocker.\n\nNext opener: on a tie under the Wikipedia regla general, the pair that opened wins and opens again. Under tournament and federation rules, the next player in the rotation opens (FID and FEMUNDO rotate to the right). For a tranque that someone wins, no source in the file says who opens next.",
+   "federationView": "No Dominican federation rulebook was found. Fededodo (Federación Dominicana de Dominó) sends its national team to the FEMUNDO world championship but publishes no rules online. Researchers found no FEDOMDOM rulebook either, and one site that names it looked unreliable.\n\nFID (2015, 2021 English, and 2024 editions, Arts. 56-58): a tranca happens when a player places the seventh and last tile of a suit and both ends then show that suit. The pair with fewer points in unplayed tiles wins and scores the unplayed tiles of both pairs. On equal points the tranca is a draw: a zero is recorded for the pair that made the tranca, and the opener rotation continues to the right.\n\nFEMUNDO 2025 (Art. 6): tranques are pair against pair. The winner scores the points of all 4 players. On a tie the points do not count and the opener rotation continues. Art. 11 allows 1 minute to think when a player locks the game or is forced to feed the lock (bandeo).\n\nUSA Domino Federation: \"Todo tranque será en pareja\" (every tranque is by pairs). The pair with fewer tantos wins. On a tie nobody wins and the rotation continues.\n\nDominican municipal tournaments: La Guáyiga 2025 says \"Se tranca con el jugador de abajo\" (the blocker against the next player). Santiago 2019 rule 6 says \"EL TRANQUE ES CON EL DE ABAJO\", but rule 12 of the same sheet says \"con todos, pareja con pareja\". That is a contradiction inside one rulebook. Santiago scores a tie as no points, reshuffles, and the next player in rotation opens.\n\nNo federation or tournament source compares tile counts.",
+   "variants": [
+    {
+     "who": "Dominican patio/informal: DR1 (2007, 2010, 2015 archives), Wikipedia (es) patio rule, OurPastimes, FichaFlow; tournaments La Guáyiga 2025 and Santiago 2019 rule 6",
+     "rule": "Trancar con el de abajo: the blocker compares his pip total only with the next player (to his right). The lower total wins. DR1: if the blocker has more, he loses and the points go to the opponent."
+    },
+    {
+     "who": "Dominican regla general (formal): Wikipedia (es) regla general, Acércate a RD 2024, La Mesa app, Boarden app, Nesmill/tranca engine, Santiago 2019 rule 12; also FID, FEMUNDO, USA Domino Federation",
+     "rule": "Pair against pair: each pair adds the pips of both partners' hands, and the pair with the lower total wins."
+    },
+    {
+     "who": "DR1 variant 'tranquar con todo el mundo'",
+     "rule": "The blocker compares with all players, and the lowest count wins. DR1 does not say whether this means the lowest individual hand or the lowest pair total. Santiago rule 12 explains 'con todos' as pair against pair."
+    },
+    {
+     "who": "Tie: DR1, Wikipedia (es) regla general, La Mesa",
+     "rule": "The team of the player who placed the first tile of the hand wins and scores. Wikipedia adds that this pair opens the next hand."
+    },
+    {
+     "who": "Tie: Santiago 2019, FID, FEMUNDO, USA Domino Federation, Boarden, Nesmill/tranca, Santa Rosa Mall PR, Boricua.com",
+     "rule": "Draw: no points are scored, and the next opener in rotation opens. Santiago also reshuffles. FID records a zero for the pair that made the tranca."
+    },
+    {
+     "who": "Tie: FichaFlow app",
+     "rule": "The tie goes to the blocker."
+    },
+    {
+     "who": "Tie: GameVelvet (generic, not Dominican)",
+     "rule": "The side that blocked loses the tie."
+    },
+    {
+     "who": "Tie-break by tile count: Mexican/international rule in Wikipedia (es), not Dominican",
+     "rule": "On equal points, the pair with fewer tiles wins. If tiles are also equal, nothing is scored. This is the only use of tile count found."
+    },
+    {
+     "who": "Points, all four hands: Wikipedia patio (per research notes), Santiago 2019, FichaFlow, FID, FEMUNDO",
+     "rule": "The winning side scores the pips left in all four hands, including its own."
+    },
+    {
+     "who": "Points, opponents only: DR1 wording, Wikipedia regla general (per research notes), 'dominó latino' generic page",
+     "rule": "The winner scores only the pips in the losing side's hands."
+    },
+    {
+     "who": "Points, difference: FichaFlow mentions other tables",
+     "rule": "Some tables pay only the difference between the two totals."
+    },
+    {
+     "who": "Puerto Rico and Cuba (not Dominican): Ponce style, Mesa28 100/200 games, Carrillo, pagat Cuban",
+     "rule": "Individual comparison: the lowest single hand among all players wins, and his team scores all four hands. Ponce also gives the blocker's team 2 points. Mesa28 says the player to the right of the blocker opens after a tie."
+    },
+    {
+     "who": "República dominó app",
+     "rule": "The host chooses whether the tranque is counted by individual or by team."
+    }
+   ],
+   "ownerView": "Supported for Dominican informal (patio) play, and not the only Dominican rule. Several sources state the belief as written: the blocker compares with the player to his right (\"trancar con el de abajo\") and the lower count wins. These are DR1, the Wikipedia (es) patio rule, OurPastimes, FichaFlow, and two municipal tournaments (La Guáyiga 2025; Santiago 2019 rule 6). \"Fewer points\" is also right, because every source compares pips (tantos) and none compares tile counts. There are three limits. (1) The Wikipedia regla general, Acércate a RD, La Mesa, Boarden, and Santiago rule 12 compare pair totals, and every federation (FID, FEMUNDO, USA Domino Federation) uses pair against pair. (2) The belief does not cover ties or how many points the winner scores, and the sources differ on both (see variants). (3) \"To his right\" must mean the next player in turn order. That holds for the counter-clockwise play in DR1, Wikipedia, and FichaFlow. La Mesa describes clockwise play, which would put a different seat on the right.",
+   "confidence": "medium",
+   "keySources": [
+    {
+     "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+     "why": "Fetched Dominican media and the most detailed informal source. It defines the tranque, 'tranquar con el de abajo', what happens when the blocker wins or loses, the 'con todo el mundo' variant, and the tie rule (the opener's team wins)."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "The Dominican section separates the regla general (pair against pair; on a tie the opening pair wins and opens next) from the patio rule (the blocker against the opponent on his right). It also has the international and Mexican tie-breaks for contrast."
+    },
+    {
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "why": "An official 2025 Dominican municipal tournament rule: the tranque is against the player 'de abajo'."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "The Santiago 2019 tournament rules. Rule 6 is 'con el de abajo' and rule 12 is pair against pair, a contradiction. A tie scores no points, the tiles are reshuffled, and the next player in rotation opens."
+    },
+    {
+     "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+     "why": "The FEMUNDO 2025 rulebook, from the world body whose championship Fededodo attends: pair against pair, all 4 hands scored, and a tie scores nothing with the rotation continuing."
+    },
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "why": "FID 2024, Arts. 56-58: the exact lock definition, pair against pair, the winner scoring all unplayed tiles, and a tie recorded as a draw."
+    },
+    {
+     "url": "https://usadomino.com/r/",
+     "why": "A federation with Dominican member clubs: every tranque is by pairs, fewer tantos wins, and a tie scores nothing."
+    },
+    {
+     "url": "https://fichaflow.com/learn/how-to-score-a-tranque-in-dominican-domino",
+     "why": "A Dominican-focused app with a worked example: the winner scores all four hands. It uses the 'next player' comparison and gives a tie to the blocker, a minority rule."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "why": "A Dominican app that uses pair totals and gives a tie to the pair that made the salida. It describes clockwise play, which conflicts with other sources."
+    },
+    {
+     "url": "https://www.acercateard.com/es/noticias/2024-01/deportes/el-domino-en-la-republica-dominicana-un-vinculo-cultural-y-social-inquebrantable?article=91431",
+     "why": "Fetched Dominican media from 2024 that states that the pair with the fewest points wins."
+    }
+   ],
+   "openQuestions": [
+    "Points for the patio 'con el de abajo' mode: does the winner score all four hands (Wikipedia patio per the notes, Santiago, FichaFlow) or only the opponents' hands (DR1 wording)? The owner must choose.",
+    "Tie rule: does the opener's pair win (DR1, Wikipedia regla general, La Mesa), is it no points with the lead rotating (tournaments, federations), or does the blocker win (FichaFlow)?",
+    "Who opens the next hand after a tranque that someone wins? No source in the file states it. In the individual mode, is it the individual winner (the blocker or the right-hand player) or a player chosen by pair?",
+    "DR1 'con todo el mundo': is the winner the lowest single hand among all four players, or the lower pair total?",
+    "1v1 with a boneyard: does the lock need an empty pile, and do the pips in the boneyard count? No source covers this.",
+    "Santiago 2019 rules 6 and 12 contradict each other. It is unknown which rule that tournament applied.",
+    "No Fededodo or FEDOMDOM rulebook was found. The elCaribe 'Ley del dominó' and dominord.com/rules pages were blocked, so an official Dominican position may exist that the researchers could not read.",
+    "Seat direction: most sources put the next player on the right (counter-clockwise play), and La Mesa describes clockwise play. The app must define 'de abajo' as the next seat in turn order."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The core rules hold against the 3 sources I could open (Wikipedia es, FichaFlow, FID 2024). DR1 did not load, so every claim that rests only on DR1 is unverified. Five corrections follow.\n\nLock detection (unchanged, verified): FID Art. 56 defines the tranca as the placement of the seventh and last tile of a suit when both ends then show that suit. In 2v2 with all 28 tiles dealt, a parity argument confirms that \"no one can play\" is equivalent to this condition. Check after every placement. Do not wait for passes. Edge case to add: if the locking tile is also the player's last tile, the hand ends as a dominada (FID Art. 55), not a tranque. The blocker is the player who placed the locking tile (FichaFlow: the player \"who placed the blocking tile\"; FID: the pair that \"hubiere ejecutado el cierre o tranca\").\n\nComparison, correction 1: remove \"the most common Dominican-specific statement\". Wikipedia (es) labels pair against pair as the Dominican \"regla general\" and the blocker-vs-right-opponent rule as the \"regla de patio\". Counted by Dominican-specific sources, the two rules have about equal support. Federations (FID Art. 58) use pair against pair. The app should offer both modes. Pair mode: each pair sums both partners' pips, and the lower pair total wins. Patio mode (Wikipedia: \"compara solo sus fichas con el oponente de la derecha\"; FichaFlow: \"the next player\"): the blocker compares his pip total only with the next player in turn order, (blocker + 1) mod 4, who is always an opponent. The lower total wins for that player's pair. Always compare pips, never tile counts (verified in all three sources).\n\nPoints (verified): Patio mode scores all four hands (Wikipedia patio: \"se suman los puntos de todas las fichas restantes\"; FichaFlow example 8+11+7+14=40). FID Art. 58 pair mode also scores all unplayed tiles of both pairs. Wikipedia regla general scores only the losing pair's pips. The owner must choose between all four hands and the losing side only. Correction 2: the claim that FichaFlow mentions tables that pay only the difference was not found on the page.\n\nTie, correction 3: each tie rule belongs to a specific mode. Wikipedia gives \"the opening pair wins and opens next\" for the regla general (pair mode) only, and gives no tie rule for patio mode. FichaFlow (patio-style): \"a tie favors the blocker\". FID Art. 58 (pair mode): a draw, with a zero recorded for the pair that made the tranca. The DR1 and La Mesa tie claims are unverified here.\n\nNext opener, correction 4: the claim \"no source says who opens next after a tranque that someone wins\" is too strong. FID rotates the opener every hand (\"La próxima mano sale el atleta a la derecha\", Art. 76 context), so under federation rules the next player to the right opens after any tranque, won or tied. Correction 5: for informal Dominican play, no source I opened states who opens after a won tranque. This is still an open decision for the owner.",
+   "sourcesChecked": [
+    {
+     "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+     "supports": "could-not-open",
+     "note": "WebFetch cannot fetch from web.archive.org. So the DR1 claims stay unverified: 'con el de abajo', 'con todo el mundo', the tie going to the opener's team, and the opponents-only scoring wording."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "Confirms the regla general: pair vs pair, the lower pair wins, only the losing pair's pips are scored, and on a tie 'la pareja que salió' wins and opens next. Confirms the regla de patio: the blocker compares only with 'el oponente de la derecha', and all remaining tiles are scored. Confirms the Mexican/international tie-break by tile count. Note that Wikipedia labels pair vs pair as the general rule, which conflicts with the consensus framing of patio as the most common rule."
+    },
+    {
+     "url": "https://fichaflow.com/learn/how-to-score-a-tranque-in-dominican-domino",
+     "supports": "partly",
+     "note": "Confirms the comparison with 'the next player', pip totals, the winning team scoring all four hands (worked example 8+11+7+14=40), and 'a tie favors the blocker'. The page does not state who opens next. The fetch summary did not find the claimed mention of tables that pay only the difference."
+    },
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "supports": "yes",
+     "note": "The WebFetch result was binary. I read the saved PDF with pdftotext. Art. 56: the lock is the seventh and last tile of a suit, and both ends show that suit. Art. 58: the pair with fewer unplayed points wins and scores all unplayed tiles. On equal points it is a draw, with a zero recorded for the pair that executed the tranca 'for the control of future salidas'. The Art. 76 context says the next hand is opened by the player to the right of the previous opener."
+    }
+   ],
+   "ownerViewCheck": "The owner-view assessment holds. Wikipedia (es) regla de patio states the owner's rule directly: the blocker compares only with the opponent on his right. FichaFlow states the same rule as a comparison with the next player. Both compare pips, so \"fewer points\" is correct. The assessment is also right that this is not the only Dominican rule. Wikipedia calls pair against pair the Dominican 'regla general' and puts the owner's rule under patio play. FID Art. 58 is pair against pair. The assessment is also right that ties and points vary. I verified three different tie outcomes (the opening pair wins, the blocker wins, a draw) and two scoring bases (all four hands, the losing pair only). Unverified parts: the DR1 support (archive fetch failed), La Guáyiga and Santiago (not opened), and the La Mesa clockwise claim (not opened). Suggested wording: \"Correct as the Dominican patio rule. The Dominican regla general and all federations use pair against pair, so the app should offer both modes.\"",
+   "confidence": "medium"
+  }
+ },
+ {
+  "topic": "scoring",
+  "synthesis": {
+   "topic": "Scoring: which hands count when a player goes out, game targets, whether a team can win only by winning a hand, and reaching the target mid-hand",
+   "consensus": "Scoring happens per hand (mano). Hand points go only to the pair that wins the hand, and they equal the pips (tantos) on the unplayed tiles. Dominican sources give two ways to count those tiles when a player goes out (dominada). Neither has a clear majority. (A) Opponents only: sum the two opposing hands. This is the \"regla general\" in Wikipedia es, DR1 for games to 200 or 250, Acento, Acercate a RD and the Tranca code. (B) All unplayed tiles: sum the opponents' hands plus the partner's hand (the winner's own hand is empty). This is the only Dominican tournament rule found (Santiago 2019: \"se cuenta todas las fichas\"), DR1 for games to 500, Wikipedia patio play, La Mesa and Boarden. FID and FEMUNDO also count all tiles. Implement the count as a table setting: countPartner: boolean. The game target is a table agreement. 200 is the most cited value (tournaments, all federations, DR1, FichaFlow, La Mesa, forums), and 100 is the common casual value (Acento \"hasta un ciento\", Wikipedia, Boarden). 150, 250, 500 and 300 also appear. Win check: after each hand is scored, a pair wins when its running total is >= target (\"alcanza o supera\"; reaching the target exactly is enough). The overshoot is kept and not capped (El Dia reports a 210-180 final). Every source that shows a check does it after the hand is scored (Tranca checks at the end of each hand). No Dominican source describes a win in the middle of a hand. No Dominican source says a team can win only by winning a hand. No Dominican source says whether a mid-hand bonus (pase de salida, paso corrido) that reaches the target ends the game. In 1v1 the partner question does not apply.",
+   "federationView": "FID (Reglamento 2015 and 2024, Art. 57; 2021 English edition): on a dominada, the winning pair scores every unplayed tile in the hand, its partner's tiles included. FID Arts. 61-62: the match goes to the pair that first reaches the preset target by capturing points in hands. The target is 200 at world championships (300 in exceptional cases), with a time limit of 40 minutes (2015) or 35 minutes (2024), and a match cannot end in a tie. FEMUNDO 2025 (Art. 6), which the Dominican federation Fededodo attends: each dominada scores the points of the 3 players still holding tiles, and matches run to 200 tantos or 40 minutes, whichever comes first. USA Domino Federation: 200 tantos or 35 minutes (its counting basis is not in the claim file). None of these rulebooks has capicua or pass bonuses, so every point comes from hand results, and in federation play a pair can reach the target only by winning hands (a dominada or a tranque). No federation text covers reaching the target in the middle of a hand. Fededodo publishes no rulebook that the researchers could find. Municipal Dominican tournaments: Santiago 2019 plays to 200 tantos, counts all tiles, and adds bonuses (pase de salida 25, capicua 25, paso corrido 0). La Guayiga 2025 has bonuses (capicua 30, paso corrido +30) but no counting basis in the claims. Neither tournament says whether a bonus can reach the target or whether a win can happen mid-hand.",
+   "variants": [
+    {
+     "who": "Wikipedia es (Dominican section, regla general), DR1 article (games to 200/250), Acento (Roberto Guzman 2025), Acercate a RD 2024, Tranca open-source game, FichaFlow scorekeeping page",
+     "rule": "When a player goes out, only the two opponents' hands count. Points = sum of pips in the losing pair's hands."
+    },
+    {
+     "who": "Santiago 2019 municipal tournament, FID, FEMUNDO, DR1 (games to 500), Wikipedia es patio rule, La Mesa app, Boarden app, DR1 forum posts 1999 and 2013",
+     "rule": "When a player goes out, all unplayed tiles count, including the winner's partner's hand."
+    },
+    {
+     "who": "DR1 article ('25, 50, Capicua!')",
+     "rule": "Counting depends on the target: opponents only in games to 200 or 250, all players' tiles in games to 500."
+    },
+    {
+     "who": "La Mesa app",
+     "rule": "All four hands by default, or only the blocked team's points by table custom."
+    },
+    {
+     "who": "Acento, Wikipedia es, Boarden, DR1 forum 2009",
+     "rule": "Target 100 (casual Dominican play; Acento says Dominicans almost always play to 100)."
+    },
+    {
+     "who": "FichaFlow, La Mesa, Dominican Domino app",
+     "rule": "Target 150 as a shorter-game option (also 100); 200 is the classic value."
+    },
+    {
+     "who": "Santiago 2019, FID, FEMUNDO, USA Domino Federation, FichaFlow, La Mesa, RDomino app, DR1 forum 2013, El Dia 2010",
+     "rule": "Target 200. The federations add a time limit (35 or 40 minutes)."
+    },
+    {
+     "who": "DR1 article, Our Pastimes, Zen Cabarete hotel blog",
+     "rule": "Target 200, 250 or 500 by preference."
+    },
+    {
+     "who": "FichaFlow (long series), Dominator scorekeeper, FID (exceptional cases)",
+     "rule": "Target 300."
+    },
+    {
+     "who": "Boarden app (per research sweep notes, not a Dominican primary source)",
+     "rule": "Bonuses are capped, and a team must win a hand to cross the target."
+    },
+    {
+     "who": "Puerto Rico, Ponce variant (Wikipedia es), not Dominican",
+     "rule": "Game to 20 with points rounded to tens. A team that reaches 20 wins at once, even before the hand ends."
+    },
+    {
+     "who": "Kapiku and pagat.com generic variants, not Dominican",
+     "rule": "After a lock, both pairs score their own points, so both can pass the target in one hand. The lower total wins, or a tiebreak hand is played."
+    },
+    {
+     "who": "Generic Spanish unofficial play (Domino arte o ciencia), not Dominican",
+     "rule": "Hand points rounded to tens (32 scores as 4). No Dominican rounding rule was found."
+    }
+   ],
+   "ownerView": "Partly supported. No Dominican source (media, reference page, forum or municipal tournament) states the owner's rule. The sources say only that the game ends when a pair reaches or passes the target (\"alcanza o supera\"), with no exception for bonus points. Only the Boarden app, which is not a Dominican primary source, states it: bonuses are capped and a hand must be won to cross the target. In federation play (FID, FEMUNDO) the rule holds automatically, because those rulebooks have no bonuses and every point comes from winning a hand. The rule becomes a real question only when the table uses Dominican patio or municipal bonuses (pase de salida, paso corrido, capicua). Santiago 2019 and La Guayiga 2025 use such bonuses and do not address it. Capicua is paid to the pair that wins the hand, so it cannot conflict with the owner's rule. Pass bonuses paid mid-hand can conflict. Note that a tranque (blocked hand) also has a winner, so \"winning a hand\" should include winning a tranque. Treat the owner's rule as a defensible house rule. It matches federation practice in effect, but no Dominican text documents it, and a literal reading of the Dominican wording would let a bonus that reaches the target end the game.",
+   "confidence": "medium",
+   "keySources": [
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "The only Dominican tournament rule set in the claims (Copa Alcaldia de Santiago 2019). It plays to 200 tantos and counts all tiles, and it also uses bonuses."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "Dominican section: its regla general counts only the losing pair's tiles, its patio rule counts all tiles, and a game ends when a pair reaches or passes 100 or 200. Its Ponce section is the only mid-hand win rule (Puerto Rico)."
+    },
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "why": "Dominican media: games to 200, 250 or 500. It counts opponents only at 200 or 250 and all players' tiles at 500."
+    },
+    {
+     "url": "https://acento.com.do/cultura/domino-9463164.html",
+     "why": "Dominican newspaper column: Dominicans usually play to 100, and the four-player game counts only the losers' tiles."
+    },
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "why": "FID 2024 rulebook. Art. 57 counts all unplayed tiles on a dominada, and Arts. 61-62 give the win to the first pair to reach the target (200 or 35 minutes), with no ties."
+    },
+    {
+     "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+     "why": "FEMUNDO 2025 rulebook (the championship Fededodo attends). Art. 6 scores the 3 remaining players' points, and matches run to 200 tantos or 40 minutes."
+    },
+    {
+     "url": "https://eldia.com.do/domino-deporte-nacional/",
+     "why": "Dominican newspaper: a 210-180 final shows that scores run past 200 and the overshoot is kept."
+    },
+    {
+     "url": "https://github.com/Nesmill/tranca",
+     "why": "Dominican game code: counts only the opposing pips and checks the 200 target at the end of each hand. It is a concrete implementation reference."
+    },
+    {
+     "url": "https://boarden.club/how-to-play/dominican-dominoes",
+     "why": "The only source that supports the owner's rule (bonuses capped, a hand must be won). It is an app, not a Dominican primary source."
+    },
+    {
+     "url": "https://fichaflow.com/learn/how-many-points-to-win-dominican-domino",
+     "why": "States 200 as the classic target and 100 or 150 as common shorter targets. FichaFlow is inconsistent across its pages on which hands count."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "why": "App that counts all four hands by default, uses 200 (or 100/150) as the target, and gives the game to the first pair to cross the total."
+    },
+    {
+     "url": "https://www.pagat.com/domino/line/partnership.html",
+     "why": "Non-Dominican. It shows that both pairs passing the target in one hand arises only when both pairs score after a lock."
+    }
+   ],
+   "openQuestions": [
+    "Owner decision: can a pass bonus (pase de salida, paso corrido) that brings a pair to the target end the game, or must the pair win a hand (the owner's rule, stated only by the Boarden app)?",
+    "If bonuses can win: does the game end the moment the bonus is paid, in the middle of the hand, or only after the hand is scored?",
+    "If bonuses go to one pair and the hand points go to the other, and both pass the target in the same hand, which pair wins? No Dominican source covers this.",
+    "Default counting for a dominada: opponents only (Dominican press regla general) or all unplayed tiles (Santiago 2019, FID, FEMUNDO, patio)? Should the default depend on the target, as DR1 ties all-tiles counting to games to 500?",
+    "1v1 with a draw pile: do undrawn boneyard tiles count toward the winner's points? No source in the claims covers this.",
+    "Is a hand-point total ever capped at the target? No Dominican source caps it; the Cuban 'no caben' option is not Dominican.",
+    "Federation time limits (35 or 40 minutes): the claims do not say how a match ends when time runs out. This is relevant only for a tournament mode.",
+    "No Fededodo rulebook was found. The elCaribe 'Ley del domino' article (Dominican) was blocked and was not read."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The consensus holds for every part I could check. I have one addition and one caveat. Scoring happens per hand. Hand points go to the pair that wins the hand, and they equal the pips on the unplayed tiles. Dominican sources give two ways to count those tiles on a dominada. (A) Opponents only is the Wikipedia es \"regla general\" (confirmed). (B) All unplayed tiles is the Wikipedia es patio rule (confirmed) and the Santiago 2019 tournament rule (confirmed: \"SE CUENTA TODAS LAS FICHAS\"). Keep countPartner as a table setting. The target is a table agreement. Wikipedia es names 100 or 200, and Santiago 2019 plays to 200 (confirmed). A pair wins when its running total reaches or passes the target (Wikipedia es: \"alcanza o supera 100 o 200 puntos\", confirmed). The only mid-hand win rule found is the Puerto Rico Ponce variant (Wikipedia es: a team wins at 20 \"en cualquier etapa del juego\", confirmed), so it is not Dominican. Addition: Santiago 2019 also has a penalty for passing while holding a playable tile (\"PASO CON FICHA SON 100 PUNTOS, MENOS 50 PARA LA PAREJA INFRACTORA\"). This is a second mid-hand scoring event, next to the pase de salida (25), that could bring a pair to the target before the hand ends. The page also sets a sudden-death elimination format (\"MUERTE SUBITA, EL QUE PERDIO SE VA\"). My fetch of the page did not show the claimed \"paso corrido 0\" value, so treat that value as unconfirmed. Caveat: I could not open the DR1 article or the Boarden page. The DR1 rule that links the count to the target (opponents only at 200 or 250, all tiles at 500) and the Boarden rule are unverified in this check. I did not open the FID, FEMUNDO, El Dia, Acento or Tranca claims because of the 4-source limit.",
+   "sourcesChecked": [
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "supports": "partly",
+     "note": "Confirms the Copa Alcaldia de Santiago 2019, the 200-tanto target, and all-tiles counting (\"SE CUENTA TODAS LAS FICHAS\"). Confirms pase de salida 25 and capicua 25. The fetch did not show \"paso corrido 0\". The page does show a penalty for passing with a playable tile: 100 points, and minus 50 for the offending pair. It also shows a sudden-death elimination format. It says nothing about a mid-hand win or whether a bonus can reach the target."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "Dominican section confirms that the regla general counts only the losing pair's tiles. It confirms that patio play counts all remaining tiles. It confirms that a game ends when a pair \"alcanza o supera 100 o 200 puntos\". It lists paso corrido and capicua bonuses of 25 or 30 points and says nothing about a bonus that reaches the target. The Ponce (Puerto Rico) section confirms a target of 20, rounding, and an immediate win \"en cualquier etapa del juego\"."
+    },
+    {
+     "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+     "supports": "could-not-open",
+     "note": "WebFetch cannot fetch from web.archive.org. The claims that link the count to the target (200/250 opponents only, 500 all tiles) are unverified."
+    },
+    {
+     "url": "https://boarden.club/how-to-play/dominican-dominoes",
+     "supports": "could-not-open",
+     "note": "HTTP 503. The claim that bonuses are capped and a team must win a hand to cross the target is unverified. This is the only source cited for the owner's rule."
+    }
+   ],
+   "ownerViewCheck": "The owner-view assessment holds, with one change. The sources I opened do not state the owner's rule. Wikipedia es gives the \"alcanza o supera\" wording with no exception for bonuses. Santiago 2019 uses bonuses and does not say whether a bonus can reach the target. The only cited support is the Boarden app, and it did not load (HTTP 503), so that support is unverified here. The assessment should also list the Santiago 2019 penalty for passing with a playable tile (100 points, minus 50 for the offending pair) as a mid-hand scoring event. That penalty, like the pase de salida, can conflict with the owner's rule, so the conflict is wider than pass bonuses alone. The conclusion stays the same. The owner's rule is a defensible house rule that matches federation practice in effect. No Dominican text documents it, and a literal reading of the Dominican wording lets a mid-hand bonus or penalty that reaches the target end the game. The owner must decide this explicitly.",
+   "confidence": "medium"
+  }
+ },
+ {
+  "topic": "setup-turns",
+  "synthesis": {
+   "topic": "setup-turns",
+   "consensus": "Informal (patio) Dominican rules, one double-six set of 28 tiles. Every point below has at least two fetched Dominican sources, except where a point says otherwise.\n(1) DEAL, 2v2 parejas. Partners sit across the table. Each player gets 7 tiles, so all 28 tiles are dealt. There is no pile and no drawing. Sources: DR1, Acento, DR1 forum, FichaFlow.\n(2) DEAL, 1v1. Each player gets 7 tiles, and the other 14 stay face down in the pila. A player draws only when he has no legal move. He draws one tile at a time and stops at the first tile that fits. Wikipedia es says the player draws \"una por una hasta encontrar aquella que pueda ser colocada\". FichaFlow agrees on 7 tiles and a boneyard. No Dominican source says what happens when the pila is empty and the player still cannot play. The obvious rule is that he passes, and generic non-Dominican 1v1 games state it. A known Dominican variant deals 10 tiles each with no drawing (see variants).\n(3) DIRECTION. Play goes counter-clockwise, so the next player is the one to the current player's right. Sources: DR1, Wikipedia es, FichaFlow, OurPastimes, DR1 forum, and FID agrees. For code, number the seats 0 to 3 in counter-clockwise order. Then next = (seat + 1) mod 4, and the teams are seats {0,2} and {1,3}. In 1v1 the turns alternate.\n(4) FIRST HAND OF A MATCH. The holder of the 6-6 opens, and the opening tile must be the 6-6 itself (DR1, Wikipedia es, Santiago 2019 \"SALIDA CON DOBLE SEIS\", DR1 forum, El Inmobiliario, FichaFlow). In 2v2 the 6-6 is always in someone's hand, so the first opener is always known. The player who places the first tile is the \"mano\" for that hand (Acento). DR1 says this applies at the start of each match, so a rematch starts again with the 6-6.\n(5) LATER HANDS, patio rule. The winner of the previous hand opens and may lead with any tile. The next player is to the opener's right. Sources: DR1, Wikipedia es, Acércate RD, La Mesa, FichaFlow (its most common rule), Boarden, Colonial Zone. The later hands have no forced double. In code, set the opener = the player who went out (domino). For a tranque, the sources do not name one player (see open questions).\n(6) MUST PLAY. A player who holds a tile that fits either open end must play. He chooses which legal tile to play and on which end. He may pass only when no tile fits. Every source agrees: Wikipedia es, FichaFlow, La Mesa, the Santiago and La Guáyiga tournaments, FID, and USA Fed. A player who passes while holding a legal tile commits \"pase con ficha\", which is penalized (see federationView). In an app, the pass action must be impossible while a legal move exists. With that rule, the patio penalties never apply.\n(7) SHUFFLE. A player of the losing team shuffles (Wikipedia es). This matters only for flavor text in the UI.\nThe main split between patio and tournament rules is item 5: tournaments rotate the opener instead.",
+   "federationView": "International federations (not Dominican-specific, although FID 2015 lists Dominican delegates among its drafters):\n- FID Reglamento (2015 Art. 74, 2024 Arts. 74 and 76): each player takes 7 tiles, and dealing and play go to the right (counter-clockwise). The first opener of a match is chosen by lot. Each player draws a tile, and the highest total opens, not the 6-6 holder. Each later hand is opened by the player to the right of the previous opener. This rotation ignores who won. Saying \"paso\" while holding a playable tile (Art. 81) brings a yellow card and a deduction of 40% of the target. If the false pass prevents a tranque or a domino, it brings a red card and loss of the match.\n- FEMUNDO Reglamento 2025 (Arts. 6 and 8): 7 tiles per player. The first salida is drawn by lot, and after that it rotates. The shuffler is the player to the opener's left.\n- USA Domino Federation: \"La SALIDA es ROTATIVA\". A false \"paso\" costs -25.\n- No federation covers 1v1.\n- The Dominican federation (Fededodo/FEDOMDOM) has no published rulebook online. The researchers found none.\nDominican municipal tournaments:\n- Copa Alcaldía de Santiago 2019: the first hand opens with the 6-6, and after that the salida rotates. After a penalty or a tie, the player next in the rotation opens. A hand with five doubles is still played. A pase con ficha (and a \"chivo\", a tile that does not match) costs a 100-point swing: -50 for the offending pair and +50 for the other pair. Then the tiles are reshuffled.\n- La Guáyiga 2025: a pase con ficha gives +30 to the opposing team. A tile the player lifts and commits must be played, which is a touched-tile rule. The tiles are reshuffled only when one player holds all 7 doubles.\nSummary: tournaments and federations rotate the opener to the right each hand. Federations choose the first opener by lot, but the Dominican tournament uses the 6-6. The patio game gives the next lead to the winner.",
+   "variants": [
+    {
+     "who": "Wikipedia es, Dominican section (Pila)",
+     "rule": "1v1 alternative: each player takes 10 tiles and drawing ('cargar') from the pile is not allowed. The other 8 tiles stay out of play. The source does not say who opens if the 6-6 is among the 8 undealt tiles."
+    },
+    {
+     "who": "Santiago 2019 municipal tournament; FID 2015/2024; FEMUNDO 2025; USA Domino Federation; FichaFlow ('some tables'); dominoarteociencia (generic); Dominó en Parejas app (generic)",
+     "rule": "Rotating salida: each new hand is opened by the player to the right of the previous hand's opener, whoever won. Santiago still uses the 6-6 for the first hand. FID and FEMUNDO choose the first opener by lot."
+    },
+    {
+     "who": "FID 2015 Art. 74b",
+     "rule": "The first opener is chosen by a draw: each player draws a tile and the highest pip total opens. The 6-6 is not required."
+    },
+    {
+     "who": "Boarden app; International Game Descriptions PDF (labeled Dominican); Puerto Rico sources (Carrillo, Caribbean Trading); generic mano-a-mano games",
+     "rule": "The first hand is opened by the highest double held, not only the 6-6. The PR sources apply this when nobody drew the 6-6 in 2- or 3-player games. This is the only written fallback for 1v1."
+    },
+    {
+     "who": "Boarden, FichaFlow, DR1 forum 2009 (Mega_Man)",
+     "rule": "Later hands are opened by a player of the winning team, not necessarily the player who went out. The 2009 forum post says either partner may start."
+    },
+    {
+     "who": "Nesmill/tranca open-source game",
+     "rule": "Later hands are opened by the last player who played in the previous hand. This is unusual, and no other source uses it."
+    },
+    {
+     "who": "Mesa28 (Puerto Rico, non-Dominican); Santiago 2019",
+     "rule": "After a tied tranque the winner-leads rule does not apply. In Santiago the player next in the rotation opens."
+    },
+    {
+     "who": "La Mesa app",
+     "rule": "When a hand must be redealt, the same player who opened opens again."
+    },
+    {
+     "who": "La Mesa app; jugardominoenlinea.com (unreliable); DR1 forum 2009 post",
+     "rule": "Play goes clockwise or to the left. Every other Dominican source and FID contradict this, so treat it as an error."
+    },
+    {
+     "who": "Wikipedia es (patio penalty for pase con ficha)",
+     "rule": "All points scored after the false pass go to the opponents. If the player corrects the pass before the next player plays, the penalty is only 25 or 30. Tournaments use other amounts (Santiago 100-point swing, La Guáyiga +30, FID yellow card and 40%, USA Fed -25)."
+    }
+   ],
+   "ownerView": "Not covered. The task and the sweep notes give no owner belief for setup and turns. The owner's listed beliefs are about capicúa with a double, pass bonuses reaching the target, and the tranque against the player on the right. The 1v1 setup appears only as a research question. The sources answer it with 7 tiles each plus drawing from the pila, or a 10-each no-draw variant, and they leave the 1v1 opener without the 6-6 unresolved. If the app's current setup is 7 tiles each in 2v2 with no drawing, counter-clockwise play, the 6-6 opening the first hand, the winner leading later hands, and forced play, then the Dominican patio sources support it. Confirm the 1v1 draw rule and the 1v1 opener fallback with the owner as house rules.",
+   "confidence": "high",
+   "keySources": [
+    {
+     "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+     "why": "Fetched Dominican media article that covers the core patio setup: 7 tiles each, the 6-6 holder opens the match, the hand winner leads the next hand with any tile, counter-clockwise play, and a player with no match passes."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "Dominican section. It says the 6-6 opens the first hand, the previous winner opens later hands, play goes to the right, and the teams are 1 or 2 players. For 1v1 it gives 7 tiles each and drawing one at a time, or a 10-tile no-draw variant. It also gives the patio pase con ficha penalty and says the losing team shuffles."
+    },
+    {
+     "url": "https://acento.com.do/cultura/domino-9463164.html",
+     "why": "Dominican media (2025). It confirms 7 tiles each with four players and defines the 'mano' as the player who places the first tile."
+    },
+    {
+     "url": "https://www.acercateard.com/es/noticias/2024-01/deportes/el-domino-en-la-republica-dominicana-un-vinculo-cultural-y-social-inquebrantable?article=91431",
+     "why": "Dominican media (2024) that independently confirms the winner of the previous hand opens later hands."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "Dominican municipal tournament rules (Santiago 2019). The first hand opens with the 6-6, the salida then rotates, a tie or penalty goes to the next opener in the rotation, and pase con ficha costs a 100-point swing. This is the clearest Dominican tournament rule against the patio winner-leads rule."
+    },
+    {
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "why": "Dominican municipal tournament rules (2025): pase con ficha gives +30 to opponents, a lifted tile must be played, and the tiles are reshuffled only for 7 doubles."
+    },
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "why": "FID federation rulebook (2024): 7 tiles each, play to the right, the first opener chosen by lot, and the next opener to the right of the previous one."
+    },
+    {
+     "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+     "why": "FID 2015 rulebook: the highest drawn tile opens the match, play and dealing go to the right, and a false 'paso' brings the Art. 81 card penalties."
+    },
+    {
+     "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+     "why": "FEMUNDO 2025 rulebook (the world body the Dominican federation competes in): 7 tiles each, the first salida drawn by lot and then rotated."
+    },
+    {
+     "url": "https://fichaflow.com/learn/who-goes-first-in-dominican-domino",
+     "why": "A Dominican-focused app that states both later-hand rules: the winning team keeps la mano (most common), and some tables rotate one seat to the right."
+    },
+    {
+     "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+     "why": "The same app on deals and play: 2v2 deals all 28 tiles, 1v1 deals 7 each with a boneyard, play is counter-clockwise, and a player must play when able."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "why": "A Dominican app that supports winner-leads and forced play, gives the redeal rule, and is the main source that says clockwise, which is an outlier."
+    }
+   ],
+   "openQuestions": [
+    "1v1 first hand: who opens when the 6-6 is in the pila, or among the 8 undealt tiles in the 10-tile variant? No Dominican source says. Non-Dominican sources and Boarden say the highest double held opens. It is also unknown whether that double must be the opening tile, and what happens when neither player holds a double (redeal, or the highest tile?).",
+    "1v1 empty pila: a player who cannot play after the pila is empty presumably passes, but no Dominican source states it. It is also unknown whether some tables keep the last 1 or 2 tiles in the pila undrawable. No source mentions this.",
+    "1v1 drawn tile: Wikipedia implies the player stops drawing at the first tile that fits. It does not say whether he must play that exact tile, or may play another tile that now fits. The same tile set fits either way, but the choice matters for strategy.",
+    "2v2 winner-leads: which partner opens after a win? DR1 and Wikipedia say the person who won, meaning the player who went out. Boarden, FichaFlow, and a 2009 forum post say the winning team, and the forum post lets either partner start. Suggested app rule: the player who went out.",
+    "Tranque: who is the 'winner' who opens the next hand? The tranque claims file decides whether the blocker or a team wins. This file does not say which individual then leads.",
+    "Tied tranque: who opens the next hand? Candidates are the same opener again, rotation to the next player (Santiago), or another rule. There is no patio source.",
+    "Redeal (for example, the 7-doubles rule at La Guáyiga): La Mesa says the same opener opens again. This is the only source.",
+    "Should the app offer a 'rotating salida' table option to match tournament and federation play? The option would rotate the opener to the right of the previous opener each hand, and optionally draw the first opener by lot as FID does. This is a scope decision for the owner."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The consensus holds on every point I could check. Three of the four sources I tried opened, and they support items 1 to 7 and the Santiago tournament summary. Small corrections and caveats:\n(a) DR1 did not open. Two claims rest on DR1 alone and stay unverified: partners sit across, and \"the 6-6 applies at the start of each match, so a rematch starts again with the 6-6\". Wikipedia es says only that the 6-6 holder opens \"la primera partida\".\n(b) Item 4: FichaFlow says the first hand \"usually\" opens with the 6-6, so it is the common rule, not a universal one. Santiago's \"SALIDA CON DOBLE SEIS\" is the clearest support that the opening tile is the 6-6 itself.\n(c) Item 5: Wikipedia es and FichaFlow both confirm winner-leads. FichaFlow words it as \"many tables\", so it is the common patio rule, and rotation is the minority rule. Neither source states \"any tile\" in words. It follows from the lack of a forced double.\n(d) Wikipedia pase-con-ficha variant: the fetched text confirms that the points after the false pass go to the opponents and that the penalty is \"25 o 30 puntos dependiendo de las reglas\". It does not confirm the condition \"if the player corrects the pass before the next player plays\". Treat that condition as unverified.\n(e) Santiago 2019: the fetch confirms the 6-6 first hand, \"SALIDA ROTATIVA\", the reshuffle with the next player in rotation opening after a penalty or tie, \"CINCO DOBLE SE JUEGA\", and the 100-point swing (-50 / +50) for \"PASO CON FICHA\". The fetched text did not show the \"chivo\" part of that penalty, so it stays unverified.\nEverything else stands as written: 7 tiles each, all 28 dealt in 2v2, 1v1 with 7 each and drawing one at a time from the pila, the 10-tile no-draw 1v1 variant, play to the right (counter-clockwise), forced play, and the losing team shuffles.",
+   "sourcesChecked": [
+    {
+     "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+     "supports": "could-not-open",
+     "note": "WebFetch refused web.archive.org. Not retried. The DR1-only claims (partners across, the 6-6 at the start of each match or rematch) are unverified."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "Dominican section confirms: the 6-6 holder opens the first hand, and the previous winner opens later hands. The next tile goes to the player on the right. Teams have 1 or 2 players. 1v1 draws from the pila one at a time, and a variant deals 10 each with no cargar. A player of the losing team shuffles. A false pass sends later points to the opponents, with a '25 o 30 puntos' option. The fetched text did not show the 'corrects before the next play' condition."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "supports": "yes",
+     "note": "Alcaldía de Santiago tournament, Aug 20, 2019. Confirms 'SALIDA CON DOBLE SEIS', 'SALIDA ROTATIVA', a reshuffle with the next player in rotation opening after a penalty or tie, 'CINCO DOBLE SE JUEGA', and the pase con ficha 100-point swing (-50 / +50). 'Chivo' was not visible in the fetched text."
+    },
+    {
+     "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+     "supports": "yes",
+     "note": "Confirms that 2v2 deals all 28 tiles with no boneyard, 1v1 deals 7 each with the rest face down in the boneyard, and play moves counter-clockwise. A player cannot pass with a legal tile. The first hand 'usually' opens with the 6-6, and 'many tables' let the previous winner keep la mano."
+    }
+   ],
+   "ownerViewCheck": "The owner-view assessment holds. No owner belief on setup or turns is on record, so \"Not covered\" is correct. I checked its conditional statement against the app code. The app matches the Dominican patio consensus:\n- packages/engine/src/reducer.ts deals 7 tiles each. In 2v2 it deals all 28, and validate.ts blocks draws in 2v2.\n- Later rounds are led by the round winner with free choice: startNewRound and getRoundWinningSeat.\n- Pass and draw are rejected while a legal move exists (validate.ts).\n- In 1v1 the player draws until a tile fits. He may pass only when the boneyard is empty.\n- getNextSeat (n,e,s,w) combined with getRelativeSeats in apps/web/src/app/game/[id]/page.tsx puts the next seat on the viewer's right, so play is counter-clockwise. The rules text in packages/i18n/src/rules.ts says the same.\nThree app behaviors are house rules with no Dominican source. Confirm them with the owner, as the assessment suggests:\n(1) First-round opener: the highest double at the table opens, and the app places that tile automatically. With no double, the highest tile opens. In 2v2 this is always the 6-6, but in 1v1 it follows the Boarden and Puerto Rico variant, not a Dominican source.\n(2) After a tranque, the player on the winning side with the fewest pips leads.\n(3) After drawing in 1v1, the player may play any legal tile, not only the drawn tile.\nAlso, the app gives no tile-count rule for a tied tranque or a redeal. Those remain open questions.",
+   "confidence": "high"
+  }
+ },
+ {
+  "topic": "variants",
+  "synthesis": {
+   "topic": "Variants: other Dominican bonuses and customs (chuchazo, la caja, capicúa with a blank, pollona, dar agua, tournament vs informal rules, player expectations)",
+   "consensus": "Implement two rule sets and let the table choose between them.\n\n(A) FORMAL / \"Regla General\" (tournament mode). This follows FID 2024 and FEMUNDO 2025. The Dominican federation sends its national team to FEMUNDO events, so this is probably how its national events are played, but no Fededodo rulebook was found. In this mode there are NO bonuses: capicúa = 0, pase de salida = 0, pase corrido = 0, chuchazo = 0, and no shutout bonus. A hand ends only by dominada (a player goes out) or by tranque (the game is blocked). The hand score is the pips left in the players' hands. The match goes to the first pair that reaches or passes the target (200). Deal every hand as it falls. There is no redeal for many doubles (FEMUNDO Art. 5).\n\n(B) INFORMAL / \"Regla de Patio\" (the default casual Dominican game). It adds the pase de salida, pase corrido and capicúa bonuses. The usual amount is 25 each, and some tables and the La Guáyiga tournament use 30. In DR1's version the pase de salida is 10 in games to 200 or 250 and 25 in games to 500. In patio play one table serves several pairs, and the losing pair gives up its seat.\n\nThe other items, one by one:\n\n1) CHUCHAZO is not a Dominican bonus. It comes from Puerto Rico, where \"la chucha\" is the 0-0. There, going out with the 0-0 pays +100, but only in 500-point games. Default: 0, off. If you offer it, label it as a Puerto Rican option, never stack it with capicúa, and pay nothing in two cases: the 0-0 is the tile that causes a tranque, or the 0-0 closes two blank ends (Puerto Ricans call that \"dominau\"). A Dominican glossary uses \"chuchazo\" loosely for any hard blow, not for a tile.\n\n2) LA CAJA is the Dominican name for the 0-0. Other names are \"la cajita\" and \"el muerto\", and the 6-6 is \"el burro\". The name carries no bonus. Use it only for tile names in the UI.\n\n3) CAPICÚA WITH A BLANK: one Dominican source (the DR1 article) says a capicúa made with a blank does not count. No source pays extra for it. Default: treat it like any other capicúa. Offer \"capicúa con blanco no vale\" as a house-rule toggle, default off. Separately, all sources agree that a double closing both ends is NOT capicúa.\n\n4) POLLONA is Cuban dictionary vocabulary for a shutout (losing without scoring a point). The Dominican word for a shutout win (for example 200-0) is \"zapato\", with the forms zapatero and zapatera; one Dominican scorekeeper app also shows \"lisa\". No reliable source gives a shutout point bonus in Dominican play. Show the shutout as a label or celebration only, with a bonus of 0.\n\n5) DAR AGUA is a Cuban term, meaning the losing pair turns and mixes the tiles. The Dominican custom is the same act: a player of the losing team shuffles. The Dominican words for it are \"barajar las fichas\" or \"lavar\". In the app the shuffle is automatic. Only the wording matters, plus crediting the shuffle to the losing side if you animate it.\n\n6) TOURNAMENT PENALTIES (a chivo, a tile that does not fit; passing with a playable tile; playing or opening out of turn) are for mistakes that the engine should make impossible. Enforce forced play: no pass while a legal move exists, and a tile picked up must be played. Then no penalty scoring is needed.\n\n7) CUSTOMS a Dominican player recognizes: the teams are called \"Largos\" and \"Cortos\"; \"manito\" is the opener's partner after the opener makes the next opponent pass; \"los mirones son de cera\" means spectators stay silent; \"juego en banda\" is a hand where the tranque is forced; \"dominar\" means to win a hand; the loser shuffles; and the patio game uses winner-stays seating.",
+   "federationView": "FID Reglamento 2024 (Art. 54: a hand ends only by dominada or by cierre/tranca) and FEMUNDO Reglamento de Competencia 2025 have no capicúa, pase de salida, pase corrido, chuchazo or shutout bonus. A hand scores only the tiles left. FID and FEMUNDO count every unplayed tile, including those held by the winner's partner. The match goes to the first pair that reaches the target (200). A tranque compares pair against pair. A tied tranque scores nothing, and the opener rotates. FEMUNDO Art. 5 says a hand is played with however many doubles a player draws, so there is no redeal. The FID 2015 drafters include Dominican delegates. Around 2010 the Dominican Republic and Puerto Rico left the FID and founded the parallel FEMUNDO world championships. The Federación Dominicana de Dominó (Fededodo) ran a 14-match national championship in 2025 to pick its FEMUNDO team, but no Fededodo rulebook was found. FichaFlow calls the federation \"FEDOMINO\". One unreliable site says a \"FEDOMDOM\" cup uses double-nine tiles and a pollona penalty. Every other Dominican source describes double-six, so drop that claim.\n\nMunicipal Dominican tournaments are a mix. Copa Alcaldía de Santiago 2019 says it applies \"reglas internacional\", but it pays capicúa 25 and pase de salida 25 and pays nothing for the pase corrido. It plays sudden death (the losing pair leaves) and plays a hand even with five doubles. Passing with a playable tile swings 100 points (-50 to the offenders, +50 to the other pair), and then the tiles are redealt. A wrong opening gives 50 to the opponents. Its rule 6 (\"con el de abajo\") and rule 12 (pair against pair) contradict each other on the tranque. The La Guáyiga 2025 tournament pays capicúa 30 and lists \"Paso corrido: +30 al equipo contrario\", which is ambiguous. It gives +30 to the other team for a chivo, for playing out of turn and for opening out of turn. A tile picked up must be played. It redeals only if the 7 doubles come out. No federation or tournament source mentions chuchazo, la caja as a scoring event, capicúa with a blank, pollona or dar agua.",
+   "variants": [
+    {
+     "who": "FID 2024 / FEMUNDO 2025 (federation)",
+     "rule": "No bonuses of any kind. A hand ends by dominada or tranque, and the score is the pips left in all hands. A tranque compares pair against pair, and a tie scores nothing. All doubles are played, with no redeal."
+    },
+    {
+     "who": "Wikipedia (es), Dominican section: Regla General vs Regla de Patio",
+     "rule": "Regla General is essentially the Latin game with no bonuses. Regla de Patio adds pase de salida, pase corrido and capicúa at 25 or 30. One table serves three or more pairs, and the losers give up the seat. A player of the losing team shuffles."
+    },
+    {
+     "who": "DR1 article (Dominican, English)",
+     "rule": "Pase de salida is 10 in games to 200/250 and 25 in games to 500. Paso corrido 25, capicúa 25. A capicúa made with a double or with a blank does not count."
+    },
+    {
+     "who": "La Mesa: Dominó Latino (app)",
+     "rule": "Capicúa is not paid under Regla General. \"Chuchazo\" means a hard blow, not a tile. Zapato/zapatero is a match won with the other pair at 0, and some tables call it pollona. The shuffle is called \"lavar\"."
+    },
+    {
+     "who": "Diario Libre (Aníbal de Castro, 2026)",
+     "rule": "The 0-0 is \"la cajita\" or \"el muerto\". Some groups make capicúa worth double."
+    },
+    {
+     "who": "Wikipedia (es), tile names",
+     "rule": "The 0-0 is \"la caja\" and the 6-6 is \"el burro\" in the Dominican Republic."
+    },
+    {
+     "who": "Copa Alcaldía de Santiago 2019 (municipal tournament)",
+     "rule": "Capicúa 25, pase de salida 25, pase corrido 0. Sudden death, and the losing pair leaves. Five doubles are still played. Passing with a playable tile swings 100 (-50/+50), then the tiles are redealt. A wrong opening gives +50 to the opponents."
+    },
+    {
+     "who": "La Guáyiga 2025 (municipal tournament)",
+     "rule": "Capicúa 30. Paso corrido is listed as \"+30 al equipo contrario\" (ambiguous). +30 to the other team for a chivo, for playing out of turn, and for opening out of turn. A tile picked up must be played. Redeal only if the 7 doubles come out."
+    },
+    {
+     "who": "Puerto Rico (Carrillo archive, Mesa28, Caribbean Trading, ASALE \"chucha\")",
+     "rule": "The chucha is the 0-0. Chuchazo (going out with it) is +100, only in 500-point games. It is not paid when the chucha is the tranque tile, or when it closes two blank ends (dominau). The shutout is \"chiva\"/\"chivote\"."
+    },
+    {
+     "who": "Cuba (ASALE \"pollona\", VisitCubaGo, Árbol Invertido)",
+     "rule": "Pollona is losing a match without scoring a point. Dar agua means the losing pair turns and mixes the tiles."
+    },
+    {
+     "who": "FichaFlow (app)",
+     "rule": "Chuchazo is treated as Puerto Rican and pollona as Cuban. Both are optional, off by default, and never stacked with capicúa. The pase de salida setting is named \"Veinticinco\", but the value can be changed."
+    },
+    {
+     "who": "Domino Apunte Dominicano (scorekeeper app)",
+     "rule": "Celebrates a 200-0 win as \"LISA y ZAPATERA\"."
+    },
+    {
+     "who": "Dominator (scorekeeper app)",
+     "rule": "The default team names are Largos and Cortos."
+    },
+    {
+     "who": "Acento (Roberto Guzmán, 2025)",
+     "rule": "Rules vary by local custom. The shuffle is \"barajar las fichas\". The opener's partner becomes \"manito\" after the opener makes the opponent on his right pass. \"Los mirones son de cera\" (spectators stay silent)."
+    },
+    {
+     "who": "Wikipedia (es): Pintintín",
+     "rule": "Every player for himself, 2 to 4 players with 6 or 7 tiles each, played for bets. Each hand stands alone, with no running score."
+    },
+    {
+     "who": "DR1 forum (2013)",
+     "rule": "Three-player game: 7 tiles each and 7 out of play, every man for himself, first to 200. Some places take points off for noise or for a tile dropped on the floor."
+    },
+    {
+     "who": "DR1 forum (2006)",
+     "rule": "Lists \"caja de muerto\" as an extra-points situation without defining it."
+    },
+    {
+     "who": "NEUSA Domino Association (US, not Dominican)",
+     "rule": "A player with 5 or more doubles may show them and ask for a redeal, and the same player opens again."
+    },
+    {
+     "who": "jugardominoenlinea.com (unreliable)",
+     "rule": "Claims the FEDOMDOM cup uses double-nine tiles and a pollona penalty. This contradicts every other Dominican source."
+    }
+   ],
+   "ownerView": "Not covered as a stated belief. The files give no owner position on this topic. The question's list suggests the owner expects chuchazo, pollona and dar agua to be Dominican features, and on that reading the view is only partly supported. La caja is supported, but only as the Dominican name for the 0-0, not as a bonus. Chuchazo is contradicted: it is Puerto Rican, and no Dominican source pays it. Pollona is contradicted as a Dominican bonus: it is Cuban vocabulary, and Dominicans say zapato, with some tables also saying pollona. Dar agua is contradicted as a Dominican word, though the custom behind it (the losing side shuffles) is Dominican. Capicúa with a blank is thinly supported: only DR1 says it does not count, and no source pays extra for it. The research sweep also recorded a related owner belief on the capicúa topic: that a double closing matching ends (for example the 2-2 on ends 2 and 2) counts as capicúa. Every readable Dominican source contradicts that, and only La Mesa agrees with it.",
+   "confidence": "medium",
+   "keySources": [
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "why": "Federation rulebook, fetched. A hand ends only by dominada or tranque, and there are no bonuses. This is the base for the formal mode."
+    },
+    {
+     "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+     "why": "FEMUNDO 2025 rulebook, the federation line the Dominican national team plays in. No bonuses, and all doubles are played (Art. 5)."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "why": "Main Dominican-specific description: Regla General vs Regla de Patio, patio bonuses, loser shuffles, la caja and el burro, Pintintín, juego en banda."
+    },
+    {
+     "url": "https://momentodeportivord.com/?p=17503",
+     "why": "Santiago 2019 municipal tournament rules: local bonuses inside a tournament, the paso-con-ficha penalty, no redeal for five doubles, sudden death."
+    },
+    {
+     "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+     "why": "La Guáyiga 2025 municipal tournament: capicúa 30, +30 penalties, redeal only with 7 doubles."
+    },
+    {
+     "url": "https://www.diariolibre.com/deportes/mas-deportes/2025/07/01/mundial-de-dominos-en-barbados-tendra-participacion-rd/3169241",
+     "why": "Shows Fededodo picks its national team for FEMUNDO, which links Dominican formal play to FEMUNDO rules."
+    },
+    {
+     "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+     "why": "Puerto Rican source for chuchazo (+100 in 500 games, not on a tranque) and chiva as the PR shutout word."
+    },
+    {
+     "url": "https://www.mesa28.com/chuchazo-domino",
+     "why": "Puerto Rican: the chucha is the 0-0, chuchazo pays only in 500 games, and a tile closing two blank ends is dominau, not chuchazo."
+    },
+    {
+     "url": "https://www.asale.org/damer/pollona",
+     "why": "Dictionary marks pollona (shutout) as Cuban only."
+    },
+    {
+     "url": "https://www.asale.org/damer/chucha",
+     "why": "Dictionary marks chucha (0-0) as Puerto Rican."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/glosario-domino/",
+     "why": "Dominican glossary: chuchazo means a hard blow, and zapato/zapatero is the shutout, sometimes called pollona."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+     "why": "Dominican shuffle word is lavar, not dar agua."
+    },
+    {
+     "url": "https://acento.com.do/cultura/domino-9463164.html",
+     "why": "Dominican language column: barajar las fichas, manito, los mirones son de cera, rules vary by custom."
+    },
+    {
+     "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+     "why": "Dominican columnist: the 0-0 is la cajita or el muerto, and some groups make capicúa worth double."
+    },
+    {
+     "url": "https://visitcubago.com/domino-cubano-reglas-como-jugar/",
+     "why": "Shows dar agua is Cuban usage (the losing pair turns the tiles)."
+    },
+    {
+     "url": "https://fichaflow.com/learn/what-is-chuchazo-in-domino",
+     "why": "A Dominican domino app that found no basis for chuchazo as a Dominican bonus. Its default is off and it never stacks it with capicúa."
+    }
+   ],
+   "openQuestions": [
+    "DR1 says a capicúa made with a blank does not count, but the claim file has no quote for it. Does it mean a final tile that contains a blank, or both ends showing blank? DR1 is the only source.",
+    "\"Caja de muerto\" is listed as an extra-points situation in a 2006 DR1 forum post, but nobody defines it. Is there a real patio bonus tied to the 0-0 (la caja)?",
+    "\"Dar agua\" and \"pollona\" were never searched in Dominican sources, because the web search budget ran out. Their absence is not proof that Dominicans never use them.",
+    "La Guáyiga's \"solo se baraja si salen los 7 dobles\": with all 28 tiles dealt, the only sensible reading is one player holding all seven doubles. The flyer does not confirm this.",
+    "La Guáyiga's \"Paso corrido: +30 pts al equipo contrario\": which pair receives the 30?",
+    "No Fededodo rulebook was found. The elCaribe \"Ley del dominó\" article (the source FichaFlow cites for capicúa 25) and the Dominican book on pintintín and other games could not be read.",
+    "Do the patio bonuses (and any optional chuchazo) apply in 1v1? No Dominican source says.",
+    "Can a bonus alone take a pair past the target and win the match? No Dominican source says; only the Boarden app caps bonuses.",
+    "Santiago 2019 contradicts itself on the tranque: rule 6 says with the player below (to the right), rule 12 says pair against pair. Which rule did the tournament actually apply?",
+    "Should the app offer Pintintín and the three-player cutthroat game as separate modes? Both are documented as Dominican, but with few rule details."
+   ]
+  },
+  "check": {
+   "holds": true,
+   "correctedConsensus": "The consensus holds in substance. Three corrections apply.\n\nKeep the two rule sets.\n(A) FORMAL / \"Regla General\" (tournament mode): no bonuses. FID 2024 is verified. Art. 54 says a hand ends only by dominada or by cierre/tranca, never by a penalty. Art. 57 and Art. 58 score all unplayed tiles, including the winner's own. A tranque goes to the pair with fewer pips. On a pip tie the tranque is a draw, and a zero is recorded to track future openings. Art. 61 plays World Championship matches to 200, with a 35-minute cap. Art. 62 gives the match to the first pair that reaches the target. The rulebook text has no capicúa, pase de salida, pase corrido, chuchazo or shutout bonus. The no-redeal rule (FEMUNDO Art. 5) was not checked in this pass.\n(B) INFORMAL / \"Regla de Patio\": pase de salida, pase corrido and capicúa pay 25 or 30 each. Wikipedia (es) uses the two names \"Regla General\" and \"Regla de Patio\" literally and says Regla General is essentially the Latin game. In patio play the losing pair gives the table to the next pair, and a player of the losing team shuffles. Wikipedia does not state \"three or more pairs\" as a figure. Describe the patio setup as one table where the winner stays and the next pair waits.\n\nItems 1, 2, 5, 6 and 7 stand as written. Chuchazo is Puerto Rican: the 0-0 is the chucha, it pays 100 only in 500-point games, it pays nothing on a tranque, and closing two blank ends is \"dominau\" (Mesa28 confirms all of this). A Dominican glossary uses \"chuchazo\" for a hard blow. \"La caja\" is the 0-0 and \"el burro\" is the 6-6, with no bonus attached. The loser shuffles (\"barajar las fichas\", or \"lavar\").\n\nCorrection 1 (item 3): the double rule. Wikipedia (es), Dominican section, explicitly says a double on the last play is not capicúa. The La Mesa glossary defines capicúa as going out with a tile that could close either end and says nothing about doubles. So replace \"all sources agree\" with \"Wikipedia (es) and DR1 exclude doubles; the La Mesa glossary is silent.\" Remove the conflicting ownerView line that says \"only La Mesa agrees\", unless the La Mesa rules page (not opened here) supports it. The \"capicúa con blanco no vale\" toggle rests on DR1 alone. Wikipedia's capicúa text does not mention blanks.\n\nCorrection 2 (item 4): pollona. Pollona is not only Cuban vocabulary. The Dominican La Mesa glossary defines zapato as winning the match while the other pair has 0, and adds: \"También se le dice pollona en algunas mesas.\" So the Dominican shutout labels are \"zapato\" (primary) and \"pollona\" (secondary, some tables). Zapatero/zapatera and \"lisa\" come from other apps not checked here. The bonus stays at 0. Show the shutout as a label or celebration only.\n\nCorrection 3 (wording): the consensus says Regla General \"follows FID 2024 and FEMUNDO 2025\". Wikipedia supports only \"essentially the Latin game\". The FID link is inferred, not stated by a Dominican source. The Fededodo-to-FEMUNDO link was not checked.",
+   "sourcesChecked": [
+    {
+     "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+     "supports": "yes",
+     "note": "WebFetch could not parse the PDF but saved the binary. pdftotext on the saved file gave the full text. Art. 54: a hand ends only by dominada or cierre/tranca, never by a penalty. Art. 57/58: all unplayed tiles are counted, including the winner's. A tranque goes to the lower pair, and a pip tie is a draw with a zero recorded. Art. 61: World Championships play to 200, max 35 min. Art. 62: first pair to reach the target wins. No capicúa, pase, chuchazo or shutout bonus appears in the text (grep for capic, corrido, bonif, chuch, pollona, zapato found none in scoring)."
+    },
+    {
+     "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+     "supports": "yes",
+     "note": "Dominican section. Uses 'Regla General' and 'Regla de Patio' literally. Regla General is essentially the Latin game. Pase de salida, pase corrido and capicúa pay 25 or 30. Losers give the table to the next pair. A player of the losing team shuffles. The 0-0 is la caja and the 6-6 is el burro. Juego en banda and Pintintín are described. The page explicitly excludes a double as capicúa and says nothing about blanks. No 'three or more pairs' figure. No chuchazo, pollona, dar agua or Largos/Cortos. Queried twice (same cached URL)."
+    },
+    {
+     "url": "https://www.mesa28.com/chuchazo-domino",
+     "supports": "yes",
+     "note": "Puerto Rican (boricua) page. The chucha is the 0-0. Chuchazo is going out with it and pays 100 only in 500-point games. It does not count on a tranque. When the 0-0 connects two blank ends it is dominau, not chuchazo. No Dominican usage."
+    },
+    {
+     "url": "https://lamesa.mercitlabs.com/glosario-domino/",
+     "supports": "partly",
+     "note": "Self-described Dominican glossary. Chuchazo is a hard blow, not a tile. Zapato is a match won with the other pair at 0, and some tables also call it pollona. This contradicts the consensus framing of pollona as Cuban only. Lavar means mixing the 28 tiles. Capicúa is defined without any mention of doubles. The glossary does not have zapatero/zapatera, dar agua, la caja, manito, or Largos/Cortos. Queried twice (same cached URL)."
+    }
+   ],
+   "ownerViewCheck": "Mostly holds, with two fixes. Holds: chuchazo is contradicted as a Dominican feature, because it is Puerto Rican (Mesa28) and Dominicans use the word for a hard blow (La Mesa). La caja is supported only as the tile name, with no bonus (Wikipedia). For dar agua, the word does not appear in Wikipedia or in the La Mesa glossary, while the custom (the losing team shuffles) is Dominican (Wikipedia). Fix 1: pollona is partly supported as Dominican vocabulary, not only Cuban. The La Mesa glossary says some Dominican tables call a zapato \"pollona\". It is still contradicted as a bonus, because no opened source pays points for it. Fix 2: the double-capicúa belief. Wikipedia (es) explicitly says a double is not capicúa, so that part of the contradiction is confirmed. The statement that \"only La Mesa agrees\" with the owner is not confirmed by the La Mesa glossary, which says nothing about doubles, and it conflicts with consensus item 3's \"all sources agree\". Keep one version: Wikipedia and DR1 exclude doubles, La Mesa's glossary is silent, and the La Mesa rules page was not checked. Capicúa with a blank is still thin support (DR1 only, not opened here).",
+   "confidence": "medium"
+  }
+ }
+]

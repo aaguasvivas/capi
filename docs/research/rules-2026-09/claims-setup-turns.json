@@ -1,0 +1,992 @@
+[
+ {
+  "rule": "Each player takes seven tiles. The player with the double six plays first in a match.",
+  "quote": "the first person to play is the person who has the double six",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1, Wayback 2015 copy)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "After the first hand, the winner of the hand leads the next one and may open with any tile.",
+  "quote": "the person who wins the hand, or “mano,” who will be the leader",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Play goes to the right of the player who just played (counter-clockwise). A player who cannot match either end loses his turn.",
+  "quote": "the game is played in a counter-clockwise fashion",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Doubles are placed crosswise, and players may not play off the sides of doubles; play is only on the two open ends.",
+  "quote": "players are not allowed to play off of the doubles on the table",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The double six opens the first game. Later games are opened by the winner of the previous game, and the next tile is played by the player to his right.",
+  "quote": "Las demás partidas las inicia quien haya ganado la partida anterior.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican game: two teams of 1 or 2 players each. In 1v1, each player takes 7 tiles, and the rest stay in the pile to draw from when unable to play.",
+  "quote": "En la modalidad de 1 jugador por equipo, los jugadores toman 7 fichas cada uno",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "1v1 variant: each player takes ten tiles, and drawing from the pile is not allowed.",
+  "quote": "ambos jugadores toma diez fichas y no es permitido “cargar” de la pila",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Passing with a playable tile: all points after that pass go to the opponents. If the player corrects it before the next player plays, the penalty is 25 or 30.",
+  "quote": "solo recibirá una sanción de 25 o 30 puntos dependiendo de las reglas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano (Pase con ficha)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "With four players, each takes seven tiles.",
+  "quote": "Cuando juegan cuatro personas, cada jugador toma siete fichas.",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The player who places the first tile is the 'mano' for that hand.",
+  "quote": "El jugador que coloca la primera ficha es “mano” en esa partida.",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Later games are started by the winner of the previous game.",
+  "quote": "las subsiguientes son iniciadas por el ganador de la partida anterior",
+  "url": "https://www.acercateard.com/es/noticias/2024-01/deportes/el-domino-en-la-republica-dominicana-un-vinculo-cultural-y-social-inquebrantable?article=91431",
+  "sourceName": "Acércate a RD, Leonel Marzán (Jan 2024)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament: the first lead is with the double six, and later leads rotate (not winner-leads). A player may ask about the lead (rule 10).",
+  "quote": "SALIDA ROTATIVA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament: passing with a playable tile (also a mis-matched tile, 'chivo') costs 100 in total: minus 50 for the offending pair and plus 50 for the other pair. Then the tiles are reshuffled.",
+  "quote": "PASO CON FICHA SON 100 PUNTOS, MENOS 50 PARA LA PAREJA INFRACTORA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament: passing while holding a playable tile gives +30 to the other team.",
+  "quote": "Si pasas con fichas: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum answer from a DR resident: the game starts with the double six and goes anticlockwise, with partners sitting across.",
+  "quote": "the game starts by playing the double six, then continues in an anticlockwise fashion",
+  "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+  "sourceName": "DR1.com forum (2013)",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: in the standard 2v2, all 28 tiles are dealt, 7 each, with no boneyard. A player must play when able and cannot choose to pass.",
+  "quote": "You cannot choose to pass when you have a legal tile.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: in 1v1 and 3-player games, each player gets 7 tiles and the rest go to a face-down boneyard.",
+  "quote": "each player still gets seven tiles and the remaining tiles go face-down to the boneyard",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: after the first hand, many tables let the previous winner keep the lead.",
+  "quote": "many tables let the previous winner keep la mano and start again",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The double six orders the start: holding it means you lead.",
+  "quote": "el doble seis. Tenerlo es salir, marcar el primer paso",
+  "url": "https://inmobiliario.do/aqui-no-se-pasa-con-fichas/",
+  "sourceName": "El Inmobiliario, 'La tradición del dominó: Porque aquí no se pasa con fichas'",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Generic Spanish rule: passing is not allowed with a playable tile. After the first game, the lead rotates to the right with a free choice of tile.",
+  "quote": "No se permitirá el pase teniendo opción de juego",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: every player takes 7 tiles. The opener takes first, then the players to his right, which means play and dealing go to the right (counterclockwise).",
+  "quote": "en segundo y tercer lugar, los situados a la derecha de éste",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (2015, Art. 74c)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: the first opener of a match is chosen by each player drawing a tile. The highest tile opens, not the double six.",
+  "quote": "Corresponderá salir a aquél que presente la de puntuación más alta",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (2015, Art. 74b)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID 2024: the next hand is opened by the player to the right of the previous hand's opener (rotation), not by the winner.",
+  "quote": "La próxima mano sale el atleta a la derecha o trasmano de la mano anterior",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024 edition, Art. 76)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: saying 'paso' while holding a playable tile gives a yellow card and a 40% deduction of the target. If it prevents a tranca or domination, it gives a red card and loss of the match.",
+  "quote": "pronuncie la palabra paso teniendo fichas por jugar",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (2015, Art. 81)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO: the first opener is chosen by lot and the opener then rotates. The shuffler is the player to the left of the opener.",
+  "quote": "La primera salida será sorteada y luego será rotada.",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 8)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO: each player plays with 7 tiles.",
+  "quote": "Se juega con 7 fichas por atleta.",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 6)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican game: the holder of the double six opens the first game.",
+  "quote": "el jugador que posee el seis doble realiza la salida de la primera partida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican game: the winner of the previous hand opens later hands. The next tile is played by the player to the opener's right.",
+  "quote": "Las demás partidas las inicia quien haya ganado la partida anterior.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican game: play passes to the player on the right.",
+  "quote": "La próxima ficha la coloca el jugador a la derecha de este.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican game: sides are teams of 1 or 2 players, so 1v1 and 2v2 are both recognized.",
+  "quote": "Dos equipos de 1 o 2 jugadores cada uno.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican 1v1 ('Pila'): each player takes 7 tiles and the rest go to a pile. A player who cannot play draws from the pile one tile at a time until he finds a playable one.",
+  "quote": "toman 7 fichas cada uno, quedando las fichas restantes a un lado",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican 1v1 variant: each player takes ten tiles and drawing from the pile is not allowed.",
+  "quote": "ambos jugadores toma diez fichas y no es permitido “cargar” de la pila",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Each player takes 7 tiles. The holder of the double six plays first in a match.",
+  "quote": "the first person to play is the person who has the double six",
+  "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' page 1 (archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "After the first hand, the winner of the hand leads the next one and may open with any tile.",
+  "quote": "can play any fichas he or she desires",
+  "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' page 1 (archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Play goes to the right of the player who just played (counterclockwise). A player with no matching tile passes.",
+  "quote": "the game is played in a counter-clockwise fashion",
+  "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' page 1 (archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Doubles are placed crosswise, and players may not play off the sides of doubles. Only the two open ends of the line are playable, so there are no spinners.",
+  "quote": "players are not allowed to play off of the doubles on the table",
+  "url": "http://web.archive.org/web/20240708161409/https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' page 1 (archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament: the double six opens (rule 1) and the opener rotates (rule 2).",
+  "quote": "SALIDA CON DOBLE SEIS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga 2025 tournament: a lifted tile must be played, and passing with a playable tile gives +30 to the opposing team.",
+  "quote": "Si levantas ficha y vas, debes jugarla.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "When four people play, each player takes seven tiles. The player who places the first tile is the 'mano'.",
+  "quote": "Cuando juegan cuatro personas, cada jugador toma siete fichas.",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Roberto Guzmán, 'Dominó' (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Generic: passing is not allowed when the player has a tile that fits either end, whether or not the play is convenient.",
+  "quote": "No se permitirá el pase teniendo opción de juego",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "App: in 1v1 and 3-player games each player gets 7 tiles and the rest go to a boneyard. The standard 2v2 game deals all 28 tiles.",
+  "quote": "1v1 and 3-player formats deal seven tiles each — the rest go to the boneyard.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, 'How to Play Dominican Domino'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App: a player cannot choose to pass while holding a legal tile.",
+  "quote": "You cannot choose to pass when you have a legal tile.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, 'How to Play Dominican Domino'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App: the highest double leads the first hand. After that, the partnership that won the previous hand opens with any tile.",
+  "quote": "the player whose frente won the previous hand opens the next one",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, 'Dominican Dominoes Rules'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: the double six opens the first game. In 2- or 3-player games where nobody drew the double six, the highest double opens. The winner of the previous game opens later games with any tile, and play goes counterclockwise.",
+  "quote": "if the double 6 wasn't drawn, then the highest double starts the game",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, 'Domino Games in Puerto Rico' (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation: falsely saying 'paso' while holding playable tiles gives a -25 point fine to the offender.",
+  "quote": "Si un jugador FALSAMENTE dice PASO, y tiene fichas para jugar, conlleva multa",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Team play: each player takes seven tiles. The holder of the double six plays first in a match.",
+  "quote": "in a match the first person to play is the person who has the double six",
+  "url": "https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1, Wayback snapshot 2024-07-08)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "After the first hand, the winner of the previous hand leads the next one and may lead with any tile.",
+  "quote": "can play any fichas he or she desires",
+  "url": "https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The next player is the one to the right; play goes counter-clockwise. A player with no matching tile forfeits the turn.",
+  "quote": "the game is played in a counter-clockwise fashion",
+  "url": "https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Doubles are laid crosswise and no play is allowed off the sides of a double; only the two open ends are playable.",
+  "quote": "players are not allowed to play off of the doubles on the table",
+  "url": "https://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 1, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The double-six holder opens the first game. Later games are opened by the winner of the previous game, and the next tile is placed by the player to the right.",
+  "quote": "Las demás partidas las inicia quien haya ganado la partida anterior.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Salida",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican 1v1 (one player per team): 7 tiles each, the rest in a pile. A player who cannot play draws one at a time until a playable tile appears.",
+  "quote": "debe “cargar” fichas de la pila, una por una hasta encontrar aquella",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Pila",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: the opening does not rotate; the team that won the previous hand opens. The double six opens the first hand.",
+  "quote": "la salida no rota: la sale el equipo que ganó la mano anterior",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa states turns go clockwise, which contradicts DR1, Wikipedia, FichaFlow and OurPastimes (counter-clockwise, to the right).",
+  "quote": "Se juega por turnos en el sentido de las manecillas del reloj.",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: a player must play when able; passing is allowed only with no playable tile.",
+  "quote": "Jugar es obligatorio: si tienes una ficha que pegue, tienes que ponerla.",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: if a hand must be redealt, the same player who opened opens again.",
+  "quote": "hay que repartir de nuevo, vuelve a salir quien salió",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: the four-player game deals all 28 tiles with no boneyard. 1v1 and 3-player games deal seven each, and the rest go to a boneyard.",
+  "quote": "The game is also played 1v1 or with three players — those formats use a boneyard",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: play moves counter-clockwise and a player must play if able; you cannot choose to pass with a legal tile.",
+  "quote": "Play moves counter-clockwise. If you can answer one of the open ends, you must play.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: the most common rule is that the team that won the previous hand keeps 'la mano' and opens with any tile. The 6-6 requirement applies only to the first hand.",
+  "quote": "the team that won the previous hand keeps la mano",
+  "url": "https://fichaflow.com/learn/who-goes-first-in-dominican-domino",
+  "sourceName": "FichaFlow, Who Goes First in Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow variant: some tables rotate the opening one seat to the right each hand, whoever won.",
+  "quote": "Some tables rotate instead, passing the start one seat to the right each hand",
+  "url": "https://fichaflow.com/learn/who-goes-first-in-dominican-domino",
+  "sourceName": "FichaFlow, Who Goes First in Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: in the first hand the holder of the highest double leads with it. Later hands are led by the winning team's player, with any tile.",
+  "quote": "whoever holds the highest double must lead with it",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): the first opening is with the double six, and after that the opening rotates.",
+  "quote": "SALIDA ROTATIVA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Tranca (open-source Dominican game): the first hand has a forced double-six opening. Later hands are opened by the last player who played in the previous hand.",
+  "quote": "Deal the next hand; the previous hand's last player to play opens.",
+  "url": "https://github.com/Nesmill/tranca",
+  "sourceName": "Nesmill/tranca, src/core/rules.js",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1 forum poster: the four-person partner game starts with the double six and continues anticlockwise.",
+  "quote": "the game starts by playing the double six, then continues in an anticlockwise fashion",
+  "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+  "sourceName": "DR1.com forum, 'Rules for Dominican Dominoes?'",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "OurPastimes: turns rotate counter-clockwise; each player draws seven.",
+  "quote": "Rotate turns counter-clockwise",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "OurPastimes, How to Play Dominican Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "GameVelvet Dominó Mano a Mano (generic 1v1): 7 tiles each and 14 in a draw pool. Draw until you can play, and pass only when the pool is empty. The highest double starts; game to 100.",
+  "quote": "7 tiles each player. 14 bones at the draw pool.",
+  "url": "https://www.gamevelvet.com/domino-single-online/rules",
+  "sourceName": "GameVelvet, How to Play Dominó Mano a Mano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominó en Parejas (Spanish app, generic rules): later rounds are opened by the player to the right, with any tile; target typically 100.",
+  "quote": "En las rondas siguientes el turno pasa al jugador de la derecha",
+  "url": "https://apps.apple.com/do/app/domin%C3%B3-en-parejas/id1070659362",
+  "sourceName": "Dominó en Parejas by Producciones Don Naipe (App Store listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Mesa28 (Puerto Rico): later hands are opened by the previous hand's winner, except after a tied tranca.",
+  "quote": "En las manos siguientes sale quien ganó la mano anterior, salvo una tranca empatada.",
+  "url": "https://www.mesa28.com/reglas-domino-boricua",
+  "sourceName": "Mesa28, Reglas del dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "The holder of the double six opens the first game; later games are opened by the winner of the previous one; the next tile is played by the player to the right.",
+  "quote": "el jugador que posee el seis doble realiza la salida de la primera partida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Later hands are opened by whoever won the previous one.",
+  "quote": "Las demás partidas las inicia quien haya ganado la partida anterior.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Play goes to the right of the opener (counterclockwise).",
+  "quote": "La próxima ficha la coloca el jugador a la derecha de este.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "1v1 (one player per team): 7 tiles each, the rest in the pila; a player who cannot play draws one by one until he finds a playable tile. A variant deals 10 each with no drawing.",
+  "quote": "una por una hasta encontrar aquella que pueda ser colocada",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "1v1 variant: both players take ten tiles and drawing from the pile is not allowed.",
+  "quote": "ambos jugadores toma diez fichas y no es permitido",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Four-player game: partners sit across; the game starts with the double six and goes anticlockwise.",
+  "quote": "the game starts by playing the double six, then continues in an anticlockwise fashion",
+  "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+  "sourceName": "DR1.com forum, Rules for Dominican Dominoes?, user The Gorgon, 2013",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (2009): 7 tiles each; highest double opens; each new round is started by the previous round's winner (either partner may start). This post says play passes to the left, which conflicts with other sources.",
+  "quote": "Each new round is started by winner of previous round",
+  "url": "https://dr1.com/forums/threads/rules-for-playing-domino.44672/page-2",
+  "sourceName": "DR1.com forum, Rules for playing domino, user Mega_Man, 2009",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): opening with the double six, and the opener rotates each hand.",
+  "quote": "SALIDA CON DOBLE SEIS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): the salida is rotative (not kept by the winner).",
+  "quote": "SALIDA ROTATIVA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: first hand opens with the 6-6; later the winning team keeps la mano and opens with any tile; some tables rotate the start one seat to the right instead.",
+  "quote": "its player opens the next hand with any tile they choose",
+  "url": "https://fichaflow.com/learn/who-goes-first-in-dominican-domino",
+  "sourceName": "FichaFlow, Who Goes First? La Salida",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: 2v2 deals all 28 tiles (7 each, no boneyard); in 1v1 or 3-player each gets 7 and the rest stays in the boneyard.",
+  "quote": "each player gets seven tiles and the remaining tiles stay face-down in the boneyard",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: a pass is legal only when you cannot answer either end; if you hold a legal tile you must play it.",
+  "quote": "If you hold a legal response, you must play it.",
+  "url": "https://fichaflow.com/learn/dominican-domino-passing-rules-explained",
+  "sourceName": "FichaFlow, Dominican Domino Passing Rules Explained",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican-labeled game sheet: the holder of double-six opens, failing that double-five and so on; a player who can play must play, otherwise knocks.",
+  "quote": "holding the double-six, or failing that the double-five and so on",
+  "url": "https://s3.amazonaws.com/mywt5-files/wp-content/uploads/sites/99/2019/08/14124500/International-games-pyt2019.pdf",
+  "sourceName": "International Game Descriptions PDF, Dominoes (Dominican Republic)",
+  "sourceKind": "other",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "General rules: passing is not allowed while holding a playable tile; play is counterclockwise; after the first hand the salida rotates and the opener picks any tile.",
+  "quote": "No se permitirá el pase teniendo opción de juego",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: the first opener is chosen by drawing tiles; each player takes 7; the next hand is opened by the player to the right of the previous opener.",
+  "quote": "La próxima mano sale el atleta a la derecha o trasmano de la mano anterior.",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024), Arts. 74, 76",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: in 2- or 3-player games, if nobody drew the double six, the highest double opens; players draw from the boneyard until they can play.",
+  "quote": "if the double 6 wasn't drawn, then the highest double starts the game",
+  "url": "https://caribbeantrading.com/dominoes-rules-in-puerto-rico/",
+  "sourceName": "Caribbean Trading, The Basics of Puerto Rican Dominoes Rules",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Generic mano a mano (online game): 7 tiles each, 14 in the draw pile; the highest double opens; draw until a tile fits; game to 50.",
+  "quote": "El jugador que comienza la partida es el que tiene el doble más alto",
+  "url": "https://www.magnojuegos.com/domino-mano-a-mano-online/reglas",
+  "sourceName": "Magnojuegos, Dominó Mano a Mano reglas",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Generic partnership rules: players must play if they legally can; play is normally counterclockwise; 6-6 holder leads the first deal.",
+  "quote": "Players must play a tile at their turn if they legally can.",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "pagat.com, Partnership Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Teams are 1 or 2 players each (1v1 or 2v2).",
+  "quote": "Dos equipos de 1 o 2 jugadores cada uno.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The holder of the double six opens the first game.",
+  "quote": "el jugador que posee el seis doble realiza la salida de la primera partida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Later hands are opened by whoever won the previous hand.",
+  "quote": "Las demás partidas las inicia quien haya ganado la partida anterior.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Play passes to the player on the right of the opener.",
+  "quote": "La próxima ficha la coloca el jugador a la derecha de este.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A player of the losing team shuffles.",
+  "quote": "Un jugador del equipo perdedor le tocara barajar las fichas.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "1v1: each player takes 7 tiles, the rest form the pila; a player who cannot play draws one by one until he can play.",
+  "quote": "debe “cargar” fichas de la pila, una por una",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "1v1 variant: each player takes ten tiles and drawing from the pila is not allowed.",
+  "quote": "ambos jugadores toma diez fichas y no es permitido “cargar” de la pila",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pila)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Passing while holding a playable tile: all points after that pass are counted for the opponents (or a 25/30 penalty if corrected in time).",
+  "quote": "los puntos de todas las fichas después de ese pase se cuentan a los oponentes",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano (Pase con ficha)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: the double six opens the first game of a match.",
+  "quote": "the first person to play is the person who has the double six",
+  "url": "http://web.archive.org/web/20100901215749/http://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 1, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: the winner of the hand leads the next game and may play any tile.",
+  "quote": "the person who wins the hand, or “mano,” who will be the leader",
+  "url": "http://web.archive.org/web/20100901215749/http://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 1, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: play goes counter-clockwise.",
+  "quote": "the game is played in a counter-clockwise fashion",
+  "url": "http://web.archive.org/web/20100901215749/http://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 1, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: doubles are placed crosswise and nobody may play off the sides of a double (only two open ends).",
+  "quote": "players are not allowed to play off of the doubles on the table",
+  "url": "http://web.archive.org/web/20100901215749/http://dr1.com/articles/dominoes.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 1, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament: the game opens with the double six.",
+  "quote": "SALIDA CON DOBLE SEIS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament: after a penalty or tie the next opener follows the rotation (rotating salida in that event).",
+  "quote": "SALE QUIEN LE TOCA SALIR EN LA ROTACION",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament: a hand with five doubles is still played (no redeal).",
+  "quote": "CINCO BOBLE SE JUEGA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guayiga 2025 tournament: tiles are only reshuffled if a player gets all 7 doubles.",
+  "quote": "Solo se baraja si salen los 7 dobles.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guayiga 2025 tournament: passing while holding a playable tile gives 30 points to the other team.",
+  "quote": "Si pasas con fichas: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican style: the team in the lead keeps the opening; the starter is not rotated.",
+  "quote": "The team in the lead does not give up position",
+  "url": "https://www.colonialzone-dr.com/dominoes/",
+  "sourceName": "Colonial Zone DR guide, Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: play is counter-clockwise and a player must play if he can answer an open end.",
+  "quote": "Play moves counter-clockwise. If you can answer one of the open ends, you must play.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: in 1v1 and 3-player games each player gets seven tiles and the rest go to a boneyard.",
+  "quote": "each player still gets seven tiles and the remaining tiles go face-down to the boneyard",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: from hand two, most commonly a player of the winning team opens with any tile; some tables rotate the opener one seat to the right.",
+  "quote": "passing the start one seat to the right each hand regardless of who won",
+  "url": "https://fichaflow.com/learn/who-goes-first-in-dominican-domino",
+  "sourceName": "FichaFlow, Who Goes First? La Salida",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: the team that won the previous hand opens the next one with any tile.",
+  "quote": "the player whose frente won the previous hand opens the next one",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: in 2 or 3 player games, if nobody drew the double six, the highest double starts.",
+  "quote": "if the double 6 wasn't drawn, then the highest double starts the game",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation: the opening rotates.",
+  "quote": "La SALIDA es ROTATIVA.",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento (Jan 2024 tournament)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Low-reliability site says Dominican play goes clockwise (contradicts all other Dominican sources).",
+  "quote": "O jogo avança no sentido horário",
+  "url": "https://jugardominoenlinea.com/variantes/dominicano.html",
+  "sourceName": "JogarDominoOnline / jugardominoenlinea.com, Dominó Dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ }
+]

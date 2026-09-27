@@ -1,0 +1,920 @@
+[
+ {
+  "rule": "Patio mode 'puntos de salida': if the opponent right after the opener cannot play on the first tile, the opener gets 25 or 30. If the opener's partner also cannot play, the points are cancelled.",
+  "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio mode: when no other player can play (paso corrido), the player who caused it gets 25 or 30 points.",
+  "quote": "el jugador que dio ese pase corrido se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase de salida: if the next player cannot play on the first tile, the opener's team gets 10 points (games to 200 or 250) or 25 points (games to 500).",
+  "quote": "his team is awarded 10 or 25 points, this depends on the total",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The pase de salida is cancelled if the player after that also cannot play. It applies only to the first tile of a hand.",
+  "quote": "If the next player after that also doesn’t have a piece to play",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase corrido: all three other players cannot play. The player who last played gets 25 for his team and plays again.",
+  "quote": "the player who last played receives 25 points towards his team’s total",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A player can score several pases corridos in the same hand; there is no limit.",
+  "quote": "there is no limit to the amount of pases corridos one can accumulate",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Only the pase de salida and the pase corrido score pass points. Making just the next player pass in mid-hand earns nothing.",
+  "quote": "the only other time that a player can gain points for skipping other players",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): a pass on the opening tile is worth 25 points.",
+  "quote": "EL PASO A LA SALIDA CON 25 PUNTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): the paso corrido is worth no points.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): paso corrido is worth +30 to the 'equipo contrario'. It is listed among penalties, so it is unclear whether this means the team that caused the pass.",
+  "quote": "Paso corrido: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the Dominican Republic, special plays are normally worth 25: pase de salida (second player passes on the opening tile), pase redondo or corrido (other three pass), and capicúa.",
+  "quote": "Pase redondo o corrido (provocar el pase de los otros tres jugadores de la mesa)",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia, Dominó Latino section",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In Dominican patio mode, a paso corrido adds points for the player who makes it. The article does not give an amount.",
+  "quote": "un paso corrido suma puntos al jugador que lo realiza",
+  "url": "https://www.acercateard.com/es/noticias/2024-01/deportes/el-domino-en-la-republica-dominicana-un-vinculo-cultural-y-social-inquebrantable?article=91431",
+  "sourceName": "Acércate a RD, 'El Dominó en la República Dominicana' by Leonel Marzán (Jan 2024)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Restating DR1: if all three players cannot play, the player who last played earns 25.",
+  "quote": "If all three players are unable to play, that opponent earns 25 points.",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes (cites DR1)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow defaults: pase de salida 25 and paso redondo (the other three, partner included, pass and you can still play) 25. A fully locked hand does not count as paso redondo.",
+  "quote": "Pase de Salida 25, Paso Redondo 25",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Paso redondo or pase corrido does not include a fully locked hand (tranque).",
+  "quote": "A fully blocked hand does not qualify.",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Terminology: the player who places the first tile is 'mano'. If he makes the opponent on his right pass, his partner becomes 'manito'. No points are mentioned.",
+  "quote": "al jugador oponente que le queda a su derecha, su frente se convierte en “manito”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican patio mode: when a player makes a pase corrido (none of the other three can play), that player gets 25 or 30 points, depending on the rules.",
+  "quote": "el jugador que dio ese pase corrido se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican patio mode, 'puntos de salida': if the next opponent cannot answer the first tile, the opener gets 25 or 30. The bonus is cancelled if the opener's partner also cannot play.",
+  "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican 'pase con ficha' (passing while holding a playable tile): the points of all tiles after that pass go to the opponents. If the player corrects it before the next player plays, the penalty is only 25 or 30 points.",
+  "quote": "los puntos de todas las fichas después de ese pase se cuentan a los oponentes",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase de salida: if the next player cannot answer the opening tile, the opener's team gets 10 points in games to 200 or 250, or 25 points in games to 500.",
+  "quote": "his team is awarded 10 or 25 points",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The pase de salida bonus is cancelled if the player after that one also cannot play. It exists only on the first tile of a hand.",
+  "quote": "also doesn't have a piece to play, the points aren't counted",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase corrido: when all three other players cannot play, the player who last played gets 25 points for his team and plays again.",
+  "quote": "the player who last played receives 25 points towards his team's total",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A player can score any number of pases corridos in one hand.",
+  "quote": "there is no limit to the amount of pases corridos one can accumulate",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Only two pass situations score: the pase de salida and the pase corrido. An ordinary single pass later in the hand gives no bonus.",
+  "quote": "the only other time that a player can gain points for skipping other players",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 municipal tournament: the paso corrido is worth no points.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 municipal tournament: the pass on the opening tile (paso a la salida) is worth 25 points.",
+  "quote": "EL PASO A LA SALIDA CON 25 PUNTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga 2025 tournament: a paso corrido gives +30 points 'to the opposing team'. This most likely means the side that did not pass, but the wording is ambiguous.",
+  "quote": "Paso corrido: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican special plays (normally 25 points) include the pase de salida: the opening tile makes the second player pass.",
+  "quote": "Pase de salida (provocar el pase del segundo jugador con la ficha de salida)",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican special plays (normally 25 points) include the pase redondo or corrido: one play makes all three other players pass.",
+  "quote": "Pase redondo o corrido (provocar el pase de los otros tres jugadores de la mesa)",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican dominoes: when a player cannot play, the opponent who last played gets 10 extra points in games to 200 or 250, or 25 in games to 500.",
+  "quote": "the opponent who last played gets an extra 10 points",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, 'How to Play Dominican Dominoes'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App rule: a full pass gives +25 and an opener pass gives +10. Bonuses cannot win the match; a side must win a hand to cross the target.",
+  "quote": "Bonuses alone cannot win the match",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, 'Dominican Dominoes Rules'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App rule: the Dominican pase de salida bonus is 10 or 25 depending on the variant. A paso redondo means the other three (including the partner) pass. A fully blocked hand does not count as paso redondo.",
+  "quote": "Dominican variants use 10 or 25.",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO world rules have no pass bonus. A paso corrido only means the same player may play again, and it is not a move out of turn.",
+  "quote": "Paso corrido no se considerará jugada adelantada.",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 13)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO: passing while holding a playable tile costs 40% of the target (80 points) and a yellow card. Doing it on purpose loses the match 0-200.",
+  "quote": "El Paso con Ficha: el atleta infractor será penalizado con un descuento de 40%",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 16)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID rules have no pass bonus. Saying 'paso' only counts as making a move.",
+  "quote": "pronunciar la palabra paso será equivalente a la ejecución de una jugada",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (July 2015, Art. 80)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Ponce (Puerto Rico) style: passes are the main scoring. The first pass of the match is worth 2 points and later passes 1 point. A pass by your own partner is free.",
+  "quote": "Los demás pases valen 1 punto.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Spanish or Puerto Rican style tournament: every pass gives the non-passing team 10 points at once.",
+  "quote": "The non-passing team immediately scores 10pts",
+  "url": "https://stayandplaygamecafe.com/domino-tournament-rules",
+  "sourceName": "Stay and Play Game Cafe, 'Domino Tournament Rules'",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Pase de salida (patio): if the opponent right after the opener cannot play, the opener gets 25 or 30. If the opener's partner also cannot play, the bonus is cancelled.",
+  "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Puntos de salida",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Paso corrido (patio): when none of the other players can play, the player who caused it gets 25 or 30.",
+  "quote": "el jugador que dio ese pase corrido se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Paso corrido",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase con ficha: a player who passes while holding a playable tile gives the opponents the points of all tiles after that pass. If he corrects it before the next player plays, the penalty is only 25 or 30.",
+  "quote": "solo recibirá una sanción de 25 o 30 puntos dependiendo de las reglas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Pase con ficha",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Opening pass: if the player after the opener cannot play on the first tile, the opener's team gets 10 points in games to 200 or 250, and 25 in games to 500. It applies only to the first tile of a hand.",
+  "quote": "his team is awarded 10 or 25 points, this depends on the total",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The opening-pass points are cancelled if the next player after that (the opener's partner) also cannot play.",
+  "quote": "the points aren’t counted, and the next player plays his piece",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase corrido: all three other players cannot play; the player who last played gets 25 for his team and plays again. There is no limit on how many can be collected.",
+  "quote": "the player who last played receives 25 points towards his team’s total",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Apart from the opening pass and the pase corrido, making a player pass earns no points.",
+  "quote": "the only other time that a player can gain points for skipping other players",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: full pass (one play makes all three others pass) is +25 for that player's team.",
+  "quote": "Full pass, plus 25: a single play that forces all three other players to pass",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: opener pass is +10, awarded in a hand where the winner opened and the next player cannot answer the lead.",
+  "quote": "Opener pass, plus 10: in a hand where the winner opened",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: bonuses cannot win the match on their own; they are capped so a team must win a hand to cross the target.",
+  "quote": "Bonuses alone cannot win the match, they are capped",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: pase de salida is 25 by default for the first opposing pass right after the opening tile. It notes DR1's 10/25 and partner-cancel rule but does not implement the cancellation. A later pass is not pase de salida.",
+  "quote": "it does not cancel the award if the opener’s partner later passes",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: paso redondo (pase corrido) is 25 at a four-player table and the circuit includes the partner. It is not awarded if the sequence is a tranque, and it does not exist at a two-player table.",
+  "quote": "At a two-player table, a single opponent’s pass is not this four-player bonus.",
+  "url": "https://fichaflow.com/learn/what-is-paso-redondo-in-domino",
+  "sourceName": "FichaFlow, What Is Paso Redondo in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow notes that some Dominican competitions exclude pass bonuses, citing the Santiago tournament rules.",
+  "quote": "Some Dominican competitions exclude pass bonuses, as in the published Santiago tournament rules.",
+  "url": "https://fichaflow.com/learn/what-is-paso-redondo-in-domino",
+  "sourceName": "FichaFlow, What Is Paso Redondo in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): pase de salida is worth 25.",
+  "quote": "EL PASO A LA SALIDA CON 25 PUNTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): the paso corrido earns no points.",
+  "quote": "NO VALE TANTOS EL PASO CORRIDO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): passing with a playable tile costs a 100-point swing (minus 50 for the offenders, plus 50 for the other pair), then the tiles are reshuffled.",
+  "quote": "PASO CON FICHA SON 100 PUNTOS, MENOS 50 PARA LA PAREJA INFRACTORA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): paso corrido is listed as +30 to the 'equipo contrario' (literal wording, placed among the penalty lines; the direction of the award is ambiguous).",
+  "quote": "Paso corrido: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): passing while holding a playable tile gives the other team 30.",
+  "quote": "Si pasas con fichas: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A user review of the República dominó app says the app's Dominican style should give 30 for the opening pass (paso a la salida), but sometimes gives 60.",
+  "quote": "estilo de juego dominicano coloca 60 puntos en lugar de 30",
+  "url": "https://apps.apple.com/do/app/rep%C3%BAblica-domin%C3%B3/id1484277118",
+  "sourceName": "República dominó (App Store DO, user review)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "RDomino (Dominican-style partnership dominoes app) scores bonuses for paso corrido, capicúa, and the opener (opening pass); amounts are not published in the listing.",
+  "quote": "the bonuses that matter: paso corrido, capicúa, and the opener",
+  "url": "https://apps.apple.com/us/app/rdomino-dominican-dominoes/id6776026533",
+  "sourceName": "RDomino | Dominican Dominoes (App Store and Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Domino Apunte Dominicano scorekeeper has a quick button for a 25-point pase.",
+  "quote": "Pase 25 puntos",
+  "url": "https://play.google.com/store/apps/details?id=com.parkave.dominoesscore&hl=es",
+  "sourceName": "Domino Apunte Dominicano (Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican newspaper column: if the opener makes the opponent on his right pass, the opener's partner becomes 'manito' (a named event; no points given).",
+  "quote": "al jugador oponente que le queda a su derecha, su frente se convierte en “manito”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, 'Dominó' (language column)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "OurPastimes (based on DR1) states it more broadly: when a player cannot play, the opponent who last played gets 10 (games to 200/250) or 25 (games to 500); if all three cannot play, 25.",
+  "quote": "gets an extra 10 points if the game is being played to 200 or 250",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "OurPastimes, How to Play Dominican Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Jugarmania 'Dominó Latino' browser game (lists DR among Caribbean countries): pase de salida, pase redondo, and capicúa each give 25.",
+  "quote": "\"Pase de salida\", \"Pase redondo\" y \"Capicua\" otorgan 25 puntos.",
+  "url": "https://www.jugarmania.com/juego/domino-latino/",
+  "sourceName": "Jugarmania, Dominó Latino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico (Ponce) variant played to 20: every pass scores (first pass of the match 2 points, others 1); a partner's pass is free.",
+  "quote": "Los demás pases valen 1 punto.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Mesa28 (Puerto Rico): the only point prizes are capicú, chuchazo and the first hands, in 500-point games; no pass bonuses are listed.",
+  "quote": "incluyen premios de punto por capicú, chuchazo y las primeras manos",
+  "url": "https://www.mesa28.com/reglas-domino-boricua",
+  "sourceName": "Mesa28, Reglas del dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Paso corrido (patio mode): when none of the other players can play, the player who caused it gets 25 or 30 points.",
+  "quote": "el jugador que dio ese pase corrido se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puntos de salida (patio mode): if the opener's next opponent cannot play the first tile, the opener gets 25 or 30; if the opener's partner also cannot play, the salida points are cancelled.",
+  "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase con ficha: if a player passes while holding a playable tile, all points after that pass go to the opponents; if he corrects it before the next player plays, the penalty is only 25 or 30.",
+  "quote": "los puntos de todas las fichas después de ese pase se cuentan a los oponentes",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican special plays (usually 25 points): pase de salida (make the second player pass with the opening tile) and pase redondo (make the other three players pass).",
+  "quote": "provocar el pase de los otros tres jugadores de la mesa",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Initial pass: if the next player cannot answer the first tile, the opener's team gets 10 or 25 points depending on the game target (10 for 200/250, 25 for 500).",
+  "quote": "his team is awarded 10 or 25 points, this depends on the total amount",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Initial pass is cancelled if the following player (the opener's partner) also cannot play.",
+  "quote": "also doesn't have a piece to play, the points aren't counted",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase corrido: all three other players cannot play; the player who last played gets 25 points for his team.",
+  "quote": "the player who last played receives 25 points towards his team's total",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (1999, DR style): 25 points if the next player cannot go, provided your partner can play.",
+  "quote": "if the following person cant go you gain 25 points providing your partner can play",
+  "url": "https://dr1.com/forums/threads/the-rules-for-dominoes-dr-style.2622/",
+  "sourceName": "DR1.com forum, The rules for Dominoes (DR style), user allan, 1999",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (1999, DR style): another 25 points if you play and nobody else can go.",
+  "quote": "if you play a dominoe and nobody else can go another 25 points",
+  "url": "https://dr1.com/forums/threads/the-rules-for-dominoes-dr-style.2622/",
+  "sourceName": "DR1.com forum, The rules for Dominoes (DR style), user allan, 1999",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (2009): if the player after the opener cannot play, the starting team earns 10 points.",
+  "quote": "he must pass and the starting team earns a 10 point bonus",
+  "url": "https://dr1.com/forums/threads/rules-for-playing-domino.44672/page-2",
+  "sourceName": "DR1.com forum, Rules for playing domino, user Mega_Man, 2009",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): the pass at the opening (paso a la salida) is worth 25 points.",
+  "quote": "EL PASO A LA SALIDA CON 25 PUNTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): passing with a playable tile (also a misplayed tile, chivo) costs 100: minus 50 to the offending pair, plus 50 to the other pair; reshuffle.",
+  "quote": "PASO CON FICHA SON 100 PUNTOS, MENOS 50 PARA LA PAREJA INFRACTORA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): paso corrido gives 30 points to the other team (the rule lines are all written from the side of the team that passes or errs).",
+  "quote": "Paso corrido: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): passing while holding a playable tile gives 30 points to the other team.",
+  "quote": "Si pasas con fichas: +30 pts al equipo contrario",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FID international rules: saying paso while holding playable tiles gives a yellow card and a deduction of 40% of the match target; the hand ends.",
+  "quote": "pronuncie la palabra paso teniendo fichas por jugar",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024), Art. 81",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: pase de salida is a Dominican opening-pass bonus (default 25). The site notes DR1 cancels it if the opener's partner also passes, but FichaFlow does not implement that.",
+  "quote": "Pase de Salida is a Dominican opening-pass bonus: the player after the opener cannot play.",
+  "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+  "sourceName": "FichaFlow, What Is Pase de Salida in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: paso redondo (all three others pass back to you, default 25) does not exist in 1v1; a single opponent's pass is not this bonus.",
+  "quote": "At a two-player table, a single opponent's pass is not this four-player bonus.",
+  "url": "https://fichaflow.com/learn/what-is-paso-redondo-in-domino",
+  "sourceName": "FichaFlow, What Is Paso Redondo in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico Doscientos: 20 points to the team of the first player in the match whose tile makes the next player pass; 10 points each later time.",
+  "quote": "the team that played the tile scores 10 points",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "pagat.com, Partnership Dominoes (Puerto Rico, Doscientos)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban custom: 'salida vale 20', if the opener's opponent cannot answer the first tile, the opening team scores 20.",
+  "quote": "Salida vale 20",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "CubaTrendings, Capicúa vale doble y otras reglas para jugar dominó en Cuba",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominó ponceño (Puerto Rico, 20-point game): the first pass of the match is worth 2 points, later passes 1 point.",
+  "quote": "El primer pase de todo el partido vale 2 puntos.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Patio game: a paso corrido (no other player can play) gives the player who caused it 25 or 30 points.",
+  "quote": "el jugador que dio ese pase corrido se le suman 25 o 30 puntos",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio game: if the next opponent cannot play the opening tile, the opener gets 25 or 30 points.",
+  "quote": "si al momento de colocarse la primera ficha, el oponente inmediato no puede jugar",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The opening-pass points are cancelled if the opener's partner also cannot play.",
+  "quote": "si la pareja tampoco puede jugar entonces se anulan los puntos de salida",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: pase de salida pays 10 points in games to 200 or 250 and 25 points in games to 500; it only applies to the opening tile of a hand.",
+  "quote": "his team is awarded 10 or 25 points, this depends on the total amount",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: the pase de salida is cancelled if the player after the passer also cannot play.",
+  "quote": "also doesn't have a piece to play, the points aren't counted",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: a pase corrido (all three other players cannot play) gives 25 points to the last player's team, who then plays again.",
+  "quote": "the player who last played receives 25 points towards his team’s total",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: a player can collect any number of pases corridos in one hand.",
+  "quote": "there is no limit to the amount of pases corridos one can accumulate",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guayiga 2025 tournament: paso corrido is worth 30 points, written as '+30 to the opposing team' (the team opposite the players who passed).",
+  "quote": "Paso corrido: +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament: the pass on the opening tile is worth 25 points.",
+  "quote": "EL PASO A LA SALIDA CON 25 PUNTOS.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the DR, special plays are normally worth 25 points: pase de salida (the second player passes on the opening tile), pase redondo or corrido (the other three pass), and capicua.",
+  "quote": "jugadas con puntuación especial (normalmente 25 puntos), en países como en La República Dominicana",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: Arte o Ciencia, Reglas del Dominó (Dominó Latino section)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pase redondo or corrido means making the other three players at the table pass.",
+  "quote": "Pase redondo o corrido (provocar el pase de los otros tres jugadores de la mesa)",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: Arte o Ciencia, Reglas del Dominó (Dominó Latino section)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: paso redondo means both opponents and your partner pass and you can still play; a fully blocked hand does not count.",
+  "quote": "the other three players, including your partner, pass after your play",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: pase de salida is when the next player cannot answer the opening tile; Dominican variants pay 10 or 25.",
+  "quote": "After the opening tile, the next player cannot answer. Dominican variants use 10 or 25.",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, Complete Dominican Domino Guide",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden (Dominican dominoes web game): pass bonuses (full pass +25, opener pass +10) cannot win the match; a team must win a hand to cross the target.",
+  "quote": "Bonuses alone cannot win the match, they are capped",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican street betting custom: a player who cannot play pays money to the player who laid the tile that made him pass.",
+  "quote": "pass money to the player that laid that tile",
+  "url": "https://www.colonialzone-dr.com/dominoes/",
+  "sourceName": "Colonial Zone DR guide, Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "If the opener makes the opponent on his right pass, the opener's partner becomes 'manito' (a named position, no points stated).",
+  "quote": "al jugador oponente que le queda a su derecha, su frente se convierte en “manito”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Dominó, by Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Cuba: 'no caben' rule, points that would take a team past the target are not scored (optional; 'de caballero' means the rule is not used).",
+  "quote": "si esa cantidad supera los necesarios para ganar el juego entonces no se anotan",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "Cubatrendings, Capicúa vale doble y otras reglas para jugar dominó en Cuba (2018)",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuba: when the opening double makes the next player pass, the opening pair scores 20 tantos.",
+  "quote": "se apuntan 20 tantos para la pareja que salió",
+  "url": "https://cubatrendings.com/2018/01/05/jugar-domino-en-cuba/",
+  "sourceName": "Cubatrendings, Capicúa vale doble y otras reglas para jugar dominó en Cuba (2018)",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico 'Pase Sureño': 20 points for the first pass of the game and 10 for each later pass, scores rounded down to tens.",
+  "quote": "scores a bonus of 20 points for the very first pass of the game",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ }
+]

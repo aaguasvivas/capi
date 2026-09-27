@@ -1,0 +1,758 @@
+[
+ {
+  "rule": "The Dominican Republic has two modes: Regla General (like the Latin game, no bonuses listed) and Regla de Patio (informal). Patio mode carries the pase de salida, pase corrido, and capicúa bonuses.",
+  "quote": "se juegan dos modalidades, son llamadas De Regla General y De Regla de Patio",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio play uses one table even with three or more pairs; the losing pair gives up its seat, so the rules aim to speed play.",
+  "quote": "se usa solo una mesa aunque haya tres o más parejas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "'Juego en banda': a position where the tranque is forced no matter where the remaining tiles are played.",
+  "quote": "el tranque es obligado sin importar por donde se coloquen las fichas restantes",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pintintín: a Dominican every-player-for-himself variant for 2 to 4 players with 6 or 7 tiles each. It is played for bets, with no running score.",
+  "quote": "El Pintintin es una variedad en la que se juega todos contra todos.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A player of the losing team shuffles the tiles for the next hand (the 'dar agua' custom).",
+  "quote": "Un jugador del equipo perdedor le tocara barajar las fichas.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Tile names: in the Dominican Republic the double blank is 'la caja' and the double six is 'el burro'.",
+  "quote": "en República Dominicana el cero doble se conoce como «la caja»",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, Nombre de las fichas",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A Dominican columnist names the double blank 'la cajita' or 'el muerto', not 'la chucha'.",
+  "quote": "El doble blanco es la cajita o el muerto",
+  "url": "https://www.diariolibre.com/opinion/columnistas/2026/01/29/domino--la-republica-de-las-fichas/3419598",
+  "sourceName": "Diario Libre, Aníbal de Castro (2026)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican players keep rules that differ by local custom.",
+  "quote": "En el español dominicano los jugadores mantienen reglas que difieren según las costumbres.",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The Dominican verb for shuffling tiles is 'barajar las fichas'.",
+  "quote": "“barajar las fichas” es mezclarlas antes de repartirlas",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow says chuchazo comes from Puerto Rican rules and pollona is a Cuban shutout term; both are off by default. Its pollona page reports no reliable standard Dominican pollona bonus.",
+  "quote": "Chuchazo is documented in Puerto Rican rules and Pollona as a Cuban shutout term",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: la Chucha is the 0-0. A chuchazo (going out with it) earns a 100-point prize only in 500-point games.",
+  "quote": "100 puntos de premio solo en mesas de 500 puntos",
+  "url": "https://www.mesa28.com/chuchazo-domino",
+  "sourceName": "Mesa28, Qué es un chuchazo en dominó boricua",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament: sudden death, so the losing pair leaves (patio style). Rule 7 says a hand with five doubles is still played.",
+  "quote": "SE JUGARA MUERTE SUBITA, EL QUE PERDIO SE VA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament: tiles are reshuffled only if the 7 doubles come out (together in one hand). Other deals are played as dealt.",
+  "quote": "Solo se baraja si salen los 7 dobles.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Three-player Dominican game: 7 tiles each with 7 out of play, every man for himself, first to 200.",
+  "quote": "three people with 7 cards each, and 7 out of play",
+  "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+  "sourceName": "DR1.com forum (2013)",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "One tournament-listing site claims the FEDOMDOM cup uses double-9 with a 'pollona' penalty. Every other Dominican source describes double six, so this claim is likely wrong.",
+  "quote": "Las reglas siguen la variante dominicana, que usa el doble-9",
+  "url": "https://jugardominoenlinea.com/torneos.html",
+  "sourceName": "jugardominoenlinea.com, Torneos de Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The Dominican Republic has two modes: Regla General (formal) and Regla de Patio (informal).",
+  "quote": "se juegan dos modalidades, son llamadas De Regla General y De Regla de Patio",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Regla general is essentially the generic Latino mode. The bonuses (capicúa, pase corrido, puntos de salida) are listed under the patio mode.",
+  "quote": "El dominó de regla general es más bien la modalidad latina.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Juego de patio: one table is shared by three or more pairs. The winners stay and the losers give their place to the next pair, so there are rules and penalties to speed up play.",
+  "quote": "para seguir jugando hay que ganar las partidas o si no, ceder el turno",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A player from the losing team shuffles the tiles for the next hand.",
+  "quote": "Un jugador del equipo perdedor le tocara barajar las fichas.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pintintín: an every-player-for-himself Dominican variant for 2 to 4 players with 6 or 7 tiles each. It is a betting game and each hand stands alone, with no cumulative score.",
+  "quote": "El Pintintin es una variedad en la que se juega todos contra todos.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican names for tiles: the double blank is 'la caja' and the double six is 'el burro'.",
+  "quote": "en República Dominicana el cero doble se conoce como «la caja»",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Nombres de las fichas",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 municipal tournament rules claim to apply 'international rules', yet add a 25-point capicúa and a 25-point pase de salida and give no points for the pase corrido. This mixes federation rules with local bonuses.",
+  "quote": "aplicándose las reglas internacional que rige este deporte",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019: a hand is played even with five doubles, so there is no reshuffle for doubles.",
+  "quote": "CINCO BOBLE SE JUEGA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019: passing with a playable tile, or a 'chivo'/'pacho' (a tile that does not fit), is a 100-point swing: -50 to the offenders and +50 to the other pair. Then the tiles are reshuffled and the next opener in rotation opens.",
+  "quote": "PASO CON FICHA SON 100 PUNTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga 2025: the tiles are reshuffled only if 'the 7 doubles come out'. In practice a hand with many doubles must be played.",
+  "quote": "Solo se baraja si salen los 7 dobles.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO: the hand is played with all the doubles a player draws, so there is no reshuffle for many doubles.",
+  "quote": "Se jugará con todos los dobles que el atleta levante.",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 5)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "US tournament association: a player who draws 5 or more doubles may show them and have the tiles reshuffled, and the same player opens again.",
+  "quote": "SI UN JUGADOR COJE 5 O MAS DOBLES TIENE LA OPCION DE VIRARLAS",
+  "url": "http://neusadomino.org/6401.html",
+  "sourceName": "NEUSA Domino Association, Reglamento de los torneos (rev. 2010)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican custom: when the opener (mano) makes the opponent on his right pass, the opener's partner becomes the 'manito'. Spectators may not comment ('los mirones son de cera').",
+  "quote": "su frente se convierte en “manito”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Roberto Guzmán, 'Dominó' (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Chuchazo (going out with the double blank) is a Puerto Rican bonus worth +100 in the 500-point game. It does not apply when the double blank is the tile that locks a tranque.",
+  "quote": "There is no \"Chuchazo\" when the \"Tranque\" in a blocked game is the \"Chucha\".",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, 'Domino Games in Puerto Rico' (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: the shutout term is 'chiva' or 'chivote' (for example 200-0), not 'pollona'.",
+  "quote": "A term for \"kept winless\" or \"shutout\"",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, 'Domino Games in Puerto Rico' (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "The Diccionario de americanismos labels 'pollona' only as Cuban: losing a domino game without scoring any points.",
+  "quote": "pérdida de una partida sin lograr acumular ningún punto",
+  "url": "https://www.asale.org/damer/pollona",
+  "sourceName": "ASALE, Diccionario de americanismos, 'pollona'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "App: chuchazo is documented in Puerto Rican rules and pollona as a Cuban shutout term. Both are optional and off by default for Dominican play.",
+  "quote": "Chuchazo is documented in Puerto Rican rules, and Pollona as a Cuban shutout term",
+  "url": "https://fichaflow.com/learn/guide",
+  "sourceName": "FichaFlow, 'Complete Dominican Domino Guide'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Federation context: in 2010, Puerto Rico and the Dominican Republic split from the FID and organized their own parallel world championships (the FEMUNDO line).",
+  "quote": "organizando sus porpios mundiales paralelos",
+  "url": "https://jugamostodos.org/index.php/noticias-en-el-mundo/noticias-94262/2522-mundiales-de-domino",
+  "sourceName": "Jugamos Todos, 'Mundiales de Dominó'",
+  "sourceKind": "other",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The Federación Dominicana de Dominó (Fededodo) ran its 2025 National Championship over 14 official matches to select the team for the FEMUNDO 2025 world championship. This implies that its national tournaments use the FEMUNDO/FID-style rules, with no bonuses. No published Fededodo rulebook was found.",
+  "quote": "14 partidas oficiales",
+  "url": "https://www.diariolibre.com/deportes/mas-deportes/2025/07/01/mundial-de-dominos-en-barbados-tendra-participacion-rd/3169241",
+  "sourceName": "Diario Libre, 'Mundial de dóminos en Barbados tendrá participación RD' (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The Dominican Republic has two modalities: Regla General (close to Latin dominó) and Regla de Patio (informal). The patio bonuses (salida, corrido, capicúa) belong to the informal mode.",
+  "quote": "se juegan dos modalidades, son llamadas De Regla General y De Regla de Patio",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: in more formal rules (Regla General) capicúa earns nothing; it is a patio-game bonus.",
+  "quote": "En las reglas más formales, tipo Regla General, la capicúa no se premia",
+  "url": "https://lamesa.mercitlabs.com/que-es-capicua/",
+  "sourceName": "La Mesa: Dominó Latino, ¿Qué es la capicúa?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio game: one table serves several pairs; a pair must keep winning or give up its seat to the next pair.",
+  "quote": "para seguir jugando hay que ganar las partidas o si no, ceder el turno",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Juego de patio",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "'Juego en banda': a hand where the tranque is forced because the remaining player(s) must give the tiles that lock it.",
+  "quote": "es aquel en el que el tranque es obligado",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Juego en banda",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Tile names: in the Dominican Republic the double blank is called 'la caja' and the double six 'el burro'.",
+  "quote": "en República Dominicana el cero doble se conoce como «la caja»",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, Nombre de las fichas",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: the Dominican word for shuffling face down before dealing is 'lavar' (not 'dar agua').",
+  "quote": "se revuelven las fichas boca abajo (eso es lavar el dominó)",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: chuchazo (going out with 0-0) is documented in Puerto Rican Quinientos at +100. FichaFlow found no basis for it as a standard Dominican bonus, keeps it off by default, and never stacks it with capicúa.",
+  "quote": "We found no basis to call it a standard Dominican bonus.",
+  "url": "https://fichaflow.com/learn/what-is-chuchazo-in-domino",
+  "sourceName": "FichaFlow, What Is Chuchazo?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow classifies chuchazo as Puerto Rican and pollona as a Cuban shutout term; both optional bonuses start at 0.",
+  "quote": "Chuchazo is documented in Puerto Rican rules and Pollona as a Cuban shutout term",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa's Dominican glossary defines chuchazo as a hard hit on the rivals (for example going out fast and leaving them loaded), not as a specific tile.",
+  "quote": "Un golpe fuerte en la mesa",
+  "url": "https://lamesa.mercitlabs.com/glosario-domino/",
+  "sourceName": "La Mesa: Dominó Latino, Glosario del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa glossary: zapato (zapatero) means winning the whole game while the other pair scores zero; some tables also call it pollona.",
+  "quote": "También se le dice pollona en algunas mesas.",
+  "url": "https://lamesa.mercitlabs.com/glosario-domino/",
+  "sourceName": "La Mesa: Dominó Latino, Glosario del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Diccionario de americanismos: pollona is losing a domino match without scoring any points, marked as Cuban usage only.",
+  "quote": "pérdida de una partida sin lograr acumular ningún punto",
+  "url": "https://www.asale.org/damer/pollona",
+  "sourceName": "ASALE, Diccionario de americanismos, 'pollona'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Domino Apunte Dominicano celebrates a 200-0 win with 'LISA y ZAPATERA' (shutout names in Dominican play).",
+  "quote": "gana 200-0, la pantalla explota con la legendaria celebración de LISA y ZAPATERA",
+  "url": "https://play.google.com/store/apps/details?id=com.parkave.dominoesscore&hl=es",
+  "sourceName": "Domino Apunte Dominicano (Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Mesa28 (Puerto Rico): la Chucha is the 0-0; a chuchazo is going out with it, unless it closes two blank ends (then it is dominau). Worth 100 only in 500 games.",
+  "quote": "La Chucha es la ficha 0-0.",
+  "url": "https://www.mesa28.com/chuchazo-domino",
+  "sourceName": "Mesa28, Qué es un chuchazo en dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament penalties: 30 to the other team for playing a tile that does not match ('un chivo'), for playing out of turn, and for opening out of turn. A lifted tile must be played.",
+  "quote": "Si tiras una ficha que no cuadra (“un chivo”): +30 pts al equipo contrario.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament: the tiles are reshuffled only if the 7 doubles come out (the flyer does not explain this further).",
+  "quote": "Solo se baraja si salen los 7 dobles.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): a hand with five doubles is still played; a wrong opening gives 50 to the opponents; asking about the opening is allowed.",
+  "quote": "CINCO BOBLE SE JUEGA.",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican table custom: onlookers must not comment on the play.",
+  "quote": "“los mirones son de cera”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, 'Dominó' (language column)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominator scorekeeper names the two Dominican teams 'Largos' and 'Cortos' by default.",
+  "quote": "Two side-by-side team columns (Largos & Cortos) that mirror the table.",
+  "url": "https://play.google.com/store/apps/details?id=com.dominator&hl=en",
+  "sourceName": "Dominator - apunte de domino (Google Play listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow uses 'Veinticinco' as the settings name for the pase de salida bonus, and says the name does not force a 25-point value.",
+  "quote": "FichaFlow also uses the settings identifier Veinticinco for this bonus.",
+  "url": "https://fichaflow.com/learn/what-is-pase-de-salida-in-domino",
+  "sourceName": "FichaFlow, What Is Pase de Salida in Domino?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The Dominican Republic has two modes: Regla General (formal, Latin style) and Regla de Patio (informal). Bonuses (capicúa, paso corrido, salida) belong to the patio mode.",
+  "quote": "se juegan dos modalidades, son llamadas De Regla General y De Regla de Patio",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Juego de patio: one table for three or more pairs; losers give up their seat, so rules and penalties speed up play.",
+  "quote": "se usa solo una mesa aunque haya tres o más parejas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pintintín: an every-player-for-himself betting variant for 2-4 players with 6 or 7 tiles each; each game is separate, no running score.",
+  "quote": "El Pintintin es una variedad en la que se juega todos contra todos.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): with five doubles in one hand you still play (no reshuffle).",
+  "quote": "CINCO BOBLE SE JUEGA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019): sudden death, the losing pair leaves the table (patio style).",
+  "quote": "SE JUGARA MUERTE SUBITA, EL QUE PERDIO SE VA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): reshuffle only if all 7 doubles come out (in one hand); penalties of +30 to the other team for a tile that does not fit (chivo), playing out of turn, etc.",
+  "quote": "Solo se baraja si salen los 7 dobles",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): playing a tile that does not fit (a chivo) gives 30 points to the other team.",
+  "quote": "Si tiras una ficha que no cuadra ('un chivo')",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (2006): Dominicans add extra points for certain situations such as capicúa and 'caja de muerto' (not defined in the post).",
+  "quote": "having extra points for certain situations ('capicúa', 'caja de muerto'...)",
+  "url": "https://dr1.com/forums/threads/rules-for-playing-domino.44672/",
+  "sourceName": "DR1.com forum, Rules for playing domino, user Mirador, 2006",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Forum (2013): in some places you lose points for making noise or if a tile falls on the floor.",
+  "quote": "you also lose points in one of your cards falls on the floor",
+  "url": "https://dr1.com/forums/threads/rules-for-dominican-dominoes.106506/",
+  "sourceName": "DR1.com forum, Rules for Dominican Dominoes?, user The Gorgon, 2013",
+  "sourceKind": "forum",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FID international regulation: a hand ends only by dominada or by cierre/tranca; the regulation contains no capicúa or pass bonuses (only tile points and penalties).",
+  "quote": "Toda mano o ronda termina por dominada, por cierre o tranca.",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024), Art. 54",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Pollona (dictionary, marked Cuba only): losing a game without scoring any point.",
+  "quote": "pérdida de una partida sin lograr acumular ningún punto",
+  "url": "https://www.asale.org/damer/pollona",
+  "sourceName": "ASALE, Diccionario de americanismos, pollona",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: pollona is a match shutout; it is Cuban vocabulary per ASALE, and no reliable standard Dominican bonus for it was found (default 0).",
+  "quote": "A completed match in which the losing side scores zero",
+  "url": "https://fichaflow.com/learn/what-is-a-pollona-in-domino",
+  "sourceName": "FichaFlow, What Is a Pollona?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Chuchazo (Puerto Rico): the winning tile is the double blank.",
+  "quote": "When the winning bone is the double-blank.",
+  "url": "https://caribbeantrading.com/dominoes-rules-in-puerto-rico/",
+  "sourceName": "Caribbean Trading, The Basics of Puerto Rican Dominoes Rules",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico (Mesa28): chuchazo gives 100 bonus points only in 500-point games.",
+  "quote": "el chuchazo otorga 100 puntos de premio solo en juegos de 500 puntos",
+  "url": "https://www.mesa28.com/chuchazo-domino",
+  "sourceName": "Mesa28, Qué es un chuchazo en dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: chuchazo is documented in Puerto Rican rules, not established as a standard Dominican bonus (default 0).",
+  "quote": "Chuchazo is a winning finish with 0-0, documented in Puerto Rican domino rules.",
+  "url": "https://fichaflow.com/learn/what-is-chuchazo-in-domino",
+  "sourceName": "FichaFlow, What Is Chuchazo?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban: dar agua means turning and mixing the tiles, done by the losing pair.",
+  "quote": "Esta expresión se refiere a rotar las fichas, lo hace la pareja que pierde.",
+  "url": "https://visitcubago.com/domino-cubano-reglas-como-jugar/",
+  "sourceName": "VisitCubaGo, Dominó cubano",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban: pollona is when a team wins without the other side scoring even one point.",
+  "quote": "sin permitir que el bando perdedor pueda acumular ni siquiera un punto",
+  "url": "https://www.arbolinvertido.com/sociedad/todo-sobre-el-domino-cubano-reglas-historias-y-dicharachos",
+  "sourceName": "Árbol Invertido, Todo sobre el dominó cubano",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "The DR has two modalities: regla general (formal, close to Latin rules) and regla de patio (informal).",
+  "quote": "se juegan dos modalidades, son llamadas De Regla General y De Regla de Patio",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The patio game uses one table for three or more pairs; losers give their seat to the next pair, so rules and penalties speed up play.",
+  "quote": "se usa solo una mesa aunque haya tres o más parejas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Pintintín is a Dominican every-player-for-himself variant (2 to 4 players, 6 or 7 tiles each), played for bets.",
+  "quote": "El Pintintin es una variedad en la que se juega todos contra todos.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In the DR the double blank is called 'la caja' (and the double six 'el burro').",
+  "quote": "en República Dominicana el cero doble se conoce como «la caja»",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Nombre de las fichas",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "'Chucha' for the double blank is a Puerto Rican term.",
+  "quote": "En el juego del dominó, ficha de doble blanco",
+  "url": "https://www.asale.org/damer/chucha",
+  "sourceName": "ASALE, Diccionario de americanismos, chucha (marked PR)",
+  "sourceKind": "book",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico Quinientos: chuchazo (winning with the double blank) and capicu each add 100 points.",
+  "quote": "an additional 100 points in that hand",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow found no basis for chuchazo as a standard Dominican bonus; it treats it as Puerto Rican.",
+  "quote": "We found no basis to call it a standard Dominican bonus.",
+  "url": "https://fichaflow.com/learn/what-is-chuchazo-in-domino",
+  "sourceName": "FichaFlow, What Is Chuchazo?",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "'Pollona' is recorded as Cuban: losing a game without scoring any point.",
+  "quote": "pérdida de una partida sin lograr acumular ningún punto",
+  "url": "https://www.asale.org/damer/pollona",
+  "sourceName": "ASALE, Diccionario de americanismos, pollona (marked Cu)",
+  "sourceKind": "book",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "'Dominar' (to win a domino hand) is recorded for Cuba and the DR.",
+  "quote": "Cu, RD. Ganar una partida de dominó.",
+  "url": "https://www.asale.org/damer/dominar",
+  "sourceName": "ASALE, Diccionario de americanismos, dominar",
+  "sourceKind": "book",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 penalty: passing with a tile costs 100 points (minus 50 to the offenders, plus 50 to the others), then reshuffle.",
+  "quote": "PASO CON FICHA SON 100 PUNTOS, MENOS 50 PARA LA PAREJA INFRACTORA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 organizers say the event follows 'international rules', yet adds local bonuses (capicua 25, opening pass 25).",
+  "quote": "se jugará en pareja, pero de manera individual, aplicándose las reglas internacional",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Alcaldía de Santiago anuncia torneo de Dominó (2019)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican tables add extra points for different plays (bonuses are part of the Dominican style).",
+  "quote": "There are extra points for different moves.",
+  "url": "https://www.colonialzone-dr.com/dominoes/",
+  "sourceName": "Colonial Zone DR guide, Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow says competitive domino in the DR is governed by FEDOMINO (Federación Dominicana de Dominó); no rulebook text is given.",
+  "quote": "Competitive domino in the Dominican Republic is organized under FEDOMINO",
+  "url": "https://fichaflow.com/learn/dominican-domino-tournament-format",
+  "sourceName": "FichaFlow, Dominican domino tournament format",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Low-reliability site claims the FEDOMDOM cup uses double-nine and a pollona penalty (contradicts all Dominican double-six sources).",
+  "quote": "Las reglas siguen la variante dominicana, que usa el doble-9",
+  "url": "https://jugardominoenlinea.com/torneos.html",
+  "sourceName": "jugardominoenlinea.com, Torneos de Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ }
+]

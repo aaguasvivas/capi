@@ -1,0 +1,1037 @@
+[
+ {
+  "rule": "A tranque is a lock of the game: no player can play because all tiles of the needed suits are already played.",
+  "quote": "because all pieces of the corresponding suits have been played",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The player who locks the game shows his tiles to the player on his right; this is called 'trancar con el de abajo'.",
+  "quote": "his pieces to the player to his right, known as “tranquar con el de abajo.”",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "If the blocker has fewer points (pips) than the player on his right, he wins and gets the points in the opponents' hands. If he has more, he loses and the points go to the opponent.",
+  "quote": "has the least amount of points in his hand he wins the tranque",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Variant 'trancar con todo el mundo': the blocker compares with all players, and the lowest point count wins.",
+  "quote": "one compares his pieces with all the players in the game",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "On a tie in a tranque, the player who placed the first tile of that hand wins by default, and his team gets the points.",
+  "quote": "In the case of a tie the player who began the game",
+  "url": "http://web.archive.org/web/2015/http://www.dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Regla general: in a tranque the pair with fewer points wins. On a tie, the pair that opened the hand wins and opens the next hand.",
+  "quote": "la pareja que salió en esa mano será la ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio mode: the player who made the tranque compares only his own tiles with the opponent on his right.",
+  "quote": "quien hizo el tranque compara solo sus fichas con el oponente de la derecha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019) rule 6: the tranque is decided against the player 'de abajo' (the next player).",
+  "quote": "EL TRANQUE ES CON EL DE ABAJO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The same Santiago list, rule 12, also says the tranque is decided 'with everyone', pair against pair. This contradicts rule 6 in the same list.",
+  "quote": "SE TRANCA CON TODOS, ES DECIR PAREJA CON PAREJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament: a tied tranque scores no points. The tiles are reshuffled, and the next player in the rotation opens.",
+  "quote": "SI SALE EMPATE NO VALEN LOS PUNTOS, SE BARAJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): the tranque is decided against the player 'de abajo'.",
+  "quote": "Se tranca con el jugador de abajo.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Trancar means a player closes the game on purpose so that the points (tantos) are counted.",
+  "quote": "cierra el juego de propósito para contar los tantos, se dice que lo “tranca”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento, Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "In a tranque, the pair with the fewest points wins.",
+  "quote": "En el tranque, la pareja con la menor cantidad de puntos gana",
+  "url": "https://www.acercateard.com/es/noticias/2024-01/deportes/el-domino-en-la-republica-dominicana-un-vinculo-cultural-y-social-inquebrantable?article=91431",
+  "sourceName": "Acércate a RD, Leonel Marzán (Jan 2024)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "A humor column jokes that players have swallowed the double six so as not to lose a tranque. This shows the tranque is decided by pip count, so heavy tiles hurt.",
+  "quote": "se han tragado el doble 6 para no perder un tranque",
+  "url": "https://eldia.com.do/domine-mi-frente-2/",
+  "sourceName": "El Día, '¡Domine mi frente!' by Bienvenido Carmona (2017)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Restating DR1: after a tranque, the blocker gets the opponents' points if his tiles add up to less than those of the player on his right.",
+  "quote": "add up to less than the tiles of the player to the right of him",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes (cites DR1)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: the blocker compares hands with the next player, and fewer points wins. A tie goes to the blocker, and the winning side scores every point in all four hands. Other tables compare side totals.",
+  "quote": "the player who blocked compares hands with the next player",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Generic Latin rule: a lock happens when all seven tiles of a suit are played and that suit shows on both ends. Each pair's points are counted, and the lower pair wins, not necessarily the player who locked.",
+  "quote": "no gana el jugador que coloca la última ficha o ficha de cierre",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation tournament rules: every tranque is decided pair against pair, and the pair with fewer tantos wins. On a tie nobody wins and the rotation continues.",
+  "quote": "Todo tranque será en pareja. Gana la pareja con menos tantos.",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Ponce (Puerto Rico): the tranque is individual. Each player counts his own points, the lowest wins, and his team scores all four hands.",
+  "quote": "El jugador que tenga menos puntos en mano es el ganador del tranque.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "International rule: on equal points in a lock, the pair with fewer tiles wins. If tiles are also equal, nothing is scored. This was the only tile-count comparison found, and it is only a tie-break.",
+  "quote": "gana la pareja con menor cantidad de fichas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó Internacional",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID definition: a hand ends in cierre or tranca when a player places the seventh and last tile of a suit and both ends then show that suit.",
+  "quote": "aparte de ser la séptima y última de un palo",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (2015, Art. 56; same in 2024 edition)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: in a tranca the pair with fewer points in unplayed tiles wins. It scores all unplayed tiles, both its own and the losing pair's.",
+  "quote": "la pareja con menos puntos en las fichas no jugadas",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024 edition, Art. 58)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: if both pairs have equal points, the tranca is a draw. A zero is written for the pair that made the tranca, to track hands and future openers.",
+  "quote": "el cierre o tranca se considerará empate",
+  "url": "https://www.pagat.com/docs/REGLAMENTO-FID.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento de Juego (2015, Art. 58)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "IDF (English edition of the FID rules): in a locked hand, the pair with the fewest points in unplayed tiles wins.",
+  "quote": "the pair with the fewest points in the dominoes not played",
+  "url": "https://casino.hardrock.com/tampa/-/media/project/shrss/sga/casinos/hard-rock/tampa/casino/dominoes/international-dominoes-federation-rules-and-regulations.pdf?rev=430da2aa700c4909a129fe95ef2a76f9",
+  "sourceName": "International Domino Federation Rules and Regulations (English, hosted by Hard Rock Tampa)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO (the world body whose championship the Dominican federation Fededodo attends): tranques are pair against pair. On a tie the points do not count and the opener rotation continues.",
+  "quote": "Los tranques son en pareja, de ocurrir un empate los puntos no cuentan",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 6)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO: in a tranque the winner scores the points of all 4 players.",
+  "quote": "en un tranque, se anotan los puntos de los 4, a favor del ganador",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 6)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FEMUNDO allows 1 minute to think when a player is locking the game or is forced to feed the lock ('bandeo').",
+  "quote": "mandar a cerrar obligado (bandeo)",
+  "url": "https://egpkydvggrhlazmrfbhc.supabase.co/storage/v1/object/public/femundo-media/documentos/reglamento-femundo-2025-ES.pdf",
+  "sourceName": "FEMUNDO, Reglamento de Competencia 2025 (Art. 11)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican regla general: in a tranque the pair with fewer points wins. On a tie, the pair that opened that hand wins and also opens the next hand.",
+  "quote": "la pareja que salió en esa mano será la ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican patio mode: the player who made the tranque compares only his own tiles with the opponent on his right.",
+  "quote": "quien hizo el tranque compara solo sus fichas con el oponente de la derecha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican 'juego en banda': the tranque is forced whatever tiles the remaining players place, because they must give the tiles that cause it.",
+  "quote": "es aquel en el que el tranque es obligado",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "To settle a tranque, the player who made it shows his tiles to the player on his right ('tranquar con el de abajo'). The lower count wins and gets the points in the opponent's hand. A variant, 'tranquar con todo el mundo', compares with all players.",
+  "quote": "shows his pieces to the player to his right",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "On a tranque tie, the player who placed the first tile of the hand wins, and his team gets the points.",
+  "quote": "In the case of a tie the player who began the game",
+  "url": "http://web.archive.org/web/20070206210406/http://www.dr1.com:80/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (2007, archived)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament, rule 6: the tranque is settled against the player below (to the right).",
+  "quote": "EL TRANQUE ES CON EL DE ABAJO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 tournament, rule 12, which contradicts rule 6: the tranque is 'with everyone', pair against pair. On a tie the points do not count, the tiles are reshuffled, and the next opener in rotation opens.",
+  "quote": "SE TRANCA CON TODOS, ES DECIR PAREJA CON PAREJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Copa Alcaldía de Santiago rules (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga 2025 tournament: the tranque is settled with the player below (to the right).",
+  "quote": "Se tranca con el jugador de abajo.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, tournament rules (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican usage: 'trancar' means closing the game on purpose so that the tantos are counted.",
+  "quote": "cierra el juego de propósito para contar los tantos, se dice que lo “tranca”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Roberto Guzmán, 'Dominó' (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican dominoes: the player who makes the tranque gets all points in the opponents' hands if his own tiles total less than those of the player to his right.",
+  "quote": "less than the tiles of the player to the right of him",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, 'How to Play Dominican Dominoes'",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App rule: the blocker compares with the next player and the lower total wins. A tie goes to the blocker. The winning side scores every point left in all four hands.",
+  "quote": "a tie goes to the blocker",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, 'How to Play Dominican Domino'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "App rule: in a tranque each partnership adds its pips and the lower total wins. Equal totals make the hand a draw with no points.",
+  "quote": "If both totals are equal, the hand is a draw and no points are scored.",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, 'Dominican Dominoes Rules'",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "International and generic rule: in a cierre or tranca the pair with fewer points wins. On a tie neither pair wins, and the right to open passes to the next player.",
+  "quote": "En caso de empate, ninguna pareja será la vencedora",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "'Dominó latino' (generic, listed just before the Dominican bonuses): in a cierre only the opposing pair's unplayed points are added. On a tie, the 'mano' (the pair that opened) wins.",
+  "quote": "en caso de empate gana la mano (pareja que salió)",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó, arte o ciencia: Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Generic: in a locked game the player or pair with the lower total wins. Under the international norm a tie has no winner, and the next player opens.",
+  "quote": "En caso de empate la norma internacional establece que no hay ganador",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Final del juego",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: most circles compare team totals. Other circles have the player who locked the game compare with the opponent to his right, and the winner's team scores all 4 hands.",
+  "quote": "compares his points versus the oponent to his right",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, 'Domino Games in Puerto Rico' (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico mall tournament: every tranque is pair against pair and the pair with fewer tantos wins. A tied tranque does not count and the opener rotates.",
+  "quote": "Tranques empate no cuentan pero la mano rota.",
+  "url": "https://www.santarosamallpr.com/wp-content/uploads/reglas-domino.pdf",
+  "sourceName": "Santa Rosa Mall (PR), 'Reglas de Torneo'",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation: every tranque is pair against pair and the pair with fewer tantos wins. On a tie nobody wins and the rotation continues.",
+  "quote": "TRANQUE con EMPATE NADIE GANA y se SIGUE la rotación.",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominousa-rules tournament page: in a tranque both pairs' unplayed points are counted and the lower pair wins. On a tie the hand is cancelled and the rotation continues.",
+  "quote": "Si hubiese un empate de puntos entre las dos parejas, se anula la mano",
+  "url": "https://boricua.com/competencias-de-domino/",
+  "sourceName": "Boricua.com, 'Competencias de Dominó'",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Ponce (Puerto Rico) style: the tranque is individual and the player with the fewest points wins it. It is also worth 2 points to the blocker's team even if that team loses the tranque.",
+  "quote": "El jugador que tenga menos puntos en mano es el ganador del tranque.",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó ponceño",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "The player who executes the tranque shows his tiles to the player on his right ('tranquar con el de abajo').",
+  "quote": "shows his pieces to the player to his right, known as “tranquar con el de abajo.”",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "If the blocker has fewer points he wins and gets the points in his opponents' hands; if he has more, the opponents get the points.",
+  "quote": "he wins the tranque, and is allotted the points in his opponent’s hands",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Variant: 'tranquar con todo el mundo', where the blocker compares with all players and the lowest wins.",
+  "quote": "tranquar con todo el mundo, which means to lock the game with everyone",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Tranque tie: the player who opened the hand wins by default and his team gets the points.",
+  "quote": "In the case of a tie the player who began the game",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Definition: a tranque is a lock where no player can play because the tiles of the suits at the ends are all played.",
+  "quote": "a lock of the game, in which no player can play any more",
+  "url": "https://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, '25, 50, Capicua!' (page 2, Wayback)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican Regla General (formal) mode: the pair with fewer points in hand wins the tranque.",
+  "quote": "la pareja que tenga la menor cantidad de puntos será la pareja ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Tranque",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Regla General tie: the pair that opened the hand wins the tranque and opens the next hand.",
+  "quote": "la pareja que salió en esa mano será la ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó dominicano, Tranque",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019), rule 6: the tranque is with the player 'de abajo'.",
+  "quote": "EL TRANQUE ES CON EL DE ABAJO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "The same Santiago sheet, rule 12, also says the tranque is with everyone, pair against pair. On a tie no points count, the tiles are reshuffled and the next opener in rotation opens. Rules 6 and 12 contradict each other.",
+  "quote": "SE TRANCA CON TODOS, ES DECIR PAREJA CON PAREJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo Copa Alcaldía de Santiago 2019",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: the table locks when nobody can play. Each player adds up his remaining pips and the pair with the lower sum wins.",
+  "quote": "gana la pareja cuya suma sea menor",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Mesa: on a tranque tie, the pair that made the opening (salida) wins the hand.",
+  "quote": "la gana la pareja que hizo la salida",
+  "url": "https://lamesa.mercitlabs.com/reglas-domino-dominicano/",
+  "sourceName": "La Mesa: Dominó Latino, Reglas del dominó dominicano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: a tranque is all four players passing in a row. Each team adds its pips and the lower total wins. Equal totals are a draw with no points.",
+  "quote": "If both totals are equal, the hand is a draw and no points are scored.",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: the player who placed the blocking tile compares with the next player in turn. Fewer pips wins and a tie goes to the blocker.",
+  "quote": "the player who blocked compares hands with the next player: fewer points wins",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: the team that wins the tranque scores the pips left in all four hands (example: 8+11+7+14 = 40). There is no extra tranque bonus by default.",
+  "quote": "the winning side scores every point left in all four hands",
+  "url": "https://fichaflow.com/learn/how-to-score-a-tranque-in-dominican-domino",
+  "sourceName": "FichaFlow, How to Score a Tranque",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow reports that under the FID (international federation) rule, both partners' pips are combined per team, and a tied total is a drawn hand.",
+  "quote": "compare both partners’ combined pips; a tied total is a drawn hand",
+  "url": "https://fichaflow.com/learn/how-to-score-a-tranque-in-dominican-domino",
+  "sourceName": "FichaFlow, How to Score a Tranque (citing FID regulation)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Tranca (open-source browser game with a 'pure Dominican rules engine'): locked after four passes in a row. Team pip totals are compared, the lower takes the hand, and a tie scores nothing.",
+  "quote": "Trancado. Lower pip total takes the hand; a tie scores nothing.",
+  "url": "https://github.com/Nesmill/tranca",
+  "sourceName": "Nesmill/tranca, src/core/rules.js",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "República dominó app lets the host choose whether the tranque is counted individually or by team.",
+  "quote": "Elija el juego trancado de manera individual o por equipo.",
+  "url": "https://apps.apple.com/do/app/rep%C3%BAblica-domin%C3%B3/id1484277118",
+  "sourceName": "República dominó (App Store listing)",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican newspaper column: tranque is when play ends because no player holds tiles of the numbers at the ends of the line.",
+  "quote": "no haber más fichas en manos de los jugadores de las pintas",
+  "url": "https://acento.com.do/cultura/tranque-9044825.html",
+  "sourceName": "Acento, 'Tranque' (language column)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "OurPastimes (based on DR1): the blocker gets all the points in the opponents' hands if his tiles total less than those of the player on his right.",
+  "quote": "less than the tiles of the player to the right of him",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "OurPastimes, How to Play Dominican Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Generic Latin rules: a closure happens when all seven tiles of one suit are played and that suit shows on both ends. The pair with fewer points wins.",
+  "quote": "jugadas las siete fichas de un palo y figurar ambas en los extremos",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Generic rules: the closure is won by the pair with fewer points, not by the player who placed the last tile. A tie voids the hand in most rule sets.",
+  "quote": "Gana el cierre, no quién provoca la situación poniendo la última ficha",
+  "url": "https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+  "sourceName": "Dominó: arte o ciencia, El cierre (o la tranca)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Mesa28 (Puerto Rico), games to 100 or 200: the team of the individual player with the fewest pips wins. In 500 games, team totals decide. On a tie no points, and the player to the right of the blocker opens next.",
+  "quote": "Gana el equipo del jugador con menos puntos individuales en mano.",
+  "url": "https://www.mesa28.com/tranca-domino-boricua",
+  "sourceName": "Mesa28, Qué es una tranca en dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "GameVelvet Dominó Mano a Mano (generic): in a blocked game points are counted, and on a tie the side that blocked loses.",
+  "quote": "If the score is tied, the team that blocked the game, lose.",
+  "url": "https://www.gamevelvet.com/domino-single-online/rules",
+  "sourceName": "GameVelvet, How to Play Dominó Mano a Mano",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Regla general tie in tranque: the pair that opened the hand wins it.",
+  "quote": "la pareja que salió en esa mano será la ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Regla de patio: the player who made the tranque compares only his tiles with the opponent on his right.",
+  "quote": "quien hizo el tranque compara solo sus fichas con el oponente de la derecha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Juego en banda: a position where the tranque is forced no matter where the remaining tiles go, because the remaining players must give the tiles that cause it.",
+  "quote": "el tranque es obligado sin importar por donde se coloquen las fichas restantes",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Tranque: no one can play because all tiles of the suits are out. The player who locked it shows his tiles to the player on his right ('tranquar con el de abajo'); fewer points wins.",
+  "quote": "shows his pieces to the player to his right",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "If the player who locked the game has more points than the player to his right, he loses and the points go to the opponent.",
+  "quote": "he loses and the points are awarded to the opponent's total",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Variant 'tranquar con todo el mundo': the locker compares with all players and the lowest wins.",
+  "quote": "one compares his pieces with all the players in the game",
+  "url": "https://dr1.com/articles.php?doc=dominoes_1.shtml",
+  "sourceName": "DR1.com, Dominoes in the Dominican Republic (article)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019), rule 6: the tranque is against the player below (to the right).",
+  "quote": "EL TRANQUE ES CON EL DE ABAJO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago tournament (2019), rule 12 (contradicts rule 6 in the same list): tranque is with everyone, pair against pair; on a tie no points, reshuffle, next in rotation opens.",
+  "quote": "SE TRANCA CON TODOS, ES DECIR PAREJA CON PAREJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, 1er Torneo de Dominó Copa Alcaldía de Santiago reglamento (2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guáyiga tournament (2025): the tranque is against the player below (to the right).",
+  "quote": "Se tranca con el jugador de abajo.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Dominican-titled how-to: the player who blocks gets all points in his opponents' hands if his tiles total less than those of the player to his right.",
+  "quote": "less than the tiles of the player to the right of him",
+  "url": "https://ourpastimes.com/play-domincan-dominoes-8552767.html",
+  "sourceName": "Our Pastimes, How to Play Dominican Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow default: the blocker compares pips with the next player; a tie goes to the blocker; the winning side scores all points in all four hands. Cites La Guáyiga rules and FID arts. 57-58 as alternatives.",
+  "quote": "the winning side scores every point left in all four hands",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FID: a tranca happens when a player plays the seventh and last tile of a suit and both ends then show that suit.",
+  "quote": "aparte de ser la séptima y última de un palo",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024), Art. 56",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: in a tranca the pair with fewer points in unplayed tiles wins and scores all unplayed tiles of both pairs; equal points is a draw (zero recorded).",
+  "quote": "el cierre o tranca se considerará empate",
+  "url": "https://fidomino.org/wp-content/uploads/2025/09/Reglamento-FID-NEW-2024.pdf",
+  "sourceName": "Federación Internacional de Dominó, Reglamento (2024), Art. 58",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation (US body with Dominican member clubs): every tranque is pair against pair; the pair with fewer points wins; a tie scores nothing.",
+  "quote": "Todo tranque será en pareja. Gana la pareja con menos tantos",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "General Spanish-language rules: in a tranca the pair with the lower total wins, not the player who placed the last tile; on a tie no pair wins and the salida passes on.",
+  "quote": "En caso de empate, ninguna pareja será la vencedora",
+  "url": "https://sites.google.com/site/dominoarteociencia/Principiante/reglasdeldomino",
+  "sourceName": "Dominó: arte o ciencia, Reglas del Dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "General rules: the tranca is won by the pair with fewer points, not by the player who causes it.",
+  "quote": "Gana el cierre, no quién provoca la situación poniendo la última ficha",
+  "url": "https://sites.google.com/site/dominoarteociencia/anuncio/elcierreolatranca",
+  "sourceName": "Dominó: arte o ciencia, El cierre (o la tranca)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Cuban (double-nine): in a blocked round the winner is the single player with fewest pips; tie between opponents scores nothing.",
+  "quote": "the winner is the player with fewest pips on their remaining tiles",
+  "url": "https://www.pagat.com/domino/line/cuban.html",
+  "sourceName": "pagat.com, Cuban Dominoes",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Venezuelan: the tranca is by pairs; the team with fewer points wins the round.",
+  "quote": "La tranca es en parejas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó venezolano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rican (Mesa28), 100/200 games: the team holding the single player with the fewest points wins the tranque; in 500 games the lower team total wins; tie gives no points.",
+  "quote": "Gana el equipo que contiene al jugador con menos puntos individuales",
+  "url": "https://www.mesa28.com/reglas-domino-boricua",
+  "sourceName": "Mesa28, Reglas del dominó boricua",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID-style comparison table: blocked hand won by team with fewer pips; tie handling differs (Federation: no winner, next player starts; Mexican: starting team wins; Colombian: blocking team wins).",
+  "quote": "no winner, next player starts",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "pagat.com, Partnership Dominoes (FID comparison table)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Regla general: in a tranque the pair with fewer points wins.",
+  "quote": "la pareja que tenga la menor cantidad de puntos será la pareja ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Regla general: on a tied tranque, the pair that opened the hand wins and opens the next hand.",
+  "quote": "la pareja que salió en esa mano será la ganadora",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Patio game: the player who made the tranque compares only his own tiles with the opponent on his right.",
+  "quote": "quien hizo el tranque compara solo sus fichas con el oponente de la derecha",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó dominicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: the player who locked the game shows his tiles to the player on his right ('trancar con el de abajo').",
+  "quote": "the player who executed the tranque shows his pieces to the player to his right",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: if the blocker has fewer points he wins and takes the points in the opponents' hands.",
+  "quote": "he wins the tranque, and is allotted the points in his opponent’s hands",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: if the blocker has more points, he loses and the points go to the opponent.",
+  "quote": "he loses and the points are awarded to the opponent’s total",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: some tables play 'trancar con todo el mundo', where the blocker compares with all players and the lowest wins.",
+  "quote": "in this case one compares his pieces with all the players in the game",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "DR1: on a tie, the player who placed the first tile of the hand wins, and his team takes the points.",
+  "quote": "In the case of a tie the player who began the game",
+  "url": "http://web.archive.org/web/2010/http://dr1.com/articles/dominoes_1.shtml",
+  "sourceName": "DR1.com, 25, 50, Capicua! Dominoes and the Dominican Republic (page 2, archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "La Guayiga 2025 tournament: the tranque is played against the player below (next in turn, to the right).",
+  "quote": "Se tranca con el jugador de abajo.",
+  "url": "https://distritomunicipallaguayiga.gob.do/gran-torneo-de-domino-regular-3-2/",
+  "sourceName": "Junta del Distrito Municipal La Guáyiga, Gran Torneo de Dominó Regular 3/2 (Oct 2025)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 rule 6: the tranque is against the player below (next player).",
+  "quote": "EL TRANQUE ES CON EL DE ABAJO",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019 rule 12 (contradicts rule 6 in the same list): the tranque is with everyone, pair against pair.",
+  "quote": "SE TRANCA CON TODOS, ES DECIR PAREJA CON PAREJA",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Santiago 2019: a tied tranque scores no points; the tiles are reshuffled and the next player in the rotation opens.",
+  "quote": "SI SALE EMPATE NO VALEN LOS PUNTOS",
+  "url": "https://momentodeportivord.com/?p=17503",
+  "sourceName": "Momento Deportivo RD, Reglas del torneo de dominó Copa Alcaldía de Santiago (Aug 2019)",
+  "sourceKind": "tournament-rules",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "'Trancar' means closing the game on purpose so that the tantos (points) are counted.",
+  "quote": "cierra el juego de propósito para contar los tantos, se dice que lo “tranca”",
+  "url": "https://acento.com.do/cultura/domino-9463164.html",
+  "sourceName": "Acento.com.do, Dominó, by Roberto Guzmán (2025)",
+  "sourceKind": "dominican-media",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow default: the blocker compares with the next player; lower pips wins, a tie goes to the blocker, and the winner scores all four hands.",
+  "quote": "the winning side scores every point left in all four hands",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "FichaFlow: other tables compare team totals or pay only the difference.",
+  "quote": "Other tables compare each side's total, or pay only the difference.",
+  "url": "https://fichaflow.com/learn/dominican-domino-rules/",
+  "sourceName": "FichaFlow, How to Play Dominican Domino",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Boarden: each team adds its pips; the lower team total wins; equal totals are a draw with no points.",
+  "quote": "If both totals are equal, the hand is a draw and no points are scored.",
+  "url": "https://boarden.club/how-to-play/dominican-dominoes",
+  "sourceName": "Boarden, How to play Dominican dominoes",
+  "sourceKind": "app-or-game",
+  "dominicanSpecific": true,
+  "fetched": true
+ },
+ {
+  "rule": "Math paper: when a hand ends in a tranca, both ends of the board always show the same number.",
+  "quote": "Si una partida termina en una tranca, los extremos del tablero coinciden.",
+  "url": "https://arxiv.org/html/2502.06790v1",
+  "sourceName": "arXiv 2502.06790, Puntajes máximos en el juego de dominó",
+  "sourceKind": "other",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID international rules: the hand locks when a player places the seventh and last tile of a number, so both ends show that number.",
+  "quote": "places a domino that apart from being the seventh and last of a stick",
+  "url": "https://fidomino.org/wp-content/uploads/2024/01/2021-Reglamento-FID_Ingles_Final-Version_Ready-for-Print.pdf",
+  "sourceName": "Federación Internacional de Dominó (FID), Regulations 2021 (English)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "FID: the pair with fewer pips wins the lock and scores all unplayed tiles of both pairs; equal pips is a draw.",
+  "quote": "the closing or blocking will be considered a draw",
+  "url": "https://fidomino.org/wp-content/uploads/2024/01/2021-Reglamento-FID_Ingles_Final-Version_Ready-for-Print.pdf",
+  "sourceName": "Federación Internacional de Dominó (FID), Regulations 2021 (English)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "USA Domino Federation (Florida): every tranque is by pairs, fewer tantos wins; a tie means nobody wins and the rotation continues.",
+  "quote": "Todo tranque será en pareja. Gana la pareja con menos tantos.",
+  "url": "https://usadomino.com/r/",
+  "sourceName": "USA Domino Federation, Reglamento (Jan 2024 tournament)",
+  "sourceKind": "federation",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Puerto Rico: most circles compare team totals; other circles compare the blocker with the opponent to his right, and the winner takes all four hands.",
+  "quote": "compares his points versus the oponent to his right",
+  "url": "https://web.archive.org/web/20260118095929/https://members.tripod.com/~j_carrillo_vii/dominoes.htm",
+  "sourceName": "José Carrillo, Jose's Page on Domino Games in Puerto Rico (archived)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Mexican/international rule: on equal points, the pair with fewer tiles wins (tile count only breaks ties).",
+  "quote": "gana la pareja con menor cantidad de fichas",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Dominó mexicano",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "General/international: on a tied lock there is no winner and the next player opens.",
+  "quote": "En caso de empate la norma internacional establece que no hay ganador",
+  "url": "https://es.wikipedia.org/wiki/Domin%C3%B3",
+  "sourceName": "Wikipedia (es), Dominó, section Final del juego",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Some tables score each team its own unplayed tiles in a lock, so both teams can pass the target in one hand (the case the owner asked about).",
+  "quote": "In this version both teams can reach 100 or more points",
+  "url": "https://www.pagat.com/domino/line/partnership.html",
+  "sourceName": "Pagat.com, Partnership Dominoes (Latin)",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ },
+ {
+  "rule": "Kapiku: when both pairs score their own points in a cierre, both can pass 200 in the same hand, which needs a tiebreak hand.",
+  "quote": "existe la posibilidad de que ambas parejas superen los 200 puntos en una misma partida",
+  "url": "http://www.kapiku.com/reglas-del-domino.html",
+  "sourceName": "Kapiku, Reglas del dominó",
+  "sourceKind": "reference-site",
+  "dominicanSpecific": false,
+  "fetched": true
+ }
+]
