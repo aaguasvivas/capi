@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateMove, hasLegalPlay } from "../src/validate";
+import { validateMove, hasLegalPlay, isBoardLocked } from "../src/validate";
 import type { GameState } from "../src/types";
 
 const baseState: GameState = {
@@ -139,5 +139,25 @@ describe("hasLegalPlay", () => {
   });
   it("returns false when no match", () => {
     expect(hasLegalPlay([[1, 1], [2, 2]], [[5, 6], [6, 3]])).toBe(false);
+  });
+});
+
+describe("isBoardLocked", () => {
+  // Ends 5 and 3 on baseState's board.
+  const hands = (n: GameState["hands"]["n"], s: GameState["hands"]["s"]) => ({ n, s, e: [], w: [] });
+
+  it("false while any hand holds a tile that fits", () => {
+    expect(isBoardLocked(baseState)).toBe(false);
+  });
+  it("true when no hand and no boneyard tile fits either end", () => {
+    expect(isBoardLocked({ ...baseState, hands: hands([[1, 2]], [[4, 4]]) })).toBe(true);
+  });
+  it("a fitting tile in the boneyard keeps the board open", () => {
+    expect(
+      isBoardLocked({ ...baseState, hands: hands([[1, 2]], [[4, 4]]), boneyard: [[0, 0], [3, 0]] })
+    ).toBe(false);
+  });
+  it("an empty table is never locked", () => {
+    expect(isBoardLocked({ ...baseState, board: [], hands: hands([], []) })).toBe(false);
   });
 });

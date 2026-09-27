@@ -87,8 +87,8 @@ describe("scoreDomino", () => {
   });
 });
 
-describe("scoreTrancao", () => {
-  it("lower side wins and takes every pip on the table (both sides)", () => {
+describe("scoreTrancao (blocker against the player to his right)", () => {
+  it("the lighter hand wins and takes every pip left in the hands", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -115,12 +115,18 @@ describe("scoreTrancao", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    const r = scoreTrancao(state);
+    // Blocker n (2) against the rival on his right, s (12): n wins.
+    const r = scoreTrancao(state, "n");
+    expect(r.winnerSeat).toBe("n");
     expect(r.winnerTeam).toBe(0);
+    expect(r).toMatchObject({ blockerSeat: "n", rivalSeat: "s", blockerPips: 2, rivalPips: 12 });
     // Whole table, not the difference: 2 + 12 = 14
     expect(r.pts).toBe(14);
+    // Heads-up the rival of s is n, so the lighter hand still wins.
+    const fromS = scoreTrancao(state, "s");
+    expect(fromS).toMatchObject({ winnerSeat: "n", winnerTeam: 0, rivalSeat: "n", pts: 14 });
   });
-  it("tie: starter's team wins and takes the whole table", () => {
+  it("tie: the side that opened the round wins and takes the whole table", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -147,11 +153,12 @@ describe("scoreTrancao", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    const r = scoreTrancao(state);
+    const r = scoreTrancao(state, "s");
+    expect(r.winnerSeat).toBe("n");
     expect(r.winnerTeam).toBe(0);
     expect(r.pts).toBe(6);
   });
-  it("tie: a starter on team 1 takes the whole table for team 1", () => {
+  it("tie: an opener on team 1 takes the whole table for team 1", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -178,32 +185,35 @@ describe("scoreTrancao", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    const r = scoreTrancao(state);
+    const r = scoreTrancao(state, "n");
+    expect(r.winnerSeat).toBe("s");
     expect(r.winnerTeam).toBe(1);
     expect(r.pts).toBe(10);
   });
 });
 
-describe("isCapicua", () => {
-  it("true when both ends match and the tile is not a double", () => {
-    expect(isCapicua([[4, 5], [5, 3], [3, 4]], [4, 3])).toBe(true);
+describe("isCapicua (ends just before the closing tile)", () => {
+  it("true for the tile that carries both different ends: 3-5 on ends 3 and 5", () => {
+    expect(isCapicua({ left: 3, right: 5 }, [3, 5])).toBe(true);
+    expect(isCapicua({ left: 3, right: 5 }, [5, 3])).toBe(true);
   });
-  it("false when tile is double", () => {
-    expect(isCapicua([[3, 3]], [3, 3])).toBe(false);
+  it("true for a non-double on two equal ends: 5-6 on ends 5 and 5", () => {
+    expect(isCapicua({ left: 5, right: 5 }, [5, 6])).toBe(true);
   });
-  it("false for the double blank (doubles are the only exclusion)", () => {
-    expect(isCapicua([[0, 0]], [0, 0])).toBe(false);
+  it("false for a double, even on two equal ends: 5-5 on ends 5 and 5", () => {
+    expect(isCapicua({ left: 5, right: 5 }, [5, 5])).toBe(false);
+    expect(isCapicua({ left: 0, right: 0 }, [0, 0])).toBe(false);
   });
   it("true when the closing tile has a blank", () => {
-    // Board ends 3 and 3; the closing tile [0,3] carries a blank and still counts.
-    expect(isCapicua([[3, 5], [5, 0], [0, 3]], [0, 3])).toBe(true);
+    expect(isCapicua({ left: 3, right: 0 }, [0, 3])).toBe(true);
+    expect(isCapicua({ left: 0, right: 0 }, [5, 0])).toBe(true);
   });
-  it("true when both open ends are blank", () => {
-    // Board ends 0 and 0; the closing tile [5,0] is not a double.
-    expect(isCapicua([[0, 3], [3, 5], [5, 0]], [5, 0])).toBe(true);
+  it("false when the tile fits only one end", () => {
+    expect(isCapicua({ left: 3, right: 5 }, [5, 2])).toBe(false);
+    expect(isCapicua({ left: 4, right: 4 }, [5, 2])).toBe(false);
   });
-  it("false when ends differ", () => {
-    expect(isCapicua([[3, 4], [4, 5]], [5, 2])).toBe(false);
+  it("false on an empty table", () => {
+    expect(isCapicua({ left: -1, right: -1 }, [3, 5])).toBe(false);
   });
 });
 
@@ -280,7 +290,7 @@ describe("2v2 - scoreDomino", () => {
 });
 
 describe("2v2 - scoreTrancao", () => {
-  it("lower team wins and takes every pip on the table (both teams)", () => {
+  it("the lighter of blocker and rival wins and takes every pip in all four hands", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -307,12 +317,51 @@ describe("2v2 - scoreTrancao", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    const r = scoreTrancao(state);
-    // Team 0 = 2+4 = 6, Team 1 = 12+10 = 22. Team 0 takes 6 + 22 = 28.
-    expect(r.winnerTeam).toBe(0);
+    // Blocker n (2) against e (12), the player on his right: n wins.
+    const r = scoreTrancao(state, "n");
+    expect(r).toMatchObject({ winnerSeat: "n", winnerTeam: 0, rivalSeat: "e" });
+    // Every hand counts: 2 + 12 + 4 + 10 = 28.
     expect(r.pts).toBe(28);
+    // Blocker w (10) against n (2): n wins for team 0 again.
+    expect(scoreTrancao(state, "w")).toMatchObject({ winnerSeat: "n", winnerTeam: 0, rivalSeat: "n" });
   });
-  it("tie: starter's team takes the whole table", () => {
+  it("the blocker's own hand decides, not his side's total", () => {
+    const state: GameState = {
+      phase: "playing",
+      mode: "turn_based",
+      theme: "barberia",
+      is2v2: true,
+      targetScore: 100,
+      scores: [0, 0],
+      roundIndex: 0,
+      hands: {
+        n: [[1, 1]], // 2
+        e: [[5, 0]], // 5
+        s: [[6, 6], [4, 4]], // 20 (team 0 = 22)
+        w: [[1, 0]], // 1 (team 1 = 6)
+      },
+      board: [],
+      boneyard: [],
+      currentTurn: "e",
+      consecutivePasses: 0,
+      passesSinceLastPlay: 0,
+      starterThisRound: "e",
+      lastCallout: null,
+      lastCalloutPayload: null,
+      players: { n: null, e: null, s: null, w: null },
+      winnerTeam: null,
+      lastPlayedBy: "n",
+    };
+    // Team 0 holds far more pips, but n (2) beats e (5) and wins for team 0.
+    expect(scoreTrancao(state, "n")).toMatchObject({
+      winnerSeat: "n",
+      winnerTeam: 0,
+      blockerPips: 2,
+      rivalPips: 5,
+      pts: 28,
+    });
+  });
+  it("tie of blocker and rival: the pair that opened takes the whole table", () => {
     const state: GameState = {
       phase: "playing",
       mode: "turn_based",
@@ -339,9 +388,20 @@ describe("2v2 - scoreTrancao", () => {
       winnerTeam: null,
       lastPlayedBy: null,
     };
-    const r = scoreTrancao(state);
-    // Team 0 = 6, Team 1 = 6. Starter E is on team 1, which takes all 12.
-    expect(r.winnerTeam).toBe(1);
-    expect(r.pts).toBe(12);
+    // Blocker w (3) against n (2) is no tie: n wins.
+    expect(scoreTrancao(state, "w")).toMatchObject({ winnerSeat: "n", winnerTeam: 0 });
+    // Blocker e (3) against s (4) is no tie either: e wins.
+    expect(scoreTrancao(state, "e")).toMatchObject({ winnerSeat: "e", winnerTeam: 1 });
+    // Tie of the two players: blocker n holds [1,2] = 3, like e.
+    const tie: GameState = { ...state, hands: { ...state.hands, n: [[1, 2]] } };
+    const r = scoreTrancao(tie, "n");
+    // The pair that opened the round (E, team 1) takes the whole table.
+    expect(r).toMatchObject({ winnerSeat: "e", winnerTeam: 1, blockerPips: 3, rivalPips: 3 });
+    expect(r.pts).toBe(3 + 3 + 4 + 3);
+    // With S opening, the same tie goes to team 0 and the blocker n.
+    expect(scoreTrancao({ ...tie, starterThisRound: "s" }, "n")).toMatchObject({
+      winnerSeat: "n",
+      winnerTeam: 0,
+    });
   });
 });

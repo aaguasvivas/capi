@@ -124,26 +124,33 @@ describe("phase machine guards", () => {
     expect(startNewRound(finished, finished.players, rng)).toBe(finished);
   });
 
-  it("a veinticinco that crosses the target never ends the game mid-round", () => {
-    // 2v2, team 0 sits at 90 of 100; N played last, E and S have passed, W passes now.
+  it("a pase corrido is paid only while it leaves the side below the target", () => {
+    // 2v2: N played last, E and S have passed, W passes now. N still holds a 3.
     const rng = mulberry32(3);
     const base = createInitialState({ mode: "live", theme: "colmado", is2v2: true, targetScore: 100, rng });
-    const state: GameState = {
+    const at = (scores: [number, number]): GameState => ({
       ...base,
-      scores: [90, 0],
+      scores,
       lastPlayedBy: "n",
       currentTurn: "w",
       consecutivePasses: 2,
       passesSinceLastPlay: 2,
-      hands: { ...base.hands, w: [[6, 6]] },
+      hands: { n: [[3, 4]], e: [[0, 0]], s: [[5, 5]], w: [[6, 6]] },
       board: [[1, 2], [2, 3]],
-    };
-    const r = applyMove(state, "w", { type: "pass" });
+    });
+
+    const paid = applyMove(at([74, 0]), "w", { type: "pass" });
+    expect(paid.callout).toBe("veinticinco");
+    expect(paid.newState.scores).toEqual([99, 0]);
+
+    // 90 + 25 would pass the target: a plain pass, and the game goes on.
+    const r = applyMove(at([90, 0]), "w", { type: "pass" });
     expect(r.success).toBe(true);
-    expect(r.callout).toBe("veinticinco");
-    expect(r.newState.scores[0]).toBe(115);
+    expect(r.callout).toBeUndefined();
+    expect(r.newState.scores).toEqual([90, 0]);
     expect(r.newState.phase).toBe("playing");
     expect(r.newState.winnerTeam).toBeNull();
     expect(getSeatsForGame(true)).toContain(r.newState.currentTurn);
+    expect(r.newState.currentTurn).toBe("n");
   });
 });

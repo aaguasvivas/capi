@@ -42,6 +42,14 @@ export function hasLegalPlay(hand: Tile[], board: Tile[]): boolean {
   );
 }
 
+// TRANQUE: the board is locked when no tile outside it (any hand or the
+// boneyard) fits either open end, so nobody can ever play again this round.
+export function isBoardLocked(state: GameState): boolean {
+  if (state.board.length === 0) return false;
+  const outside = [...Object.values(state.hands).flatMap((h) => h ?? []), ...state.boneyard];
+  return !hasLegalPlay(outside, state.board);
+}
+
 export function validateMove(
   state: GameState,
   seat: Seat,

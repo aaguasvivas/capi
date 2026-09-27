@@ -1,5 +1,5 @@
 import type { GameState, Seat, Tile } from "./types";
-import { getTeam } from "./types";
+import { getNextSeat, getTeam } from "./types";
 
 export function tilePips(tile: Tile): number {
   return tile[0] + tile[1];
@@ -42,34 +42,60 @@ export function scoreDomino(state: GameState, winningTeam: 0 | 1): number {
   );
 }
 
-/**
- * TRANCAO: the side holding fewer pips wins and, like a dominó, takes every
- * pip left on the table (both sides). A tie goes to the side that opened the
- * round.
- */
-export function scoreTrancao(state: GameState): { winnerTeam: 0 | 1; pts: number } {
-  const team0 = teamPips(state, 0);
-  const team1 = teamPips(state, 1);
-  const total = team0 + team1;
-  if (team0 < team1) return { winnerTeam: 0, pts: total };
-  if (team1 < team0) return { winnerTeam: 1, pts: total };
-  return { winnerTeam: getTeam(state.starterThisRound, state.is2v2), pts: total };
+export interface TrancaoResult {
+  winnerSeat: Seat;
+  winnerTeam: 0 | 1;
+  pts: number;
+  blockerSeat: Seat;
+  rivalSeat: Seat;
+  blockerPips: number;
+  rivalPips: number;
 }
 
 /**
- * CAPICÚA: +25 bonus when the closing tile fits both open ends. A double
- * never counts (it only "fits both ends" when they already match).
+ * TRANCAO (regla de patio): the blocker (the player who placed the locking
+ * tile) compares the pips in his own hand with the rival, the next player to
+ * his right, who is always an opponent. Fewer pips wins the round for that
+ * player's side; a tie goes to the side that opened the round. The winning
+ * side takes every pip left in every hand, like a dominó.
+ */
+export function scoreTrancao(state: GameState, blockerSeat: Seat): TrancaoResult {
+  const rivalSeat = getNextSeat(blockerSeat, state.is2v2);
+  const blockerPips = handPips(state.hands[blockerSeat] ?? []);
+  const rivalPips = handPips(state.hands[rivalSeat] ?? []);
+  const openingTeam = getTeam(state.starterThisRound, state.is2v2);
+  const winnerSeat =
+    blockerPips < rivalPips
+      ? blockerSeat
+      : rivalPips < blockerPips
+      ? rivalSeat
+      : getTeam(blockerSeat, state.is2v2) === openingTeam
+      ? blockerSeat
+      : rivalSeat;
+  return {
+    winnerSeat,
+    winnerTeam: getTeam(winnerSeat, state.is2v2),
+    pts: teamPips(state, 0) + teamPips(state, 1),
+    blockerSeat,
+    rivalSeat,
+    blockerPips,
+    rivalPips,
+  };
+}
+
+/**
+ * CAPICÚA: +25 bonus when the closing tile of a dominó fits both open ends
+ * as they were just before it was placed. With ends 3 and 5 that is the 3-5;
+ * with ends 5 and 5 any non-double with a 5 counts. A double never counts.
  */
 export function isCapicua(
-  board: Tile[],
+  endsBefore: { left: number; right: number },
   lastTile: Tile
 ): boolean {
-  if (board.length === 0) return false;
-  const leftEnd = board[0][0];
-  const rightEnd = board[board.length - 1][1];
-  if (leftEnd !== rightEnd) return false;
-  if (lastTile[0] === lastTile[1]) return false;
-  return true;
+  const [a, b] = lastTile;
+  if (a === b) return false;
+  const fits = (end: number) => a === end || b === end;
+  return fits(endsBefore.left) && fits(endsBefore.right);
 }
 
 export const CAPICUA_BONUS = 25;

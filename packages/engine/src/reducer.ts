@@ -7,11 +7,12 @@ import type {
   MoveResult,
 } from "./types";
 import {
+  boardEnds,
   getNextSeat,
   getTeam,
   getSeatsForGame,
 } from "./types";
-import { validateMove, hasLegalPlay } from "./validate";
+import { validateMove, hasLegalPlay, isBoardLocked } from "./validate";
 import {
   scoreDomino,
   scoreTrancao,
@@ -183,10 +184,44 @@ export function createInitialState(params: {
   };
 }
 
+// Bank a round's points. Only the round-winning side scores, so only that
+// side can reach the target: a game is won by winning a round.
+function creditRound(
+  state: GameState,
+  winningTeam: 0 | 1,
+  pts: number
+): Pick<GameState, "phase" | "scores" | "winnerTeam"> {
+  const scores: [number, number] = [
+    state.scores[0] + (winningTeam === 0 ? pts : 0),
+    state.scores[1] + (winningTeam === 1 ? pts : 0),
+  ];
+  const other: 0 | 1 = winningTeam === 0 ? 1 : 0;
+  const t = state.targetScore;
+  // Normally only the round winner can be at the target. A game saved before
+  // the pase corrido cap can hold the other side there already (the old
+  // engine banked +25 past the target mid-round); that side then wins when
+  // the round ends, as it did under the old engine, and a tie of two sides
+  // past the target goes to the higher score, then to the round winner.
+  let winnerTeam: 0 | 1 | null = null;
+  if (scores[winningTeam] >= t && scores[other] >= t) {
+    winnerTeam = scores[other] > scores[winningTeam] ? other : winningTeam;
+  } else if (scores[winningTeam] >= t) {
+    winnerTeam = winningTeam;
+  } else if (scores[other] >= t) {
+    winnerTeam = other;
+  }
+  return {
+    phase: winnerTeam !== null ? "finished" : "round_over",
+    scores,
+    winnerTeam,
+  };
+}
+
 function endRoundWithDomino(
   state: GameState,
   winningTeam: 0 | 1,
-  lastTile: Tile
+  lastTile: Tile,
+  endsBefore: { left: number; right: number }
 ): GameState {
   let pts = scoreDomino(state, winningTeam);
   let callout: MoveResult["callout"] = "domino";
@@ -197,54 +232,50 @@ function endRoundWithDomino(
     team1Pips: teamPips(state, 1),
   };
 
-  if (isCapicua(state.board, lastTile)) {
+  if (isCapicua(endsBefore, lastTile)) {
     pts += CAPICUA_BONUS;
     callout = "capicua";
     payload.capicuaBonus = CAPICUA_BONUS;
   }
 
-  const newScores: [number, number] = [
-    state.scores[0] + (winningTeam === 0 ? pts : 0),
-    state.scores[1] + (winningTeam === 1 ? pts : 0),
-  ];
-  const winner =
-    newScores[0] >= state.targetScore || newScores[1] >= state.targetScore
-      ? (newScores[0] >= state.targetScore ? 0 : 1)
-      : null;
-
   return {
     ...state,
-    phase: winner !== null ? "finished" : "round_over",
-    scores: newScores,
-    winnerTeam: winner,
+    ...creditRound(state, winningTeam, pts),
     lastCallout: callout,
     lastCalloutPayload: payload,
   };
 }
 
-function endRoundWithTrancao(state: GameState): GameState {
-  const { winnerTeam, pts } = scoreTrancao(state);
-  const newScores: [number, number] = [
-    state.scores[0] + (winnerTeam === 0 ? pts : 0),
-    state.scores[1] + (winnerTeam === 1 ? pts : 0),
-  ];
-  const winner =
-    newScores[0] >= state.targetScore || newScores[1] >= state.targetScore
-      ? (newScores[0] >= state.targetScore ? 0 : 1)
-      : null;
-
+function endRoundWithTrancao(state: GameState, blockerSeat: Seat): GameState {
+  const t = scoreTrancao(state, blockerSeat);
   return {
     ...state,
-    phase: winner !== null ? "finished" : "round_over",
-    scores: newScores,
-    winnerTeam: winner,
+    ...creditRound(state, t.winnerTeam, t.pts),
     lastCallout: "trancao",
     lastCalloutPayload: {
-      winningTeam: winnerTeam,
-      pts,
+      winningTeam: t.winnerTeam,
+      pts: t.pts,
       team0Pips: teamPips(state, 0),
       team1Pips: teamPips(state, 1),
+      blockerSeat: t.blockerSeat,
+      rivalSeat: t.rivalSeat,
+      blockerPips: t.blockerPips,
+      rivalPips: t.rivalPips,
     },
+  };
+}
+
+function previousSeat(seat: Seat, is2v2: boolean): Seat {
+  const seats = getSeatsForGame(is2v2);
+  return seats[(seats.indexOf(seat) + seats.length - 1) % seats.length];
+}
+
+function roundEnded(newState: GameState): MoveResult {
+  return {
+    success: true,
+    newState,
+    callout: newState.lastCallout ?? undefined,
+    calloutPayload: newState.lastCalloutPayload ?? undefined,
   };
 }
 
@@ -261,48 +292,51 @@ export function applyMove(
   if (intent.type === "play" && intent.tile && intent.end !== undefined) {
     const hand = state.hands[seat] ?? [];
     const newHand = removeTileFromHand(hand, intent.tile);
-    const newBoard = placeTileOnBoard(state.board, intent.tile, intent.end);
-
-    const wentOut = newHand.length === 0;
-    const winningTeam = getTeam(seat, state.is2v2);
-
-    if (wentOut) {
-      // Record who went out BEFORE ending the round: getRoundWinningSeat reads
-      // lastPlayedBy to decide who leads the next round (the DOMINÓ/CAPICÚA
-      // winner). Without this the field keeps the *previous* player's seat and
-      // the loser would start next round.
-      const newState = endRoundWithDomino(
-        {
-          ...state,
-          hands: { ...state.hands, [seat]: newHand },
-          board: newBoard,
-          lastPlayedBy: seat,
-        },
-        winningTeam,
-        intent.tile
-      );
-      return {
-        success: true,
-        newState,
-        callout: newState.lastCallout ?? undefined,
-        calloutPayload: newState.lastCalloutPayload ?? undefined,
-      };
-    }
-
-    const nextTurn = getNextSeat(seat, state.is2v2);
-    const newState: GameState = {
+    // Record who played BEFORE any round end: getRoundWinningSeat reads
+    // lastPlayedBy to decide who leads after a DOMINÓ/CAPICÚA.
+    const placed: GameState = {
       ...state,
       hands: { ...state.hands, [seat]: newHand },
-      board: newBoard,
-      currentTurn: nextTurn,
+      board: placeTileOnBoard(state.board, intent.tile, intent.end),
+      lastPlayedBy: seat,
+    };
+
+    // Going out is a dominó even when the same tile locks the board.
+    if (newHand.length === 0) {
+      return roundEnded(
+        endRoundWithDomino(
+          placed,
+          getTeam(seat, state.is2v2),
+          intent.tile,
+          boardEnds(state.board)
+        )
+      );
+    }
+
+    // TRANQUE: nothing outside the board fits either end any more. The round
+    // ends on the spot and the player who placed the tile is the blocker.
+    if (isBoardLocked(placed)) {
+      return roundEnded(endRoundWithTrancao(placed, seat));
+    }
+
+    const newState: GameState = {
+      ...placed,
+      currentTurn: getNextSeat(seat, state.is2v2),
       consecutivePasses: 0,
       passesSinceLastPlay: 0,
-      lastPlayedBy: seat,
       // Clear any mid-round VEINTICINCO callout once play resumes.
       lastCallout: null,
       lastCalloutPayload: null,
     };
     return { success: true, newState };
+  }
+
+  // A lock is caught when the locking tile is placed, so a live board is never
+  // locked. A game saved before that rule can be: resolve it on the next draw
+  // or pass, with the player who played last as the blocker.
+  if ((intent.type === "draw" || intent.type === "pass") && isBoardLocked(state)) {
+    const blocker = state.lastPlayedBy ?? previousSeat(seat, state.is2v2);
+    return roundEnded(endRoundWithTrancao(state, blocker));
   }
 
   if (intent.type === "draw") {
@@ -331,71 +365,54 @@ export function applyMove(
   if (intent.type === "pass") {
     const newConsecutive = state.consecutivePasses + 1;
     const newPassesSincePlay = state.passesSinceLastPlay + 1;
-    const passThreshold = state.is2v2 ? 4 : 2;
     // Pase corrido is a parejas rule: it needs the three other seats to pass.
-    // Heads-up, a single pass is just a pass (and two passes are a trancao).
+    // Heads-up, a pass is just a pass.
     const veinticincoThreshold = state.is2v2 ? 3 : Infinity;
     const nextTurn = getNextSeat(seat, state.is2v2);
 
     // VEINTICINCO ("pase corrido"): the cycle of forced passes returns to
     // `lastPlayedBy`. Award +25 to their team as a MID-ROUND bonus; the
-    // round does NOT end. `lastPlayedBy` gets the next turn and must play
-    // (or pass, which can stack into a TRANCAO below). VEINTICINCO can fire
-    // multiple times in one round if the same player keeps forcing
-    // pass-arounds with subsequent plays.
+    // round does NOT end, and `lastPlayedBy` must play next (the board is not
+    // locked, and nobody else can follow). It can fire more than once in a
+    // round. The bonus only counts while it leaves the team below the target:
+    // a game is won by winning a round, never by a bonus. When it would reach
+    // the target, the pass is a plain pass.
     if (
       state.lastPlayedBy !== null &&
       nextTurn === state.lastPlayedBy &&
       newPassesSincePlay === veinticincoThreshold
     ) {
       const winningTeam = getTeam(state.lastPlayedBy, state.is2v2);
-      const newScores: [number, number] = [
-        state.scores[0] + (winningTeam === 0 ? VEINTICINCO_BONUS : 0),
-        state.scores[1] + (winningTeam === 1 ? VEINTICINCO_BONUS : 0),
-      ];
-      const payload: CalloutPayload = {
-        winningTeam,
-        veinticincoBonus: VEINTICINCO_BONUS,
-        team0Pips: teamPips(state, 0),
-        team1Pips: teamPips(state, 1),
-      };
-      // The bonus is banked mid-round; a game only ends when a round does,
-      // so a live board is never abandoned with hands still full.
-      const newState: GameState = {
-        ...state,
-        scores: newScores,
-        currentTurn: nextTurn, // = lastPlayedBy, who must now play or pass
-        consecutivePasses: newConsecutive,
-        passesSinceLastPlay: newPassesSincePlay,
-        lastCallout: "veinticinco",
-        lastCalloutPayload: payload,
-      };
-      return {
-        success: true,
-        newState,
-        callout: "veinticinco",
-        calloutPayload: payload,
-      };
+      if (state.scores[winningTeam] + VEINTICINCO_BONUS < state.targetScore) {
+        const newScores: [number, number] = [
+          state.scores[0] + (winningTeam === 0 ? VEINTICINCO_BONUS : 0),
+          state.scores[1] + (winningTeam === 1 ? VEINTICINCO_BONUS : 0),
+        ];
+        const payload: CalloutPayload = {
+          winningTeam,
+          veinticincoBonus: VEINTICINCO_BONUS,
+          team0Pips: teamPips(state, 0),
+          team1Pips: teamPips(state, 1),
+        };
+        const newState: GameState = {
+          ...state,
+          scores: newScores,
+          currentTurn: nextTurn, // = lastPlayedBy, who must now play
+          consecutivePasses: newConsecutive,
+          passesSinceLastPlay: newPassesSincePlay,
+          lastCallout: "veinticinco",
+          lastCalloutPayload: payload,
+        };
+        return {
+          success: true,
+          newState,
+          callout: "veinticinco",
+          calloutPayload: payload,
+        };
+      }
     }
 
-    // TRANCAO: pass threshold reached. The board is truly locked because
-    // nobody (including `lastPlayedBy`, whose pass got us here) can play.
-    // The +25 from any preceding VEINTICINCO is already banked in state.scores;
-    // TRANCAO adds pip-diff scoring on top.
-    if (newConsecutive >= passThreshold) {
-      const newState = endRoundWithTrancao({
-        ...state,
-        consecutivePasses: newConsecutive,
-      });
-      return {
-        success: true,
-        newState,
-        callout: "trancao",
-        calloutPayload: newState.lastCalloutPayload ?? undefined,
-      };
-    }
-
-    // Normal pass: advance turn, no end-of-round event. Clear any prior
+    // Plain pass: advance turn, no end-of-round event. Clear any prior
     // mid-round callout so it doesn't linger across the round.
     const newState: GameState = {
       ...state,
@@ -413,18 +430,26 @@ export function applyMove(
 
 /**
  * Determine which seat won the round and should start next.
- * DOMINÓ/CAPICÚA/VEINTICINCO → the player who last played.
- * TRANCAO → the player with fewest individual pips on the winning team.
+ * DOMINÓ/CAPICÚA → the player who went out (the last to play).
+ * TRANCAO → whoever won the comparison: the blocker or the rival.
  */
 function getRoundWinningSeat(state: GameState): Seat {
   const callout = state.lastCallout;
 
-  if (callout === "domino" || callout === "capicua" || callout === "veinticinco") {
+  if (callout === "domino" || callout === "capicua") {
     return state.lastPlayedBy ?? state.starterThisRound;
   }
 
   if (callout === "trancao") {
-    const winningTeam = state.lastCalloutPayload?.winningTeam ?? 0;
+    const payload = state.lastCalloutPayload;
+    const winningTeam = payload?.winningTeam ?? 0;
+    if (payload?.blockerSeat && payload.rivalSeat) {
+      return getTeam(payload.blockerSeat, state.is2v2) === winningTeam
+        ? payload.blockerSeat
+        : payload.rivalSeat;
+    }
+    // A tranque saved before the comparison fields existed: the lightest
+    // hand on the winning side opens, as it did then.
     const seats = getSeatsForGame(state.is2v2);
     let bestSeat: Seat = seats[0];
     let bestPips = Infinity;

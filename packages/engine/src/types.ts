@@ -19,6 +19,9 @@ export type CalloutType = "domino" | "trancao" | "capicua" | "veinticinco";
 // callout names the side that scored and both sides' pips at that moment;
 // the optional fields belong to one callout each (dominó and capicúa award
 // `pipsAwarded`, tranque awards `pts`, pase corrido awards `veinticincoBonus`).
+// A tranque also names the comparison that decided it: the blocker (who placed
+// the locking tile), the rival on his right, and each one's own hand pips.
+// Tranques that ended before those fields existed carry only `pts`.
 export interface CalloutPayload {
   winningTeam: 0 | 1;
   team0Pips: number;
@@ -27,6 +30,10 @@ export interface CalloutPayload {
   capicuaBonus?: number;
   pts?: number;
   veinticincoBonus?: number;
+  blockerSeat?: Seat;
+  rivalSeat?: Seat;
+  blockerPips?: number;
+  rivalPips?: number;
 }
 
 // How a game ended when it was not played to the target score: the seat on

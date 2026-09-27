@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { createInitialState, applyMove, startNewRound } from "../src/reducer";
 import { hasLegalPlay } from "../src/validate";
-import { handPips, teamPips, CAPICUA_BONUS, VEINTICINCO_BONUS } from "../src/scoring";
+import { handPips, CAPICUA_BONUS, VEINTICINCO_BONUS } from "../src/scoring";
 import { getNextSeat, getSeatsForGame, getTeam } from "../src/types";
 import type { GameState, MoveIntent, Seat, Tile } from "../src/types";
 
@@ -70,6 +70,28 @@ function legalPlays(state: GameState): MoveIntent[] {
   return out;
 }
 
+// Recomputed here from first principles, not through the engine's helpers:
+// the board is locked when no tile in any hand or the boneyard fits an end.
+function boardLocked(state: GameState): boolean {
+  if (state.board.length === 0) return false;
+  const left = state.board[0][0];
+  const right = state.board[state.board.length - 1][1];
+  const outside = [...(["n", "e", "s", "w"] as Seat[]).flatMap((s) => state.hands[s] ?? []), ...state.boneyard];
+  return !outside.some((t) => t[0] === left || t[1] === left || t[0] === right || t[1] === right);
+}
+
+// Tranque comparison, recomputed: the blocker against the next seat, fewer
+// pips wins, a tie goes to the side that opened the round.
+function expectedTranque(ended: GameState, blocker: Seat): { winnerSeat: Seat; rival: Seat } {
+  const rival = getNextSeat(blocker, ended.is2v2);
+  const bp = handPips(ended.hands[blocker] ?? []);
+  const rp = handPips(ended.hands[rival] ?? []);
+  const openers = getTeam(ended.starterThisRound, ended.is2v2);
+  const winnerSeat =
+    bp < rp ? blocker : rp < bp ? rival : getTeam(blocker, ended.is2v2) === openers ? blocker : rival;
+  return { winnerSeat, rival };
+}
+
 function chooseIntent(state: GameState, rng: () => number): MoveIntent {
   const plays = legalPlays(state);
   if (plays.length > 0) return plays[Math.floor(rng() * plays.length)];
@@ -92,6 +114,10 @@ function assertDealInvariants(state: GameState, label: string): void {
   }
   expect(seats.includes(state.currentTurn), `${label}: turn is an active seat`).toBe(true);
 }
+
+// Which rule paths the seeded games reached. An invariant that never fires
+// proves nothing, so each suite checks that its paths were exercised.
+const reached = new Set<string>();
 
 /** The battery: structural truths that must hold across every transition. */
 function assertTransition(
@@ -119,24 +145,39 @@ function assertTransition(
     expect(Number.isInteger(next.scores[team]), L("score integer")).toBe(true);
   }
 
-  // Phase machine consistency.
+  // Phase machine consistency. Only a round win scores enough to reach the
+  // target, so while no side has won the game both sit below it.
   if (next.phase === "finished") {
     expect(next.winnerTeam, L("finished has winner")).not.toBeNull();
+    expect(["domino", "capicua", "trancao"], L("game ends on a round end")).toContain(next.lastCallout);
+    expect(next.winnerTeam, L("game goes to the round winner")).toBe(next.lastCalloutPayload?.winningTeam);
     expect(
       next.scores[next.winnerTeam as 0 | 1],
       L("winner reached target")
     ).toBeGreaterThanOrEqual(next.targetScore);
-  } else if (next.phase === "playing") {
-    expect(next.winnerTeam, L("playing has no winner")).toBeNull();
-    const threshold = next.is2v2 ? 4 : 2;
-    expect(next.consecutivePasses, L("passes below trancao threshold")).toBeLessThan(threshold);
+  } else {
+    expect(next.winnerTeam, L("no winner before the game ends")).toBeNull();
+    for (const team of [0, 1] as const) {
+      expect(next.scores[team], L("scores stay below target until a round wins it")).toBeLessThan(next.targetScore);
+    }
+  }
+  if (next.phase === "playing") {
+    // A lock ends the round on placement, so a live board is never locked
+    // and passes never go all the way around the table.
+    expect(boardLocked(next), L("live board is never locked")).toBe(false);
+    expect(next.consecutivePasses, L("passes never complete a cycle")).toBeLessThan(
+      getSeatsForGame(next.is2v2).length
+    );
   } else if (next.phase === "round_over") {
-    expect(next.winnerTeam, L("round_over is not game end")).toBeNull();
     expect(["domino", "capicua", "trancao"]).toContain(next.lastCallout);
   }
 
   const delta0 = next.scores[0] - prev.scores[0];
   const delta1 = next.scores[1] - prev.scores[1];
+  const allPips = getSeatsForGame(next.is2v2).reduce(
+    (sum, s) => sum + handPips(next.hands[s] ?? []),
+    0
+  );
 
   if (intent.type === "play") {
     // Actor's hand shrank by exactly the played tile; others untouched.
@@ -144,31 +185,55 @@ function assertTransition(
     for (const s of getSeatsForGame(prev.is2v2)) {
       if (s !== seat) expect(next.hands[s], L(`hand ${s} untouched`)).toEqual(prev.hands[s]);
     }
+    expect(next.lastPlayedBy, L("lastPlayedBy updated")).toBe(seat);
     if (next.phase === "playing") {
       expect(next.currentTurn, L("turn advances after play")).toBe(getNextSeat(seat, prev.is2v2));
       expect(next.consecutivePasses, L("play resets passes")).toBe(0);
       expect(delta0 + delta1, L("no score change mid-round play")).toBe(0);
-      expect(next.lastPlayedBy, L("lastPlayedBy updated")).toBe(seat);
-    } else {
-      // Round ended by this play: DOMINO or CAPICUA.
-      expect(next.hands[seat].length, L("winner went out")).toBe(0);
-      expect(["domino", "capicua"]).toContain(next.lastCallout);
+    } else if (next.hands[seat].length === 0) {
+      // Going out is a DOMINÓ, or a CAPICÚA when the tile is no double and
+      // fits both ends as they were before it was placed. It wins over a lock.
+      const tile = intent.tile as Tile;
+      const left = prev.board.length > 0 ? prev.board[0][0] : -1;
+      const right = prev.board.length > 0 ? prev.board[prev.board.length - 1][1] : -1;
+      const fits = (end: number) => tile[0] === end || tile[1] === end;
+      const capicua = tile[0] !== tile[1] && fits(left) && fits(right);
+      expect(next.lastCallout, L("capicúa iff the last tile fits both ends")).toBe(
+        capicua ? "capicua" : "domino"
+      );
+      if (capicua) reached.add(left === right ? "capicua on equal ends" : "capicua");
       const winningTeam = getTeam(seat, prev.is2v2);
       const losingDelta = winningTeam === 0 ? delta1 : delta0;
       const winningDelta = winningTeam === 0 ? delta0 : delta1;
       expect(losingDelta, L("loser scores nothing on domino")).toBe(0);
-      const allPips = getSeatsForGame(next.is2v2).reduce(
-        (sum, s) => sum + handPips(next.hands[s] ?? []),
-        0
-      );
-      const expected = allPips + (next.lastCallout === "capicua" ? CAPICUA_BONUS : 0);
-      expect(winningDelta, L("domino awards remaining pips (+bonus)")).toBe(expected);
+      const expected = allPips + (capicua ? CAPICUA_BONUS : 0);
+      expect(winningDelta, L("domino awards remaining pips (+bonus once)")).toBe(expected);
+    } else {
+      // TRANQUE on placement: the player who placed the tile is the blocker.
+      expect(next.lastCallout, L("a round that ends with tiles in hand is a tranque")).toBe("trancao");
+      expect(boardLocked(next), L("tranque only on a locked board")).toBe(true);
+      const { winnerSeat, rival } = expectedTranque(next, seat);
+      const winner = getTeam(winnerSeat, next.is2v2);
+      const payload = next.lastCalloutPayload;
+      expect(payload?.blockerSeat, L("blocker is the placer")).toBe(seat);
+      expect(payload?.rivalSeat, L("rival is the next seat")).toBe(rival);
+      expect(payload?.blockerPips, L("blocker pips")).toBe(handPips(next.hands[seat]));
+      expect(payload?.rivalPips, L("rival pips")).toBe(handPips(next.hands[rival]));
+      expect(payload?.winningTeam, L("lighter of blocker and rival wins")).toBe(winner);
+      expect(payload?.capicuaBonus, L("no capicúa on a tranque")).toBeUndefined();
+      // A tranque pays every pip left in the hands to the winning side.
+      expect(payload?.pts, L("trancao pts = every pip in the hands")).toBe(allPips);
+      expect(winner === 0 ? delta0 : delta1, L("trancao credits winner")).toBe(allPips);
+      expect(winner === 0 ? delta1 : delta0, L("trancao pays one side")).toBe(0);
+      reached.add(winnerSeat === seat ? "tranque won by blocker" : "tranque won by rival");
+      if (payload?.blockerPips === payload?.rivalPips) reached.add("tranque tie");
     }
   }
 
   if (intent.type === "draw") {
     const gained = next.hands[seat].length - prev.hands[seat].length;
     const consumed = prev.boneyard.length - next.boneyard.length;
+    expect(next.phase, L("a draw never ends the round")).toBe("playing");
     expect(gained, L("draw moved tiles hand<-boneyard")).toBe(consumed);
     expect(gained, L("draw takes at least one tile")).toBeGreaterThanOrEqual(1);
     expect(next.currentTurn, L("draw keeps the turn")).toBe(seat);
@@ -180,60 +245,40 @@ function assertTransition(
   }
 
   if (intent.type === "pass") {
+    expect(next.phase, L("a pass never ends the round")).toBe("playing");
     expect(next.hands[seat], L("pass leaves hand untouched")).toEqual(prev.hands[seat]);
     expect(next.board, L("pass leaves board untouched")).toEqual(prev.board);
-    if (next.lastCallout === "veinticinco") {
-      // Pase corrido: +25 to the team of the last player, who plays next.
-      const team = getTeam(prev.lastPlayedBy as Seat, prev.is2v2);
+    expect(next.currentTurn, L("pass advances turn")).toBe(getNextSeat(seat, prev.is2v2));
+    // Pase corrido: the third pass in a row after a play returns the turn to
+    // the player who made it. It pays 25 to his side only while that leaves
+    // the side below the target; otherwise the pass is plain.
+    const forcer = prev.lastPlayedBy;
+    const cycle =
+      prev.is2v2 &&
+      forcer !== null &&
+      next.currentTurn === forcer &&
+      prev.passesSinceLastPlay + 1 === 3;
+    const team = forcer ? getTeam(forcer, prev.is2v2) : 0;
+    const paid = cycle && prev.scores[team] + VEINTICINCO_BONUS < prev.targetScore;
+    if (cycle) reached.add(paid ? "pase corrido paid" : "pase corrido not paid at the target");
+    if (paid) {
+      expect(next.lastCallout, L("pase corrido fires")).toBe("veinticinco");
       expect(team === 0 ? delta0 : delta1, L("veinticinco pays 25")).toBe(VEINTICINCO_BONUS);
       expect(team === 0 ? delta1 : delta0, L("veinticinco pays one side")).toBe(0);
-      if (next.phase === "playing") {
-        expect(next.currentTurn, L("veinticinco returns turn to forcer")).toBe(prev.lastPlayedBy);
-      }
-    } else if (next.lastCallout === "trancao") {
-      const t0 = teamPips(next, 0);
-      const t1 = teamPips(next, 1);
-      const pts = (next.lastCalloutPayload?.pts as number) ?? -1;
-      const winner = (next.lastCalloutPayload?.winningTeam as number) ?? -1;
-      // A trancao pays the whole table to the lighter side, like a domino.
-      expect(pts, L("trancao pts = every pip on the table")).toBe(t0 + t1);
-      if (t0 !== t1) {
-        expect(winner, L("trancao lower pips wins")).toBe(t0 < t1 ? 0 : 1);
-      } else {
-        expect(winner, L("trancao tie goes to starter")).toBe(
-          getTeam(next.starterThisRound, next.is2v2)
-        );
-      }
-      expect(winner === 0 ? delta0 : delta1, L("trancao credits winner")).toBe(pts);
-      expect(winner === 0 ? delta1 : delta0, L("trancao pays one side")).toBe(0);
     } else {
+      expect(next.lastCallout, L("no pase corrido")).toBeNull();
       expect(delta0 + delta1, L("plain pass never scores")).toBe(0);
-      if (next.phase === "playing") {
-        expect(next.currentTurn, L("pass advances turn")).toBe(getNextSeat(seat, prev.is2v2));
-      }
     }
   }
 }
 
 /** Expected starter of the next round, recomputed independently. */
 function expectedNextStarter(ended: GameState): Seat {
-  if (ended.lastCallout === "domino" || ended.lastCallout === "capicua") {
-    return (ended.lastPlayedBy ?? ended.starterThisRound) as Seat;
-  }
-  // trancao: fewest individual pips on the winning team, first in seat order.
-  const winningTeam = (ended.lastCalloutPayload?.winningTeam as number) ?? 0;
-  let best: Seat = getSeatsForGame(ended.is2v2)[0];
-  let bestPips = Infinity;
-  for (const seat of getSeatsForGame(ended.is2v2)) {
-    if (getTeam(seat, ended.is2v2) === winningTeam) {
-      const pips = handPips(ended.hands[seat] ?? []);
-      if (pips < bestPips) {
-        bestPips = pips;
-        best = seat;
-      }
-    }
-  }
-  return best;
+  const lastPlayer = (ended.lastPlayedBy ?? ended.starterThisRound) as Seat;
+  if (ended.lastCallout === "domino" || ended.lastCallout === "capicua") return lastPlayer;
+  // trancao: whoever won the comparison, the blocker (who placed the locking
+  // tile, the last player) or the rival on his right.
+  return expectedTranque(ended, lastPlayer).winnerSeat;
 }
 
 const MAX_STEPS_PER_ROUND = 400;
@@ -310,15 +355,30 @@ describe("invariant fuzz: full random games through the real reducer", () => {
   // game-over transitions many more times per run.
   const TARGETS = [25, 50, 100, 200];
 
+  const SHARED_PATHS = [
+    "capicua",
+    "capicua on equal ends",
+    "tranque won by blocker",
+    "tranque won by rival",
+    "tranque tie",
+  ];
+
   it("1v1: 60 seeded games hold every invariant at every step", () => {
+    reached.clear();
     for (let i = 0; i < 60; i++) {
       playFullGame({ seed: 1000 + i, is2v2: false, targetScore: TARGETS[i % TARGETS.length] });
     }
+    for (const path of SHARED_PATHS) expect(reached, `1v1 seeds reach: ${path}`).toContain(path);
+    expect(reached, "no pase corrido heads-up").not.toContain("pase corrido paid");
   });
 
   it("2v2: 60 seeded games hold every invariant at every step", () => {
+    reached.clear();
     for (let i = 0; i < 60; i++) {
       playFullGame({ seed: 2000 + i, is2v2: true, targetScore: TARGETS[i % TARGETS.length] });
+    }
+    for (const path of [...SHARED_PATHS, "pase corrido paid", "pase corrido not paid at the target"]) {
+      expect(reached, `2v2 seeds reach: ${path}`).toContain(path);
     }
   });
 });

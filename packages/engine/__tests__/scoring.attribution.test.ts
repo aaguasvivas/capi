@@ -69,47 +69,34 @@ describe("score attribution: 1v1", () => {
     expect(res.newState.scores).toEqual([10 + 25, 0]);
   });
 
-  it("two passes in a row lock the table; the whole table goes to the lighter side (team 0)", () => {
-    // n played last; s can't play. Heads-up there is no pase corrido, so the
-    // pass is plain: nothing is banked and the turn returns to n. n can't play
-    // either, so the second pass locks the table (TRANCAO).
+  it("the tile that locks the table credits team 0 when the blocker n holds fewer pips", () => {
+    // Ends 5 and 0. n places [0,4]: the ends become 5 and 4 and no tile left
+    // fits either, so the table locks on that play (TRANCAO).
     const state = base1v1({
-      currentTurn: "s",
-      lastPlayedBy: "n",
-      passesSinceLastPlay: 0,
-      board: [T(0, 0)],
-      hands: { n: [T(1, 2)], s: [T(3, 4)], e: [], w: [] },
+      currentTurn: "n",
+      lastPlayedBy: "s",
+      board: [T(5, 0)],
+      hands: { n: [T(0, 4), T(1, 2)], s: [T(3, 3)], e: [], w: [] },
     });
-    const r1 = applyMove(state, "s", { type: "pass" });
-    expect(r1.success).toBe(true);
-    expect(r1.callout).toBeUndefined();
-    expect(r1.newState.lastCallout).toBeNull();
-    expect(r1.newState.scores).toEqual([0, 0]);
-    expect(r1.newState.phase).toBe("playing");
-    expect(r1.newState.currentTurn).toBe("n");
-
-    const r2 = applyMove(r1.newState, "n", { type: "pass" });
-    expect(r2.success).toBe(true);
-    expect(r2.callout).toBe("trancao");
-    expect(r2.newState.phase).toBe("round_over");
-    // n has 3 pips, s has 7. Team 0 is lighter and takes the whole table: 10.
-    expect(r2.newState.scores).toEqual([10, 0]);
-    const payload = r2.newState.lastCalloutPayload!;
+    const res = applyMove(state, "n", { type: "play", tile: T(0, 4), end: "right" });
+    expect(res.success).toBe(true);
+    expect(res.callout).toBe("trancao");
+    expect(res.newState.phase).toBe("round_over");
+    // n has 3 pips, s has 6. n wins and team 0 takes the whole table: 9.
+    expect(res.newState.scores).toEqual([9, 0]);
+    const payload = res.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(0);
-    expect(payload.pts).toBe(10);
+    expect(payload.pts).toBe(9);
   });
 
   it("TRANCAO credits team 1 with the whole table when s is the lighter side", () => {
-    // n played, s passed (plain), now n passes too: the table locks.
     const state = base1v1({
       currentTurn: "n",
-      lastPlayedBy: "n",
-      consecutivePasses: 1,
-      passesSinceLastPlay: 1,
-      board: [T(3, 5)],
-      hands: { n: [T(6, 6)], s: [T(1, 1)], e: [], w: [] },
+      lastPlayedBy: "s",
+      board: [T(5, 0)],
+      hands: { n: [T(0, 4), T(6, 6)], s: [T(1, 1)], e: [], w: [] },
     });
-    const res = applyMove(state, "n", { type: "pass" });
+    const res = applyMove(state, "n", { type: "play", tile: T(0, 4), end: "right" });
     expect(res.success).toBe(true);
     expect(res.callout).toBe("trancao");
     // n has 12 pips, s has 2. Team 1 takes 12 + 2 = 14; team 0 gets nothing.
@@ -177,47 +164,46 @@ describe("score attribution: 2v2", () => {
     expect(res.newState.scores).toEqual([8 + 6 + 1, 0]);
   });
 
-  it("TRANCAO credits the lighter team (team 1) with the whole table", () => {
-    // w played last, n/e/s passed, and w's own pass is the fourth: the lock.
+  it("TRANCAO credits team 1 when the blocker w beats n, the player to his right", () => {
+    // w places [0,3]: the ends become 4 and 3 and nobody can follow.
     const state = base2v2({
       currentTurn: "w",
-      lastPlayedBy: "w",
-      consecutivePasses: 3,
-      passesSinceLastPlay: 3,
-      board: [T(4, 4)],
+      lastPlayedBy: "s",
+      board: [T(4, 0)],
       hands: {
         n: [T(6, 6)], // 12
         s: [T(5, 5)], // 10 (team 0 = 22)
         e: [T(1, 1)], // 2
-        w: [T(1, 2)], // 3 (team 1 = 5)
+        w: [T(0, 3), T(1, 2)], // 3 after the play (team 1 = 5)
       },
     });
-    const res = applyMove(state, "w", { type: "pass" });
+    const res = applyMove(state, "w", { type: "play", tile: T(0, 3), end: "right" });
     expect(res.success).toBe(true);
     expect(res.callout).toBe("trancao");
     expect(res.newState.scores).toEqual([0, 22 + 5]);
   });
 
-  it("TRANCAO tie credits the starter's team (team 0) with the whole table", () => {
+  it("TRANCAO tie credits the opening side (team 0) with the whole table", () => {
+    // w places [0,6]: the ends become 4 and 6 and nobody can follow. w and n
+    // both hold 3 pips; s opened the round, so team 0 wins.
     const state = base2v2({
       currentTurn: "w",
-      lastPlayedBy: "w",
-      consecutivePasses: 3,
-      passesSinceLastPlay: 3,
+      lastPlayedBy: "s",
       starterThisRound: "s",
-      board: [T(4, 5)],
+      board: [T(4, 0)],
       hands: {
-        n: [T(1, 1)], // 2
-        s: [T(2, 2)], // 4 (team 0 = 6)
-        e: [T(3, 0)], // 3
-        w: [T(1, 2)], // 3 (team 1 = 6)
+        n: [T(1, 2)], // 3
+        s: [T(2, 2)], // 4 (team 0 = 7)
+        e: [T(5, 5)], // 10
+        w: [T(0, 6), T(0, 3)], // 3 after the play (team 1 = 13)
       },
     });
-    const res = applyMove(state, "w", { type: "pass" });
+    const res = applyMove(state, "w", { type: "play", tile: T(0, 6), end: "right" });
     expect(res.success).toBe(true);
     expect(res.callout).toBe("trancao");
-    expect(res.newState.scores).toEqual([12, 0]);
+    expect(res.newState.scores).toEqual([20, 0]);
     const payload = res.newState.lastCalloutPayload!;
     expect(payload.winningTeam).toBe(0);
+    expect(payload).toMatchObject({ blockerSeat: "w", rivalSeat: "n", blockerPips: 3, rivalPips: 3 });
   });
 });
