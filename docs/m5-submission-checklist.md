@@ -40,13 +40,13 @@ sources (apps/mobile/targets/messages), adds the extension's own privacy
 manifest (plugins/withMessagesExtension.js), and adds a line to the app's
 table for Messages games (apps/mobile/app/game/[id].tsx) after build 21.
 Build 21 is superseded. "The iMessage fix build" below means the next
-production build, build 22 (not built yet); test it, select it, and submit
-it, not 21. Its web half (apps/web: named turn bubbles, the result bubble
-from the player whose move ended the round, the next-round and rematch
-bubbles, the drawer's error screen, the hand and round-card fixes for short
-drawers) ships with a Vercel deploy. Build 22 also works against the page as
-it is live now (it falls back to "Your turn" and bare scores), but the fixes
-need the deploy before review.
+production build, build 22 (EAS id f259d3ed, commit f0ef651, uploaded to
+App Store Connect on 2026-09-29, submission 337e00a5); test it, select it, and
+submit it, not 21. Its web half (named turn bubbles, the result bubble from
+the player whose move ended the round, the next-round and rematch bubbles, the
+drawer's error screen, the hand and round-card fixes for short drawers) is
+live on playcapi.com since commit f0ef651. It also carries the capicúa rule
+of 2026-09-28: a double on matching ends counts.
 
 ## A. Code gates (Me)
 
@@ -138,7 +138,19 @@ need the deploy before review.
       Pase de salida section and the new tie lines. The .ipa's extension
       declares CFBundleIcons and version 1.1.0 (21). Submitted to App Store
       Connect on 2026-09-27 (submission 9a48e179). Confirm no ITMS email
-      comes back for it.
+      comes back for it. Superseded by build 22.
+- [x] The iMessage fix build, build 22 (EAS id f259d3ed, commit f0ef651).
+      Checked on the 14 Plus against playcapi.com after the deploy, with a
+      Release build of the same extension and the EAS simulator build of the
+      same commit (ae0a4c95): the create card in the small drawer, centered
+      even when the drawer opens over the Messages keyboard; the name field
+      expanding with the keyboard; invite, "Your turn, Luis" with "Ana 45 ·
+      Luis 30", live bot moves, "Ana took the round" with "Ana 81 · Luis 30";
+      the app's "Esta mesa es de Mensajes" line on a Messages table. The
+      .ipa: version 1.1.0 (22) in the app and the extension, CFBundleIcons,
+      the extension's PrivacyInfo.xcprivacy, the new capicúa sentences in
+      both languages. Submitted to App Store Connect on 2026-09-29
+      (submission 337e00a5). Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
