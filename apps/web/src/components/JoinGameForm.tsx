@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiErrorText, useI18n } from "@/lib/i18n/context";
+import { readProfile, saveProfile } from "@/lib/profile";
 
 const AVATAR_COLORS = [
   "#ec4899", "#6366f1", "#f59e0b", "#10b981", "#3b82f6", "#ef4444",
@@ -37,6 +38,13 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Start from the name and color this browser used last time.
+  useEffect(() => {
+    const { nickname: name, avatarColor: color } = readProfile(AVATAR_COLORS);
+    if (name) setNickname((typed) => typed || name);
+    if (color) setAvatarColor(color);
+  }, []);
 
   const showCodeHint = codeHint && inviteCode.length !== CODE_LENGTH;
 
@@ -80,6 +88,7 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
           gameId,
         })
       );
+      saveProfile({ nickname: nickname.trim(), avatarColor });
 
       router.push(`/game/${gameId}`);
     } catch {

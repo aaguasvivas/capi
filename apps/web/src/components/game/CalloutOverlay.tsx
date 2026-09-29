@@ -22,6 +22,8 @@ const CALLOUT_CONFIG: Record<
     emoji: string;
     bg: string;
     textColor: string;
+    // Full-opacity ink for the payload lines and "tap to continue": each
+    // reaches 4.5:1 on every stop of its gradient (4.83 at the lowest).
     subTextColor: string;
     borderColor: string;
   }
@@ -31,7 +33,7 @@ const CALLOUT_CONFIG: Record<
     emoji: "🎯",
     bg: "from-amber-500 via-yellow-400 to-amber-500",
     textColor: "text-amber-950",
-    subTextColor: "text-amber-900/80",
+    subTextColor: "text-amber-950",
     borderColor: "border-amber-300",
   },
   trancao: {
@@ -39,7 +41,7 @@ const CALLOUT_CONFIG: Record<
     emoji: "🔒",
     bg: "from-red-700 via-red-600 to-red-700",
     textColor: "text-white",
-    subTextColor: "text-red-100/80",
+    subTextColor: "text-white",
     borderColor: "border-red-400",
   },
   capicua: {
@@ -47,7 +49,7 @@ const CALLOUT_CONFIG: Record<
     emoji: "🔥",
     bg: "from-orange-600 via-amber-500 to-orange-600",
     textColor: "text-orange-950",
-    subTextColor: "text-orange-900/80",
+    subTextColor: "text-gray-950",
     borderColor: "border-orange-300",
   },
   veinticinco: {
@@ -55,7 +57,7 @@ const CALLOUT_CONFIG: Record<
     emoji: "💥",
     bg: "from-purple-700 via-indigo-600 to-purple-700",
     textColor: "text-white",
-    subTextColor: "text-purple-100/80",
+    subTextColor: "text-white",
     borderColor: "border-purple-400",
   },
 };
@@ -150,7 +152,8 @@ export default function CalloutOverlay({
         )}
 
         {/* The backdrop click already dismisses; stop the bubble so a
-            keyboard activation does not dismiss twice. */}
+            keyboard activation does not dismiss twice. The pulse scales
+            only, so the label keeps its full contrast. */}
         <button
           ref={dismissRef}
           type="button"
@@ -158,7 +161,7 @@ export default function CalloutOverlay({
             e.stopPropagation();
             onDismiss();
           }}
-          className={`mt-6 min-h-[44px] px-5 text-sm rounded-xl ${config.subTextColor} animate-pulse focus:outline-none focus-visible:ring-2 focus-visible:ring-current`}
+          className={`mt-6 min-h-[44px] px-5 text-sm rounded-xl ${config.subTextColor} animate-tap-pulse focus:outline-none focus-visible:ring-2 focus-visible:ring-current`}
         >
           {s.tapToContinue}
         </button>

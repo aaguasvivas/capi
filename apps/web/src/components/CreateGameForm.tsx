@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiErrorText, useI18n } from "@/lib/i18n/context";
+import { readProfile, saveProfile } from "@/lib/profile";
 
 const AVATAR_COLORS = [
   "#6366f1",
@@ -69,6 +70,13 @@ export default function CreateGameForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Start from the name and color this browser used last time.
+  useEffect(() => {
+    const { nickname: name, avatarColor: color } = readProfile(AVATAR_COLORS);
+    if (name) setNickname((typed) => typed || name);
+    if (color) setAvatarColor(color);
+  }, []);
+
   const themes: { id: ThemeId; label: string; color: string; accent: string; desc: string }[] = [
     { id: "barberia", label: "Barbería", color: "#145228", accent: "#c0392b", desc: s.themeClassic },
     { id: "colmado", label: "Colmado", color: "#3a2a1a", accent: "#d4a017", desc: s.themeBarrio },
@@ -103,6 +111,7 @@ export default function CreateGameForm() {
           gameId: data.gameId,
         })
       );
+      saveProfile({ nickname: nickname.trim(), avatarColor });
 
       router.push(`/game/${data.gameId}`);
     } catch {

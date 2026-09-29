@@ -86,12 +86,15 @@ function Board({ board, endsGlow, hand, selectedTile }: Props) {
   const xOffset = (innerW - layout.contentW) / 2;
   const yOffset = (innerH - layout.contentH) / 2;
 
-  const [growth, setGrowth] = useState<Growth>({
-    len: 0,
-    first: null,
+  // Starts from the board it mounts with. A cold mount (a refresh, or a
+  // bubble tap in Messages) cannot tell which tile was played last, so it
+  // rings and slams none rather than guess the right end.
+  const [growth, setGrowth] = useState<Growth>(() => ({
+    len: board.length,
+    first: board.length > 0 ? board[0] : null,
     newest: -1,
     grew: false,
-  });
+  }));
   const first = board.length > 0 ? board[0] : null;
   if (board.length !== growth.len || !sameTile(first, growth.first)) {
     const grew = board.length > growth.len;
@@ -125,6 +128,23 @@ function Board({ board, endsGlow, hand, selectedTile }: Props) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [growth]);
+
+  // A cold mount with a long chain scrolls once, as soon as the layout is
+  // measured, to the midpoint of the two open ends: both show whenever they
+  // fit the view, and part of each when they do not.
+  const mountScrollRef = useRef(board.length > 0);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!mountScrollRef.current || !el || layout.placements.length === 0) return;
+    mountScrollRef.current = false;
+    if (layout.contentW <= size.w && layout.contentH <= size.h) return;
+    const a = layout.placements[0];
+    const b = layout.placements[layout.placements.length - 1];
+    el.scrollTo({
+      left: Math.max(0, (a.x + b.x) / 2 + xOffset - el.clientWidth / 2),
+      top: Math.max(0, (a.y + b.y) / 2 + yOffset - el.clientHeight / 2),
+    });
+  }, [layout, size.w, size.h, xOffset, yOffset]);
 
   // Open ends of the serpentine chain are always index 0 (left end, pip
   // board[0][0]) and the last index (right end, pip board[last][1]). A

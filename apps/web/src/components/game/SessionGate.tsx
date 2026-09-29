@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Seat, Tile } from "@capi/engine";
 import { getSeatsForGame } from "@capi/engine";
 import { errorKeyFor } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
 import type { EmbedSession as Session } from "@/lib/embedSession";
+import { readProfile, saveProfile } from "@/lib/profile";
 
 // Everything the game page shows when this browser holds no seat at the
 // table: the join card while a seat is free, and the spectator chrome once
@@ -43,6 +44,13 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Start from the name and color this browser used last time.
+  useEffect(() => {
+    const { nickname: name, avatarColor: color } = readProfile(AVATAR_COLORS);
+    if (name) setNickname((typed) => typed || name);
+    if (color) setAvatarColor(color);
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const name = nickname.trim();
@@ -69,6 +77,7 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
         gameId,
       };
       localStorage.setItem(`capi_session_${gameId}`, JSON.stringify(session));
+      saveProfile({ nickname: name, avatarColor });
       await onJoined(session);
     } catch {
       setError(s.networkError);
@@ -264,7 +273,7 @@ export function SpectatorSeats({
               >
                 <span className="truncate max-w-[120px]">{p?.nickname ?? "?"}</span>
                 <span className="flex-shrink-0 whitespace-pre">
-                  {" - "}
+                  {" · "}
                   {s.tileCount((hands[seat] ?? []).length)}
                 </span>
               </span>

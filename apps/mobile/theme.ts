@@ -24,7 +24,7 @@ export const THEMES: Record<
     scoreText: "#f5f0e8",
     accent: "#c0392b",
     handBg: "#ebe4d4",
-    handText: "#6b7280",
+    handText: "#4b5563",
     watermark: "BARBERÍA DON RAMÓN",
   },
   colmado: {
@@ -36,7 +36,7 @@ export const THEMES: Record<
     scoreText: "#f5e6c8",
     accent: "#d4a017",
     handBg: "#f0dcc0",
-    handText: "#6b7280",
+    handText: "#4b5563",
     watermark: "COLMADO LA ESQUINA",
   },
   patio: {
@@ -48,7 +48,7 @@ export const THEMES: Record<
     scoreText: "#f0ebe3",
     accent: "#c4693d",
     handBg: "#e0ceb8",
-    handText: "#6b7280",
+    handText: "#4b5563",
     watermark: "EL PATIO DE TÍA",
   },
   quisqueya: {
@@ -88,6 +88,49 @@ export const THEMES: Record<
     watermark: "CAPI NOCHE",
   },
 };
+
+// Label inks for text drawn on a filled accent (buttons, chips, pills).
+export const INK_DARK = "#111827";
+export const INK_LIGHT = "#ffffff";
+
+// WCAG relative luminance of a #rrggbb color.
+function luminance(hex: string): number {
+  const n = parseInt(hex.slice(1, 7), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrast(a: string, b: string): number {
+  const la = luminance(a);
+  const lb = luminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+// Label color on a fill: whichever of the two inks contrasts more. White
+// wins on the red accent, dark ink on gold, terracotta and teal. Where
+// neither reaches body-text contrast, pure black may: Noche's indigo gives
+// white 4.47:1 and black 4.70:1, the ink the web uses there.
+export function inkOn(fill: string): string {
+  const ink =
+    contrast(INK_DARK, fill) >= contrast(INK_LIGHT, fill) ? INK_DARK : INK_LIGHT;
+  return contrast(ink, fill) < 4.5 && contrast("#000000", fill) > contrast(ink, fill)
+    ? "#000000"
+    : ink;
+}
+
+// Accent-colored text where the accent reads on the background at the given
+// ratio (4.5 for body text, 3 for large bold), otherwise the fallback ink.
+export function accentTextOn(
+  accent: string,
+  bg: string,
+  fallback: string,
+  min: number
+): string {
+  return contrast(accent, bg) >= min ? accent : fallback;
+}
 
 export function getTheme(name?: string): ThemePalette {
   return THEMES[name as keyof typeof THEMES] ?? THEMES.barberia;

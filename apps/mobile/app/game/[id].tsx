@@ -60,7 +60,13 @@ import {
   preloadSounds,
   setMuted,
 } from "../../lib/sounds";
-import { API_BASE, getTheme, THEME } from "../../theme";
+import {
+  accentTextOn,
+  API_BASE,
+  getTheme,
+  inkOn,
+  THEME,
+} from "../../theme";
 
 interface ChatBubbleItem extends ChatMessage {
   phase: "in" | "out";
@@ -500,7 +506,10 @@ function GameTable({
       leave();
       return;
     }
-    Alert.alert(s.leaveTable, s.leaveConfirm, [
+    // Only live tables can be claimed after a stall; say so only there.
+    const message =
+      gameState?.mode === "turn_based" ? s.leaveConfirmTurnBased : s.leaveConfirm;
+    Alert.alert(s.leaveTable, message, [
       { text: s.reportBugCancel, style: "cancel" },
       { text: s.leaveTable, style: "destructive", onPress: leave },
     ]);
@@ -1043,6 +1052,15 @@ function GameTable({
 
   // ── Active / round-over / finished ──
   const palette = getTheme(gameState.theme);
+  // Label ink on the accent fill, and accent text on the dark score panel
+  // where the accent reads there (else the panel's own text color).
+  const accentInk = inkOn(palette.accent);
+  const scoreAccentText = accentTextOn(
+    palette.accent,
+    palette.scoreBg,
+    palette.scoreText,
+    4.5
+  );
   const is2v2 = gameState.is2v2 ?? gameSettings?.is2v2 ?? false;
   // No session for a started table means watching, never a made-up seat.
   const mySeat: Seat | null = session ? (session.seat as Seat) : null;
@@ -1717,7 +1735,12 @@ function GameTable({
                       style={{
                         fontSize: 30,
                         fontWeight: "900",
-                        color: palette.accent,
+                        color: accentTextOn(
+                          palette.accent,
+                          palette.scoreBg,
+                          palette.scoreText,
+                          3
+                        ),
                       }}
                     >
                       +{roundAward}
@@ -1818,9 +1841,11 @@ function GameTable({
                     }}
                   >
                     {nextRoundLoading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={accentInk} />
                     ) : (
-                      <Text style={overlayButtonText}>{s.nextRound}</Text>
+                      <Text style={[overlayButtonText, { color: accentInk }]}>
+                        {s.nextRound}
+                      </Text>
                     )}
                   </Pressable>
                 )}
@@ -1897,7 +1922,7 @@ function GameTable({
                     style={{
                       fontSize: 13,
                       fontWeight: "700",
-                      color: palette.accent,
+                      color: scoreAccentText,
                       textAlign: "center",
                     }}
                   >
@@ -1923,9 +1948,9 @@ function GameTable({
                     }}
                   >
                     {rematchLoading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={accentInk} />
                     ) : (
-                      <Text style={overlayButtonText}>
+                      <Text style={[overlayButtonText, { color: accentInk }]}>
                         {gameState.rematchGameId ? s.joinRematch : s.playAgain}
                       </Text>
                     )}
@@ -1954,6 +1979,9 @@ function GameTable({
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
+                // The turn chip's height, so the hand does not move when
+                // the chip comes and goes.
+                minHeight: TURN_CHIP_HEIGHT,
                 marginBottom: 8,
               }}
             >
@@ -1969,15 +1997,7 @@ function GameTable({
                 {s.yourHand}
               </Text>
               {isMyTurn ? (
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: "700",
-                    color: palette.accent,
-                  }}
-                >
-                  {s.yourTurn}
-                </Text>
+                <TurnChip label={s.yourTurn} fill={palette.accent} />
               ) : null}
             </View>
             <Hand
@@ -1988,7 +2008,6 @@ function GameTable({
               boneyardCount={gameState.boneyard?.length ?? 0}
               waitingLabel={s.turnOf(turnName)}
               accent={palette.accent}
-              panelBg={palette.handBg}
               mutedText={palette.handText}
               onPlay={handlePlay}
               onPass={handlePass}
@@ -2062,17 +2081,7 @@ function GameTable({
                   {s.tileCount((gameState.hands[viewSeat] ?? []).length)}
                 </Text>
               </View>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: "700",
-                  color: palette.accent,
-                  flexShrink: 1,
-                }}
-                numberOfLines={1}
-              >
-                {s.turnOf(turnName)}
-              </Text>
+              <TurnChip label={s.turnOf(turnName)} fill={palette.accent} />
             </View>
           </View>
         )}
@@ -2122,7 +2131,42 @@ function SpectatingPill({ label, color }: { label: string; color: string }) {
         backgroundColor: color,
       }}
     >
-      <Text style={{ color: "#fff", fontSize: 11, fontWeight: "800" }}>
+      <Text style={{ color: inkOn(color), fontSize: 11, fontWeight: "800" }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+// Whose turn it is, on the accent. As plain accent text on the hand panel it
+// read at 1.8:1 to 4.3:1; on the fill with its own ink it reads at 4.5:1 or
+// more on every table (black at 4.70:1 on Noche's indigo). The height is a
+// minimum (a 16 pt line plus 2 pt padding), so the pill grows with larger
+// text sizes instead of letting the label spill out.
+const TURN_CHIP_HEIGHT = 20;
+
+function TurnChip({ label, fill }: { label: string; fill: string }) {
+  return (
+    <View
+      style={{
+        flexShrink: 1,
+        minHeight: TURN_CHIP_HEIGHT,
+        justifyContent: "center",
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        borderRadius: 999,
+        backgroundColor: fill,
+      }}
+    >
+      <Text
+        numberOfLines={1}
+        style={{
+          fontSize: 12,
+          lineHeight: 16,
+          fontWeight: "700",
+          color: inkOn(fill),
+        }}
+      >
         {label}
       </Text>
     </View>
@@ -2467,8 +2511,8 @@ const overlayButton = {
   justifyContent: "center" as const,
 };
 
+// Color comes from inkOn(accent) at each use.
 const overlayButtonText = {
-  color: "#fff",
   fontSize: 16,
   fontWeight: "700" as const,
 };

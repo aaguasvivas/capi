@@ -41,6 +41,7 @@ const config: Config = {
         "chat-bubble-in": "chat-bubble-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "chat-bubble-out": "chat-bubble-out 0.3s ease-in forwards",
         "emote-pop": "emote-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "tap-pulse": "tap-pulse 2s ease-in-out infinite",
       },
       keyframes: {
         "callout-enter": {
@@ -112,6 +113,10 @@ const config: Config = {
           "0%": { transform: "scale(0.2) rotate(-15deg)", opacity: "0" },
           "60%": { transform: "scale(1.3) rotate(5deg)", opacity: "1" },
           "100%": { transform: "scale(1) rotate(0deg)", opacity: "1" },
+        },
+        "tap-pulse": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.06)" },
         },
       },
     },

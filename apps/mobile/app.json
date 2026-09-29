@@ -17,6 +17,29 @@
       "bundleIdentifier": "dev.capi.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1", "0A2A.1", "3B52.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1", "85F4.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+          }
+        ]
       }
     },
     "android": {
@@ -40,7 +63,7 @@
         "react-native-google-mobile-ads",
         {
           "iosAppId": "ca-app-pub-4879291425090726~7274134137",
-          "userTrackingUsageDescription": "This lets Capi show ads that are more relevant to you. Your games stay on the table.",
+          "userTrackingUsageDescription": "Capi uses this to show ads that are more relevant to you. Your games and nickname are never shared with advertisers.",
           "skAdNetworkItems": [
             "cstr6suwn9.skadnetwork",
             "4fzdc2evr5.skadnetwork",
@@ -98,7 +121,7 @@
       [
         "expo-tracking-transparency",
         {
-          "userTrackingPermission": "This lets Capi show ads that are more relevant to you. Your games stay on the table."
+          "userTrackingPermission": "Capi uses this to show ads that are more relevant to you. Your games and nickname are never shared with advertisers."
         }
       ],
       "@sentry/react-native"

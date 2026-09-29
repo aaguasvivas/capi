@@ -10,6 +10,7 @@ import { Animated, Pressable, ScrollView, Text, View } from "react-native";
 import type { Tile } from "@capi/engine";
 import TileDisplay from "./TileDisplay";
 import { useI18n } from "../lib/i18n";
+import { inkOn, INK_DARK } from "../theme";
 
 interface Props {
   tiles: Tile[];
@@ -19,9 +20,8 @@ interface Props {
   boneyardCount: number;
   /** Shown in the action row while another seat is on turn. */
   waitingLabel: string;
-  /** Table palette: the panel behind the hand, its accent and muted text. */
+  /** Table palette: the accent and the muted text on the hand panel. */
   accent: string;
-  panelBg: string;
   mutedText: string;
   onPlay: (tile: Tile, end: "left" | "right") => void;
   onPass: () => void;
@@ -33,31 +33,6 @@ interface Props {
 // The row above the strip keeps this height in every state (end chooser,
 // draw, pass, waiting, or empty) so the tiles never move under a thumb.
 const ACTION_ROW_HEIGHT = 40;
-
-const INK_DARK = "#111827";
-const INK_LIGHT = "#ffffff";
-
-// WCAG relative luminance of a #rrggbb color.
-function luminance(hex: string): number {
-  const n = parseInt(hex.slice(1, 7), 16);
-  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
-    const c = v / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function contrast(a: string, b: string): number {
-  const la = luminance(a);
-  const lb = luminance(b);
-  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
-}
-
-// Label color on an accent fill: white where it reads, dark on the light
-// accents (gold, teal) where white would not.
-function inkOn(fill: string): string {
-  return contrast(INK_LIGHT, fill) >= 3 ? INK_LIGHT : INK_DARK;
-}
 
 function tileMatchesEnd(tile: Tile, pip: number): boolean {
   return tile[0] === pip || tile[1] === pip;
@@ -108,7 +83,6 @@ export default function Hand({
   boneyardCount,
   waitingLabel,
   accent,
-  panelBg,
   mutedText,
   onPlay,
   onPass,
@@ -132,15 +106,6 @@ export default function Hand({
     revealEndRef.current = isMyTurn && tiles.length > prevCountRef.current;
     prevCountRef.current = tiles.length;
   }, [tiles.length, isMyTurn]);
-
-  // The pass outline and label use the accent where it reads on the panel,
-  // otherwise the panel's own ink.
-  const passInk =
-    contrast(accent, panelBg) >= 3
-      ? accent
-      : contrast(INK_DARK, panelBg) >= contrast(INK_LIGHT, panelBg)
-      ? INK_DARK
-      : INK_LIGHT;
 
   // Clear any stale tile selection when it's no longer my turn or a new
   // round starts with an empty board.
@@ -244,7 +209,7 @@ export default function Hand({
               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 14, color: "#fff", fontWeight: "700" }}>
+            <Text style={{ fontSize: 14, color: INK_DARK, fontWeight: "700" }}>
               {s.draw(boneyardCount)}
             </Text>
           </Pressable>
@@ -261,7 +226,10 @@ export default function Hand({
               justifyContent: "center",
             }}
           >
-            <Text style={{ fontSize: 14, color: passInk, fontWeight: "700" }}>
+            {/* The accent marks the outline only: as label text it read at
+                4.29:1 on Barberia and 3.65:1 on Noche. The panel text
+                reads at 4.5:1 or more on every table, as on the web. */}
+            <Text style={{ fontSize: 14, color: mutedText, fontWeight: "700" }}>
               {s.pass}
             </Text>
           </Pressable>

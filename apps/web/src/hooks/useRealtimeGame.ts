@@ -9,7 +9,7 @@ import {
   removeTileFromHand,
 } from "@capi/engine";
 import {
-  chatText,
+  chatWireText,
   errorKeyFor,
   normalizeChatPayload,
   type ErrorKey,
@@ -704,7 +704,7 @@ export function useRealtimeGame(
         playerId: session.playerId,
         seat: session.seat,
         type,
-        payload: chatText(type, canonical, lang),
+        payload: chatWireText(type, canonical, lang),
       };
 
       // Add to local state immediately (sender sees their own message)

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EMOTES, QUICK_PHRASES } from "@capi/i18n";
+import { EMOTES, QUICK_PHRASES, chatText, chatWireText } from "@capi/i18n";
 import { FakeDb, params, post, seedPlaying, type Seeded } from "./fakeDb";
 
 const holder = vi.hoisted(() => ({ db: null as unknown }));
@@ -38,6 +38,22 @@ describe("POST /api/games/[id]/chat", () => {
     expect((await chat("quick_chat", "¡Vamo' allá!")).status).toBe(200);
     expect((await chat("quick_chat", "We outside!")).status).toBe(200);
     expect(stored()).toEqual(["vamo_alla", "vamo_alla"]);
+  });
+
+  it("still maps the English text shipped clients send for a renamed phrase", async () => {
+    // 1.0 and 1.1 know que_lo_que as "Say less!" and eso_e as "That's crazy!".
+    expect((await chat("quick_chat", "Say less!")).status).toBe(200);
+    expect((await chat("quick_chat", "What's up!")).status).toBe(200);
+    expect((await chat("quick_chat", "That's crazy!")).status).toBe(200);
+    expect(stored()).toEqual(["que_lo_que", "que_lo_que", "eso_e"]);
+    // Both languages now say the same thing, and the wire keeps the text
+    // shipped clients know.
+    expect(chatText("quick_chat", "que_lo_que", "en")).toBe("What's up!");
+    expect(chatText("quick_chat", "eso_e", "en")).toBe("That's it!");
+    expect(chatWireText("quick_chat", "que_lo_que", "en")).toBe("Say less!");
+    expect(chatWireText("quick_chat", "que_lo_que", "es")).toBe("¡Qué lo qué!");
+    expect(chatWireText("quick_chat", "dale", "en")).toBe("Let's go!");
+    expect(chatWireText("emote", "🔥", "en")).toBe("🔥");
   });
 
   it("accepts the listed emotes", async () => {

@@ -151,6 +151,25 @@ of 2026-09-28: a double on matching ends counts.
       the extension's PrivacyInfo.xcprivacy, the new capicúa sentences in
       both languages. Submitted to App Store Connect on 2026-09-29
       (submission 337e00a5). Confirm no ITMS email comes back for it.
+- [ ] The privacy-manifest fix build, build 23. Build 22 shipped the
+      extension's manifest as the app's own (both files md5 07916a79), and a
+      config-level check had passed for it, so check the built product. On
+      the build 23 .ipa from EAS:
+
+      ```
+      unzip -p Capi.ipa Payload/Capi.app/PrivacyInfo.xcprivacy | plutil -p -
+      unzip -p Capi.ipa Payload/Capi.app/PlugIns/CapiMessages.appex/PrivacyInfo.xcprivacy | plutil -p -
+      unzip -p Capi.ipa Payload/Capi.app/PrivacyInfo.xcprivacy | md5
+      unzip -p Capi.ipa Payload/Capi.app/PlugIns/CapiMessages.appex/PrivacyInfo.xcprivacy | md5
+      md5 apps/mobile/targets/messages/PrivacyInfo.xcprivacy
+      ```
+
+      Pass: the two .ipa md5 hashes differ. The app root lists UserDefaults
+      CA92.1, FileTimestamp C617.1, DiskSpace E174.1 and SystemBootTime
+      35F9.1 (plus any reasons the pods add). The appex lists only
+      UserDefaults 1C8F.1, and its md5 equals the one of
+      apps/mobile/targets/messages/PrivacyInfo.xcprivacy. Do not select or
+      submit build 23 until this check passes. Record the result here.
 
 ## D. App Store Connect (You, ~30 minutes total)
 

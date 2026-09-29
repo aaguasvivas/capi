@@ -66,6 +66,18 @@ describe("POST /api/games/[id]/join", () => {
     expect(starts.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("answers a failed players read with a reported 500, not 'Game has no host'", async () => {
+    const { gameId } = await createGame({});
+    db.intercept = (call) =>
+      call.table === "players" && call.op === "select"
+        ? { data: null, error: { code: "57014", message: "statement timeout" } }
+        : undefined;
+    const res = await joinAs(gameId, "Luis");
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "Failed to join game" });
+    expect(reportError).toHaveBeenCalledTimes(1);
+  });
+
   it("says the table is full only when no seat is left", async () => {
     const { gameId } = await createGame({});
     const [a, b] = await Promise.all([joinAs(gameId, "Beto"), joinAs(gameId, "Caro")]);

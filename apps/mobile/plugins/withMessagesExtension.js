@@ -12,7 +12,13 @@ const GROUP = "group.dev.capi.app";
 const SRC_DIR = path.join(__dirname, "..", "targets", "messages");
 // The extension's own privacy manifest: Apple reads one per bundle, and the
 // extension reads the App Group's UserDefaults (reason 1C8F.1), which the
-// app's manifest does not cover.
+// app's manifest does not cover. It goes only into the CapiMessages group and
+// target. React Native's pod install step (privacy_manifest_utils.rb) then
+// looks for a PrivacyInfo.xcprivacy in the app target's resources; when it
+// finds none it adds the first project file whose path ends in that name,
+// which is this one (build 22 shipped it as the app's manifest). Apple
+// requires the name, so no path can hide it. The app's own file, written by
+// Expo from ios.privacyManifests into Capi/, must exist first.
 const PRIVACY_MANIFEST = "PrivacyInfo.xcprivacy";
 const SWIFT_FILES = [
   "MessagesViewController.swift",
@@ -180,5 +186,11 @@ function withAppGroup(config) {
 }
 
 module.exports = function withMessagesExtension(config) {
+  if (!config.ios?.privacyManifests?.NSPrivacyAccessedAPITypes?.length) {
+    throw new Error(
+      "withMessagesExtension: app.json needs ios.privacyManifests with NSPrivacyAccessedAPITypes. " +
+        "Without the app's own PrivacyInfo.xcprivacy, pod install wires the extension's manifest into the app."
+    );
+  }
   return withAppGroup(withMessagesTarget(config));
 };

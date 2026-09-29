@@ -16,6 +16,8 @@
   --score-text: #f5f0e8;
   --accent: #c0392b;
   --accent-light: #e74c3c;
+  /* Label ink on an accent fill, chosen per theme for 4.5:1 (5.44 here). */
+  --accent-ink: #ffffff;
   --hand-bg: #ebe4d4;
   /* Text, borders and hover fill on the hand panel. Every light hand panel
      inherits these from :root; a dark one (noche) overrides them. */
@@ -37,6 +39,7 @@
   --score-text: #f5e6c8;
   --accent: #d4a017;
   --accent-light: #f0c040;
+  --accent-ink: #111827; /* 7.47:1 on the accent */
   --hand-bg: #f0dcc0;
 }
 
@@ -53,6 +56,11 @@
   --score-text: #f0ebe3;
   --accent: #c4693d;
   --accent-light: #d4845a;
+  --accent-ink: #111827; /* 4.59:1 on the accent */
+  /* Accent text on the score panel. The terracotta reads at 2.2:1 on this
+     brown, so the panel's own cream text (7.15:1) stands in for it. Themes
+     without it fall back to their accent. */
+  --score-accent: var(--score-text);
   --hand-bg: #e0ceb8;
 }
 
@@ -68,6 +76,7 @@
   --score-text: #eef1f6;
   --accent: #c9a227;
   --accent-light: #e0bf4d;
+  --accent-ink: #111827; /* 7.33:1 on the accent */
   --hand-bg: #e2e8f2;
 }
 
@@ -83,6 +92,7 @@
   --score-text: #e9f2f3;
   --accent: #58b7c4;
   --accent-light: #7fd0da;
+  --accent-ink: #111827; /* 7.59:1 on the accent */
   --hand-bg: #d9e9eb;
 }
 
@@ -98,6 +108,8 @@
   --score-text: #e6e6f5;
   --accent: #6366f1;
   --accent-light: #8b8df5;
+  /* White is 4.47:1 on this indigo, just short; black is 4.70:1. */
+  --accent-ink: #000000;
   --hand-bg: #1d1d3a;
   /* Same hand text as the native app (theme.ts handText), 6.9:1 on hand-bg. */
   --hand-text: #a5a8c9;

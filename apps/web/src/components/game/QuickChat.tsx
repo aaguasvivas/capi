@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EMOTES, QUICK_PHRASES } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -11,22 +11,10 @@ interface QuickChatProps {
 
 export default function QuickChat({ onSend, disabled }: QuickChatProps) {
   const { lang, s } = useI18n();
+  // Stays open while the player reads: it closes on a pick, a tap outside,
+  // or the chat button.
   const [open, setOpen] = useState(false);
-  const [tapped, setTapped] = useState<string | null>(null);
-  const inactivityRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const resetInactivity = useCallback(() => {
-    if (inactivityRef.current) clearTimeout(inactivityRef.current);
-    inactivityRef.current = setTimeout(() => setOpen(false), 3000);
-  }, []);
-
-  useEffect(() => {
-    if (open) resetInactivity();
-    return () => {
-      if (inactivityRef.current) clearTimeout(inactivityRef.current);
-    };
-  }, [open, resetInactivity]);
 
   useEffect(() => {
     if (!open) return;
@@ -45,10 +33,8 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
   // Phrases travel as ids so every receiver renders them in its own language.
   function handleSend(type: "quick_chat" | "emote", value: string) {
     if (disabled) return;
-    setTapped(value);
-    setTimeout(() => setTapped(null), 300);
     onSend(type, value);
-    resetInactivity();
+    setOpen(false);
   }
 
   return (
@@ -58,23 +44,15 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
         // grid scrolls, and the emote row sits last, nearest the button, so
         // it stays reachable on short and landscape screens.
         <div className="absolute bottom-full mb-2 left-0 w-[280px] max-w-[calc(100vw-1rem)] chat-tray-cap flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 animate-chat-tray-in">
-          <div className="bg-[#1a1208]/95 backdrop-blur-sm p-3 flex flex-col gap-3 min-h-0">
-            <div
-              className="grid grid-cols-2 gap-1.5 min-h-0 overflow-y-auto overscroll-contain"
-              onScroll={resetInactivity}
-            >
+          {/* Opaque, so board tiles never show through the phrases. */}
+          <div className="bg-[#1a1208] p-3 flex flex-col gap-3 min-h-0">
+            <div className="grid grid-cols-2 gap-1.5 min-h-0 overflow-y-auto overscroll-contain">
               {QUICK_PHRASES.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   onClick={() => handleSend("quick_chat", p.id)}
-                  className={`min-h-[44px] text-left text-sm font-bold leading-tight px-2.5 py-1.5 rounded-xl transition-all duration-150 select-none
-                    text-amber-200
-                    ${tapped === p.id
-                      ? "scale-95 bg-amber-500/30"
-                      : "scale-100 hover:bg-white/10 active:scale-95"
-                    }
-                  `}
+                  className="min-h-[44px] text-left text-sm font-bold leading-tight px-2.5 py-1.5 rounded-xl transition-all duration-150 select-none text-amber-200 hover:bg-white/10 active:scale-95 active:bg-amber-500/30"
                 >
                   {p[lang]}
                 </button>
@@ -89,12 +67,7 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
                   key={e}
                   type="button"
                   onClick={() => handleSend("emote", e)}
-                  className={`text-xl leading-none w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-150 select-none
-                    ${tapped === e
-                      ? "scale-75 bg-white/20"
-                      : "scale-100 hover:bg-white/10 active:scale-75"
-                    }
-                  `}
+                  className="text-xl leading-none w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-150 select-none hover:bg-white/10 active:scale-75 active:bg-white/20"
                   aria-label={e}
                 >
                   {e}

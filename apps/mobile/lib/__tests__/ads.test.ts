@@ -9,6 +9,7 @@ const m = vi.hoisted(() => ({
   getConsentInfo: vi.fn(),
   showPrivacyOptionsForm: vi.fn(),
   initialize: vi.fn(),
+  setRequestConfiguration: vi.fn(),
   getTrackingPermissionsAsync: vi.fn(),
   requestTrackingPermissionsAsync: vi.fn(),
 }));
@@ -21,7 +22,11 @@ vi.mock("react-native", () => ({
   Platform: { OS: "ios" },
 }));
 vi.mock("react-native-google-mobile-ads", () => ({
-  default: () => ({ initialize: m.initialize }),
+  default: () => ({
+    initialize: m.initialize,
+    setRequestConfiguration: m.setRequestConfiguration,
+  }),
+  MaxAdContentRating: { G: "G", PG: "PG", T: "T", MA: "MA" },
   AdsConsent: {
     requestInfoUpdate: m.requestInfoUpdate,
     loadAndShowConsentFormIfRequired: m.loadAndShowConsentFormIfRequired,
@@ -52,6 +57,7 @@ beforeEach(async () => {
   m.loadAndShowConsentFormIfRequired.mockResolvedValue({});
   m.getConsentInfo.mockResolvedValue({ canRequestAds: true });
   m.initialize.mockResolvedValue([]);
+  m.setRequestConfiguration.mockResolvedValue(undefined);
   m.getTrackingPermissionsAsync.mockResolvedValue({ status: "undetermined" });
   m.requestTrackingPermissionsAsync.mockResolvedValue({ status: "denied" });
   // initAds keeps its first successful run for the session; each test gets a
@@ -118,6 +124,30 @@ describe("initAds consent flow", () => {
     await vi.advanceTimersByTimeAsync(0);
     await expect(second).resolves.toBe(true);
     expect(m.initialize).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("ad content rating", () => {
+  it("caps requests at G before the SDK starts", async () => {
+    const started = ads.initAds();
+    await vi.advanceTimersByTimeAsync(0);
+    await expect(started).resolves.toBe(true);
+    expect(m.setRequestConfiguration).toHaveBeenCalledWith({ maxAdContentRating: "G" });
+    expect(m.setRequestConfiguration.mock.invocationCallOrder[0]).toBeLessThan(
+      m.initialize.mock.invocationCallOrder[0]
+    );
+    // ATT still comes first.
+    expect(m.requestTrackingPermissionsAsync.mock.invocationCallOrder[0]).toBeLessThan(
+      m.setRequestConfiguration.mock.invocationCallOrder[0]
+    );
+  });
+
+  it("stays dark when the rating cannot be set", async () => {
+    m.setRequestConfiguration.mockRejectedValue(new Error("config-failed"));
+    const started = ads.initAds();
+    await vi.advanceTimersByTimeAsync(0);
+    await expect(started).resolves.toBe(false);
+    expect(m.initialize).not.toHaveBeenCalled();
   });
 });
 

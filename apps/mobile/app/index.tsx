@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -18,6 +18,7 @@ import AdBanner from "../components/AdBanner";
 import ModeGlyph from "../components/ModeGlyph";
 import StoreSheet from "../components/StoreSheet";
 import { useEntitlements } from "../lib/entitlements";
+import { loadHomePrefs, saveHomePrefs, savedThemeAction } from "../lib/homePrefs";
 import {
   deriveEntitlements,
   PRODUCT_IDS,
@@ -32,6 +33,8 @@ import { API_BASE, THEME } from "../theme";
 import { errorKeyFor, type ErrorKey, type Lang } from "@capi/i18n";
 
 const LANGS: Lang[] = ["es", "en"];
+
+const NICKNAME_MAX = 20;
 
 const AVATAR_COLORS = [
   "#6366f1",
@@ -236,7 +239,7 @@ function SkinSwatch({ id }: { id: TileSkinId }) {
 export default function Index() {
   const { lang, setLang, s } = useI18n();
   const insets = useSafeAreaInsets();
-  const { ent, prices } = useEntitlements();
+  const { ent, prices, reconciled } = useEntitlements();
   const { skinId, setSkinId } = useTileSkin();
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
@@ -252,6 +255,57 @@ export default function Index() {
   const [storeOpen, setStoreOpen] = useState(false);
   const storeTargetRef = useRef<StoreTarget | null>(null);
   const [resumable, setResumable] = useState<ResumableGame[]>([]);
+
+  // Last launch's choices. The table waits in savedTheme until entitlements
+  // say whether it may come back (theme state never holds a locked id).
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [savedTheme, setSavedTheme] = useState<ThemeId | null>(null);
+  useEffect(() => {
+    let active = true;
+    loadHomePrefs({
+      colors: AVATAR_COLORS,
+      themes: TABLE_THEMES.map((t) => t.id),
+      maxNickname: NICKNAME_MAX,
+    }).then((p) => {
+      if (!active) return;
+      const name = p.nickname;
+      if (name) setNickname((prev) => prev || name);
+      if (p.avatarColor) setAvatarColor(p.avatarColor);
+      if (p.is2v2 !== undefined) setIs2v2(p.is2v2);
+      if (p.targetScore) setTargetScore(p.targetScore);
+      if (p.theme) setSavedTheme(p.theme);
+      setPrefsLoaded(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!savedTheme) return;
+    const premium = TABLE_THEMES.find((t) => t.id === savedTheme)?.premium;
+    const action = savedThemeAction(premium, ent.mesas, reconciled);
+    if (action === "wait") return;
+    if (action === "apply") setTheme(savedTheme);
+    setSavedTheme(null);
+  }, [savedTheme, ent, reconciled]);
+
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    saveHomePrefs({
+      nickname,
+      avatarColor,
+      theme: savedTheme ?? theme,
+      is2v2,
+      targetScore,
+    });
+  }, [prefsLoaded, nickname, avatarColor, theme, savedTheme, is2v2, targetScore]);
+
+  // A table the player picks (or buys) wins over one still waiting above.
+  function pickTheme(id: ThemeId) {
+    setSavedTheme(null);
+    setTheme(id);
+  }
 
   // Re-audit saved sessions every time home comes back into focus: a table
   // left mid-game shows up here, a finished one disappears.
@@ -308,7 +362,7 @@ export default function Index() {
     const got = deriveEntitlements([id]);
     const target = storeTargetRef.current;
     if (target && "mesa" in target && got.mesas.has(target.mesa)) {
-      setTheme(target.mesa);
+      pickTheme(target.mesa);
       closeStore();
       return;
     }
@@ -317,7 +371,7 @@ export default function Index() {
       closeStore();
       return;
     }
-    if (got.mesas.size === 1) setTheme([...got.mesas][0]);
+    if (got.mesas.size === 1) pickTheme([...got.mesas][0]);
     if (got.fichas.size === 1) setSkinId([...got.fichas][0]);
   }
 
@@ -608,7 +662,7 @@ export default function Index() {
             <TextInput
               value={nickname}
               onChangeText={setNickname}
-              maxLength={20}
+              maxLength={NICKNAME_MAX}
               placeholder={s.namePlaceholder}
               placeholderTextColor="#9ca3af"
               accessibilityLabel={s.yourName}
@@ -669,7 +723,7 @@ export default function Index() {
                         openStore({ mesa: lockedMesa });
                         return;
                       }
-                      setTheme(t.id);
+                      pickTheme(t.id);
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={

@@ -36,11 +36,17 @@ export async function POST(
     const is2v2: boolean = game.settings?.is2v2 ?? false;
     const maxPlayers = maxPlayersFor(game as GameRow);
 
-    const { data: existingPlayers } = await db
+    const { data: existingPlayers, error: playersError } = await db
       .from("players")
       .select("*")
       .eq("game_id", params.id);
 
+    // A failed read is a server fault the client can retry, not a table
+    // without a host (which clients show as "table not found").
+    if (playersError) {
+      reportError(playersError, "POST /api/games/[id]/join players");
+      return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
+    }
     if (!existingPlayers || existingPlayers.length === 0) {
       return NextResponse.json({ error: "Game has no host" }, { status: 400 });
     }

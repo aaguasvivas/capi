@@ -27,17 +27,34 @@ interface Arrival {
 // Idempotent: a second call (or a second player's client racing the first)
 // returns the existing row. Starts the table the moment the last seat fills.
 // Returns "full" only when no seat is left for them.
-async function arrive(db: Db, rematchId: string, who: PlayerRow): Promise<Arrival | "full" | null> {
+async function arrive(
+  db: Db,
+  rematchId: string,
+  who: PlayerRow,
+  originals: PlayerRow[]
+): Promise<Arrival | "full" | null> {
   const { data: game } = await db.from("games").select("*").eq("id", rematchId).single();
   if (!game) return null;
 
+  // Two original players with the same nickname and color (the app's form
+  // defaults the color) look alike at the new table. A row at a twin's
+  // original seat is the twin's, never this player's.
+  const twinSeats = new Set(
+    originals.filter((p) => p.id !== who.id && sameSeatHolder(p, who)).map((p) => p.seat)
+  );
+  const mine = (r: PlayerRow) => sameSeatHolder(r, who) && !twinSeats.has(r.seat);
+
   // Idempotent: this player already has a row at the table (a retry, or
-  // their other device), wherever it is.
+  // their other device), wherever it is. A lookalike row at another seat is
+  // theirs only when their own seat is taken: seats never free up (no route
+  // deletes players), so a free own seat means they have no row yet, and a
+  // lookalike elsewhere is a displaced twin's.
   const { data: tableRows } = await db.from("players").select("*").eq("game_id", rematchId);
   const rows = (tableRows ?? []) as PlayerRow[];
+  const ownSeatFree = !rows.some((r) => r.seat === who.seat);
   let me: PlayerRow | null =
     rows.find((r) => r.seat === who.seat && sameSeatHolder(r, who)) ??
-    rows.find((r) => sameSeatHolder(r, who)) ??
+    (ownSeatFree ? undefined : rows.find(mine)) ??
     null;
 
   if (!me) {
@@ -45,7 +62,10 @@ async function arrive(db: Db, rematchId: string, who: PlayerRow): Promise<Arriva
     // it, the next free seat, so the table can still fill. Never hand out a
     // row that belongs to another person.
     const is2v2 = (game as GameRow).settings?.is2v2 ?? false;
-    const order = [who.seat, ...getSeatsForGame(is2v2).filter((seat) => seat !== who.seat)];
+    const order = [
+      who.seat,
+      ...getSeatsForGame(is2v2).filter((seat) => seat !== who.seat && !twinSeats.has(seat)),
+    ];
     const taken = new Set(rows.map((r) => r.seat));
     for (const seat of order) {
       if (taken.has(seat)) continue;
@@ -67,7 +87,7 @@ async function arrive(db: Db, rematchId: string, who: PlayerRow): Promise<Arriva
         .eq("game_id", rematchId)
         .eq("seat", seat)
         .single();
-      if (again && sameSeatHolder(again as PlayerRow, who)) {
+      if (again && mine(again as PlayerRow)) {
         me = again as PlayerRow;
         break;
       }
@@ -118,7 +138,8 @@ export async function POST(
     if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/rematch");
 
     const { data: players } = await db.from("players").select("*").eq("game_id", params.id);
-    const requester = (players ?? []).find((p) => p.id === playerId) as PlayerRow | undefined;
+    const originals = (players ?? []) as PlayerRow[];
+    const requester = originals.find((p) => p.id === playerId);
     if (!requester) {
       return NextResponse.json({ error: "Player not in this game" }, { status: 403 });
     }
@@ -129,10 +150,13 @@ export async function POST(
     const state = game.game_state as GameState | null;
 
     // Someone already opened the rematch table: just take your seat there.
+    // A failed read or write answers an error the client can retry, never a
+    // second table: relinking would strand whoever already sits at the first.
     if (state?.rematchGameId) {
-      const arrival = await arrive(db, state.rematchGameId, requester);
+      const arrival = await arrive(db, state.rematchGameId, requester, originals);
       if (arrival === "full") return NextResponse.json({ error: "Game is full" }, { status: 409 });
-      if (arrival) return NextResponse.json(arrival);
+      if (!arrival) return NextResponse.json({ error: "Failed to create rematch" }, { status: 500 });
+      return NextResponse.json(arrival);
     }
 
     // First to ask: open the table with the same settings, then link it from
@@ -180,7 +204,7 @@ export async function POST(
       rematchId = linked;
     }
 
-    const arrival = await arrive(db, rematchId, requester);
+    const arrival = await arrive(db, rematchId, requester, originals);
     if (arrival === "full") return NextResponse.json({ error: "Game is full" }, { status: 409 });
     if (!arrival) {
       return NextResponse.json({ error: "Failed to create rematch" }, { status: 500 });

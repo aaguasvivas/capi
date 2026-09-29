@@ -72,6 +72,9 @@ export interface Strings {
   codeCopied: string;
   autoRefresh: string;
   conTuFrente: string;
+  // Messages waiting room: the invite bubble reaches the chat, and this code
+  // lets a player on the web join too.
+  embedShareCode: string;
 
   // Seats
   seatNorth: string;
@@ -221,6 +224,8 @@ export interface Strings {
   refresh: string;
   leaveTable: string;
   leaveConfirm: string;
+  // Turn-based (Messages) tables cannot be claimed, so no claim warning.
+  leaveConfirmTurnBased: string;
   resumeGame: string;
   resumeGameHint: (code: string) => string;
 
@@ -339,8 +344,9 @@ export const es: Strings = {
   copyLink: "Copiar enlace",
   orShareCode: "o comparte el código",
   codeCopied: "¡Código copiado!",
-  autoRefresh: "La página se actualizará cuando se unan.",
+  autoRefresh: "Se actualiza sola cuando se unan.",
   conTuFrente: "Con tu frente",
+  embedShareCode: "Desde la web se entra en playcapi.com con este código.",
 
   seatNorth: "Norte",
   seatEast: "Este",
@@ -370,8 +376,8 @@ export const es: Strings = {
   pass: "Pasar",
 
   points: "puntos",
-  bonus: "bonus",
-  capicuaBonus: "bonus Capicúa",
+  bonus: "extra",
+  capicuaBonus: "por la capicúa",
   tranqueCompare: (blocker, blockerPips, rival, rivalPips) =>
     `Tranque: ${blocker} ${blockerPips} · ${rival} ${rivalPips}`,
   tranqueTie: (opener) => `Empate: gana ${opener}, que salió`,
@@ -385,7 +391,7 @@ export const es: Strings = {
   wonRound: "¡Ganaste la ronda!",
   lostRound: "Perdiste la ronda",
   pips: "pips",
-  nextRound: "Siguiente Ronda →",
+  nextRound: "Siguiente ronda →",
   nextRoundLoading: "Preparando…",
 
   won: "¡GANASTE!",
@@ -464,6 +470,8 @@ export const es: Strings = {
   leaveTable: "Salir de la mesa",
   leaveConfirm:
     "¿Salir de la mesa? La partida sigue y puedes volver desde el inicio. Si pasas 2 minutos sin jugar, el otro lado puede reclamar la partida.",
+  leaveConfirmTurnBased:
+    "¿Salir de la mesa? La partida sigue y puedes volver desde el inicio.",
   resumeGame: "Volver a tu partida",
   resumeGameHint: (code) => `Mesa ${code}`,
 
@@ -572,8 +580,9 @@ export const en: Strings = {
   copyLink: "Copy link",
   orShareCode: "or share the code",
   codeCopied: "Code copied!",
-  autoRefresh: "Page updates when they pull up.",
+  autoRefresh: "Updates by itself when they join.",
   conTuFrente: "With your partner",
+  embedShareCode: "On the web, join at playcapi.com with this code.",
 
   seatNorth: "North",
   seatEast: "East",
@@ -633,7 +642,7 @@ export const en: Strings = {
   loading: "Loading…",
   backToHome: "Back to home",
   networkError: "Connection error",
-  gameNotFound: "Can't find that game - check the code",
+  gameNotFound: "Can't find that game. Check the code.",
   tableNotFound: "That table no longer exists",
   retry: "Retry",
   failedCreate: "Couldn't start the game",
@@ -655,7 +664,7 @@ export const en: Strings = {
 
   reportBug: "Report a problem",
   reportBugTitle: "Report a problem",
-  reportBugSent: "Thanks - got it.",
+  reportBugSent: "Thanks, got it.",
   reportBugPrompt:
     "This goes to the Capi team, not to your opponent. Tell us what happened; the game state is attached so we can fix it.",
   reportBugNotChat: "To talk to your opponent, use the 💬 chat on the table.",
@@ -697,6 +706,8 @@ export const en: Strings = {
   leaveTable: "Leave the table",
   leaveConfirm:
     "Leave the table? The game keeps going and you can come back from home. After 2 minutes without a move, the other side can claim the win.",
+  leaveConfirmTurnBased:
+    "Leave the table? The game keeps going and you can come back from home.",
   resumeGame: "Back to your game",
   resumeGameHint: (code) => `Table ${code}`,
 

@@ -5,7 +5,7 @@ import { API_BASE } from "../theme";
 import type { CalloutPayload, GameState, Seat, Tile } from "@capi/engine";
 import { getNextSeat, placeTileOnBoard, removeTileFromHand } from "@capi/engine";
 import {
-  chatText,
+  chatWireText,
   errorKeyFor,
   normalizeChatPayload,
   type ErrorKey,
@@ -581,13 +581,13 @@ export function useRealtimeGame(
       if (!canonical) return;
 
       // The wire carries the phrase text in the sender's language, because
-      // the 1.0 app prints the payload as is. Newer receivers map the text
-      // back to the id.
+      // the 1.0 app prints the payload as is (a renamed English phrase keeps
+      // its shipped text). Newer receivers map the text back to the id.
       const broadcastPayload: ChatBroadcastPayload = {
         playerId: session.playerId,
         seat: session.seat,
         type,
-        payload: chatText(type, canonical, lang),
+        payload: chatWireText(type, canonical, lang),
       };
 
       // Add to local state immediately (sender sees their own message)

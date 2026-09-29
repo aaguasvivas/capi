@@ -21,11 +21,15 @@ interface Props {
 }
 
 // From this many tiles on, the hand uses the small preset so a drawn-up
-// 1v1 hand still fits inside its capped height.
-const SMALL_HAND_AT = 9;
+// 1v1 hand still fits inside its capped height. Eight small tiles fit one
+// row at 375 px, so a 7-tile hand that draws once does not wrap.
+const SMALL_HAND_AT = 8;
+
+// The tile list's top padding (pt-4), kept above a tile scrolled to the top.
+const LIST_TOP_PAD = 16;
 
 const END_BUTTON =
-  "min-h-[44px] px-4 text-sm rounded-xl bg-[var(--accent)] text-white font-semibold hover:brightness-110 transition-all active:scale-95";
+  "min-h-[44px] px-4 text-sm rounded-xl bg-[var(--accent)] text-[var(--accent-ink)] font-semibold hover:brightness-110 transition-all active:scale-95";
 
 function matchesEnd(tile: Tile, pip: number): boolean {
   return tile[0] === pip || tile[1] === pip;
@@ -127,6 +131,27 @@ function Hand({
     select(null);
   }
 
+  const firstPlayable = isMyTurn
+    ? tiles.findIndex((t) => boardEmpty || matchesEnd(t, boardLeftEnd) || matchesEnd(t, boardRightEnd))
+    : -1;
+
+  // A drawn tile lands last, often in a row the capped list has scrolled out
+  // of view. When the turn arrives or the hand grows, scroll the list (only
+  // the list, never the page or the Messages drawer) so the first playable
+  // tile shows. Measured from layout offsets (the list is `relative`, so it
+  // is the tiles' offsetParent): a drawn tile mounts mid tile-enter, and its
+  // transformed rect sits up to 27 px above where it lands.
+  const listRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    const el = firstPlayable >= 0 ? list?.children[firstPlayable] : undefined;
+    if (!list || !(el instanceof HTMLElement)) return;
+    const top = el.offsetTop;
+    const bottom = top + el.offsetHeight;
+    if (top >= list.scrollTop && bottom <= list.scrollTop + list.clientHeight) return;
+    list.scrollTop = top - LIST_TOP_PAD;
+  }, [firstPlayable, tiles.length]);
+
   const small = tiles.length >= SMALL_HAND_AT;
   const chooser = isMyTurn && selected;
 
@@ -138,7 +163,10 @@ function Hand({
 
       {/* Top padding leaves room for the raised selected tile inside the
           scroll clip; the list wraps and scrolls once the cap is reached. */}
-      <div className="min-h-0 overflow-y-auto overscroll-contain flex flex-wrap content-start justify-center gap-1.5 px-0.5 pt-4 pb-1">
+      <div
+        ref={listRef}
+        className="relative min-h-0 overflow-y-auto overscroll-contain flex flex-wrap content-start justify-center gap-1.5 px-0.5 pt-4 pb-1"
+      >
         {tiles.map((tile, i) => {
           const key = tileKey(tile);
           const isSelected = !!selected && sameTile(selected, tile);
@@ -215,7 +243,7 @@ function Hand({
           <button
             type="button"
             onClick={onDraw}
-            className="min-h-[44px] px-6 text-sm rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
+            className="min-h-[44px] px-6 text-sm rounded-xl bg-amber-500 text-gray-900 font-semibold hover:bg-amber-600 transition-all active:scale-95 shadow-md"
           >
             {s.draw(boneyardCount)}
           </button>
@@ -223,7 +251,7 @@ function Hand({
           <button
             type="button"
             onClick={onPass}
-            className="min-h-[44px] px-6 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
+            className="min-h-[44px] px-6 text-sm rounded-xl border-2 border-[var(--accent)] text-[var(--hand-text)] font-semibold hover:bg-[var(--accent)]/10 transition-all active:scale-95"
           >
             {s.pass}
           </button>

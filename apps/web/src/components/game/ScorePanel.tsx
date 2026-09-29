@@ -130,8 +130,10 @@ function TeamScore({
             {p?.nickname?.[0]?.toUpperCase() ?? "?"}
           </div>
         ))}
+        {/* No z-index: as a positioned element it already paints over the
+            avatars, and a z-index would lift it over the open quick chat tray. */}
         {isActive && (
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[var(--score-bg)] animate-pulse z-10" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[var(--score-bg)] animate-pulse" />
         )}
       </div>
 

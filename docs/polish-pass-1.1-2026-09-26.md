@@ -104,7 +104,16 @@ raw audit with evidence is summarized below by cluster.
 
 ## Deferred past 1.1
 
-- Web in phone landscape shrinks the board to a strip.
+- Web in phone landscape shrinks the board to a strip. The hand is capped
+  too: at 667x375 and 812x375 the tile list is 37 px tall and a small tile
+  is 72 px, so no tile ever shows in full (the playable one shows 21 of 72
+  px), and the empty action row stays reserved under it. Owner decision: a
+  short-landscape rule (raise .hand-cap under `(orientation: landscape) and
+  (max-height: 500px)` and collapse the empty action row when a play is
+  legal) or a rotate-to-portrait hint (its string goes in packages/i18n).
+  Either one needs a retest of the board height and the chat tray cap
+  (.chat-tray-cap assumes the hand takes 38dvh) at 667x375, 812x375 and the
+  portrait sizes.
 - Callout and chat sounds reuse the tile sound, pitch-shifted.
 - In 2v2, every chat bubble appears in the same corner.
 - Android: no AdMob Android app id, iOS banner unit, pending purchases

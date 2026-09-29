@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EMOTES, QUICK_PHRASES, chatText, normalizeChatPayload } from "@capi/i18n";
+import { EMOTES, QUICK_PHRASES, chatText, chatWireText, normalizeChatPayload } from "@capi/i18n";
 import { FakeDb, get, legalIntent, params, post } from "./fakeDb";
 
 const holder = vi.hoisted(() => ({ db: null as unknown }));
@@ -136,12 +136,13 @@ describe("1.0 response contract", () => {
 
 describe("chat wire contract", () => {
   // 1.0 prints a received chat payload verbatim, so senders broadcast the
-  // display text; newer receivers map it back to the phrase id.
+  // display text (a renamed English phrase keeps its shipped text); newer
+  // receivers map it back to the phrase id.
   for (const lang of ["es", "en"] as const) {
     it(`every phrase's ${lang} wire text is readable text that maps back to its id`, () => {
       for (const p of QUICK_PHRASES) {
-        const wire = chatText("quick_chat", p.id, lang);
-        expect(wire).toBe(p[lang]);
+        const wire = chatWireText("quick_chat", p.id, lang);
+        expect(wire).toBe(lang === "en" ? (p.legacyEn ?? p.en) : p.es);
         expect(wire).not.toBe(p.id);
         expect(normalizeChatPayload("quick_chat", wire)).toBe(p.id);
       }

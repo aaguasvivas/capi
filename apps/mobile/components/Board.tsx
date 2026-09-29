@@ -186,9 +186,12 @@ function Board({ board, endsGlow, playableEnds, selectedTile }: Props) {
   // comparing the first tile against the previously committed board. The
   // memo keys on the board, so unrelated re-renders keep the same answer and
   // the last-move highlight survives them; the effect below records the
-  // committed board for the next comparison.
+  // committed board for the next comparison. It starts from the board it
+  // mounts with: a cold mount (resuming a table, or opening one from
+  // Messages) cannot tell which tile was played last, so it rings and
+  // springs none rather than guess the right end.
   const prevRef = useRef<{ board: Tile[]; newest: number }>({
-    board: [],
+    board,
     newest: -1,
   });
   const newestIndex = useMemo(() => {
@@ -208,9 +211,28 @@ function Board({ board, endsGlow, playableEnds, selectedTile }: Props) {
     prevRef.current = { board, newest: newestIndex };
   }, [board, newestIndex]);
 
+  // A cold mount with a long chain scrolls once, as soon as the layout is
+  // measured, to the middle of the two open ends so both are in view.
+  const mountScrollRef = useRef(board.length > 0);
+  useEffect(() => {
+    if (!mountScrollRef.current || layout.placements.length === 0) return;
+    mountScrollRef.current = false;
+    if (layout.contentW <= size.w && layout.contentH <= size.h) return;
+    const a = layout.placements[0];
+    const b = layout.placements[layout.placements.length - 1];
+    hScrollRef.current?.scrollTo({
+      x: Math.max(0, (a.x + b.x) / 2 + xOffset - size.w / 2),
+      animated: false,
+    });
+    vScrollRef.current?.scrollTo({
+      y: Math.max(0, (a.y + b.y) / 2 + yOffset - size.h / 2),
+      animated: false,
+    });
+  }, [layout, size.w, size.h, xOffset, yOffset]);
+
   // Auto-scroll to keep the latest played tile in view. Only fires when the
-  // tile count grows, not on resize, not on round resets.
-  const scrolledLenRef = useRef(0);
+  // tile count grows, not on resize, not on round resets, not on mount.
+  const scrolledLenRef = useRef(board.length);
   useEffect(() => {
     const grew = board.length > scrolledLenRef.current;
     scrolledLenRef.current = board.length;

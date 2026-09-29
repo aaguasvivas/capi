@@ -9,6 +9,7 @@ import { AppState, Platform } from "react-native";
 import mobileAds, {
   AdsConsent,
   AdsConsentPrivacyOptionsRequirementStatus,
+  MaxAdContentRating,
 } from "react-native-google-mobile-ads";
 import {
   getTrackingPermissionsAsync,
@@ -110,6 +111,14 @@ async function start(): Promise<boolean> {
       const info = await withTimeout(AdsConsent.getConsentInfo(), 5000);
       if (!info.canRequestAds) return false;
     }
+    // The app is rated 4+, and Guideline 2.5.18 requires ads that fit the
+    // age rating. Cap every request at G before the SDK starts; banners only
+    // mount after this resolves true, so no request goes out without it. A
+    // failure here stays dark rather than serving uncapped ads.
+    await withTimeout(
+      mobileAds().setRequestConfiguration({ maxAdContentRating: MaxAdContentRating.G }),
+      5000
+    );
     await withTimeout(mobileAds().initialize(), 15000);
     return true;
   } catch {

@@ -189,7 +189,7 @@ export default function TablePresence({
       <span
         className={
           myTurn
-            ? "font-bold text-[var(--accent-light)]"
+            ? "font-bold text-[var(--score-accent,var(--accent-light))]"
             : "opacity-70"
         }
       >

@@ -13,6 +13,7 @@ import TileDisplay from "@/components/game/TileDisplay";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
 import TablePresence from "@/components/game/TablePresence";
+import RulesButton from "@/components/game/RulesButton";
 import {
   JoinCard,
   SpectatorBar,
@@ -37,6 +38,7 @@ import {
   writeBridgeMarks,
 } from "@/lib/imessageBridge";
 import { tranqueLines, veinticincoLabel } from "@/lib/callouts";
+import { inkOn } from "@/lib/ink";
 import {
   playSlam,
   playDraw as playDrawSound,
@@ -623,6 +625,35 @@ function GameContent({ id }: { id: string }) {
     const playersNeeded = Math.max(0, maxPlayers - players.length);
     // A visitor with no seat can take a free one from right here.
     const canJoin = !session && playersNeeded > 0;
+    // The invite code under a one-line lead, copied on tap.
+    const codeChip = (lead: string) =>
+      inviteCode && (
+        <div className="space-y-1.5">
+          <p className="text-xs text-gray-500">{lead}</p>
+          <button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(inviteCode);
+                setCodeCopied(true);
+                setTimeout(() => setCodeCopied(false), 2000);
+              } catch {
+                /* no-op */
+              }
+            }}
+            className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
+            title={s.copyLink}
+          >
+            <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
+              {inviteCode}
+            </span>
+          </button>
+          {codeCopied && (
+            <p className="text-xs text-green-600 font-semibold">
+              {s.codeCopied}
+            </p>
+          )}
+        </div>
+      );
 
     return (
       <div
@@ -638,7 +669,7 @@ function GameContent({ id }: { id: string }) {
           </h2>
           {is2v2 && (
             <p className="text-xs text-indigo-600 font-semibold">
-              2v2 - {s.conTuFrente}
+              2v2 · {s.conTuFrente}
             </p>
           )}
 
@@ -735,35 +766,13 @@ function GameContent({ id }: { id: string }) {
               </button>
 
               {/* Secondary: the short code, for typing in by hand */}
-              {inviteCode && (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-gray-500">{s.orShareCode}</p>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(inviteCode);
-                        setCodeCopied(true);
-                        setTimeout(() => setCodeCopied(false), 2000);
-                      } catch {
-                        /* no-op */
-                      }
-                    }}
-                    className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
-                    title={s.copyLink}
-                  >
-                    <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
-                      {inviteCode}
-                    </span>
-                  </button>
-                  {codeCopied && (
-                    <p className="text-xs text-green-600 font-semibold">
-                      {s.codeCopied}
-                    </p>
-                  )}
-                </div>
-              )}
+              {codeChip(s.orShareCode)}
             </>
           )}
+
+          {/* In Messages the invite bubble reaches the chat; the code is for
+              a player joining from the web. */}
+          {session && embedded && playersNeeded > 0 && codeChip(s.embedShareCode)}
 
           <p className="text-xs text-gray-500">{s.autoRefresh}</p>
 
@@ -1016,11 +1025,11 @@ function GameContent({ id }: { id: string }) {
           {/* Light temperature + vignette overlay */}
           <div className="absolute inset-0 theme-light pointer-events-none z-[1]" />
 
-          {/* Bottom-right utility cluster: bug report (not in Messages) +
-              mute. In the short Messages drawer a seated 2v2 table moves it
-              to the top-right corner: at the bottom it covered the right
-              rail's tile count, and at the top that corner is empty in 2v2
-              (no boneyard count). */}
+          {/* Bottom-right utility cluster: bug report (not in Messages),
+              how to play, and mute. In the short Messages drawer a seated
+              2v2 table moves it to the top-right corner: at the bottom it
+              covered the right rail's tile count, and at the top that corner
+              is empty in 2v2 (no boneyard count). */}
           <div
             className={`absolute right-2 z-[3] flex items-center gap-1.5 ${
               muteOnTop && !isGameEnded ? "top-2" : "bottom-2"
@@ -1034,6 +1043,7 @@ function GameContent({ id }: { id: string }) {
                 stateVersion={stateVersion}
               />
             )}
+            <RulesButton />
             <button
               type="button"
               onClick={toggleMute}
@@ -1098,7 +1108,7 @@ function GameContent({ id }: { id: string }) {
             (mySeat ? (
               <div
                 className={`px-3 sm:px-4 pt-2 sm:pt-3 pb-1 flex-shrink-0 z-[2] ${
-                  muteOnTop ? "pr-14 sm:pr-14" : ""
+                  muteOnTop ? "pr-24" : ""
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1 min-w-0">
@@ -1117,7 +1127,7 @@ function GameContent({ id }: { id: string }) {
                     <span className="text-white/60 text-xs font-medium truncate min-w-0">
                       {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
                       {is2v2 && <span className="opacity-60 ml-1">{s.partnerTag}</span>}
-                      {" - "}
+                      {" · "}
                       {s.tileCount(topHand.length)}
                     </span>
                   </div>
@@ -1228,9 +1238,9 @@ function GameContent({ id }: { id: string }) {
                     pips look like points credited to the loser. Hidden when
                     the winner is unknown rather than guessed. */}
                 {cardWinnerTeam !== null && (
-                  <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight short:text-2xl">
+                  <p className="text-3xl font-black text-[var(--score-accent,var(--accent))] tabular-nums leading-tight short:text-2xl">
                     +{roundAward}
-                    <span className="block text-xs font-bold opacity-70 mt-0.5">
+                    <span className="block text-xs font-bold text-[var(--score-text)] opacity-80 mt-0.5">
                       {s.awardedTo} {teamLabel(cardWinnerTeam)}
                     </span>
                   </p>
@@ -1277,7 +1287,7 @@ function GameContent({ id }: { id: string }) {
                   <button
                     type="button"
                     onClick={() => setHeldRound(null)}
-                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95"
+                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--accent-ink)] font-bold text-base hover:brightness-110 transition-all active:scale-95"
                   >
                     {s.nextRound}
                   </button>
@@ -1287,7 +1297,7 @@ function GameContent({ id }: { id: string }) {
                       type="button"
                       onClick={handleNextRound}
                       disabled={nextRoundLoading}
-                      className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
+                      className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--accent-ink)] font-bold text-base hover:brightness-110 transition-all active:scale-95 disabled:opacity-50"
                     >
                       {nextRoundLoading ? s.nextRoundLoading : s.nextRound}
                     </button>
@@ -1367,7 +1377,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
 
                 {gameState.rematchGameId && (
-                  <p className="text-sm font-bold text-[var(--accent-light)] relative z-10">
+                  <p className="text-sm font-bold text-[var(--score-accent,var(--accent-light))] relative z-10">
                     {s.rematchReady}
                   </p>
                 )}
@@ -1425,7 +1435,7 @@ function GameContent({ id }: { id: string }) {
                         if (!navigating) setRematchLoading(false);
                       }
                     }}
-                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-white font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
+                    className="w-full px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--accent-ink)] font-bold text-base hover:brightness-110 transition-all active:scale-95 relative z-10 disabled:opacity-60"
                   >
                     {rematchLoading
                       ? s.creatingRematch
@@ -1457,7 +1467,7 @@ function GameContent({ id }: { id: string }) {
                   {s.yourHand}
                 </p>
                 {isMyTurn && (
-                  <span className="text-xs font-bold text-[var(--accent)] animate-pulse">
+                  <span className="px-2 rounded-full text-xs leading-4 font-bold bg-[var(--accent)] text-[var(--accent-ink)]">
                     {s.yourTurn}
                   </span>
                 )}
@@ -1568,12 +1578,13 @@ function ChatBubbleDisplay({ bubble, accentColor }: ChatBubbleDisplayProps) {
   return (
     <div
       className={`
-        px-3 py-1.5 rounded-2xl text-white text-sm font-bold
+        px-3 py-1.5 rounded-2xl text-sm font-bold
         shadow-lg max-w-full break-words leading-tight
         ${animClass}
       `}
       style={{
         backgroundColor: accentColor,
+        color: inkOn(accentColor),
         boxShadow: `0 2px 12px ${accentColor}55`,
       }}
     >
