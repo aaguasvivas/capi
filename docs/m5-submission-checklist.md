@@ -179,6 +179,8 @@ of 2026-09-28: a double on matching ends counts.
       (EAS 60075b84) showed the remembered home choices after a cold launch
       and the Colmado turn chip; the extension's Swift is unchanged since
       build 22's verified run (only the plugin guard changed).
+      Uploaded to App Store Connect on 2026-09-29 (submission fa0fdf23).
+      Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
 
