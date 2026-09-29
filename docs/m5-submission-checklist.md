@@ -35,6 +35,19 @@ a new production build once the rules update lands and the server runs it.
 Store Connect, and submit it, not 16, 17, 19, or 20. It is build 21 (EAS id
 b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
 
+State on 2026-09-29: the iMessage fix pass changes the extension's Swift
+sources (apps/mobile/targets/messages), adds the extension's own privacy
+manifest (plugins/withMessagesExtension.js), and adds a line to the app's
+table for Messages games (apps/mobile/app/game/[id].tsx) after build 21.
+Build 21 is superseded. "The iMessage fix build" below means the next
+production build, build 22 (not built yet); test it, select it, and submit
+it, not 21. Its web half (apps/web: named turn bubbles, the result bubble
+from the player whose move ended the round, the next-round and rematch
+bubbles, the drawer's error screen, the hand and round-card fixes for short
+drawers) ships with a Vercel deploy. Build 22 also works against the page as
+it is live now (it falls back to "Your turn" and bare scores), but the fixes
+need the deploy before review.
+
 ## A. Code gates (Me)
 
 - [x] `grep -rn "3940256099942544\|PENDING_ADMOB" apps/mobile` returns NOTHING
@@ -95,10 +108,8 @@ b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
       Sentry DSN, so the website and the iMessage game view report errors now
       (confirm the Vercel source-map variables). The app runs with reporting
       off until the EAS half is done; nothing breaks.
-- [ ] B8. Before D3: approve docs/privacy-1.1-draft.md. I apply it to
-      /privacy and /support, deploy, and check both pages live. The live
-      privacy page still says no ads and no tracking, which contradicts the
-      ATT prompt and D3.
+- [x] B8. docs/privacy-1.1-draft.md approved 2026-09-26 (commit 727b10c);
+      /privacy and /support carry the 1.1 text live (checked 2026-09-29).
 
 ## C. Production build (Me)
 
@@ -111,7 +122,8 @@ b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
       14 Plus, submitted to App Store Connect (submission 6782fb49). The ITMS
       email must not come back for it; build 18 is a cancelled build.
 - [x] The 8 IAP review screenshots exist in store-assets/iap (one PNG per
-      product id). iMessage screenshots on request if ASC shows that section.
+      product id). The 4 iMessage App screenshots (1284x2778, the 6.5-inch
+      slot) exist in apps/mobile/store-assets/screenshots/imessage.
 - [x] The polish-pass build, build 20 (EAS id 9dc17f6a): the production-config
       simulator build of the same code passed on the iPhone SE and 14 Plus;
       the extension fix was checked with a Release build of the extension.
@@ -141,8 +153,14 @@ b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
       Tracking = YES; Usage Data > Product Interaction + Advertising Data;
       Location > Coarse Location, purpose Third-Party Advertising (AdMob
       estimates a general location from the IP address); Diagnostics > Crash
-      Data + Performance Data + Other Diagnostic Data (all from the AdMob
-      SDK). Anota's accepted label had no Coarse Location or Other Diagnostic
+      Data + Performance Data + Other Diagnostic Data. Two sources: the AdMob
+      SDK (its manifest: Crash Data for Analytics; Performance Data and Other
+      Diagnostic Data for Third-Party Advertising, Developer Advertising and
+      Analytics), and Sentry error reports from the playcapi.com page that
+      the iMessage game view loads (and the app, once EAS has a Sentry DSN).
+      So also select App Functionality on Crash Data and Other Diagnostic
+      Data, not linked to the user, not used for tracking. Performance Data
+      stays AdMob only (Sentry runs with tracing off). Anota's accepted label had no Coarse Location or Other Diagnostic
       Data; the shipped SDK's own privacy manifest (Google Mobile Ads 12.2.0)
       declares both. That manifest marks Device ID, Product Interaction,
       Advertising Data and Coarse Location as linked to the user and the
@@ -157,15 +175,20 @@ b5e46d7f, commit 9d2377b), uploaded to App Store Connect on 2026-09-27.
       the iMessage extension (guideline 4.4) and drops "nobody can cheat".
 - [ ] D6. App Review notes: paste the updated Guideline 4.2 note from
       docs/store-listing.md (it discloses the extension, IAPs, and ads).
-- [ ] D7. If ASC shows an iMessage screenshot section, ask me for the shots.
-- [ ] D8. Select build 21 (the rules-update build) for the 1.1 version (16 and 17 have no
+- [ ] D7. After the build is attached, the version page shows an "iMessage
+      App" media section, and Add for Review is blocked until it has
+      screenshots. Upload the 4 PNGs from
+      apps/mobile/store-assets/screenshots/imessage (1284x2778, the 6.5-inch
+      slot, primary locale): the create card, the invite bubble, the live
+      table, and the "Your turn" bubble.
+- [ ] D8. Select build 22 (the iMessage fix build) for the 1.1 version (16 and 17 have no
       iMessage icon; 19 predates the polish pass; 20 predates the rules
-      update).
+      update; 21 predates the iMessage fixes).
 - [ ] D9. Version Release: choose "Manually release this version" (you press
       release after approval) or "Automatically release this version" (it
       goes live as soon as review approves it).
 
-## E. TestFlight matrix (You + me, two phones, the rules-update build)
+## E. TestFlight matrix (You + me, two phones, the iMessage fix build)
 
 Sign the two phones into two different Apple IDs (TestFlight and sandbox).
 Messages needs two iMessage accounts to exchange bubbles, and purchases
@@ -179,6 +202,16 @@ A's Todo Capi and the restore test proves nothing.
       menu shows the create card right away (not a blank drawer); the drawer's
       buttons sit above the table, not over the turn line; after a move the
       small drawer shows "Volver a la mesa" and it brings the table back.
+- [ ] iMessage bubbles (after the Vercel deploy), every staged bubble sent:
+      with no name saved, one tap on the name field in the small drawer
+      expands it with the keyboard up; a join that deals the first turn to
+      phone A stages "Te toca, <A>" on phone B; the loser's "Siguiente ronda"
+      stages "Te toca, <winner>"; a blocker who loses a tranque stages
+      "<winner> ganó la ronda"; "Jugar otra vez" stages "¡Revancha! Toca para
+      jugar", and phone B's tap on it opens the finished table with "Ir a la
+      revancha". A third person (group chat) who taps a full table's bubble
+      watches it instead of seeing a join form. In the app, a Messages table
+      says to play it in Messages on your turn.
 - [ ] Rematch: finish a game, tap "Jugar otra vez" on phone A; phone B's button
       turns into "Ir a la revancha" and both land at the same table in the same
       seats.
@@ -232,6 +265,6 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 21 selected, then
+- [ ] Add for Review with the 8 IAPs attached and build 22 selected, then
       submit. Review typically takes 1 to 3 days. If
       rejected, paste the message to me and I turn the fix around same day.

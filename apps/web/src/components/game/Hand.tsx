@@ -131,7 +131,9 @@ function Hand({
   const chooser = isMyTurn && selected;
 
   return (
-    <div className="hand-cap flex flex-col gap-2">
+    // Fills what the capped hand area leaves after its header: only the tile
+    // list scrolls, so the action row below it is always on screen.
+    <div className="min-h-0 flex-1 flex flex-col gap-2">
       <TileGradientDefs />
 
       {/* Top padding leaves room for the raised selected tile inside the

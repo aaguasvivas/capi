@@ -233,17 +233,24 @@ function assertTransition(
         expect(delta0 + delta1, L("no score change mid-round play")).toBe(0);
       }
     } else if (next.hands[seat].length === 0) {
-      // Going out is a DOMINÓ, or a CAPICÚA when the tile is no double and
-      // fits both ends as they were before it was placed. It wins over a lock.
+      // Going out is a DOMINÓ, or a CAPICÚA when the tile fits both ends as
+      // they were before it was placed. A double fits both only when both
+      // ends show its number. It wins over a lock.
       const tile = intent.tile as Tile;
       const left = prev.board.length > 0 ? prev.board[0][0] : -1;
       const right = prev.board.length > 0 ? prev.board[prev.board.length - 1][1] : -1;
       const fits = (end: number) => tile[0] === end || tile[1] === end;
-      const capicua = tile[0] !== tile[1] && fits(left) && fits(right);
+      const capicua = fits(left) && fits(right);
       expect(next.lastCallout, L("capicúa iff the last tile fits both ends")).toBe(
         capicua ? "capicua" : "domino"
       );
-      if (capicua) reach(left === right ? "capicua on equal ends" : "capicua");
+      // Tallied from the engine's callout, not the oracle's condition.
+      const double = tile[0] === tile[1];
+      if (next.lastCallout === "capicua") {
+        reach(double ? "capicua with a double" : left === right ? "capicua on equal ends" : "capicua");
+      } else if (double) {
+        reach("dominó with a double on one end only");
+      }
       const winningTeam = getTeam(seat, prev.is2v2);
       const losingDelta = winningTeam === 0 ? delta1 : delta0;
       const winningDelta = winningTeam === 0 ? delta0 : delta1;
@@ -414,6 +421,8 @@ describe("invariant fuzz: full random games through the real reducer", () => {
   const SHARED_PATHS = [
     "capicua",
     "capicua on equal ends",
+    "capicua with a double",
+    "dominó with a double on one end only",
     "tranque won by blocker",
     "tranque won by rival",
     "tranque tie",

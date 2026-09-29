@@ -19,14 +19,23 @@ import {
   SpectatorScoreBar,
   SpectatorSeats,
 } from "@/components/game/SessionGate";
-import type { CalloutPayload, Tile, Seat, Theme } from "@capi/engine";
+import type { CalloutPayload, GameState, Tile, Seat, Theme } from "@capi/engine";
 import { getTeam, getOpponentTeam, getSeatsForGame } from "@capi/engine";
 import { chatText, errorKeyFor } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
 import { isImessageEmbed, embedLang } from "@/lib/embed";
 import { parseSessionFragment } from "@/lib/embedSession";
 import type { EmbedSession as Session } from "@/lib/embedSession";
-import { postToExtension } from "@/lib/imessageBridge";
+import {
+  bridgeSides,
+  gameWinner,
+  postToExtension,
+  readBridgeMarks,
+  resultStep,
+  roundWinnerName,
+  turnName,
+  writeBridgeMarks,
+} from "@/lib/imessageBridge";
 import { tranqueLines, veinticincoLabel } from "@/lib/callouts";
 import {
   playSlam,
@@ -109,32 +118,6 @@ function getRelativeSeats(
     case "e": return { top: "w", left: "n", right: "s" };
     case "s": return { top: "n", left: "e", right: "w" };
     case "w": return { top: "e", left: "s", right: "n" };
-  }
-}
-
-// iMessage bubble markers survive remounts: a finished game reopened later
-// must not post its bubble again. A table finishes once, and each round ends
-// once, so rounds are keyed by index. state_version is not stable enough for
-// this: a rematch request bumps it on the finished game.
-interface BridgeMarks {
-  roundOver?: number;
-  gameOver?: boolean;
-}
-
-function readBridgeMarks(gameId: string): BridgeMarks {
-  try {
-    const raw = localStorage.getItem(`capi_bridge_${gameId}`);
-    return raw ? (JSON.parse(raw) as BridgeMarks) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeBridgeMarks(gameId: string, marks: BridgeMarks) {
-  try {
-    localStorage.setItem(`capi_bridge_${gameId}`, JSON.stringify(marks));
-  } catch {
-    /* storage blocked: worst case is one repeated bubble */
   }
 }
 
@@ -370,6 +353,18 @@ function GameContent({ id }: { id: string }) {
           showToast(apiErrorText(data.error, s.errorStartRound));
         }
       } else {
+        // This deal is this client's doing, so the bubble is too: the round
+        // winner opens, usually someone who is not in the drawer.
+        const data = await res.json().catch(() => null);
+        const dealt = data?.gameState as GameState | undefined;
+        if (dealt && dealt.phase === "playing" && dealt.currentTurn !== session.seat) {
+          postToExtension({
+            type: "moved",
+            gameId: id,
+            turnName: turnName(dealt),
+            ...bridgeSides(dealt, session.seat as Seat),
+          });
+        }
         await refetch();
       }
     } catch {
@@ -468,13 +463,16 @@ function GameContent({ id }: { id: string }) {
     }
   }, [lastCallout]);
 
-  // Notify the iMessage extension shell exactly once each time the
-  // round-over or game-over card becomes visible, so it can refresh the
-  // turn bubble. These mirror the isRoundOver/isFinished + !lastCallout
-  // conditions the overlays further down use to show those same cards.
-  // The ref guards block re-emits from unrelated re-renders (gameState gets
-  // a new object reference on every realtime sync) while the card stays up;
-  // the stored marks block re-emits across remounts of the same card.
+  // Notify the iMessage extension shell once when the round-over or
+  // game-over card becomes visible, so it can post the result bubble. Only
+  // the device whose move ended the round sends it (the hook marks that
+  // round), whichever side won: in 2v2 both partners' pages reach this
+  // card, and when the mover loses a tranque the winners' drawers are shut.
+  // These mirror the isRoundOver/isFinished + !lastCallout conditions the
+  // overlays further down use to show those same cards. The ref guards
+  // block re-emits from unrelated re-renders (gameState gets a new object
+  // reference on every realtime sync) while the card stays up; the stored
+  // marks block re-emits across remounts of the same card.
   const roundOverVisible = gameState?.phase === "round_over" && !lastCallout;
   const roundOverNotifiedRef = useRef(false);
   useEffect(() => {
@@ -482,18 +480,23 @@ function GameContent({ id }: { id: string }) {
       roundOverNotifiedRef.current = false;
       return;
     }
-    if (roundOverNotifiedRef.current || !gameState || myTeam === null) return;
-    roundOverNotifiedRef.current = true;
+    if (roundOverNotifiedRef.current || !gameState || !mySeat || myTeam === null) return;
+    // The ref is set only once the marks decide: the card can show before
+    // the move response marks this device's round.
     const marks = readBridgeMarks(id);
-    if (marks.roundOver === gameState.roundIndex) return;
+    const step = resultStep("roundOver", marks, gameState);
+    if (step === "wait") return;
+    roundOverNotifiedRef.current = true;
     writeBridgeMarks(id, { ...marks, roundOver: gameState.roundIndex });
+    if (step === "skip") return;
     postToExtension({
       type: "roundOver",
+      gameId: id,
       iWon: roundWinnerTeam === myTeam,
-      myScore: gameState.scores[myTeam],
-      oppScore: gameState.scores[getOpponentTeam(myTeam)],
+      winnerName: roundWinnerName(gameState),
+      ...bridgeSides(gameState, mySeat),
     });
-  }, [roundOverVisible, gameState, myTeam, roundWinnerTeam, id]);
+  }, [roundOverVisible, gameState, mySeat, myTeam, roundWinnerTeam, id]);
 
   // Claim the game once the seat on turn has been silent past the window.
   // TablePresence has already asked for confirmation in the page (no
@@ -526,18 +529,23 @@ function GameContent({ id }: { id: string }) {
       gameOverNotifiedRef.current = false;
       return;
     }
-    if (gameOverNotifiedRef.current || !gameState || myTeam === null) return;
-    gameOverNotifiedRef.current = true;
+    if (gameOverNotifiedRef.current || !gameState || !mySeat || myTeam === null) return;
+    // As for the round: the ref waits for the marks. A result that lands
+    // after the rematch invite went out is marked and not sent.
     const marks = readBridgeMarks(id);
-    if (marks.gameOver) return;
+    const step = resultStep("gameOver", marks, gameState);
+    if (step === "wait") return;
+    gameOverNotifiedRef.current = true;
     writeBridgeMarks(id, { ...marks, gameOver: true });
+    if (step === "skip") return;
     postToExtension({
       type: "gameOver",
+      gameId: id,
       iWon: gameState.winnerTeam === myTeam,
-      myScore: gameState.scores[myTeam],
-      oppScore: gameState.scores[getOpponentTeam(myTeam)],
+      ...gameWinner(gameState),
+      ...bridgeSides(gameState, mySeat),
     });
-  }, [gameOverVisible, gameState, myTeam, id]);
+  }, [gameOverVisible, gameState, mySeat, myTeam, id]);
 
   // The waiting room has no game_state yet, so the table's theme comes from
   // the game row itself.
@@ -571,17 +579,37 @@ function GameContent({ id }: { id: string }) {
   }
 
   // --- Error state ---
+  // Inside Messages the drawer must stay on this table: no link to the
+  // website, no invite code to check, and Retry for a failed load (a table
+  // that is gone has nothing to retry; the drawer's New game is the way on).
   if (errorKey && !gameState) {
+    const gone = errorKey === "gameNotFound";
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f0e8]">
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f0e8] px-4">
         <div className="text-center space-y-3">
-          <p className="text-red-600 font-medium">{s[errorKey]}</p>
-          <button
-            onClick={() => router.push("/")}
-            className="text-sm text-indigo-600 underline"
-          >
-            {s.backToHome}
-          </button>
+          <p className="text-red-600 font-medium">
+            {embedded && gone ? s.tableNotFound : s[errorKey]}
+          </p>
+          {embedded ? (
+            !gone && (
+              <button
+                type="button"
+                onClick={() => {
+                  void refetch();
+                }}
+                className="min-h-[44px] px-4 text-sm font-semibold text-indigo-600 underline"
+              >
+                {s.retry}
+              </button>
+            )
+          ) : (
+            <button
+              onClick={() => router.push("/")}
+              className="text-sm text-indigo-600 underline"
+            >
+              {s.backToHome}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -601,7 +629,7 @@ function GameContent({ id }: { id: string }) {
         data-theme={waitingTheme ?? "barberia"}
         className="min-h-screen flex items-center justify-center bg-theme-page p-4"
       >
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-sm w-full text-center space-y-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 max-w-sm w-full text-center space-y-4">
           <div className="text-4xl">{is2v2 ? "👥" : "🎲"}</div>
           <h2 className="text-lg font-black text-gray-900">
             {playersNeeded > 0
@@ -622,33 +650,35 @@ function GameContent({ id }: { id: string }) {
               return (
                 <div
                   key={seat}
-                  className={`px-3 py-3 rounded-xl border-2 transition-all min-w-0 ${
+                  className={`flex items-center px-3 py-3 rounded-xl border-2 transition-all min-w-0 ${
                     p
                       ? "border-green-300 bg-green-50"
                       : "border-dashed border-gray-300 bg-gray-50"
                   }`}
                 >
                   {p ? (
-                    <div className="flex items-center gap-2 justify-center min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 w-full">
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                         style={{ backgroundColor: p.avatar_color ?? "#999" }}
                       >
                         {p.nickname?.[0]?.toUpperCase() ?? "?"}
                       </div>
-                      <span className="text-sm font-medium text-gray-800 truncate min-w-0">
-                        {p.nickname}
-                      </span>
-                      {/* Outside the truncating name, so a long name never
-                          hides the only marker of your own seat. */}
-                      {isMe && (
-                        <span className="-ml-1 text-[11px] text-gray-500 flex-shrink-0">
-                          {s.youTag}
+                      {/* The marker of your own seat gets its own line, so
+                          the name keeps the cell's full width. */}
+                      <div className="min-w-0 text-left leading-tight">
+                        <span className="block text-sm font-medium text-gray-800 truncate">
+                          {p.nickname}
                         </span>
-                      )}
+                        {isMe && (
+                          <span className="block text-[11px] text-gray-500">
+                            {s.youTag}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 justify-center min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 w-full">
                       <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <span aria-hidden className="text-gray-500 text-xs">?</span>
                       </div>
@@ -664,8 +694,8 @@ function GameContent({ id }: { id: string }) {
 
           {is2v2 && (
             <div className="flex justify-center gap-4 text-[11px] text-gray-500">
-              <span>N-S: {s.team1}</span>
-              <span>E-W: {s.team2}</span>
+              <span>{s.seatsNS}: {s.team1}</span>
+              <span>{s.seatsEW}: {s.team2}</span>
             </div>
           )}
 
@@ -891,6 +921,7 @@ function GameContent({ id }: { id: string }) {
   // Turn-based games (iMessage) have no claim window, so no stall notice,
   // warning, or claim.
   const turnBased = gameState.mode === "turn_based";
+  const muteOnTop = embedded && is2v2 && mySeat !== null;
 
   return (
     // touch-manipulation stops double-tap zoom on the table; pinch zoom
@@ -985,26 +1016,34 @@ function GameContent({ id }: { id: string }) {
           {/* Light temperature + vignette overlay */}
           <div className="absolute inset-0 theme-light pointer-events-none z-[1]" />
 
-          {/* Bottom-right utility cluster: bug report + mute */}
-          {!embedded && (
-            <div className="absolute bottom-2 right-2 z-[3] flex items-center gap-1.5">
+          {/* Bottom-right utility cluster: bug report (not in Messages) +
+              mute. In the short Messages drawer a seated 2v2 table moves it
+              to the top-right corner: at the bottom it covered the right
+              rail's tile count, and at the top that corner is empty in 2v2
+              (no boneyard count). */}
+          <div
+            className={`absolute right-2 z-[3] flex items-center gap-1.5 ${
+              muteOnTop && !isGameEnded ? "top-2" : "bottom-2"
+            }`}
+          >
+            {!embedded && (
               <BugReportButton
                 gameId={id}
                 playerId={session?.playerId}
                 gameState={gameState}
                 stateVersion={stateVersion}
               />
-              <button
-                type="button"
-                onClick={toggleMute}
-                className="w-11 h-11 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
-                title={muted ? s.enableSound : s.muteSound}
-                aria-label={muted ? s.enableSound : s.muteSound}
-              >
-                <span aria-hidden>{muted ? "🔇" : "🔊"}</span>
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="w-11 h-11 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/50 transition-colors text-white/70 hover:text-white text-sm"
+              title={muted ? s.enableSound : s.muteSound}
+              aria-label={muted ? s.enableSound : s.muteSound}
+            >
+              <span aria-hidden>{muted ? "🔇" : "🔊"}</span>
+            </button>
+          </div>
 
           {/* QuickChat toggle - floats on board bottom-left */}
           {!embedded && mySeat && !isGameEnded && (
@@ -1057,7 +1096,11 @@ function GameContent({ id }: { id: string }) {
               or every seat for a spectator */}
           {!isGameEnded &&
             (mySeat ? (
-              <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 flex-shrink-0 z-[2]">
+              <div
+                className={`px-3 sm:px-4 pt-2 sm:pt-3 pb-1 flex-shrink-0 z-[2] ${
+                  muteOnTop ? "pr-14 sm:pr-14" : ""
+                }`}
+              >
                 <div className="flex items-center justify-between gap-2 mb-1 min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <div
@@ -1164,10 +1207,12 @@ function GameContent({ id }: { id: string }) {
           )}
 
           {/* ── Round Over overlay ── */}
+          {/* The short variants keep the whole card, button included, inside
+              the iMessage drawer on a 4.7-inch phone (about 375x560). */}
           {roundCard && (
-            <div className="absolute inset-0 bg-black/60 flex overflow-y-auto py-6 px-6 z-10">
-              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-4">
-                <p className="text-5xl">
+            <div className="absolute inset-0 bg-black/60 flex overflow-y-auto py-6 px-6 z-10 short:py-3">
+              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-4 short:p-4 short:space-y-2.5">
+                <p className="text-5xl short:text-3xl">
                   {roundOutcomeKnown ? (iWonRound ? "🎉" : "😤") : "🎲"}
                 </p>
                 <h2 className="text-2xl font-black">
@@ -1183,7 +1228,7 @@ function GameContent({ id }: { id: string }) {
                     pips look like points credited to the loser. Hidden when
                     the winner is unknown rather than guessed. */}
                 {cardWinnerTeam !== null && (
-                  <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight">
+                  <p className="text-3xl font-black text-[var(--accent)] tabular-nums leading-tight short:text-2xl">
                     +{roundAward}
                     <span className="block text-xs font-bold opacity-70 mt-0.5">
                       {s.awardedTo} {teamLabel(cardWinnerTeam)}
@@ -1202,7 +1247,7 @@ function GameContent({ id }: { id: string }) {
                 )}
 
                 {/* Pip breakdown */}
-                <div className="bg-white/10 rounded-xl p-3 space-y-1 text-sm">
+                <div className="bg-white/10 rounded-xl p-3 space-y-1 text-sm short:py-2">
                   <div className="text-[9px] uppercase tracking-widest opacity-50 text-center pb-1">
                     {s.pipsInHand}
                   </div>
@@ -1221,7 +1266,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
 
                 {/* Score update */}
-                <div className="flex items-center justify-center gap-6 text-2xl font-black tabular-nums">
+                <div className="flex items-center justify-center gap-6 text-2xl font-black tabular-nums short:text-xl">
                   <span>{roundCard.scores[teamA]}</span>
                   <span className="text-sm font-normal opacity-50">·</span>
                   <span>{roundCard.scores[teamB]}</span>
@@ -1359,6 +1404,7 @@ function GameContent({ id }: { id: string }) {
                               code: data.inviteCode,
                               playerId: data.playerId,
                               seat: data.seat,
+                              waiting: data.waiting === true,
                             });
                           }
                           navigating = true;
@@ -1397,7 +1443,7 @@ function GameContent({ id }: { id: string }) {
         {!isGameEnded &&
           (mySeat ? (
             <div
-              className={`bg-theme-hand theme-hand-texture px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0 max-h-[38dvh] overflow-y-auto transition-all duration-300 ${
+              className={`hand-cap flex flex-col bg-theme-hand theme-hand-texture px-3 sm:px-4 py-3 sm:py-4 flex-shrink-0 transition-all duration-300 ${
                 isMyTurn
                   ? "border-t-2 border-[var(--accent)] animate-turn-glow"
                   : "border-t border-black/10"
@@ -1406,7 +1452,7 @@ function GameContent({ id }: { id: string }) {
                 paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
               }}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <p className="text-xs font-semibold text-[var(--hand-text)] uppercase tracking-wider">
                   {s.yourHand}
                 </p>

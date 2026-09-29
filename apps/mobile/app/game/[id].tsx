@@ -867,7 +867,7 @@ function GameTable({
                 <Text
                   style={{ fontSize: 10, color: "#9ca3af", textAlign: "center" }}
                 >
-                  N-S: {s.team1} · E-W: {s.team2}
+                  {s.seatsNS}: {s.team1} · {s.seatsEW}: {s.team2}
                 </Text>
               ) : null}
 
@@ -1210,6 +1210,9 @@ function GameTable({
     passNoticeSeat && gameState.phase === "playing" && !isMidRoundCallout
       ? passNoticeSeat
       : null;
+  // A table started in Messages: a move made here posts no bubble, so the
+  // other side would never hear of it. On this player's turn, say so.
+  const messagesNotice = turnBasedGame && isMyTurn && gameState.phase === "playing";
   // Transient pills sit just under the top hand row so they never cover the
   // opponent's name, and never take layout space from the board.
   const floatingTop = (tableClosed ? 0 : topRowHeight) + 6;
@@ -1349,11 +1352,12 @@ function GameTable({
             </Text>
           </View>
 
-          {/* Transient notices: move errors, an away opponent, and the stall
-              notice with its claim button. Absolute, so the board never
-              shifts when they appear; box-none so the board still gets every
-              touch outside the pills while the claim button stays tappable. */}
-          {bannerKey || awaySeat || stallSeat || showWarnMe || passSeat ? (
+          {/* Transient notices: the play-in-Messages line, move errors, an
+              away opponent, and the stall notice with its claim button.
+              Absolute, so the board never shifts when they appear; box-none
+              so the board still gets every touch outside the pills while the
+              claim button stays tappable. */}
+          {bannerKey || awaySeat || stallSeat || showWarnMe || passSeat || messagesNotice ? (
             <View
               pointerEvents="box-none"
               style={{
@@ -1366,6 +1370,15 @@ function GameTable({
                 gap: 6,
               }}
             >
+              {messagesNotice ? (
+                <View style={awayPill}>
+                  <Text
+                    style={{ color: "#fff", fontSize: 13, textAlign: "center" }}
+                  >
+                    {s.playInMessages}
+                  </Text>
+                </View>
+              ) : null}
               {bannerKey ? (
                 <View style={errorBanner}>
                   <Text

@@ -10,6 +10,10 @@ const TARGET = "CapiMessages";
 const BUNDLE_ID = "dev.capi.app.messages";
 const GROUP = "group.dev.capi.app";
 const SRC_DIR = path.join(__dirname, "..", "targets", "messages");
+// The extension's own privacy manifest: Apple reads one per bundle, and the
+// extension reads the App Group's UserDefaults (reason 1C8F.1), which the
+// app's manifest does not cover.
+const PRIVACY_MANIFEST = "PrivacyInfo.xcprivacy";
 const SWIFT_FILES = [
   "MessagesViewController.swift",
   "CreateJoinViews.swift",
@@ -26,10 +30,10 @@ function withMessagesTarget(config) {
 
     // Sources refresh on every prebuild; only the pbxproj wiring below is
     // idempotent-guarded.
-    // 1. Copy sources + plist + entitlements + assets into ios/CapiMessages/
+    // 1. Copy sources + plists + entitlements + assets into ios/CapiMessages/
     const dest = path.join(projRoot, TARGET);
     fs.mkdirSync(dest, { recursive: true });
-    for (const f of [...SWIFT_FILES, "Info.plist", "CapiMessages.entitlements"]) {
+    for (const f of [...SWIFT_FILES, "Info.plist", "CapiMessages.entitlements", PRIVACY_MANIFEST]) {
       fs.copyFileSync(path.join(SRC_DIR, f), path.join(dest, f));
     }
     fs.cpSync(path.join(SRC_DIR, "Assets.xcassets"), path.join(dest, "Assets.xcassets"), { recursive: true });
@@ -120,11 +124,14 @@ function withMessagesTarget(config) {
       proj.addSourceFile(path.join(TARGET, f), { target: target.uuid }, groupKey);
     }
 
-    const assets = proj.addFile(path.join(TARGET, "Assets.xcassets"), groupKey);
-    assets.uuid = proj.generateUuid();
-    assets.target = target.uuid;
-    proj.addToPbxBuildFileSection(assets);
-    proj.addToPbxResourcesBuildPhase(assets);
+    // The privacy manifest ships as a bundle resource too, wired the same way.
+    for (const f of ["Assets.xcassets", PRIVACY_MANIFEST]) {
+      const resource = proj.addFile(path.join(TARGET, f), groupKey);
+      resource.uuid = proj.generateUuid();
+      resource.target = target.uuid;
+      proj.addToPbxBuildFileSection(resource);
+      proj.addToPbxResourcesBuildPhase(resource);
+    }
 
     for (const f of ["Info.plist", "CapiMessages.entitlements"]) {
       proj.addFile(path.join(TARGET, f), groupKey);

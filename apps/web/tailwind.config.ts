@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // A short viewport: the iMessage drawer on a 4.7-inch phone is about
+      // 560 points tall.
+      screens: {
+        short: { raw: "(max-height: 620px)" },
+      },
       colors: {
         theme: {
           board: "var(--board-bg)",

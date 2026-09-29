@@ -84,14 +84,15 @@ export function scoreTrancao(state: GameState, blockerSeat: Seat): TrancaoResult
 /**
  * CAPICÚA: +25 bonus when the closing tile of a dominó fits both open ends
  * as they were just before it was placed. With ends 3 and 5 that is the 3-5;
- * with ends 5 and 5 any non-double with a 5 counts. A double never counts.
+ * with ends 5 and 5 any tile with a 5 counts, the double 5-5 included. A
+ * double fits both ends only when both show its number, so the 2-2 on ends
+ * 2 and 5 is a plain dominó (owner decision of 2026-09-28).
  */
 export function isCapicua(
   endsBefore: { left: number; right: number },
   lastTile: Tile
 ): boolean {
   const [a, b] = lastTile;
-  if (a === b) return false;
   const fits = (end: number) => a === end || b === end;
   return fits(endsBefore.left) && fits(endsBefore.right);
 }

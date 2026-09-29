@@ -560,11 +560,40 @@ describe("applyMove - CAPICÚA (the last tile fits both ends before it is placed
     expect(r.newState.scores).toEqual([31, 0]);
   });
 
-  it("the double 5-5 on ends 5 and 5 is a plain dominó", () => {
-    const r = goOut([[5, 3], [3, 4], [4, 5]], [5, 5], "right");
+  it("the double 2-2 on ends 2 and 2 is capicúa: +25 on top of the pips", () => {
+    for (const end of ["left", "right"] as const) {
+      const r = goOut([[2, 3], [3, 4], [4, 2]], [2, 2], end);
+      expect(r.success).toBe(true);
+      expect(r.callout).toBe("capicua");
+      expect(r.newState.scores).toEqual([31, 0]);
+      expect(r.newState.lastCalloutPayload).toEqual({
+        winningTeam: 0,
+        pipsAwarded: 6,
+        capicuaBonus: 25,
+        team0Pips: 0,
+        team1Pips: 6,
+      });
+    }
+  });
+
+  it("the double 2-2 on ends 2 and 5 is a plain dominó", () => {
+    const r = goOut([[2, 3], [3, 4], [4, 5]], [2, 2], "left");
     expect(r.callout).toBe("domino");
     expect(r.newState.scores).toEqual([6, 0]);
     expect(r.newState.lastCalloutPayload?.capicuaBonus).toBeUndefined();
+  });
+
+  it("the double 0-0 on ends 0 and 0 is capicúa", () => {
+    const r = goOut([[0, 3], [3, 5], [5, 0]], [0, 0], "right");
+    expect(r.callout).toBe("capicua");
+    expect(r.newState.scores).toEqual([31, 0]);
+    expect(r.newState.lastCalloutPayload?.capicuaBonus).toBe(25);
+  });
+
+  it("the double 5-5 on ends 5 and 5 is capicúa, like the 5-6", () => {
+    const r = goOut([[5, 3], [3, 4], [4, 5]], [5, 5], "right");
+    expect(r.callout).toBe("capicua");
+    expect(r.newState.scores).toEqual([31, 0]);
   });
 
   it("a tile that fits only one end is a plain dominó", () => {
@@ -823,15 +852,31 @@ describe("2v2 - TRANCAO on placement: the blocker against the player to his righ
   });
 
   it("locking the board with the last tile is a dominó, not a tranque", () => {
+    // Ends 6 and 2; n goes out with the 6-6 on the 6. Nothing left fits a 6
+    // or a 2, so the board locks. The double shows only one end's number:
+    // a plain dominó for 8 + 4 + 5.
+    const state = make2v2State({
+      lastPlayedBy: "w",
+      board: [[6, 3], [3, 2]],
+      hands: { n: [[6, 6]], e: [[4, 4]], s: [[1, 3]], w: [[5, 0]] },
+    });
+    const r = applyMove(state, "n", { type: "play", tile: [6, 6], end: "left" });
+    expect(r.callout).toBe("domino");
+    expect(r.newState.scores).toEqual([17, 0]);
+    expect(r.newState.lastCalloutPayload?.blockerSeat).toBeUndefined();
+    expect(r.newState.lastCalloutPayload?.capicuaBonus).toBeUndefined();
+  });
+
+  it("locking the board with the double 6-6 on ends 6 and 6 as the last tile is a capicúa", () => {
     const r = lockBy("n", {
       n: [[6, 6]],
       e: [[4, 4]],
       s: [[2, 1]],
       w: [[5, 0]],
     });
-    // A double on ends 6 and 6 is no capicúa: a plain dominó for 8 + 3 + 5.
-    expect(r.callout).toBe("domino");
-    expect(r.newState.scores).toEqual([16, 0]);
+    // 8 + 3 + 5 in the hands, +25 for the capicúa.
+    expect(r.callout).toBe("capicua");
+    expect(r.newState.scores).toEqual([16 + 25, 0]);
     expect(r.newState.lastCalloutPayload?.blockerSeat).toBeUndefined();
   });
 
@@ -1118,7 +1163,8 @@ describe("2v2 - play resets consecutivePasses", () => {
 //   targetScore.
 //
 //   CAPICÚA: the closing tile fits both open ends as they were before it was
-//   placed, and is not a double. A tile with a blank counts.
+//   placed. A double counts when both ends show its number (the 2-2 on ends
+//   2 and 2), and a tile with a blank counts.
 //
 //   Stacking: VEINTICINCO can fire multiple times per round (each forced
 //   pass-around adds another +25). It can also coexist with DOMINÓ / CAPICÚA on

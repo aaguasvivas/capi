@@ -5,11 +5,15 @@ export const NICKNAME_MAX = 20;
 export const THEMES = ["barberia", "colmado", "patio", "quisqueya", "larimar", "noche"] as const;
 export const MODES = ["live", "turn_based"] as const;
 
+// The cut counts UTF-16 units, like every client's maxLength, but never
+// splits an emoji or another character outside the BMP in two: a lone
+// surrogate cannot be stored as text.
 export function cleanNickname(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim().replace(/\s+/g, " ");
   if (trimmed.length === 0) return null;
-  return trimmed.slice(0, NICKNAME_MAX);
+  const cut = trimmed.slice(0, NICKNAME_MAX);
+  return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
 }
 
 export function cleanAvatarColor(value: unknown, fallback: string): string {

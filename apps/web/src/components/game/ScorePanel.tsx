@@ -71,6 +71,7 @@ export default function ScorePanel({
         score={scores[myTeam]}
         isActive={turnTeam === myTeam}
         youTag={s.youTag}
+        youSeat={mySeat}
       />
 
       <div className="text-center flex-shrink-0">
@@ -95,17 +96,17 @@ function TeamScore({
   score,
   isActive,
   youTag,
+  youSeat,
   align = "left",
 }: {
   players: Player[];
   score: number;
   isActive: boolean;
   youTag?: string;
+  youSeat?: string;
   align?: "left" | "right";
 }) {
   const stacked = players.length > 1;
-  const name =
-    players.length > 0 ? players.map((p) => p.nickname).join(" & ") : "…";
 
   return (
     <div
@@ -135,20 +136,22 @@ function TeamScore({
       </div>
 
       <div className={`min-w-0 ${align === "right" ? "text-right" : ""}`}>
-        {/* Two names rarely fit one phone-width line, so a team name may
-            wrap once; a single name stays on one line. */}
-        <p
-          className={`font-medium leading-tight ${
-            stacked
-              ? "text-[10px] line-clamp-2 break-words"
-              : "text-xs truncate"
-          }`}
-        >
-          {name}
-          {youTag && (
-            <span className="opacity-40 ml-1 text-[10px]">{youTag}</span>
-          )}
-        </p>
+        {/* One line per player: two names rarely fit one phone-width line,
+            and a long first name must never hide the partner's. The tag
+            sits outside the truncating name, so it never disappears. */}
+        {(players.length > 0 ? players : [null]).map((p, i) => (
+          <p
+            key={p?.seat ?? i}
+            className={`flex min-w-0 font-medium leading-tight ${
+              stacked ? "text-[10px]" : "text-xs"
+            } ${align === "right" ? "justify-end" : ""}`}
+          >
+            <span className="truncate">{p?.nickname ?? "…"}</span>
+            {youTag && (!stacked || p?.seat === youSeat) && (
+              <span className="opacity-40 ml-1 text-[10px] flex-shrink-0">{youTag}</span>
+            )}
+          </p>
+        ))}
         <ScoreValue score={score} />
       </div>
     </div>

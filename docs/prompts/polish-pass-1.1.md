@@ -61,7 +61,7 @@ Stop and ask me before
 - a new feature, dependency change, new identifier, or change to ad placement or design direction;
 - changing the shape of anything 1.0 or 1.1 reads (restoring what 1.0 expects, as in the chat fix, is fine), or building hand privacy or a new credential;
 - deploying privacy policy text (draft it to match D3 and the shipped SDKs, then show me);
-- committing store-assets/, or refreshing the optional 6.7-inch and iMessage App screenshots;
+- committing store-assets/, or refreshing the optional 6.7-inch screenshots or the required iMessage App screenshots (App Store Connect blocks Add for Review without them once a build with the extension is attached);
 - the final build: ask whether an ITMS email came for build 19, and whether I set the Sentry variables from checklist B7, which decides whether SENTRY_DISABLE_AUTO_UPLOAD stays in eas.json.
 Batch questions in one message and keep working meanwhile.
 

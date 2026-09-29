@@ -2,9 +2,9 @@ import UIKit
 import WebKit
 
 // Expanded-mode game surface: the playcapi.com game page in embed mode with
-// the session handed over via URL fragment. Bridge messages arrive on the
-// "capi" handler and are forwarded to the shell for bubble refreshes, tagged
-// with the game the page is showing.
+// the session handed over via URL fragment (none for a table this device only
+// watches). Bridge messages arrive on the "capi" handler and are forwarded to
+// the shell for bubble refreshes, tagged with the game the page is showing.
 final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     private let webView: WKWebView
     // The game on screen. A rematch moves the page to a new table by itself;
@@ -13,26 +13,44 @@ final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, W
     private var pageURL: URL
     // Covers the table when the page cannot load; Retry reloads pageURL.
     private let offlineView = UIView()
+    // Until the first page load finishes the webview has nothing to draw, so
+    // the page's own loading colors and a spinner stand in for it.
+    private let spinner = UIActivityIndicatorView(style: .medium)
+    private static let pageColor = UIColor(red: 0xf5 / 255, green: 0xf0 / 255, blue: 0xe8 / 255, alpha: 1)
     var onBridgeEvent: ((_ event: [String: Any], _ gameId: String) -> Void)?
     // The open alert or confirm and its WebKit callback. WebKit raises if a
     // dialog callback is dropped without being called, so teardown answers it.
     private weak var dialog: UIAlertController?
     private var answerDialog: ((Bool) -> Void)?
 
-    init(gameId: String, session: CapiSession) {
+    init(gameId: String, session: CapiSession?) {
         self.gameId = gameId
         pageURL = GameWebView.makePageURL(gameId: gameId, session: session)
         webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
         super.init(frame: .zero)
+        backgroundColor = Self.pageColor
         // The controller retains its handlers strongly, and a direct self
         // would cycle through webView.configuration and leak every webview.
         webView.configuration.userContentController.add(WeakScriptMessageHandler(self), name: "capi")
         webView.navigationDelegate = self
         webView.uiDelegate = self
+        // Clear until the page paints, so the view's page color shows
+        // instead of a white sheet.
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
         webView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(webView)
         pin(webView)
+        spinner.color = .gray
+        spinner.hidesWhenStopped = true
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(spinner)
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
         buildOfflineView()
+        spinner.startAnimating()
         webView.load(URLRequest(url: pageURL))
     }
 
@@ -48,13 +66,14 @@ final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, W
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "capi")
     }
 
-    private static func makePageURL(gameId: String, session: CapiSession) -> URL {
+    private static func makePageURL(gameId: String, session: CapiSession?) -> URL {
         var comps = URLComponents(url: CapiAPI.base.appendingPathComponent("/game/\(gameId)"), resolvingAgainstBaseURL: false)!
         comps.queryItems = [
             URLQueryItem(name: "embed", value: "imessage"),
             URLQueryItem(name: "lang", value: CapiStrings.es ? "es" : "en"),
         ]
-        comps.fragment = "s=\(session.playerId).\(session.seat)"
+        // No fragment, no seat: the page shows the table to watch.
+        if let session { comps.fragment = "s=\(session.playerId).\(session.seat)" }
         return comps.url!
     }
 
@@ -124,15 +143,23 @@ final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, W
     // MARK: navigation
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        // The embed page blocks external navigation itself; this is the
-        // shell's own line: only the Capi origin (and blank frames) load here.
+        // Only the Capi origin (and blank frames) load here, and the drawer's
+        // own frame loads game pages only: any other page of the site would
+        // put the website in Messages. In-page moves (the page's own router)
+        // never reach this; the embed page keeps those on the table itself.
         let url = navigationAction.request.url
-        let allowed = url?.absoluteString == "about:blank" || url?.host == CapiAPI.base.host
+        let mainFrame = navigationAction.targetFrame?.isMainFrame ?? true
+        let allowed = url?.absoluteString == "about:blank"
+            || (url?.host == CapiAPI.base.host && (!mainFrame || url?.path.hasPrefix("/game/") == true))
         decisionHandler(allowed ? .allow : .cancel)
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         offlineView.isHidden = true
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        spinner.stopAnimating()
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -148,11 +175,13 @@ final class GameWebView: UIView, WKScriptMessageHandler, WKNavigationDelegate, W
         // A load superseded by a newer one (-999) or stopped by our own
         // policy above (WebKit 102) is not an outage.
         if e.code == NSURLErrorCancelled || (e.domain == "WebKitErrorDomain" && e.code == 102) { return }
+        spinner.stopAnimating()
         offlineView.isHidden = false
     }
 
     private func reload() {
         offlineView.isHidden = true
+        spinner.startAnimating()
         webView.load(URLRequest(url: pageURL))
     }
 

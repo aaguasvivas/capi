@@ -10,22 +10,34 @@ const swift = readFileSync(
   "utf8"
 );
 
-// Swift key -> i18n key. Function-valued keys are checked by name only.
+// Swift key -> i18n key.
 const mirrored: Record<string, keyof Strings> = {
   yourTurnGeneric: "yourTurnGeneric",
+  yourTurnFor: "yourTurnFor",
   roundWon: "roundWon",
   gameWon: "gameWon",
+  gameWonTeam: "gameWonTeam",
   invite1v1: "invite1v1",
   invite2v2: "invite2v2",
-  tableFull: "tableFull",
-  gameStarted: "gameStarted",
+  inviteRematch: "inviteRematch",
+  tableNotFound: "tableNotFound",
   openInCapi: "openInCapi",
   join: "joinGame",
   create: "createGame",
   yourName: "yourName",
   connectionError: "connectionError",
+  retry: "retry",
   cancel: "cancel",
 };
+
+// A function-valued key is called with the Swift interpolation of its one
+// argument, so `(name) => \`${name} took the round\`` must appear in Swift
+// as the literal "\(name) took the round".
+function literal(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "function") return (value as (name: string) => string)("\\(name)");
+  return null;
+}
 
 describe("CapiStrings.swift mirrors packages/i18n", () => {
   for (const [swiftKey, key] of Object.entries(mirrored)) {
@@ -33,9 +45,9 @@ describe("CapiStrings.swift mirrors packages/i18n", () => {
       expect(swift).toMatch(new RegExp(`static (var|func) ${swiftKey}\\b`));
     });
 
-    const esValue = es[key];
-    const enValue = en[key];
-    if (typeof esValue !== "string" || typeof enValue !== "string") continue;
+    const esValue = literal(es[key]);
+    const enValue = literal(en[key]);
+    if (esValue === null || enValue === null) continue;
     it(`${swiftKey} carries the ES and EN literals of ${key}`, () => {
       expect(swift).toContain(`"${esValue}"`);
       expect(swift).toContain(`"${enValue}"`);

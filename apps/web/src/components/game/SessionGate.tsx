@@ -256,14 +256,17 @@ export function SpectatorSeats({
               >
                 {p?.nickname?.[0]?.toUpperCase() ?? "?"}
               </div>
+              {/* Only the name truncates: the tile count always shows. */}
               <span
-                className={`text-xs font-medium truncate min-w-0 max-w-[120px] ${
+                className={`flex min-w-0 text-xs font-medium ${
                   onTurn ? "text-white" : "text-white/60"
                 }`}
               >
-                {p?.nickname ?? "?"}
-                {" - "}
-                {s.tileCount((hands[seat] ?? []).length)}
+                <span className="truncate max-w-[120px]">{p?.nickname ?? "?"}</span>
+                <span className="flex-shrink-0 whitespace-pre">
+                  {" - "}
+                  {s.tileCount((hands[seat] ?? []).length)}
+                </span>
               </span>
             </div>
           );

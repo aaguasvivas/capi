@@ -438,8 +438,10 @@ html, body {
 }
 
 /* ── Hand ─────────────────────────────────────────────────
-   The hand never grows past 38% of the viewport; the tile list inside it
-   wraps and scrolls. vh comes first as the fallback where dvh is missing. */
+   The hand area (header, tiles, action row) never grows past 38% of the
+   viewport; only the tile list inside it wraps and scrolls, so the draw,
+   pass and end buttons stay in view. vh comes first as the fallback where
+   dvh is missing. */
 .hand-cap {
   max-height: 38vh;
   max-height: 38dvh;

@@ -41,8 +41,8 @@ Capi plays patio rules. What the research says, topic by topic:
 - **Bonuses and the target:** a pase corrido bonus only counts when it leaves
   the pair below the target. A game can only be won by winning a round.
 - **Capicúa:** the last tile must fit both open ends; a non-double on two equal
-  ends now counts. A double still does not, per the sources above (owner can
-  flip this).
+  ends now counts. A double still did not, per the sources above. (On
+  2026-09-28 the owner decided that a double counts, see below.)
 
 ## 2026-09-27 follow-up: pase de salida and the tranque tie
 
@@ -85,11 +85,22 @@ What Capi does now (owner decisions of 2026-09-27):
   is the same as before; the next opener can differ. The round card names him
   under the comparison line.
 
+## Owner decisions of 2026-09-28
+
+- **Capicúa with a double:** a double counts when both open ends show its
+  number before it is placed. Going out with the 2-2 on ends 2 and 2 is a
+  capicúa, +25 on top of the pips, and so is the 0-0 on ends 0 and 0. The 2-2
+  on ends 2 and 5 fits only one end, so it is a plain domino. This follows La
+  Mesa and the literal "fits both ends" wording (Acento, ASALE), against
+  Wikipedia's Dominican section and DR1, which exclude doubles. A capicúa
+  still happens only on a domino, never on a tranque.
+- **Pase de salida value:** stays 25 flat (Wikipedia es), not DR1's 10. The
+  opener's partner confirms it by playing; if the partner passes too, nothing
+  is paid, and a fourth pass is a pase corrido. The engine already did this,
+  so only the capicúa changed.
+
 ## Open for the owner
 
-- Count a double as capicúa anyway (the owner's first instinct; one app does)?
-- Pase de salida value: 25 flat (current, Wikipedia es), or DR1's 10 for games
-  to 200 or 250 (DR1 gives no value for games to 100)?
 - Show a notice at the triggering pass? Capi shows only the pass until the
   partner plays.
 - Tranque points: every pip in all hands (current) or only the opponents'

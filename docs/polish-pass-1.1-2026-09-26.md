@@ -231,3 +231,53 @@ Also checked:
 Not checked: the iMessage drawer on the iPhone SE simulator (driving it needs
 your one-time simulator access for "Capi SE"), and two real phones, which is
 your TestFlight matrix.
+
+## iMessage fix pass (2026-09-28 and 29)
+
+The owner named the iMessage extension the most important part of 1.1. Five
+review lenses (lifecycle, identity and data, bubbles and the web bridge, the
+embedded page, App Review readiness) read the extension and its web page; a
+skeptic checked every finding (33 confirmed, 4 refuted). A simulator tester ran
+a 16-step Messages matrix on the production-config build, a fixer changed the
+extension and the embed page, a second tester reran the matrix, and a second
+review read the fix diff (11 confirmed, 3 refuted).
+
+Fixed:
+
+- The create and join cards open in the small drawer, where no keyboard can
+  show; tapping the name field now expands the drawer with the keyboard up,
+  and Start stays disabled until there is a name (a fresh install could not
+  type a name before).
+- Expanding or collapsing no longer rebuilds the cards (a typed name, the 2v2
+  choice and errors survive), and the table stays loaded under the Back to
+  the table card, so a callout never replays and a send never reloads it.
+- Every turn handoff now stages a bubble: the join that deals the first hand,
+  the next round, a round or game ended by any player's move (a blocker who
+  loses a tranque included), and a rematch ("Rematch! Tap to play"). Turn
+  bubbles name the player on turn and both scores.
+- A full or ended table opens to watch instead of a join form that fails; the
+  drawer's error screen offers Retry instead of loading the website; the
+  webview only loads game pages.
+- Short drawers: the Draw and Pass row stays visible with many tiles, the
+  round card fits at 375x560, the mute toggle is back, names no longer hide a
+  partner's name.
+- The card no longer sits under the grabber when the drawer opens over the
+  Messages keyboard (Messages passes that keyboard as a plain bottom inset).
+- A join in flight survives the drawer closing and reopening; a watched table
+  in the small drawer shows the Back card; the name field caps at the server's
+  length without splitting an emoji; a late result bubble never replaces the
+  rematch invite; a 2v2 game-won bubble names the winning pair.
+- The extension ships its own privacy manifest; the App Review note has a
+  one-phone test path; four iMessage App screenshots exist at 1284x2778.
+
+Left for after 1.1 (minor, need a server change or are cosmetic):
+
+- A second turn bubble on a rematch or join arrival that did not fill the
+  table (needs the server to say which call started the table).
+- In 2v2, every waiting rematch arrival stages another rematch bubble.
+- A turn-based table opened in a plain browser does not say its moves post no
+  bubble.
+- A full table briefly shows the join form before it switches to watch.
+- A lost join response locks that player out of the seat, and player ids are
+  readable with the public key (both need a schema change after migration
+  005).

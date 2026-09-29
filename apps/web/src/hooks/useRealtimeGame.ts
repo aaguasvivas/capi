@@ -5,8 +5,6 @@ import { supabase } from "@/lib/supabase/client";
 import type { CalloutPayload, GameState, Seat, Tile } from "@capi/engine";
 import {
   getNextSeat,
-  getTeam,
-  getOpponentTeam,
   placeTileOnBoard,
   removeTileFromHand,
 } from "@capi/engine";
@@ -17,7 +15,13 @@ import {
   type ErrorKey,
   type Lang,
 } from "@capi/i18n";
-import { postToExtension } from "@/lib/imessageBridge";
+import {
+  bridgeSides,
+  postToExtension,
+  readBridgeMarks,
+  turnName,
+  writeBridgeMarks,
+} from "@/lib/imessageBridge";
 
 export type ConnectionState = "live" | "reconnecting" | "offline";
 
@@ -67,6 +71,27 @@ interface ChatBroadcastPayload {
 // Poll cadence while realtime cannot be trusted: a degraded socket, or a
 // lobby that has no game state yet.
 const POLL_MS = 10_000;
+
+// The highest callout version this device dismissed for a table. Kept in
+// storage because the iMessage drawer reloads the page on every open, and
+// the row keeps lastCallout until the next move: without it, the winner saw
+// the same DOMINÓ again on each reopen.
+function readDismissedCallout(gameId: string): number {
+  try {
+    const raw = Number(localStorage.getItem(`capi_callout_seen_${gameId}`));
+    return Number.isFinite(raw) ? raw : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeDismissedCallout(gameId: string, version: number) {
+  try {
+    localStorage.setItem(`capi_callout_seen_${gameId}`, String(version));
+  } catch {
+    /* storage blocked: the callout shows again after a reload */
+  }
+}
 
 // A degraded socket while the browser itself reports no network is
 // "offline"; otherwise a rejoin is in progress.
@@ -176,12 +201,14 @@ export function useRealtimeGame(
         setLastCalloutPayload(null);
         return;
       }
-      if (version <= dismissedCalloutVersionRef.current) return;
+      if (version <= Math.max(dismissedCalloutVersionRef.current, readDismissedCallout(gameId))) {
+        return;
+      }
       calloutVersionRef.current = version;
       setLastCallout(callout);
       setLastCalloutPayload(payload ?? null);
     },
-    []
+    [gameId]
   );
 
   const showTransientError = useCallback((key: ErrorKey) => {
@@ -620,19 +647,26 @@ export function useRealtimeGame(
         });
 
         // Emit on server-confirmed turn changes only (plays and passes);
-        // terminal phases are covered by the roundOver/gameOver effects, and
-        // rejected moves must not post a bubble.
-        if (
-          (intent.type === "play" || intent.type === "pass") &&
-          data.gameState.phase === "playing"
-        ) {
-          const myTeam = getTeam(session.seat as Seat, data.gameState.is2v2);
-          const oppTeam = getOpponentTeam(myTeam);
-          postToExtension({
-            type: "moved",
-            myScore: data.gameState.scores[myTeam],
-            oppScore: data.gameState.scores[oppTeam],
-          });
+        // rejected moves must not post a bubble. A move that ends the round
+        // is marked instead: this device then sends the result once the
+        // round card shows (see the roundOver/gameOver effects on the page).
+        if (intent.type === "play" || intent.type === "pass") {
+          const confirmed = data.gameState as GameState;
+          if (confirmed.phase === "playing") {
+            if (confirmed.currentTurn !== session.seat) {
+              postToExtension({
+                type: "moved",
+                gameId,
+                turnName: turnName(confirmed),
+                ...bridgeSides(confirmed, session.seat as Seat),
+              });
+            }
+          } else {
+            writeBridgeMarks(gameId, {
+              ...readBridgeMarks(gameId),
+              endedRound: confirmed.roundIndex,
+            });
+          }
         }
         return true;
       } catch {
@@ -712,9 +746,10 @@ export function useRealtimeGame(
       dismissedCalloutVersionRef.current,
       calloutVersionRef.current
     );
+    writeDismissedCallout(gameId, dismissedCalloutVersionRef.current);
     setLastCallout(null);
     setLastCalloutPayload(null);
-  }, []);
+  }, [gameId]);
 
   return {
     gameState,

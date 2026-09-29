@@ -1,8 +1,10 @@
 // NOTE: apps/mobile/targets/messages/CapiStrings.swift duplicates the iMessage
-// bubble captions (yourTurnGeneric/roundWon/gameWon/invite1v1/invite2v2/join/create/
-// tableFull/gameStarted/openInCapi/yourName). Bubbles render without JS, so
-// they cannot read this file. If you change tone or wording here, update
-// CapiStrings.swift to match.
+// bubble captions and drawer strings (yourTurnGeneric/yourTurnFor/roundWon/
+// gameWon/gameWonTeam/invite1v1/invite2v2/inviteRematch/join/create/tableNotFound/
+// openInCapi/yourName/connectionError/retry/cancel). Bubbles
+// render without JS, so they cannot read this file. If you change tone or
+// wording here, update CapiStrings.swift to match (swiftParity.test.ts fails
+// until you do).
 
 export type Lang = "es" | "en";
 
@@ -78,6 +80,9 @@ export interface Strings {
   seatWest: string;
   team1: string;
   team2: string;
+  // The 2v2 waiting room legend: which seats make up each team.
+  seatsNS: string;
+  seatsEW: string;
 
   // In-game
   firstTo: string;
@@ -141,6 +146,10 @@ export interface Strings {
   backToHome: string;
   networkError: string;
   gameNotFound: string;
+  // The embedded (iMessage) table's load errors: no invite code to check
+  // there, and Retry instead of a link to the website.
+  tableNotFound: string;
+  retry: string;
   failedCreate: string;
   failedJoin: string;
   connectionError: string;
@@ -264,13 +273,18 @@ export interface Strings {
   // iMessage extension bubbles and drawer, mirrored verbatim in
   // apps/mobile/targets/messages/CapiStrings.swift (see swiftParity.test.ts)
   yourTurnGeneric: string;
+  yourTurnFor: (name: string) => string;
   roundWon: (name: string) => string;
   gameWon: (name: string) => string;
+  // A 2v2 game result names the winning side ("Ana & Rosa").
+  gameWonTeam: (name: string) => string;
   invite1v1: string;
   invite2v2: string;
-  tableFull: string;
-  gameStarted: string;
+  inviteRematch: string;
   openInCapi: string;
+  // The app, on a table started in Messages: a move made in the app posts
+  // no bubble, so the chat never hears about it.
+  playInMessages: string;
 }
 
 export const es: Strings = {
@@ -334,6 +348,8 @@ export const es: Strings = {
   seatWest: "Oeste",
   team1: "Equipo 1",
   team2: "Equipo 2",
+  seatsNS: "N-S",
+  seatsEW: "E-O",
 
   firstTo: "Primero a",
   youTag: "(tú)",
@@ -385,6 +401,8 @@ export const es: Strings = {
   backToHome: "Volver al inicio",
   networkError: "Error de conexión",
   gameNotFound: "Partida no encontrada",
+  tableNotFound: "Esa mesa ya no existe",
+  retry: "Reintentar",
   failedCreate: "Error al crear partida",
   failedJoin: "Error al unirse",
   connectionError: "Error de conexión",
@@ -491,13 +509,15 @@ export const es: Strings = {
   purchaseErrorStore: "La App Store no respondió",
 
   yourTurnGeneric: "Te toca",
+  yourTurnFor: (name) => `Te toca, ${name}`,
   roundWon: (name) => `${name} ganó la ronda`,
   gameWon: (name) => `${name} ganó el juego`,
+  gameWonTeam: (name) => `${name} ganaron el juego`,
   invite1v1: "¡A jugar dominó! 1v1",
   invite2v2: "¡Dominó 2v2! Toca para sentarte",
-  tableFull: "La mesa está llena",
-  gameStarted: "La partida ya empezó",
+  inviteRematch: "¡Revancha! Toca para jugar",
   openInCapi: "Abrir en Capi",
+  playInMessages: "Esta mesa es de Mensajes. Juega allá: una jugada hecha aquí no le avisa al chat.",
 };
 
 export const en: Strings = {
@@ -561,6 +581,8 @@ export const en: Strings = {
   seatWest: "West",
   team1: "Team 1",
   team2: "Team 2",
+  seatsNS: "N-S",
+  seatsEW: "E-W",
 
   firstTo: "First to",
   youTag: "(you)",
@@ -612,6 +634,8 @@ export const en: Strings = {
   backToHome: "Back to home",
   networkError: "Connection error",
   gameNotFound: "Can't find that game - check the code",
+  tableNotFound: "That table no longer exists",
+  retry: "Retry",
   failedCreate: "Couldn't start the game",
   failedJoin: "Couldn't join",
   connectionError: "Connection dropped",
@@ -718,13 +742,15 @@ export const en: Strings = {
   purchaseErrorStore: "The App Store did not respond",
 
   yourTurnGeneric: "Your turn",
+  yourTurnFor: (name) => `Your turn, ${name}`,
   roundWon: (name) => `${name} took the round`,
   gameWon: (name) => `${name} won the game`,
+  gameWonTeam: (name) => `${name} won the game`,
   invite1v1: "Dominoes time! 1v1",
   invite2v2: "2v2 dominoes! Tap to sit",
-  tableFull: "The table is full",
-  gameStarted: "Game already started",
+  inviteRematch: "Rematch! Tap to play",
   openInCapi: "Open in Capi",
+  playInMessages: "This table lives in Messages. Play it there: a move made here does not notify the chat.",
 };
 
 export const dictionaries: Record<Lang, Strings> = { es, en };

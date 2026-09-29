@@ -200,9 +200,18 @@ describe("isCapicua (ends just before the closing tile)", () => {
   it("true for a non-double on two equal ends: 5-6 on ends 5 and 5", () => {
     expect(isCapicua({ left: 5, right: 5 }, [5, 6])).toBe(true);
   });
-  it("false for a double, even on two equal ends: 5-5 on ends 5 and 5", () => {
-    expect(isCapicua({ left: 5, right: 5 }, [5, 5])).toBe(false);
-    expect(isCapicua({ left: 0, right: 0 }, [0, 0])).toBe(false);
+  it("true for a double when both ends show its number: 2-2 on ends 2 and 2", () => {
+    expect(isCapicua({ left: 2, right: 2 }, [2, 2])).toBe(true);
+    expect(isCapicua({ left: 5, right: 5 }, [5, 5])).toBe(true);
+    expect(isCapicua({ left: 0, right: 0 }, [0, 0])).toBe(true);
+  });
+  it("false for a double when only one end shows its number: 2-2 on ends 2 and 5", () => {
+    expect(isCapicua({ left: 2, right: 5 }, [2, 2])).toBe(false);
+    expect(isCapicua({ left: 5, right: 2 }, [2, 2])).toBe(false);
+    expect(isCapicua({ left: 0, right: 3 }, [0, 0])).toBe(false);
+  });
+  it("false for a double that shows neither end's number: 4-4 on ends 2 and 2", () => {
+    expect(isCapicua({ left: 2, right: 2 }, [4, 4])).toBe(false);
   });
   it("true when the closing tile has a blank", () => {
     expect(isCapicua({ left: 3, right: 0 }, [0, 3])).toBe(true);
