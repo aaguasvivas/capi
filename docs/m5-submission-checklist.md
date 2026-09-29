@@ -151,7 +151,7 @@ of 2026-09-28: a double on matching ends counts.
       the extension's PrivacyInfo.xcprivacy, the new capicúa sentences in
       both languages. Submitted to App Store Connect on 2026-09-29
       (submission 337e00a5). Confirm no ITMS email comes back for it.
-- [ ] The privacy-manifest fix build, build 23. Build 22 shipped the
+- [x] The privacy-manifest fix build, build 23 (EAS f0070730, commit 28e40b7). Build 22 shipped the
       extension's manifest as the app's own (both files md5 07916a79), and a
       config-level check had passed for it, so check the built product. On
       the build 23 .ipa from EAS:
@@ -170,6 +170,15 @@ of 2026-09-28: a double on matching ends counts.
       UserDefaults 1C8F.1, and its md5 equals the one of
       apps/mobile/targets/messages/PrivacyInfo.xcprivacy. Do not select or
       submit build 23 until this check passes. Record the result here.
+      Result, 2026-09-29: PASS. App root md5 b1c0dfc8 (tracking false;
+      UserDefaults CA92.1; FileTimestamp C617.1, 0A2A.1, 3B52.1; DiskSpace
+      E174.1, 85F4.1; SystemBootTime 35F9.1). Appex md5 07916a79, UserDefaults
+      1C8F.1 only. Version 1.1.0 (23) in the app and the extension,
+      CFBundleIcons present, new ATT text, the double capicúa and Messages
+      notice strings in the bundle. The simulator build of the same commit
+      (EAS 60075b84) showed the remembered home choices after a cold launch
+      and the Colmado turn chip; the extension's Swift is unchanged since
+      build 22's verified run (only the plugin guard changed).
 
 ## D. App Store Connect (You, ~30 minutes total)
 
@@ -212,7 +221,7 @@ of 2026-09-28: a double on matching ends counts.
       apps/mobile/store-assets/screenshots/imessage (1284x2778, the 6.5-inch
       slot, primary locale): the create card, the invite bubble, the live
       table, and the "Your turn" bubble.
-- [ ] D8. Select build 22 (the iMessage fix build) for the 1.1 version (16 and 17 have no
+- [ ] D8. Select build 23 for the 1.1 version (22 lacks the app's own privacy manifest; 16 and 17 have no
       iMessage icon; 19 predates the polish pass; 20 predates the rules
       update; 21 predates the iMessage fixes).
 - [ ] D9. Version Release: choose "Manually release this version" (you press
@@ -296,6 +305,6 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 22 selected, then
+- [ ] Add for Review with the 8 IAPs attached and build 23 selected, then
       submit. Review typically takes 1 to 3 days. If
       rejected, paste the message to me and I turn the fix around same day.

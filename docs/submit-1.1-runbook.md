@@ -5,8 +5,8 @@ know it worked. The paste values live in docs/store-listing.md and
 docs/m5-asc-iap-setup.md; the interactive copy of this list (with copy
 buttons) is linked in the chat message that delivered it.
 
-Build to submit: **1.1.0 (BUILD_NUMBER)**, EAS id BUILD_EAS_ID, commit
-BUILD_COMMIT. Builds 16, 17, 19, 20, 21 and 22 are superseded: 22 shipped the
+Build to submit: **1.1.0 (23)**, EAS id f0070730, commit
+28e40b7. Builds 16, 17, 19, 20, 21 and 22 are superseded: 22 shipped the
 iMessage extension's privacy manifest in place of the app's own, so its
 required-reason declarations were missing.
 
@@ -17,13 +17,12 @@ apps/mobile/store-assets/screenshots/imessage).
 ## Part 1. Before you submit
 
 1. **Build gate.** App Store Connect > Apps > Capi > TestFlight > iOS Builds >
-   1.1.0: build BUILD_NUMBER shows as processed (not Processing, not Invalid
+   1.1.0: build 23 shows as processed (not Processing, not Invalid
    Binary). Search your developer email for "ITMS" and "Missing API
-   declaration" about build BUILD_NUMBER. Any hit: stop and send it to Claude.
-   Claude must also have checked both privacy manifests in the build's .ipa
-   (docs/m5-submission-checklist.md, section C, build 23 item): the app's
-   and the extension's files differ, and the app's lists CA92.1, C617.1,
-   E174.1 and 35F9.1. If that item is not ticked, do not select the build.
+   declaration" about build 23. Any hit: stop and send it to Claude.
+   Claude checked both privacy manifests in the build 23 .ipa on
+   2026-09-29: the app's file lists CA92.1, C617.1, 0A2A.1, 3B52.1, E174.1,
+   85F4.1 and 35F9.1, and the extension keeps its own separate file.
 2. **AdMob ad rating.** AdMob > Apps > Capi (iOS) > Blocking controls > ad
    content rating: turn off "Match account-level setting", choose G, Save.
    The app also asks for G in code from build 23 on. While you are in AdMob,
@@ -54,7 +53,7 @@ apps/mobile/store-assets/screenshots/imessage).
    screenshots are 1284x2778 (padded from the first set, which had a size
    Apple does not accept).
 5. **Purchase check on your iPhone** (needs step 4). TestFlight > Capi >
-   install 1.1.0 (BUILD_NUMBER). Open the store: all 8 rows show a real
+   install 1.1.0 (23). Open the store: all 8 rows show a real
    price, not "Ver precio". Buy Mesa Quisqueya (TestFlight does not charge):
    it unlocks and can be selected. Delete the app, reinstall from TestFlight,
    tap Restore Purchases: Quisqueya comes back. Any failure: stop and send
@@ -97,7 +96,7 @@ apps/mobile/store-assets/screenshots/imessage).
 11. **App Review Information.** Sign-in required: off. Contact: your name,
     phone, email. Notes: the whole "Apple Guideline 4.2" note from
     docs/store-listing.md (3969 of 4000 bytes). Save.
-12. **Build.** Version page > Build > (+) > 1.1.0 (BUILD_NUMBER) > Done > Save.
+12. **Build.** Version page > Build > (+) > 1.1.0 (23) > Done > Save.
     No export compliance question should appear (the app declares no
     non-exempt encryption).
 13. **iMessage App screenshots** (the section appears after step 12; 6.5-inch
