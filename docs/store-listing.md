@@ -232,6 +232,7 @@ Also new, the Capi shop:
 A small banner may appear on the home screen and while you wait for players. Never during play, that is sacred.
 
 Also in this update:
+• Turns no longer freeze: if a move gets lost on a weak connection, the table catches up by itself within seconds
 • If the other side goes quiet for two minutes, you can claim the game instead of waiting forever (not in iMessage games, which go turn by turn)
 • "How to play" in the app has every rule
 • Capicúa: any last tile that fits both open ends counts, the 2-2 on ends 2 and 2 too
@@ -253,6 +254,7 @@ También nueva, la tienda de Capi:
 Puede salir un banner pequeño en la pantalla de inicio y mientras esperas que lleguen los jugadores. Nunca mientras se juega, eso es sagrado.
 
 También en esta versión:
+• Los turnos ya no se congelan: si una jugada se pierde por mala conexión, la mesa se pone al día sola en segundos
 • Si el otro lado se queda callado dos minutos, puedes reclamar la partida en vez de esperar sin fin (no en las partidas de iMessage, que van por turnos)
 • "Cómo se juega" en la app tiene todas las reglas
 • Capicúa: vale cualquier última ficha que pegue por las dos puntas, también el 2-2 cuando las puntas son 2 y 2

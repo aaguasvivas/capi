@@ -67,3 +67,51 @@ itself joined and still drop an event, and then they waited too.
 A 1.0 player against another 1.0 player heals only when one of them chats,
 files a report, or leaves the app and returns. That ends when they update to
 1.1.
+
+## Stall audit (commit f5cadf0)
+
+After the fix, five parallel audits read every end and hand-off path (engine,
+web, app 1.1, iMessage, server routes), and a second reader checked each
+finding before it was fixed.
+
+Engine: packages/engine/__tests__/flow.endgame.test.ts plays 960 complete
+seeded games (1v1 and 2v2, to 100 and 200, four move styles). After every
+move it checks that the seat on turn has a legal action, that the game
+finishes, that a round ends in round_over below the target and in finished
+at it, and that the next round deals to the round winner. Every ending
+occurs (dominó, capicúa, tranque with blocker, rival and tie wins, pase
+corrido, pase de salida, a 1v1 draw that empties the boneyard). No defects.
+
+Fixed:
+
+- A full table could stay in the waiting room forever when its start write
+  or answer was lost. GET and join now deal it.
+- A rematch could delete the table its own link named when the link answer
+  was lost, and every later rematch then failed.
+- A join whose answer was lost left a seat no device held. The server now
+  hands the seat back on a retry before the first move.
+- Next round and claim were never broadcast; the routes now push them.
+  Next round answers a stale client with stale:true and deals only from a
+  round that ended. Claim takes the client's version and answers stale.
+- A hung move request blocked every later tap; requests now time out after
+  15 s and refetch.
+- In the iMessage drawer, the result bubble waited for a tap on the DOMINÓ
+  overlay, and a move whose answer was lost never sent its bubble. Both now
+  go out when the device sees the state its own move produced.
+
+Deferred to 1.1.1 (none stops a normal game):
+
+1. iMessage: after a lost join answer the extension shows the watch view
+   instead of joining again. Needs a pending-join retry in the extension (the
+   server side is live).
+2. iMessage: the first-turn bubble after a join depends on one GET. Needs the
+   join answer to carry the dealt table, plus a retry.
+3. Two 1.0 players who never chat: only a server-side scheduled relay
+   (pg_cron with realtime.send) would reach them. Owner decision; needs SQL.
+4. A 1.1 player can claim against a 1.0 player whose socket stayed dead for
+   the whole 120 s window. Rare; the stuck player's screen then shows a loss.
+5. A screen that misses a round end and then the next deal never shows that
+   round's result card; the board redeals and the score jumps.
+6. Spectators get no waiting line on the result cards and no rematch link.
+7. A database error on the players lookup answers 403 instead of 500.
+8. A double tap on Draw in the app plays the draw sound twice.

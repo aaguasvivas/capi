@@ -1,28 +1,34 @@
-# Capi 1.1: submit tonight, step by step
+# Capi 1.1: submit, step by step
 
 Do the steps in order. Each step says where to go, what to enter, and how to
 know it worked. The paste values live in docs/store-listing.md and
 docs/m5-asc-iap-setup.md; the interactive copy of this list (with copy
-buttons) is linked in the chat message that delivered it.
+buttons) is the "Capi 1.1 Submission" page.
 
-Build to submit: **1.1.0 (23)**, EAS id f0070730, commit
-28e40b7. Builds 16, 17, 19, 20, 21 and 22 are superseded: 22 shipped the
-iMessage extension's privacy manifest in place of the app's own, so its
-required-reason declarations were missing.
+Build to submit: **1.1.0 (24)**, EAS id 92121793, commit f5cadf0. Builds 16
+through 23 are superseded. Build 23 does not have the fix for games that
+froze with nobody's turn (docs/incident-2026-09-30-stalled-turns.md). Work you
+already did in App Store Connect for build 23 (purchases, privacy, text,
+screenshots) stays; only the steps that depend on the binary are new.
 
-Have open: App Store Connect, AdMob, your iPhone with TestFlight, and this
-repo folder in Finder (store-assets/iap and
+Have open: App Store Connect, AdMob, your iPhone with TestFlight, a computer
+with playcapi.com, and this repo folder in Finder (store-assets/iap and
 apps/mobile/store-assets/screenshots/imessage).
 
 ## Part 1. Before you submit
 
+0. **If build 23 is already in review, pull it back.** App Store Connect >
+   Apps > Capi > App Review > Submissions. Only if 1.1.0 shows Waiting for
+   Review or In Review with build 23: open the submission and press Remove
+   from Review (some pages call it Cancel Submission). Everything you already
+   entered stays. If you never submitted, skip this step.
 1. **Build gate.** App Store Connect > Apps > Capi > TestFlight > iOS Builds >
-   1.1.0: build 23 shows as processed (not Processing, not Invalid
+   1.1.0: build 24 shows as processed (not Processing, not Invalid
    Binary). Search your developer email for "ITMS" and "Missing API
-   declaration" about build 23. Any hit: stop and send it to Claude.
-   Claude checked both privacy manifests in the build 23 .ipa on
-   2026-09-29: the app's file lists CA92.1, C617.1, 0A2A.1, 3B52.1, E174.1,
-   85F4.1 and 35F9.1, and the extension keeps its own separate file.
+   declaration" about build 24. Any hit: stop and send it to Claude.
+   Build 24 has the same app.json and plugins as build 23, whose .ipa
+   passed the privacy-manifest check on 2026-09-29 (CA92.1, C617.1, 0A2A.1,
+   3B52.1, E174.1, 85F4.1, 35F9.1; the extension keeps its own file).
 2. **AdMob ad rating.** AdMob > Apps > Capi (iOS) > Blocking controls > ad
    content rating: turn off "Match account-level setting", choose G, Save.
    The app also asks for G in code from build 23 on. While you are in AdMob,
@@ -53,7 +59,7 @@ apps/mobile/store-assets/screenshots/imessage).
    screenshots are 1284x2778 (padded from the first set, which had a size
    Apple does not accept).
 5. **Purchase check on your iPhone** (needs step 4). TestFlight > Capi >
-   install 1.1.0 (23). Open the store: all 8 rows show a real
+   install 1.1.0 (24). Open the store: all 8 rows show a real
    price, not "Ver precio". Buy Mesa Quisqueya (TestFlight does not charge):
    it unlocks and can be selected. Delete the app, reinstall from TestFlight,
    tap Restore Purchases: Quisqueya comes back. Any failure: stop and send
@@ -64,6 +70,13 @@ apps/mobile/store-assets/screenshots/imessage).
    code and a name. Back in Messages play a tile: the drawer gets small and
    a "Your turn, <name>" bubble waits to be sent; "Back to the table" brings
    the table back.
+6b. **A missed move recovers.** Start a 1v1 game in the app (build 24) and
+   join it from playcapi.com on a computer. When it is the computer's turn,
+   lock the iPhone, play the move on the computer, wait 20 seconds, unlock:
+   the app shows your turn. Then turn off Wi-Fi on the iPhone (no cellular
+   data) for 20 seconds while the computer moves, and turn it back on: the
+   app shows your turn within about 10 seconds. If a screen still shows the
+   wrong turn after 20 seconds, send Claude a screenshot of both screens.
 7. **Attach the purchases.** The 1.1.0 version page > In-App Purchases and
    Subscriptions > Select > check all 8 > Done > Save (top right).
 8. **App Privacy.** App Privacy > Edit. Keep Name, Gameplay Content and
@@ -96,7 +109,8 @@ apps/mobile/store-assets/screenshots/imessage).
 11. **App Review Information.** Sign-in required: off. Contact: your name,
     phone, email. Notes: the whole "Apple Guideline 4.2" note from
     docs/store-listing.md (3969 of 4000 bytes). Save.
-12. **Build.** Version page > Build > (+) > 1.1.0 (23) > Done > Save.
+12. **Build.** Version page > Build > if build 23 is attached, remove it
+    (the minus sign next to it) > (+) > 1.1.0 (24) > Done > Save.
     No export compliance question should appear (the app declares no
     non-exempt encryption).
 13. **iMessage App screenshots** (the section appears after step 12; 6.5-inch

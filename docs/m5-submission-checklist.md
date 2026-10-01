@@ -180,6 +180,15 @@ of 2026-09-28: a double on matching ends counts.
       and the Colmado turn chip; the extension's Swift is unchanged since
       build 22's verified run (only the plugin guard changed).
       Uploaded to App Store Connect on 2026-09-29 (submission fa0fdf23).
+- [ ] The frozen-turns fix build, build 24 (EAS 92121793, commit f5cadf0).
+      A live 1v1 game stalled four times with each screen showing the other
+      player's turn (docs/incident-2026-09-30-stalled-turns.md). Build 24
+      carries the app side of the fix: the idle resync and relay, a 15 s move
+      timeout, no equal-version overwrite of a move in flight, a refetch on
+      every channel join, and the claim version. The extension's Swift and the
+      config plugins are unchanged since build 23. Auto-submitted from EAS
+      (submission be7242de). Run the same .ipa privacy check as for build 23
+      and record the result here.
       Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
@@ -223,9 +232,10 @@ of 2026-09-28: a double on matching ends counts.
       apps/mobile/store-assets/screenshots/imessage (1284x2778, the 6.5-inch
       slot, primary locale): the create card, the invite bubble, the live
       table, and the "Your turn" bubble.
-- [ ] D8. Select build 23 for the 1.1 version (22 lacks the app's own privacy manifest; 16 and 17 have no
-      iMessage icon; 19 predates the polish pass; 20 predates the rules
-      update; 21 predates the iMessage fixes).
+- [ ] D8. Select build 24 for the 1.1 version (23 lacks the frozen-turns fix; 22 lacks the app's own
+      privacy manifest; 16 and 17 have no iMessage icon; 19 predates the
+      polish pass; 20 predates the rules update; 21 predates the iMessage
+      fixes).
 - [ ] D9. Version Release: choose "Manually release this version" (you press
       release after approval) or "Automatically release this version" (it
       goes live as soon as review approves it).
@@ -307,6 +317,6 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 23 selected, then
+- [ ] Add for Review with the 8 IAPs attached and build 24 selected, then
       submit. Review typically takes 1 to 3 days. If
       rejected, paste the message to me and I turn the fix around same day.
