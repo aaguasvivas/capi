@@ -111,8 +111,16 @@ describe("a full table that never started", () => {
       await join(post(`/api/games/${created.gameId}/join`, { nickname: "Caro", avatarColor: "#10b981" }), params(created.gameId))
     );
     expect(other).toEqual({ status: 409, body: { error: "Game already started" } });
-    // And once a move is made, the window closes.
-    db.row("games", created.gameId)!.state_version = 2;
+    // The host moving first keeps it open: the joiner has still never played.
+    const game = db.row("games", created.gameId)!;
+    game.state_version = 2;
+    db.insertRow("moves", { game_id: created.gameId, player_id: created.playerId, round_index: 0, intent: { type: "play" } });
+    const afterHost = await body(
+      await join(post(`/api/games/${created.gameId}/join`, { nickname: "Beto", avatarColor: "#10b981" }), params(created.gameId))
+    );
+    expect(afterHost.body).toMatchObject({ playerId: first.body.playerId, seat: "s" });
+    // Once that seat has played, the window closes.
+    db.insertRow("moves", { game_id: created.gameId, player_id: first.body.playerId, round_index: 0, intent: { type: "play" } });
     const late = await body(
       await join(post(`/api/games/${created.gameId}/join`, { nickname: "Beto", avatarColor: "#10b981" }), params(created.gameId))
     );

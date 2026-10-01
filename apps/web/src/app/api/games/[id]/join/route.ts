@@ -30,17 +30,26 @@ export async function POST(
     if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/join");
 
     // A retry after a lost answer: the join that filled the table dealt the
-    // hand, but its device never got the seat. While nobody has played yet
-    // (version 1), the joiner's own row is handed back, found the way a
-    // rematch arrival finds its row (same name and color, never the host's
-    // seat). A newcomer can never join a started table, so only the original
-    // joiner is asking.
-    if (game.status === "playing" && game.state_version === 1) {
+    // hand, but its device never got the seat. The joiner's own row is handed
+    // back, found the way a rematch arrival finds its row (same name and
+    // color, never the host's seat), for as long as that seat has never
+    // played: the others may well have moved already. A newcomer can never
+    // join a started table, so only the original joiner is asking.
+    if (game.status === "playing" || game.status === "round_over") {
       const { data: seatedRows } = await db.from("players").select("*").eq("game_id", params.id);
       const own = ((seatedRows ?? []) as PlayerRow[]).find(
         (p) => p.seat !== "n" && p.nickname === nickname && p.avatar_color === avatarColor
       );
-      if (own) return NextResponse.json({ playerId: own.id, seat: own.seat, gameId: params.id });
+      if (own) {
+        const { data: acted, error: actedError } = await db
+          .from("moves")
+          .select("id")
+          .eq("game_id", params.id)
+          .eq("player_id", own.id);
+        if (!actedError && (acted ?? []).length === 0) {
+          return NextResponse.json({ playerId: own.id, seat: own.seat, gameId: params.id });
+        }
+      }
     }
 
     if (game.status !== "waiting") {

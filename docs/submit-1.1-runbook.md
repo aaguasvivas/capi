@@ -26,9 +26,10 @@ apps/mobile/store-assets/screenshots/imessage).
    1.1.0: build 24 shows as processed (not Processing, not Invalid
    Binary). Search your developer email for "ITMS" and "Missing API
    declaration" about build 24. Any hit: stop and send it to Claude.
-   Build 24 has the same app.json and plugins as build 23, whose .ipa
-   passed the privacy-manifest check on 2026-09-29 (CA92.1, C617.1, 0A2A.1,
-   3B52.1, E174.1, 85F4.1, 35F9.1; the extension keeps its own file).
+   Claude checked both privacy manifests in the build 24 .ipa on
+   2026-09-30: the app's file lists CA92.1, C617.1, 0A2A.1, 3B52.1, E174.1,
+   85F4.1 and 35F9.1 (identical to build 23), and the extension keeps its
+   own separate file.
 2. **AdMob ad rating.** AdMob > Apps > Capi (iOS) > Blocking controls > ad
    content rating: turn off "Match account-level setting", choose G, Save.
    The app also asks for G in code from build 23 on. While you are in AdMob,
@@ -152,4 +153,5 @@ apps/mobile/store-assets/screenshots/imessage).
    browser, join from another, play a move, reload: the move stays. If a
    step fails, follow checklist B5 step 3.
 4. Tell Claude: the next build (1.1.1) takes the roadmap in
-   docs/polish-pass-1.1-2026-09-26.md.
+   docs/polish-pass-1.1-2026-09-26.md and the deferred list in
+   docs/incident-2026-09-30-stalled-turns.md.

@@ -180,15 +180,20 @@ of 2026-09-28: a double on matching ends counts.
       and the Colmado turn chip; the extension's Swift is unchanged since
       build 22's verified run (only the plugin guard changed).
       Uploaded to App Store Connect on 2026-09-29 (submission fa0fdf23).
-- [ ] The frozen-turns fix build, build 24 (EAS 92121793, commit f5cadf0).
+- [x] The frozen-turns fix build, build 24 (EAS 92121793, commit f5cadf0).
       A live 1v1 game stalled four times with each screen showing the other
       player's turn (docs/incident-2026-09-30-stalled-turns.md). Build 24
       carries the app side of the fix: the idle resync and relay, a 15 s move
       timeout, no equal-version overwrite of a move in flight, a refetch on
       every channel join, and the claim version. The extension's Swift and the
       config plugins are unchanged since build 23. Auto-submitted from EAS
-      (submission be7242de). Run the same .ipa privacy check as for build 23
-      and record the result here.
+      (submission be7242de). Result of the same .ipa privacy check, 2026-09-30:
+      PASS. App root md5 b1c0dfc8, identical to build 23 (tracking false;
+      UserDefaults CA92.1; FileTimestamp C617.1, 0A2A.1, 3B52.1; DiskSpace
+      E174.1, 85F4.1; SystemBootTime 35F9.1). Appex md5 07916a79, equal to
+      apps/mobile/targets/messages/PrivacyInfo.xcprivacy, UserDefaults 1C8F.1
+      only. Version 1.1.0 (24) in the app and the extension; the binary and
+      main.jsbundle were built at 23:41 from f5cadf0.
       Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)

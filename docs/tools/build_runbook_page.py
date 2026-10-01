@@ -157,7 +157,7 @@ steps = [
     ("after", "go", "Release 1.1", "<p>After approval, press Release on the version page.</p>", ""),
     ("after", "admoblink", "Link AdMob to the store listing", path("AdMob > Apps > Capi > App settings") + "<p>Link the app to its App Store listing.</p>", ""),
     ("after", "m005", "Lock direct database writes", "<p>In this order: Vercel &gt; Settings &gt; Environment Variables &gt; <code>SUPABASE_SERVICE_ROLE_KEY</code> (Production, the secret key from Supabase &gt; Project Settings &gt; API Keys), Save, Redeploy. Then run <code>supabase/migrations/005_lock_direct_writes.sql</code>. Then create a game in one browser, join from another, play a move and reload: the move stays. If not, follow checklist step B5.3.</p>", ""),
-    ("after", "next", "Plan 1.1.1", "<p>Tell Claude. The next build takes the roadmap in <code>docs/polish-pass-1.1-2026-09-26.md</code>.</p>", ""),
+    ("after", "next", "Plan 1.1.1", "<p>Tell Claude. The next build takes the roadmap in <code>docs/polish-pass-1.1-2026-09-26.md</code> and the deferred list in <code>docs/incident-2026-09-30-stalled-turns.md</code>.</p>", ""),
 ]
 parts = [("before", "Before you submit", "In this order. Each step ends with how you know it worked."),
          ("during", "While Apple reviews", "One to three days."),
