@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { reportError } from "@/lib/report";
+import { rebroadcastState } from "@/lib/resync";
 
 const REPORT_TO = "adelsonaguasvivas@gmail.com";
 const REPORT_CC = "aaguasvivas907@gmail.com";
@@ -90,6 +91,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // A report from a table usually means it looks stuck; push the current
+    // state so a screen that missed a move catches up.
+    if (row.game_id) await rebroadcastState(db, row.game_id);
 
     // Fire-and-mostly-forget email via Resend. If email fails we still
     // return success because the report is safely saved in the DB.

@@ -71,6 +71,10 @@ interface ChatBroadcastPayload {
 // Poll cadence while realtime cannot be trusted: a degraded socket, or a
 // lobby that has no game state yet.
 const POLL_MS = 10_000;
+// A table that has heard of no newer state for this long asks the server
+// again and relays the answer (see the idle resync effect).
+const IDLE_RESYNC_MS = 10_000;
+const IDLE_CHECK_MS = 2_000;
 
 // The highest callout version this device dismissed for a table. Kept in
 // storage because the iMessage drawer reloads the page on every open, and
@@ -145,6 +149,10 @@ export function useRealtimeGame(
   // on render) so realtime callbacks that fire before React re-renders still
   // compare against what was actually applied.
   const versionRef = useRef(0);
+  // When versionRef last moved forward, from any source. The idle resync
+  // measures from here.
+  const lastChangeAtRef = useRef(Date.now());
+  const lastResyncAtRef = useRef(0);
   // Whether a fetch for this game has succeeded. Before that a failure is
   // the error screen; after it, a failure is a connection blip.
   const loadedRef = useRef(false);
@@ -233,6 +241,8 @@ export function useRealtimeGame(
     if (activeGameIdRef.current === gameId) return;
     activeGameIdRef.current = gameId;
     versionRef.current = 0;
+    lastChangeAtRef.current = Date.now();
+    lastResyncAtRef.current = 0;
     loadedRef.current = false;
     serverStateRef.current = null;
     preOptimisticRef.current = null;
@@ -270,6 +280,7 @@ export function useRealtimeGame(
       calloutPayload: CalloutPayload | null | undefined
     ) => {
       preOptimisticRef.current = null;
+      if (sv > versionRef.current) lastChangeAtRef.current = Date.now();
       versionRef.current = sv;
       const passer = passedSeat(serverStateRef.current, gs);
       serverStateRef.current = gs;
@@ -284,7 +295,12 @@ export function useRealtimeGame(
     [surfaceCallout]
   );
 
-  const fetchGame = useCallback(async () => {
+  // Resolves to the row's state when the fetch succeeded and was applied
+  // (null otherwise), so the idle resync can relay exactly what it adopted.
+  const fetchGame = useCallback(async (): Promise<{
+    gs: GameState | null;
+    sv: number;
+  } | null> => {
     // Once the game has loaded, a failed refetch (poll, resync, tab shown)
     // is a blip: the lobby or table stays, and the connection status says
     // so. Only a failed first load shows the error screen.
@@ -294,20 +310,20 @@ export function useRealtimeGame(
     };
     try {
       const res = await fetch(`/api/games/${gameId}`, { cache: "no-store" });
-      if (activeGameIdRef.current !== gameId) return;
+      if (activeGameIdRef.current !== gameId) return null;
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        if (activeGameIdRef.current !== gameId) return;
+        if (activeGameIdRef.current !== gameId) return null;
         fail(
           errorKeyFor(
             body?.error,
             res.status === 404 ? "gameNotFound" : "connectionError"
           )
         );
-        return;
+        return null;
       }
       const data = await res.json();
-      if (activeGameIdRef.current !== gameId) return;
+      if (activeGameIdRef.current !== gameId) return null;
       loadedRef.current = true;
       // The server answered: with the socket joined, the table is live again
       // even if an earlier refetch marked it degraded.
@@ -326,10 +342,13 @@ export function useRealtimeGame(
       if (sv >= versionRef.current) {
         const gs = data.game.game_state as GameState | null;
         applyServerState(gs, sv, gs?.lastCallout, gs?.lastCalloutPayload);
+        return { gs, sv };
       }
+      return null;
     } catch {
-      if (activeGameIdRef.current !== gameId) return;
+      if (activeGameIdRef.current !== gameId) return null;
       fail("connectionError");
+      return null;
     } finally {
       if (activeGameIdRef.current === gameId) setLoading(false);
     }
@@ -518,6 +537,26 @@ export function useRealtimeGame(
     void chatChannelRef.current?.track({ seat });
   }, [session?.seat]);
 
+  // Asks the server for the row and relays it as the next "state" message.
+  // A screen that missed an update catches up from it: newer clients take
+  // the next version or refetch, and the 1.0 app, which never polls and never
+  // refetches after a rejoin, applies any newer version. Screens that are
+  // current drop it.
+  const resync = useCallback(async () => {
+    const row = await fetchGame();
+    if (!row?.gs) return;
+    chatChannelRef.current?.send({
+      type: "broadcast",
+      event: "state",
+      payload: {
+        gameState: row.gs,
+        stateVersion: row.sv,
+        callout: row.gs.lastCallout ?? null,
+        calloutPayload: row.gs.lastCalloutPayload ?? null,
+      },
+    });
+  }, [fetchGame]);
+
   // Realtime is the fast path, never the only path. While the socket is
   // degraded, or while the table has no state yet (lobby), poll the row.
   const hasGameState = gameState !== null;
@@ -528,6 +567,22 @@ export function useRealtimeGame(
     }, POLL_MS);
     return () => clearInterval(timer);
   }, [connection, hasGameState, fetchGame]);
+
+  // A live socket can still have dropped an event, and then every screen
+  // waits on another one. So a table that has heard of no newer state for
+  // IDLE_RESYNC_MS resyncs, and again every IDLE_RESYNC_MS while it stays
+  // quiet. The check runs often; the request only goes out when quiet.
+  useEffect(() => {
+    if (connection !== "live" || !hasGameState) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
+      if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
+      lastResyncAtRef.current = Date.now();
+      void resync();
+    }, IDLE_CHECK_MS);
+    return () => clearInterval(timer);
+  }, [connection, hasGameState, resync]);
 
   // Catch up whenever the page comes back (tab shown, network back), and
   // mirror the browser's own network signal in the banner.

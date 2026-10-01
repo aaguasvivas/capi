@@ -24,6 +24,10 @@ export interface LastPass {
 
 // Fallback cadence while realtime is down or the table is still forming.
 const POLL_INTERVAL_MS = 10_000;
+// A table that has heard of no newer state for this long asks the server
+// again and relays the answer (see the idle resync effect).
+const IDLE_RESYNC_MS = 10_000;
+const IDLE_CHECK_MS = 2_000;
 
 // The seat that passed between two confirmed states, or null. A pass keeps
 // the round, the board and the passer's hand as they were, moves the turn
@@ -99,6 +103,10 @@ export function useRealtimeGame(
 
   const versionRef = useRef(stateVersion);
   versionRef.current = stateVersion;
+  // When versionRef last moved forward, from any source. The idle resync
+  // measures from here.
+  const lastChangeAtRef = useRef(Date.now());
+  const lastResyncAtRef = useRef(0);
 
   // Lets fetchGame tell a first load apart from a background refetch without
   // depending on gameState (which would re-run every effect built on it).
@@ -163,6 +171,8 @@ export function useRealtimeGame(
     setLastCallout(null);
     setLastCalloutPayload(null);
     setChatMessages([]);
+    lastChangeAtRef.current = Date.now();
+    lastResyncAtRef.current = 0;
     loadedRef.current = false;
     serverStateRef.current = null;
     preOptimisticRef.current = null;
@@ -213,6 +223,7 @@ export function useRealtimeGame(
   // version guards and the next move POST see it before React re-renders.
   const adoptState = useCallback((gs: GameState | null, sv: number) => {
     preOptimisticRef.current = null;
+    if (sv > versionRef.current) lastChangeAtRef.current = Date.now();
     versionRef.current = sv;
     const passer = passedSeat(serverStateRef.current, gs);
     serverStateRef.current = gs;
@@ -224,7 +235,12 @@ export function useRealtimeGame(
     }
   }, []);
 
-  const fetchGame = useCallback(async () => {
+  // Resolves to the row's state when the fetch succeeded and was adopted
+  // (null otherwise), so the idle resync can relay exactly what it adopted.
+  const fetchGame = useCallback(async (): Promise<{
+    gs: GameState | null;
+    sv: number;
+  } | null> => {
     const stale = () => activeGameRef.current !== gameId;
     // Once the game has loaded, a failed refetch (poll, resync, foreground)
     // is a blip: the lobby or table stays, and the connection pill says so.
@@ -235,20 +251,20 @@ export function useRealtimeGame(
     };
     try {
       const res = await fetch(`${API_BASE}/api/games/${gameId}`, { cache: "no-store" });
-      if (stale()) return;
+      if (stale()) return null;
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        if (stale()) return;
+        if (stale()) return null;
         fail(
           errorKeyFor(
             body?.error,
             res.status === 404 ? "gameNotFound" : "connectionError"
           )
         );
-        return;
+        return null;
       }
       const data = await res.json();
-      if (stale()) return;
+      if (stale()) return null;
       loadedRef.current = true;
       // The server answered: with the socket joined, the table is live again
       // even if an earlier refetch marked it degraded.
@@ -268,9 +284,12 @@ export function useRealtimeGame(
         const gs = data.game.game_state as GameState | null;
         adoptState(gs, sv);
         surfaceCallout(gs?.lastCallout, gs?.lastCalloutPayload, sv);
+        return { gs, sv };
       }
+      return null;
     } catch {
       if (!stale()) fail("connectionError");
+      return null;
     } finally {
       if (!stale()) setLoading(false);
     }
@@ -302,6 +321,42 @@ export function useRealtimeGame(
     const id = setInterval(fetchGame, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, [polling, fetchGame]);
+
+  // Asks the server for the row and relays it as the next "state" message.
+  // A screen that missed an update catches up from it: newer clients take
+  // the next version or refetch, and the 1.0 app, which never polls and never
+  // refetches after a rejoin, applies any newer version. Screens that are
+  // current drop it.
+  const resync = useCallback(async () => {
+    const row = await fetchGame();
+    if (!row?.gs) return;
+    chatChannelRef.current?.send({
+      type: "broadcast",
+      event: "state",
+      payload: {
+        gameState: row.gs,
+        stateVersion: row.sv,
+        callout: row.gs.lastCallout ?? null,
+        calloutPayload: row.gs.lastCalloutPayload ?? null,
+      },
+    });
+  }, [fetchGame]);
+
+  // A live socket can still have dropped an event, and then every screen
+  // waits on another one. So a table that has heard of no newer state for
+  // IDLE_RESYNC_MS resyncs, and again every IDLE_RESYNC_MS while it stays
+  // quiet. The check runs often; the request only goes out when quiet.
+  useEffect(() => {
+    if (polling) return;
+    const id = setInterval(() => {
+      if (AppState.currentState !== "active") return;
+      const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
+      if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
+      lastResyncAtRef.current = Date.now();
+      void resync();
+    }, IDLE_CHECK_MS);
+    return () => clearInterval(id);
+  }, [polling, resync]);
 
   // Postgres Changes - game state. Also the connection signal: this is the
   // authoritative stream, so its subscription status is what "live" means.

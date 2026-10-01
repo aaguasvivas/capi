@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { normalizeChatPayload } from "@capi/i18n";
 import { reportError } from "@/lib/report";
+import { rebroadcastState } from "@/lib/resync";
 
 export async function POST(
   req: NextRequest,
@@ -63,6 +64,10 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // Players chat when the table looks stuck; push the current state so a
+    // screen that missed a move catches up.
+    await rebroadcastState(db, params.id);
 
     return NextResponse.json({ success: true });
   } catch (err) {

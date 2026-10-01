@@ -35,8 +35,24 @@ export class FakeDb {
   // Runs before each query; a returned result answers it instead of the tables.
   intercept?: (call: Call) => Result | undefined;
 
+  // What the routes sent through the Realtime REST endpoint (httpSend).
+  broadcasts: Array<{ topic: string; event: string; payload: any }> = [];
+
   from(table: string) {
     return new Query(this, table);
+  }
+
+  channel(topic: string) {
+    return {
+      httpSend: async (event: string, payload: any) => {
+        this.broadcasts.push({ topic, event, payload: clone(payload) });
+        return { success: true };
+      },
+    };
+  }
+
+  async removeChannel(_channel: unknown) {
+    return "ok";
   }
 
   row(table: string, id: string): Row | undefined {

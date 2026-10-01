@@ -76,5 +76,34 @@ describe("POST /api/games/[id]/chat", () => {
     const res = await chat("quick_chat", "dale", "00000000-0000-4000-8000-000000000000");
     expect(res.status).toBe(403);
     expect(stored()).toEqual([]);
+    expect(db.broadcasts).toEqual([]);
+  });
+
+  it("pushes the table's current state to the chat channel", async () => {
+    // Players chat when both screens wait on each other; the 1.0 app catches
+    // up from this message because it applies any newer state version.
+    expect((await chat("quick_chat", "dale")).status).toBe(200);
+    expect(db.broadcasts).toEqual([
+      {
+        topic: `chat-${seeded.game.id}`,
+        event: "state",
+        payload: {
+          gameState: seeded.state,
+          stateVersion: 1,
+          callout: null,
+          calloutPayload: null,
+        },
+      },
+    ]);
+  });
+
+  it("still answers when the push fails", async () => {
+    db.channel = () => ({
+      httpSend: async () => {
+        throw new Error("realtime down");
+      },
+    });
+    expect((await chat("quick_chat", "dale")).status).toBe(200);
+    expect(stored()).toEqual(["dale"]);
   });
 });
