@@ -29,6 +29,8 @@ const POLL_INTERVAL_MS = 10_000;
 const IDLE_RESYNC_MS = 10_000;
 const IDLE_CHECK_MS = 2_000;
 const IDLE_RESYNC_STOP_MS = 30 * 60_000;
+// A move request that has not answered by now is treated as lost.
+const MOVE_TIMEOUT_MS = 15_000;
 
 // The seat that passed between two confirmed states, or null. A pass keeps
 // the round, the board and the passer's hand as they were, moves the turn
@@ -279,9 +281,11 @@ export function useRealtimeGame(
       }
       setErrorKey(null);
       // Versions only move forward. Equal is applied too: the fetch is the
-      // truth, and replaces an optimistic preview at the same version.
+      // truth, and replaces an optimistic preview at the same version, except
+      // while this player's move is in flight: it would put the tile being
+      // played back in the hand until the answer lands.
       const sv = data.game.state_version as number;
-      if (sv >= versionRef.current) {
+      if (sv > versionRef.current || (sv === versionRef.current && !moveInFlightRef.current)) {
         const gs = data.game.game_state as GameState | null;
         adoptState(gs, sv);
         surfaceCallout(gs?.lastCallout, gs?.lastCalloutPayload, sv);
@@ -313,24 +317,15 @@ export function useRealtimeGame(
     };
   }, [fetchGame]);
 
-  // Realtime is the fast path, not the only one. While the socket is down, or
-  // while the table is still forming and no state has arrived, poll so a
-  // missed event can only delay an update, never lose it.
-  const polling = connection !== "live" || gameState === null;
-  useEffect(() => {
-    if (!polling) return;
-    const id = setInterval(fetchGame, POLL_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [polling, fetchGame]);
-
   // Asks the server for the row and relays it as the next "state" message.
   // A screen that missed an update catches up from it: newer clients take
   // the next version or refetch, and the 1.0 app, which never polls and never
   // refetches after a rejoin, applies any newer version. Screens that are
-  // current drop it.
+  // current drop it. Spectators only catch up; the seated players relay.
+  const seated = !!session?.playerId;
   const resync = useCallback(async () => {
     const row = await fetchGame();
-    if (!row?.gs) return;
+    if (!row?.gs || !seated) return;
     chatChannelRef.current?.send({
       type: "broadcast",
       event: "state",
@@ -341,17 +336,36 @@ export function useRealtimeGame(
         calloutPayload: row.gs.lastCalloutPayload ?? null,
       },
     });
-  }, [fetchGame]);
+  }, [fetchGame, seated]);
+
+  // Realtime is the fast path, not the only one. While the socket is down, or
+  // while the table is still forming and no state has arrived, poll so a
+  // missed event can only delay an update, never lose it. A table in play
+  // relays each poll too: a send without a joined socket goes out over REST,
+  // so a degraded screen still unsticks a 1.0 opponent.
+  const polling = connection !== "live" || gameState === null;
+  const hasGameState = gameState !== null;
+  useEffect(() => {
+    if (!polling) return;
+    const id = setInterval(() => {
+      void (hasGameState ? resync() : fetchGame());
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [polling, hasGameState, fetchGame, resync]);
 
   // A live socket can still have dropped an event, and then every screen
   // waits on another one. So a table that has heard of no newer state for
   // IDLE_RESYNC_MS resyncs, and again every IDLE_RESYNC_MS while it stays
   // quiet. The check runs often; the request only goes out when quiet.
-  // A table quiet for IDLE_RESYNC_STOP_MS is abandoned and stops asking.
+  // A table quiet for IDLE_RESYNC_STOP_MS is abandoned and stops asking, and
+  // a finished table stops once its rematch exists.
   useEffect(() => {
     if (polling) return;
     const id = setInterval(() => {
       if (AppState.currentState !== "active") return;
+      if (moveInFlightRef.current) return;
+      const gs = serverStateRef.current;
+      if (gs?.phase === "finished" && gs.rematchGameId) return;
       if (Date.now() - lastChangeAtRef.current > IDLE_RESYNC_STOP_MS) return;
       const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
       if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
@@ -365,7 +379,6 @@ export function useRealtimeGame(
   // authoritative stream, so its subscription status is what "live" means.
   useEffect(() => {
     let active = true;
-    let subscribedOnce = false;
     const channel = supabase
       .channel(`game-${gameId}`)
       .on(
@@ -380,7 +393,8 @@ export function useRealtimeGame(
           const updated = payload.new as Record<string, unknown>;
           const sv = updated.state_version as number;
           const gs = updated.game_state as GameState | null;
-          if (gs && sv >= versionRef.current) {
+          const inFlightEqual = sv === versionRef.current && moveInFlightRef.current;
+          if (gs && sv >= versionRef.current && !inFlightEqual) {
             adoptState(gs, sv);
             surfaceCallout(gs.lastCallout, gs.lastCalloutPayload, sv);
           } else if (!gs && (updated.status === "playing" || gameStateRef.current)) {
@@ -394,11 +408,9 @@ export function useRealtimeGame(
         if (!active) return;
         gameChannelLiveRef.current = status === "SUBSCRIBED";
         setConnection(status === "SUBSCRIBED" ? "live" : "reconnecting");
-        // A rejoin after a drop may have missed events: resync from the server.
-        if (status === "SUBSCRIBED") {
-          if (subscribedOnce) fetchGame();
-          subscribedOnce = true;
-        }
+        // Catch up on every join. A rejoin follows a socket that was down,
+        // and the first join can follow a move made after the first fetch.
+        if (status === "SUBSCRIBED") fetchGame();
       });
 
     return () => {
@@ -564,6 +576,11 @@ export function useRealtimeGame(
         });
       }
 
+      // A request stuck on a half-open connection would keep every later tap
+      // blocked (Android's client has no timeout at all); give up and ask the
+      // server what landed.
+      const abort = new AbortController();
+      const abortTimer = setTimeout(() => abort.abort(), MOVE_TIMEOUT_MS);
       try {
         const res = await fetch(`${API_BASE}/api/games/${gameId}/move`, {
           method: "POST",
@@ -574,6 +591,7 @@ export function useRealtimeGame(
             intent,
             stateVersion: versionRef.current,
           }),
+          signal: abort.signal,
         });
 
         const data = await res.json();
@@ -624,8 +642,12 @@ export function useRealtimeGame(
         if (stale()) return false;
         revertOptimistic();
         showTransientError("connectionError");
+        // The move may have landed with its answer lost: ask the server.
+        moveInFlightRef.current = false;
+        fetchGame();
         return false;
       } finally {
+        clearTimeout(abortTimer);
         if (!stale()) moveInFlightRef.current = false;
       }
     },

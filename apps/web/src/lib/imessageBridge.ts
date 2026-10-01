@@ -122,6 +122,9 @@ export interface BridgeMarks {
   roundOver?: number;
   gameOver?: boolean;
   endedRound?: number;
+  // The state version this device sent a move from, until it sees the state
+  // that move produced (see settleHandoff).
+  pendingFrom?: number;
 }
 
 export function readBridgeMarks(gameId: string): BridgeMarks {
@@ -139,6 +142,70 @@ export function writeBridgeMarks(gameId: string, marks: BridgeMarks) {
   } catch {
     /* storage blocked: worst case is one repeated or one missing bubble */
   }
+}
+
+// The bubble a state calls for when this device's own move produced it: the
+// next player's turn, or the result of the round or game the move ended
+// (sent by the mover, whichever side won). A draw that keeps the turn here
+// calls for none.
+export function handoffEvent(gs: GameState, mySeat: Seat, gameId: string): BridgeEvent | null {
+  const mine = getTeam(mySeat, gs.is2v2);
+  const sides = bridgeSides(gs, mySeat);
+  if (gs.phase === "playing") {
+    if (gs.currentTurn === mySeat) return null;
+    return { type: "moved", gameId, turnName: turnName(gs), ...sides };
+  }
+  if (gs.phase === "round_over") {
+    return {
+      type: "roundOver",
+      gameId,
+      iWon: gs.lastCalloutPayload?.winningTeam === mine,
+      winnerName: roundWinnerName(gs),
+      ...sides,
+    };
+  }
+  if (gs.phase === "finished") {
+    return { type: "gameOver", gameId, iWon: gs.winnerTeam === mine, ...gameWinner(gs), ...sides };
+  }
+  return null;
+}
+
+// Records that a move goes out from `version`. Kept in storage, so a drawer
+// torn down before the answer still finds it when it opens again.
+export function markPendingMove(gameId: string, version: number) {
+  writeBridgeMarks(gameId, { ...readBridgeMarks(gameId), pendingFrom: version });
+}
+
+export function clearPendingMove(gameId: string) {
+  const marks = readBridgeMarks(gameId);
+  if (marks.pendingFrom === undefined) return;
+  delete marks.pendingFrom;
+  writeBridgeMarks(gameId, marks);
+}
+
+// Called with every confirmed state this device adopts, from any source: the
+// move's own answer, realtime, a poll, or the first fetch after a reopen. The
+// state one version after a pending move is that move's result (only the seat
+// on turn can move; a claim against it is a forfeit, not its move), so its
+// bubble goes out exactly once, even when the move's answer was lost. A later
+// state means the moment passed; the mark is dropped without a bubble. The
+// result of a round or game is posted here, at once, and marked so the result
+// card does not send it again.
+export function settleHandoff(gameId: string, gs: GameState | null, sv: number, mySeat: Seat | null) {
+  const marks = readBridgeMarks(gameId);
+  const from = marks.pendingFrom;
+  if (from === undefined || sv <= from) return;
+  delete marks.pendingFrom;
+  const event = gs && mySeat && sv === from + 1 && !gs.forfeit ? handoffEvent(gs, mySeat, gameId) : null;
+  if (event?.type === "roundOver") {
+    marks.endedRound = gs!.roundIndex;
+    marks.roundOver = gs!.roundIndex;
+  } else if (event?.type === "gameOver") {
+    marks.endedRound = gs!.roundIndex;
+    marks.gameOver = true;
+  }
+  writeBridgeMarks(gameId, marks);
+  if (event) postToExtension(event);
 }
 
 // What a result card does with the stored marks, as it shows:

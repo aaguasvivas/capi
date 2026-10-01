@@ -15,13 +15,8 @@ import {
   type ErrorKey,
   type Lang,
 } from "@capi/i18n";
-import {
-  bridgeSides,
-  postToExtension,
-  readBridgeMarks,
-  turnName,
-  writeBridgeMarks,
-} from "@/lib/imessageBridge";
+import { clearPendingMove, markPendingMove, settleHandoff } from "@/lib/imessageBridge";
+import { isImessageEmbed } from "@/lib/embed";
 
 export type ConnectionState = "live" | "reconnecting" | "offline";
 
@@ -76,6 +71,8 @@ const POLL_MS = 10_000;
 const IDLE_RESYNC_MS = 10_000;
 const IDLE_CHECK_MS = 2_000;
 const IDLE_RESYNC_STOP_MS = 30 * 60_000;
+// A move request that has not answered by now is treated as lost.
+const MOVE_TIMEOUT_MS = 15_000;
 
 // The highest callout version this device dismissed for a table. Kept in
 // storage because the iMessage drawer reloads the page on every open, and
@@ -292,8 +289,11 @@ export function useRealtimeGame(
         passKeyRef.current += 1;
         setLastPass({ seat: passer, key: passKeyRef.current });
       }
+      // The drawer's bubble for this device's own move, whichever path
+      // brought the state that move produced.
+      settleHandoff(gameId, gs, sv, (seatRef.current as Seat | null) ?? null);
     },
-    [surfaceCallout]
+    [gameId, surfaceCallout]
   );
 
   // Resolves to the row's state when the fetch succeeded and was applied
@@ -339,8 +339,10 @@ export function useRealtimeGame(
       }
       setErrorKey(null);
       // Never roll the table backwards: a slow response that lands after a
-      // realtime update (or a later fetch) only refreshes the data above.
-      if (sv >= versionRef.current) {
+      // realtime update (or a later fetch) only refreshes the data above. An
+      // equal version is the truth too, except while this player's move is
+      // in flight: it would put the tile being played back in the hand.
+      if (sv > versionRef.current || (sv === versionRef.current && !moveInFlightRef.current)) {
         const gs = data.game.game_state as GameState | null;
         applyServerState(gs, sv, gs?.lastCallout, gs?.lastCalloutPayload);
         return { gs, sv };
@@ -362,7 +364,6 @@ export function useRealtimeGame(
   // Postgres Changes - game state (authoritative)
   useEffect(() => {
     let active = true;
-    let subscribedBefore = false;
     const channel = supabase
       .channel(`game-${gameId}`)
       .on(
@@ -378,6 +379,7 @@ export function useRealtimeGame(
           const sv = updated.state_version as number;
           const gs = updated.game_state as GameState | null;
           if (typeof sv !== "number" || sv < versionRef.current) return;
+          if (sv === versionRef.current && moveInFlightRef.current) return;
           // A row without a state body (lobby updates, or the moment the
           // status flips to playing): the fetch has the full picture.
           if (!gs) {
@@ -398,10 +400,9 @@ export function useRealtimeGame(
         }
         gameChannelLiveRef.current = true;
         setConnection("live");
-        // Every join after the first is a recovered socket: whatever moved
-        // while it was down never reached this client, so catch up.
-        if (subscribedBefore) void fetchGame();
-        subscribedBefore = true;
+        // Catch up on every join. A rejoin follows a socket that was down,
+        // and the first join can follow a move made after the first fetch.
+        void fetchGame();
       });
 
     return () => {
@@ -545,7 +546,8 @@ export function useRealtimeGame(
   // current drop it.
   const resync = useCallback(async () => {
     const row = await fetchGame();
-    if (!row?.gs) return;
+    // Spectators only catch up; the seated players relay.
+    if (!row?.gs || !playerIdRef.current) return;
     chatChannelRef.current?.send({
       type: "broadcast",
       event: "state",
@@ -559,15 +561,17 @@ export function useRealtimeGame(
   }, [fetchGame]);
 
   // Realtime is the fast path, never the only path. While the socket is
-  // degraded, or while the table has no state yet (lobby), poll the row.
+  // degraded, or while the table has no state yet (lobby), poll the row. A
+  // table in play relays each poll too: a send without a joined socket goes
+  // out over REST, so a degraded screen still unsticks a 1.0 opponent.
   const hasGameState = gameState !== null;
   useEffect(() => {
     if (connection === "live" && hasGameState) return;
     const timer = setInterval(() => {
-      void fetchGame();
+      void (hasGameState ? resync() : fetchGame());
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [connection, hasGameState, fetchGame]);
+  }, [connection, hasGameState, fetchGame, resync]);
 
   // A live socket can still have dropped an event, and then every screen
   // waits on another one. So a table that has heard of no newer state for
@@ -579,8 +583,11 @@ export function useRealtimeGame(
   useEffect(() => {
     if (connection !== "live" || !hasGameState) return;
     const timer = setInterval(() => {
-      const finished = serverStateRef.current?.phase === "finished";
-      if (finished && document.visibilityState === "hidden") return;
+      if (moveInFlightRef.current) return;
+      const gs = serverStateRef.current;
+      const finished = gs?.phase === "finished";
+      // A finished table has nothing left to relay once its rematch exists.
+      if (finished && (gs?.rematchGameId || document.visibilityState === "hidden")) return;
       if (Date.now() - lastChangeAtRef.current > IDLE_RESYNC_STOP_MS) return;
       const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
       if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
@@ -645,6 +652,17 @@ export function useRealtimeGame(
         });
       }
 
+      // In the drawer, the move's bubble goes out when this device sees the
+      // state the move produced (settleHandoff), even if this answer is lost.
+      if (isImessageEmbed(new URLSearchParams(window.location.search))) {
+        markPendingMove(gameId, versionRef.current);
+      }
+
+      // A request stuck on a half-open connection would keep every later tap
+      // blocked; give up and ask the server what landed. A plain timer, since
+      // AbortSignal.timeout is missing before iOS 16 (the drawer's WebKit).
+      const abort = new AbortController();
+      const abortTimer = setTimeout(() => abort.abort(), MOVE_TIMEOUT_MS);
       try {
         const res = await fetch(`/api/games/${gameId}/move`, {
           method: "POST",
@@ -655,6 +673,7 @@ export function useRealtimeGame(
             intent,
             stateVersion: versionRef.current,
           }),
+          signal: abort.signal,
         });
 
         const data = await res.json();
@@ -673,6 +692,8 @@ export function useRealtimeGame(
         }
 
         if (!res.ok) {
+          // Refused: no state follows from this move, so no bubble either.
+          clearPendingMove(gameId);
           // Revert optimistic update
           if (preOptimisticRef.current) {
             setGameState(preOptimisticRef.current);
@@ -706,29 +727,6 @@ export function useRealtimeGame(
             calloutPayload: data.calloutPayload ?? null,
           },
         });
-
-        // Emit on server-confirmed turn changes only (plays and passes);
-        // rejected moves must not post a bubble. A move that ends the round
-        // is marked instead: this device then sends the result once the
-        // round card shows (see the roundOver/gameOver effects on the page).
-        if (intent.type === "play" || intent.type === "pass") {
-          const confirmed = data.gameState as GameState;
-          if (confirmed.phase === "playing") {
-            if (confirmed.currentTurn !== session.seat) {
-              postToExtension({
-                type: "moved",
-                gameId,
-                turnName: turnName(confirmed),
-                ...bridgeSides(confirmed, session.seat as Seat),
-              });
-            }
-          } else {
-            writeBridgeMarks(gameId, {
-              ...readBridgeMarks(gameId),
-              endedRound: confirmed.roundIndex,
-            });
-          }
-        }
         return true;
       } catch {
         if (activeGameIdRef.current !== gameId) return false;
@@ -737,8 +735,12 @@ export function useRealtimeGame(
           preOptimisticRef.current = null;
         }
         showTransientError("connectionError");
+        // The move may have landed with its answer lost: ask the server.
+        moveInFlightRef.current = false;
+        void fetchGame();
         return false;
       } finally {
+        clearTimeout(abortTimer);
         moveInFlightRef.current = false;
       }
     },

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Seat } from "@capi/engine";
-import { buildStartedState, maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
+import { maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
 import { cleanAvatarColor, cleanNickname } from "@/lib/validation";
 import { reportError } from "@/lib/report";
-import { gameLookupFailed } from "@/lib/gameDb";
+import { gameLookupFailed, startIfFull } from "@/lib/gameDb";
 
 export async function POST(
   req: NextRequest,
@@ -29,6 +29,20 @@ export async function POST(
 
     if (gameError || !game) return gameLookupFailed(gameError, "POST /api/games/[id]/join");
 
+    // A retry after a lost answer: the join that filled the table dealt the
+    // hand, but its device never got the seat. While nobody has played yet
+    // (version 1), the joiner's own row is handed back, found the way a
+    // rematch arrival finds its row (same name and color, never the host's
+    // seat). A newcomer can never join a started table, so only the original
+    // joiner is asking.
+    if (game.status === "playing" && game.state_version === 1) {
+      const { data: seatedRows } = await db.from("players").select("*").eq("game_id", params.id);
+      const own = ((seatedRows ?? []) as PlayerRow[]).find(
+        (p) => p.seat !== "n" && p.nickname === nickname && p.avatar_color === avatarColor
+      );
+      if (own) return NextResponse.json({ playerId: own.id, seat: own.seat, gameId: params.id });
+    }
+
     if (game.status !== "waiting") {
       return NextResponse.json({ error: "Game already started" }, { status: 409 });
     }
@@ -52,6 +66,8 @@ export async function POST(
     }
 
     if (existingPlayers.length >= maxPlayers) {
+      // Full but still waiting: the join that filled it lost its start.
+      await startIfFull(db, game as GameRow & { status: string }, existingPlayers as PlayerRow[]);
       return NextResponse.json({ error: "Game is full" }, { status: 409 });
     }
 
@@ -82,6 +98,20 @@ export async function POST(
         takenSeats.add(nextSeat);
         continue;
       }
+      if (playerError) {
+        // The insert may have committed with its answer lost: this request's
+        // own row is then at the seat it asked for.
+        const { data: landed } = await db
+          .from("players")
+          .select("*")
+          .eq("game_id", params.id)
+          .eq("seat", nextSeat)
+          .maybeSingle();
+        if (landed && landed.nickname === nickname && landed.avatar_color === avatarColor) {
+          newPlayer = landed as PlayerRow;
+          break;
+        }
+      }
       if (playerError || !inserted) {
         reportError(playerError, "POST /api/games/[id]/join insert");
         return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
@@ -106,27 +136,10 @@ export async function POST(
       });
     }
 
-    const { data: started, error: updateError } = await db
-      .from("games")
-      .update({
-        status: "playing",
-        game_state: buildStartedState(game as GameRow, allPlayers),
-        state_version: 1,
-      })
-      .eq("id", params.id)
-      .eq("state_version", 0)
-      .select("id")
-      .maybeSingle();
-
-    if (updateError) {
-      reportError(updateError, "POST /api/games/[id]/join start");
-      return NextResponse.json({ error: "Failed to start game" }, { status: 500 });
-    }
-    // A concurrent join already dealt the round; this seat is still valid and
-    // the client's first fetch will see the live table.
-    if (!started) {
-      return NextResponse.json({ playerId: newPlayer.id, seat: nextSeat, gameId: params.id });
-    }
+    // The seat is taken either way, so the answer always carries it. If this
+    // start fails or a concurrent join dealt first, the client's first fetch
+    // sees the live table: GET deals a full waiting table (startIfFull).
+    await startIfFull(db, game as GameRow & { status: string }, allPlayers);
 
     return NextResponse.json({
       playerId: newPlayer.id,

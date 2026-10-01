@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { reportError } from "@/lib/report";
-import { gameLookupFailed } from "@/lib/gameDb";
+import { gameLookupFailed, startIfFull } from "@/lib/gameDb";
+import { maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,20 @@ export async function GET(
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 
-    return NextResponse.json({ game, players: players ?? [] });
+    // A full table still waiting lost its start write: deal it now. Every
+    // lobby polls this route, so such a table starts within one poll.
+    let row = game;
+    if (game.status === "waiting") {
+      const started = await startIfFull(db, game, (players ?? []) as PlayerRow[]);
+      if (started) row = started as typeof game;
+      else if ((players ?? []).length >= maxPlayersFor(game as GameRow)) {
+        // A concurrent request may have started it: answer the fresh row.
+        const { data: fresh } = await db.from("games").select("*").eq("id", params.id).single();
+        if (fresh) row = fresh;
+      }
+    }
+
+    return NextResponse.json({ game: row, players: players ?? [] });
   } catch (err) {
     reportError(err, "GET /api/games/[id]");
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

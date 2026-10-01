@@ -3,7 +3,8 @@ import { createServerClient } from "@/lib/supabase/server";
 import { startNewRound } from "@capi/engine";
 import type { GameState, Seat } from "@capi/engine";
 import { reportError } from "@/lib/report";
-import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
+import { gameLookupFailed, statusFor, unwrittenUpdate } from "@/lib/gameDb";
+import { rebroadcastState } from "@/lib/resync";
 
 export async function POST(
   req: NextRequest,
@@ -48,13 +49,8 @@ export async function POST(
       );
     }
 
-    if (game.status !== "round_over") {
-      return NextResponse.json(
-        { error: "Game is not in round_over state" },
-        { status: 409 }
-      );
-    }
-
+    // Version before status, as in the move route: a client that missed
+    // another seat's deal is stale, and only the stale answer tells it so.
     if (game.state_version !== stateVersion) {
       return NextResponse.json(
         { error: "State is stale - refetch", stale: true },
@@ -63,6 +59,15 @@ export async function POST(
     }
 
     const currentState = game.game_state as GameState;
+    // The engine deals only from a round that ended; checking the phase too
+    // means a row whose status and phase disagree is never "dealt" into a
+    // playing status with an unchanged state.
+    if (game.status !== "round_over" || currentState?.phase !== "round_over") {
+      return NextResponse.json(
+        { error: "Game is not in round_over state" },
+        { status: 409 }
+      );
+    }
     const existingPlayers = currentState.players as Record<
       Seat,
       GameState["players"][Seat]
@@ -79,7 +84,7 @@ export async function POST(
       .update({
         game_state: newState,
         state_version: newVersion,
-        status: "playing",
+        status: statusFor(newState.phase),
       })
       .eq("id", params.id)
       .eq("state_version", stateVersion)
@@ -89,6 +94,10 @@ export async function POST(
     if (updateError || !updated) {
       return unwrittenUpdate(db, params.id, stateVersion, "POST /api/games/[id]/next-round", updateError);
     }
+
+    // No client broadcasts a deal, so the other seats would learn of it only
+    // from the database event; push it as well.
+    await rebroadcastState(db, params.id);
 
     return NextResponse.json({
       success: true,

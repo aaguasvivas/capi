@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { reportError } from "@/lib/report";
 import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
+import { rebroadcastState } from "@/lib/resync";
 import { claimCheck } from "@capi/engine";
 import type { GameState, Seat } from "@capi/engine";
 
@@ -13,7 +14,10 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = (await req.json().catch(() => ({}))) as { playerId?: unknown };
+    const body = (await req.json().catch(() => ({}))) as {
+      playerId?: unknown;
+      stateVersion?: unknown;
+    };
     const playerId = typeof body.playerId === "string" ? body.playerId : "";
     if (!playerId) {
       return NextResponse.json({ error: "Missing playerId" }, { status: 400 });
@@ -35,6 +39,13 @@ export async function POST(
       .maybeSingle();
     if (!player) {
       return NextResponse.json({ error: "Player not in this game" }, { status: 403 });
+    }
+
+    // A claimer whose screen missed a move (often the very move that gave it
+    // the turn) is stale: it refetches instead of seeing a refusal. Clients
+    // that send no version keep the check below as before.
+    if (typeof body.stateVersion === "number" && body.stateVersion !== game.state_version) {
+      return NextResponse.json({ error: "State is stale - refetch", stale: true }, { status: 409 });
     }
 
     if (game.status !== "playing") {
@@ -61,6 +72,9 @@ export async function POST(
       // Usually a move landed in between: the seat is back, nothing to claim.
       return unwrittenUpdate(db, params.id, game.state_version, "POST /api/games/[id]/claim", updateError);
     }
+
+    // No client broadcasts a claim; push it so the silent seat sees it end.
+    await rebroadcastState(db, params.id);
 
     return NextResponse.json({
       success: true,

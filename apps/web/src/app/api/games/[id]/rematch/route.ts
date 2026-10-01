@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { getSeatsForGame } from "@capi/engine";
 import type { GameState } from "@capi/engine";
-import { buildStartedState, maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
+import { maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
 import { uniqueInviteCode } from "@/lib/inviteCode";
 import { reportError } from "@/lib/report";
-import { gameLookupFailed } from "@/lib/gameDb";
+import { gameLookupFailed, startIfFull } from "@/lib/gameDb";
+import { rebroadcastState } from "@/lib/resync";
 
 type Db = ReturnType<typeof createServerClient>;
 
@@ -101,13 +102,9 @@ async function arrive(
   let waiting = game.status === "waiting";
 
   if (waiting && seated.length >= maxPlayersFor(game as GameRow)) {
-    const { error: startError } = await db
-      .from("games")
-      .update({ status: "playing", game_state: buildStartedState(game as GameRow, seated), state_version: 1 })
-      .eq("id", rematchId)
-      .eq("state_version", 0);
     // A concurrent arrival may have started it first; either way it is live.
-    if (!startError) waiting = false;
+    // If the start fails, the new lobby's GET deals it (startIfFull).
+    if (await startIfFull(db, game as GameRow & { status: string }, seated)) waiting = false;
     else {
       const { data: fresh } = await db.from("games").select("status").eq("id", rematchId).single();
       waiting = fresh?.status === "waiting";
@@ -195,14 +192,21 @@ export async function POST(
     let rematchId: string = newGame.id;
     if (!claimed) {
       // Another player opened a table first: drop ours and follow theirs.
-      await db.from("games").delete().eq("id", newGame.id);
+      // Our own link may also have committed with its answer lost; then the
+      // link names our table, and deleting it would strand every seat.
       const { data: fresh } = await db.from("games").select("game_state").eq("id", params.id).single();
       const linked = (fresh?.game_state as GameState | null)?.rematchGameId;
+      // Delete only on a read that names another table: when the read itself
+      // fails, the link may be ours, and an empty spare table costs nothing.
+      if (fresh && linked !== newGame.id) await db.from("games").delete().eq("id", newGame.id);
       if (!linked) {
         return NextResponse.json({ error: "Failed to create rematch" }, { status: 500 });
       }
       rematchId = linked;
     }
+    // Other seats follow the link from the finished table; push it so a
+    // screen that misses the database event still sees the rematch.
+    await rebroadcastState(db, params.id);
 
     const arrival = await arrive(db, rematchId, requester, originals);
     if (arrival === "full") return NextResponse.json({ error: "Game is full" }, { status: 409 });

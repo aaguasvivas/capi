@@ -1,11 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameState, Seat } from "@capi/engine";
 import {
   bridgeSides,
   gameWinner,
+  markPendingMove,
   postToExtension,
+  readBridgeMarks,
   resultStep,
   roundWinnerName,
+  settleHandoff,
   turnName,
 } from "../imessageBridge";
 
@@ -185,6 +188,79 @@ describe("postToExtension", () => {
   it("stays silent on any other page in the same webview", () => {
     const postMessage = stubPage("");
     postToExtension({ type: "moved", gameId: "g", myScore: 0, oppScore: 0 });
+    expect(postMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe("settleHandoff", () => {
+  let store: Record<string, string>;
+  let postMessage: ReturnType<typeof vi.fn>;
+  beforeEach(() => {
+    store = {};
+    postMessage = vi.fn();
+    vi.stubGlobal("window", { location: { search: "?embed=imessage" }, webkit: { messageHandlers: { capi: { postMessage } } } });
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+    });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // Rosa (s) plays from version 7 in a 1v1 at round 2.
+  const after = (patch: Partial<GameState>) => table(false, { currentTurn: "n", lastPlayedBy: "s", ...patch });
+
+  it("posts the turn bubble when the state the move produced arrives, by any path, once", () => {
+    markPendingMove("g", 7);
+    settleHandoff("g", after({}), 7, "s");
+    expect(postMessage).not.toHaveBeenCalled();
+    settleHandoff("g", after({}), 8, "s");
+    expect(postMessage).toHaveBeenCalledTimes(1);
+    expect(postMessage.mock.calls[0][0]).toMatchObject({ type: "moved", gameId: "g", turnName: "Ana", myScore: 35, oppScore: 20 });
+    // The move's own answer lands after realtime already brought it.
+    settleHandoff("g", after({}), 8, "s");
+    expect(postMessage).toHaveBeenCalledTimes(1);
+    expect(readBridgeMarks("g").pendingFrom).toBeUndefined();
+  });
+
+  it("posts the round result at once and marks it, so the result card skips it", () => {
+    markPendingMove("g", 7);
+    const round = after({
+      phase: "round_over",
+      lastCallout: "domino",
+      lastCalloutPayload: { winningTeam: 1, team0Pips: 12, team1Pips: 0, pipsAwarded: 12 },
+    });
+    settleHandoff("g", round, 8, "s");
+    expect(postMessage.mock.calls[0][0]).toMatchObject({ type: "roundOver", iWon: true, winnerName: "Rosa" });
+    const marks = readBridgeMarks("g");
+    expect(marks).toMatchObject({ endedRound: 2, roundOver: 2 });
+    expect(resultStep("roundOver", marks, round)).toBe("skip");
+  });
+
+  it("posts the game result for the move that ended the game", () => {
+    markPendingMove("g", 7);
+    const finished = after({ phase: "finished", winnerTeam: 1, lastCallout: "domino", lastCalloutPayload: { winningTeam: 1, team0Pips: 5, team1Pips: 0 } });
+    settleHandoff("g", finished, 8, "s");
+    expect(postMessage.mock.calls[0][0]).toMatchObject({ type: "gameOver", iWon: true });
+    expect(readBridgeMarks("g")).toMatchObject({ gameOver: true, endedRound: 2 });
+  });
+
+  it("stays quiet for a draw that keeps the turn, a claim against the mover, or a state long past", () => {
+    markPendingMove("g", 7);
+    settleHandoff("g", after({ currentTurn: "s" }), 8, "s");
+    markPendingMove("g", 8);
+    settleHandoff("g", after({ phase: "finished", winnerTeam: 0, forfeit: { seat: "s", at: "x" } }), 9, "s");
+    markPendingMove("g", 9);
+    settleHandoff("g", after({}), 12, "s");
+    expect(postMessage).not.toHaveBeenCalled();
+    expect(readBridgeMarks("g").pendingFrom).toBeUndefined();
+  });
+
+  it("does nothing without a pending move", () => {
+    settleHandoff("g", after({}), 8, "s");
     expect(postMessage).not.toHaveBeenCalled();
   });
 });

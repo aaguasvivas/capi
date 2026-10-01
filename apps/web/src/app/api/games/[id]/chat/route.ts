@@ -49,6 +49,11 @@ export async function POST(
       return NextResponse.json({ error: "Player not in game" }, { status: 403 });
     }
 
+    // Players chat when the table looks stuck; push the current state so a
+    // screen that missed a move catches up. Before the insert, so a failed
+    // audit write never costs the heal.
+    await rebroadcastState(db, params.id);
+
     // Persist for audit
     const { error: insertError } = await db.from("chat_emotes").insert({
       game_id: params.id,
@@ -64,10 +69,6 @@ export async function POST(
         { status: 500 }
       );
     }
-
-    // Players chat when the table looks stuck; push the current state so a
-    // screen that missed a move catches up.
-    await rebroadcastState(db, params.id);
 
     return NextResponse.json({ success: true });
   } catch (err) {

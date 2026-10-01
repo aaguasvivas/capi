@@ -594,10 +594,11 @@ function GameTable({
             const res = await fetch(`${API_BASE}/api/games/${id}/claim`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ playerId: session.playerId }),
+              body: JSON.stringify({ playerId: session.playerId, stateVersion }),
             });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) flashError(errorKeyFor(data.error));
+            // Stale means this screen missed a move: the refetch shows it.
+            if (!res.ok && !data.stale) flashError(errorKeyFor(data.error));
             await refetch();
           } catch {
             flashError("connectionError");

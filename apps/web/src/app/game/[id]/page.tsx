@@ -512,10 +512,11 @@ function GameContent({ id }: { id: string }) {
       const res = await fetch(`/api/games/${id}/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId: session.playerId }),
+        body: JSON.stringify({ playerId: session.playerId, stateVersion }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) showToast(apiErrorText(data.error, s.errMoveFailed));
+      // Stale means this screen missed a move: the refetch below shows it.
+      if (!res.ok && !data.stale) showToast(apiErrorText(data.error, s.errMoveFailed));
       await refetch();
     } catch {
       showToast(s.connectionError);

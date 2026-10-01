@@ -3,7 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { applyMove } from "@capi/engine";
 import type { GameState, Seat, MoveIntent } from "@capi/engine";
 import { reportError } from "@/lib/report";
-import { gameLookupFailed, unwrittenUpdate } from "@/lib/gameDb";
+import { gameLookupFailed, statusFor, unwrittenUpdate } from "@/lib/gameDb";
 
 export async function POST(
   req: NextRequest,
@@ -81,11 +81,7 @@ export async function POST(
       .update({
         game_state: newState,
         state_version: newVersion,
-        status: newState.phase === "finished"
-          ? "finished"
-          : newState.phase === "round_over"
-          ? "round_over"
-          : "playing",
+        status: statusFor(newState.phase),
       })
       .eq("id", params.id)
       .eq("state_version", stateVersion)
