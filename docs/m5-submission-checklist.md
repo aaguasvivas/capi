@@ -194,6 +194,8 @@ of 2026-09-28: a double on matching ends counts.
       apps/mobile/targets/messages/PrivacyInfo.xcprivacy, UserDefaults 1C8F.1
       only. Version 1.1.0 (24) in the app and the extension; the binary and
       main.jsbundle were built at 23:41 from f5cadf0.
+      Uploaded to App Store Connect on 2026-10-01 at 04:05 UTC (EAS
+      submission be7242de, status FINISHED, no error).
       Confirm no ITMS email comes back for it.
 
 ## D. App Store Connect (You, ~30 minutes total)
