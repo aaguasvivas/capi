@@ -75,6 +75,7 @@ const POLL_MS = 10_000;
 // again and relays the answer (see the idle resync effect).
 const IDLE_RESYNC_MS = 10_000;
 const IDLE_CHECK_MS = 2_000;
+const IDLE_RESYNC_STOP_MS = 30 * 60_000;
 
 // The highest callout version this device dismissed for a table. Kept in
 // storage because the iMessage drawer reloads the page on every open, and
@@ -572,10 +573,15 @@ export function useRealtimeGame(
   // waits on another one. So a table that has heard of no newer state for
   // IDLE_RESYNC_MS resyncs, and again every IDLE_RESYNC_MS while it stays
   // quiet. The check runs often; the request only goes out when quiet.
+  // A hidden tab keeps it up while a round is on, because its relay is what
+  // unsticks a 1.0 opponent; a finished table only while it is on screen.
+  // A table quiet for IDLE_RESYNC_STOP_MS is abandoned and stops asking.
   useEffect(() => {
     if (connection !== "live" || !hasGameState) return;
     const timer = setInterval(() => {
-      if (document.visibilityState === "hidden") return;
+      const finished = serverStateRef.current?.phase === "finished";
+      if (finished && document.visibilityState === "hidden") return;
+      if (Date.now() - lastChangeAtRef.current > IDLE_RESYNC_STOP_MS) return;
       const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
       if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
       lastResyncAtRef.current = Date.now();

@@ -28,6 +28,7 @@ const POLL_INTERVAL_MS = 10_000;
 // again and relays the answer (see the idle resync effect).
 const IDLE_RESYNC_MS = 10_000;
 const IDLE_CHECK_MS = 2_000;
+const IDLE_RESYNC_STOP_MS = 30 * 60_000;
 
 // The seat that passed between two confirmed states, or null. A pass keeps
 // the round, the board and the passer's hand as they were, moves the turn
@@ -346,10 +347,12 @@ export function useRealtimeGame(
   // waits on another one. So a table that has heard of no newer state for
   // IDLE_RESYNC_MS resyncs, and again every IDLE_RESYNC_MS while it stays
   // quiet. The check runs often; the request only goes out when quiet.
+  // A table quiet for IDLE_RESYNC_STOP_MS is abandoned and stops asking.
   useEffect(() => {
     if (polling) return;
     const id = setInterval(() => {
       if (AppState.currentState !== "active") return;
+      if (Date.now() - lastChangeAtRef.current > IDLE_RESYNC_STOP_MS) return;
       const quietSince = Math.max(lastChangeAtRef.current, lastResyncAtRef.current);
       if (Date.now() - quietSince < IDLE_RESYNC_MS) return;
       lastResyncAtRef.current = Date.now();
