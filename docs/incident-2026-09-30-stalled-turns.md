@@ -2,7 +2,7 @@
 
 ## Report
 
-Four bug reports in 20 minutes, all from the same player (Diego, seat s, the
+Four bug reports in 20 minutes, all from the same player (player B, seat s, the
 1.0 App Store app), all in game 5cce9657, all with the text "No es turno de
 nadie". Each report carries a valid server state: phase playing, a current
 turn, a legal action for that seat.
@@ -11,7 +11,7 @@ turn, a legal action for that seat.
 
 The move log and the chat log of the game show the same pattern four times:
 
-| Stall | Last move (Diego) | Next move (Pato) | Wait |
+| Stall | Last move (player B) | Next move (player A) | Wait |
 |---|---|---|---|
 | 1 | 00:38:55 draw then play | 00:41:40 | 166 s |
 | 2 | 00:48:40 play | 00:50:48 | 128 s |
@@ -19,7 +19,7 @@ The move log and the chat log of the game show the same pattern four times:
 | 4 | 00:59:46 play | 01:00:17 | 31 s |
 
 During each wait, both players sent "dale" (go) to each other many times. So
-each screen showed the other player's turn. Pato's screen had missed Diego's
+each screen showed the other player's turn. Player A's screen had missed player B's
 move: both the postgres_changes event and the mover's "state" broadcast on
 chat-<gameId>. The server state was always correct.
 

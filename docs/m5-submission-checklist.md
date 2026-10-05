@@ -48,6 +48,13 @@ drawer's error screen, the hand and round-card fixes for short drawers) is
 live on playcapi.com since commit f0ef651. It also carries the capicúa rule
 of 2026-09-28: a double on matching ends counts.
 
+State on 2026-10-05: builds 22 and 23 are superseded. The build to test,
+select and submit is build 24 (EAS id 92121793, commit f5cadf0), which adds
+the fix for games that froze with nobody's turn
+(docs/incident-2026-09-30-stalled-turns.md). The pre-resubmission audit of
+2026-10-05 (docs/audits/2026-10-05/) found no blocker; its runbook fixes are
+in docs/submit-1.1-runbook.md and the published page.
+
 ## A. Code gates (Me)
 
 - [x] `grep -rn "3940256099942544\|PENDING_ADMOB" apps/mobile` returns NOTHING

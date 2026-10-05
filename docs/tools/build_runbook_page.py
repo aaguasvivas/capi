@@ -94,7 +94,7 @@ privacy_rows = "".join(f"<tr><td>{E(a)}</td><td>{E(b)}</td><td>{E(c)}</td><td>{E
 prev = str(int(build) - 1) if build.isdigit() else "the previous build"
 steps = [
     ("before", f"pulled{build}", f"If build {prev} is already in review, pull it back", path("App Store Connect > Apps > Capi > App Review > Submissions")
-     + f"<p>Only if 1.1.0 shows <q>Waiting for Review</q> or <q>In Review</q> with build {E(prev)}: open the submission and press <strong>Remove from Review</strong> (on some pages it is <strong>Cancel Submission</strong>). Build {E(prev)} does not have the fix for frozen turns. Everything you already entered (purchases, privacy, text, screenshots) stays. If you never submitted, tick this step and go on.</p>",
+     + f"<p>Only if 1.1.0 shows <q>Waiting for Review</q> or <q>In Review</q> with build {E(prev)}: open the submission and press <strong>Remove from Review</strong> (on some pages it is <strong>Cancel Submission</strong>). Build {E(prev)} does not have the fix for frozen turns. Everything you already entered (purchases, privacy, text, screenshots) stays. If you never submitted, tick this step and go on. While you are there, open any message from App Review that is still waiting for an answer and send it to Claude.</p>",
      f"1.1.0 is editable again, or it was never submitted."),
     ("before", f"build{build}", "Check the build", path("App Store Connect > Apps > Capi > TestFlight > iOS Builds > 1.1.0")
      + f"<p>Build <strong>{E(build)}</strong> shows as processed: not Processing, not Invalid Binary. Search your developer email for <q>ITMS</q> and <q>Missing API declaration</q> about build {E(build)}. Any hit: stop and send it to Claude.</p>",
@@ -109,16 +109,16 @@ steps = [
      + f'<div class="tablewrap"><table><thead><tr><th>Product ID</th><th>Reference name</th><th class="num">USD</th><th>English (U.S.)</th><th>Spanish (Mexico)</th><th>Screenshot</th></tr></thead><tbody>{iap_rows}</tbody></table></div>',
      "All 8 say Ready to Submit; none says Missing Metadata."),
     ("before", f"buy{build}", "Buy and restore on your iPhone", path("TestFlight > Capi > install 1.1.0 (" + build + ")")
-     + "<p>Open the store: all 8 rows show a real price, not <q>Ver precio</q>. Buy Mesa Quisqueya (TestFlight does not charge): it unlocks and can be selected. Delete the app, reinstall it from TestFlight, tap Restore Purchases: Quisqueya comes back. Any failure: stop and send Claude a screenshot.</p>",
-     "Purchase unlocks; restore brings it back."),
+     + "<p>Delete Capi first, then install build " + E(build) + " fresh: a few seconds after the home screen shows, the tracking prompt appears once. Answer it either way. Open the store: all 8 rows show a real price, not <q>See price</q> or <q>Ver precio</q>. If they do not, check App Store Connect &gt; Business: the Paid Apps agreement must say Active. Start buying Mesa Larimar and cancel: nothing unlocks and no error shows. Buy Mesa Quisqueya (TestFlight does not charge): it unlocks and can be selected. Buy Remove Ads: the home banner goes away. Delete the app, reinstall it from TestFlight, tap Restore Purchases: Quisqueya and Remove Ads come back. Any failure: stop and send Claude a screenshot.</p>",
+     "Tracking prompt shown once; prices show; cancel changes nothing; purchases unlock and restore."),
     ("before", f"reviewer{build}", "Walk the reviewer's path", path("Messages > a conversation with yourself > (+) > Capi")
-     + "<p>Tap the name field, type a name, Start a game, Send, then tap the bubble. In Safari open playcapi.com, tap <strong>Unirse</strong>, enter the code and a name. Back in Messages play a tile: the drawer gets small and a <q>Your turn, &lt;name&gt;</q> bubble waits to be sent. <q>Back to the table</q> brings the table back.</p>",
+     + "<p>Tap the name field, type a name, Start a game, Send, then tap the bubble. In Safari open playcapi.com, tap <strong>Unirse</strong>, enter the code and a name. Back in Messages, on your turn (Safari may go first; if no tile fits, Draw), play a tile: the drawer gets small and a <q>Your turn, &lt;name&gt;</q> bubble waits to be sent. <q>Back to the table</q> brings the table back.</p>",
      "The table starts, and the turn bubble appears."),
     ("before", f"stall{build}", "Check that a missed move recovers", path("Capi app (build " + build + ") on your iPhone, playcapi.com on a computer")
      + "<p>Start a 1v1 game in the app and join it from the computer. Play a few moves. When it is the computer's turn, lock the iPhone, play the move on the computer, wait about 20 seconds, and unlock: the app shows your turn. Do it once more, but instead of the lock turn off Wi-Fi on the iPhone (and use no cellular data) for 20 seconds while the computer moves, then turn it back on: the app shows your turn within about 10 seconds. If a screen still shows the wrong turn after 20 seconds, stop and send Claude a screenshot of both screens.</p>",
      "Both times, the turn on the iPhone matches the computer within about 10 seconds."),
     ("before", "attach", "Attach the purchases to 1.1.0", path("Version page > In-App Purchases and Subscriptions > Select")
-     + "<p>Check all 8, Done, then Save at the top right.</p>", "The 8 purchases are listed on the version page."),
+     + "<p>Check all 8, Done, then Save at the top right. If the version page has no In-App Purchases section, skip this step: step 17 attaches them.</p>", "The 8 purchases are listed on the version page, or step 17 will attach them."),
     ("before", "privacy", "Fill in App Privacy, then Publish", path("App Privacy > Edit")
      + "<p>Keep Name, Gameplay Content and Customer Support. Add the types below. <em>Ads &amp; analytics</em> means Third-Party Advertising, Developer's Advertising or Marketing, and Analytics.</p>"
      + f'<div class="tablewrap"><table><thead><tr><th>Data type</th><th>Purposes</th><th>Linked</th><th>Tracking</th></tr></thead><tbody>{privacy_rows}</tbody></table></div>'
@@ -126,7 +126,7 @@ steps = [
      + "<p class='warn'>Press <strong>Publish</strong> at the top of the App Privacy page. Without it the store keeps the 1.0 label.</p>",
      "The App Privacy page shows the new label as published."),
     ("before", "age", "Update the age rating", path("App Information > Age Ratings > Edit")
-     + "<p>Advertising: Yes. Messaging and Chat: Yes. Everything else unchanged. Save.</p>", "The rating stays 4+."),
+     + "<p>Advertising: Yes. Messaging and Chat: Yes. Social Media: leave it unchecked (Capi has no feed). Everything else unchanged. On the last screen keep <q>Not Applicable</q>, never Made for Kids. Save.</p>", "The rating stays 4+. Brazil shows A12 because of ads and chat; that is expected."),
     ("before", "text2", "Paste the version text, English and Spanish", path("Version page > locale menu at the top: English (U.S.), then Spanish (Mexico)")
      + "<p class='warn'>What's New changed on 2026-09-30: <q>Also in this update</q> now opens with the fix for frozen turns. If you pasted it before, paste both languages again.</p>"
      + copy("What's New, English", values["wn_en"], True) + copy("What's New, Spanish", values["wn_es"], True)
@@ -134,18 +134,19 @@ steps = [
      + copy("Promotional Text, English (optional)", values["promo_en"]) + copy("Promotional Text, Spanish (optional)", values["promo_es"])
      + copy("Support URL", values["support_url"]) + copy("Marketing URL", values["marketing_url"])
      + "<p>Keywords stay as they are. Save.</p>", "Both locales saved."),
-    ("before", "review", "Fill in App Review Information", path("Version page > App Review Information")
-     + "<p>Sign-in required: off. Contact: your name, phone and email.</p>" + copy("Notes", values["note"], True) + "<p>Save.</p>",
-     "Notes saved (3969 of 4000 bytes)."),
+    ("before", "review2", "Fill in App Review Information", path("Version page > App Review Information")
+     + "<p class='warn'>The Notes changed on 2026-10-05: step 6 now says the browser may go first. If you pasted them before, paste them again.</p>"
+     + "<p>Sign-in required: off. Contact: your name, your phone in international form (+1 and the number), and your email.</p>" + copy("Notes", values["note"], True) + "<p>Save.</p>",
+     f"Notes saved ({len(values['note'].encode())} of 4000 bytes)."),
     ("before", f"select{build}", f"Select build {build}", path("Version page > Build > (+)")
      + f"<p>If build {E(prev)} is attached, remove it first (the minus sign next to it). Choose 1.1.0 ({E(build)}), Done, Save. No export compliance question should appear.</p>", f"Build {build} is attached."),
     ("before", "shots", "Upload the iMessage screenshots", path("Version page > iMessage App (appears after the build is attached) > 6.5-inch display")
-     + "<p>From <code>apps/mobile/store-assets/screenshots/imessage</code>, in this order: <code>03-table.png</code>, <code>04-your-turn-bubble.png</code>, <code>02-invite-bubble.png</code>, <code>01-create-card.png</code>. Save. Screenshots lock when you submit.</p>",
+     + "<p>From <code>apps/mobile/store-assets/screenshots/imessage</code>, in this order: <code>03-table.png</code>, <code>04-your-turn-bubble.png</code>, <code>02-invite-bubble.png</code>, <code>01-create-card.png</code>. Save. Screenshots lock when you submit. If App Store Connect says a file has an alpha channel, send Claude the message; a fixed copy takes a minute.</p>",
      "Four screenshots in the iMessage App section."),
     ("before", "release", "Choose manual release", path("Version page > Version Release")
      + "<p>Manually release this version. Save.</p>", "Manual release selected."),
-    ("before", "submit", "Submit for review", path("Version page > Add for Review (top right)")
-     + "<p>Open the draft (App Review &gt; Submissions): it lists iOS App 1.1.0 and the 8 in-app purchases. Press <strong>Submit for Review</strong>.</p>",
+    ("before", f"submit{build}", "Submit for review", path("Version page > Add for Review (top right)")
+     + "<p>If a dialog asks, add it to the draft that already holds the purchases. Open the draft (App Review &gt; Drafts): it must list iOS App 1.1.0 and all 8 in-app purchases. If any purchase is missing: Monetization &gt; In-App Purchases &gt; Edit &gt; select the missing ones &gt; Add for Review &gt; choose the 1.1.0 draft. Then press <strong>Submit for Review</strong>.</p>",
      "Status: Waiting for Review."),
     ("during", "freeze", "Keep the web steady", "<p>Deploy to playcapi.com only changes Claude has checked inside the Messages drawer, and no API contract changes. Do not run migration 005 during review.</p>", ""),
     ("during", "reject", "If Apple rejects", "<p>Paste Apple's message to Claude. Fixes usually turn around the same day.</p>", ""),

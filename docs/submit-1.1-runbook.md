@@ -21,7 +21,8 @@ apps/mobile/store-assets/screenshots/imessage).
    Apps > Capi > App Review > Submissions. Only if 1.1.0 shows Waiting for
    Review or In Review with build 23: open the submission and press Remove
    from Review (some pages call it Cancel Submission). Everything you already
-   entered stays. If you never submitted, skip this step.
+   entered stays. If you never submitted, skip this step. While you are
+   there, send Claude any App Review message still waiting for an answer.
 1. **Build gate.** App Store Connect > Apps > Capi > TestFlight > iOS Builds >
    1.1.0: build 24 shows as processed (not Processing, not Invalid
    Binary). Search your developer email for "ITMS" and "Missing API
@@ -60,15 +61,20 @@ apps/mobile/store-assets/screenshots/imessage).
    screenshots are 1284x2778 (padded from the first set, which had a size
    Apple does not accept).
 5. **Purchase check on your iPhone** (needs step 4). TestFlight > Capi >
-   install 1.1.0 (24). Open the store: all 8 rows show a real
-   price, not "Ver precio". Buy Mesa Quisqueya (TestFlight does not charge):
-   it unlocks and can be selected. Delete the app, reinstall from TestFlight,
-   tap Restore Purchases: Quisqueya comes back. Any failure: stop and send
-   Claude a screenshot.
+   install 1.1.0 (24) after deleting Capi: a few seconds after the home
+   screen shows, the tracking prompt appears once; answer it either way.
+   Open the store: all 8 rows show a real price, not "See price" or "Ver
+   precio" (if not, App Store Connect > Business: the Paid Apps agreement
+   must say Active). Start buying Mesa Larimar and cancel: nothing unlocks,
+   no error. Buy Mesa Quisqueya (TestFlight does not charge): it unlocks
+   and can be selected. Buy Remove Ads: the home banner goes away. Delete
+   the app, reinstall from TestFlight, tap Restore Purchases: Quisqueya and
+   Remove Ads come back. Any failure: stop and send Claude a screenshot.
 6. **Reviewer path on the same iPhone.** Messages > a conversation with
    yourself > (+) > Capi > tap the name field, type a name, Start a game >
    Send > tap the bubble. In Safari open playcapi.com, tap Unirse, enter the
-   code and a name. Back in Messages play a tile: the drawer gets small and
+   code and a name. Back in Messages, on your turn (Safari may go first; if
+   no tile fits, Draw), play a tile: the drawer gets small and
    a "Your turn, <name>" bubble waits to be sent; "Back to the table" brings
    the table back.
 6b. **A missed move recovers.** Start a 1v1 game in the app (build 24) and
@@ -98,8 +104,10 @@ apps/mobile/store-assets/screenshots/imessage).
    Publish the store keeps the 1.0 label. Privacy Policy URL:
    https://playcapi.com/privacy.
 9. **Age rating.** App Information > Age Ratings > Edit: Advertising Yes,
-   Messaging and Chat Yes, everything else unchanged > Save. The result must
-   stay 4+.
+   Messaging and Chat Yes, Social Media unchecked (Capi has no feed),
+   everything else unchanged; on the last screen keep "Not Applicable",
+   never Made for Kids > Save. The result must stay 4+. Brazil shows A12
+   because of ads and chat; that is expected.
 10. **Version text, both localizations** (English (U.S.) and Spanish
     (Mexico), locale menu at the top of the version page). What's New: the
     "Version 1.1" blocks in docs/store-listing.md. Description: the App
@@ -108,8 +116,10 @@ apps/mobile/store-assets/screenshots/imessage).
     Keywords, Support URL (https://playcapi.com/support) and Marketing URL
     (https://playcapi.com) stay. Save.
 11. **App Review Information.** Sign-in required: off. Contact: your name,
-    phone, email. Notes: the whole "Apple Guideline 4.2" note from
-    docs/store-listing.md (3969 of 4000 bytes). Save.
+    phone in international form (+1 and the number), email. Notes: the
+    whole "Apple Guideline 4.2" note from docs/store-listing.md (3993 of
+    4000 bytes; it changed on 2026-10-05, so paste it again if you pasted
+    it before). Save.
 12. **Build.** Version page > Build > if build 23 is attached, remove it
     (the minus sign next to it) > (+) > 1.1.0 (24) > Done > Save.
     No export compliance question should appear (the app declares no
@@ -117,11 +127,15 @@ apps/mobile/store-assets/screenshots/imessage).
 13. **iMessage App screenshots** (the section appears after step 12; 6.5-inch
     display). Upload from apps/mobile/store-assets/screenshots/imessage, in
     this order: 03-table.png, 04-your-turn-bubble.png, 02-invite-bubble.png,
-    01-create-card.png. Save. Screenshots lock when you submit.
+    01-create-card.png. Save. Screenshots lock when you submit. If App
+    Store Connect says a file has an alpha channel, send Claude the message.
 14. **Release choice.** Version Release: Manually release this version. Save.
-15. **Submit.** Add for Review (top right). Open the draft (App Review >
-    Submissions): it lists iOS App 1.1.0 and the 8 in-app purchases. Press
-    Submit for Review. Status: Waiting for Review.
+15. **Submit.** Add for Review (top right); if a dialog asks, add it to the
+    draft that already holds the purchases. Open the draft (App Review >
+    Drafts): it must list iOS App 1.1.0 and all 8 in-app purchases. If any
+    is missing: Monetization > In-App Purchases > Edit > select the missing
+    ones > Add for Review > choose the 1.1.0 draft. Press Submit for Review.
+    Status: Waiting for Review.
 
 ## Part 2. While Apple reviews (1 to 3 days)
 

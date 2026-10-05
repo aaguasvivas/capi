@@ -7,3 +7,6 @@ node_modules
 *.log
 .vercel
 *.tsbuildinfo
+
+# Raw audit evidence: kept on disk, not published (the repo is public)
+docs/audits/*/evidence/
