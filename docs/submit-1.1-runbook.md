@@ -17,6 +17,12 @@ apps/mobile/store-assets/screenshots/imessage).
 
 ## Part 1. Before you submit
 
+00. **Accept any pending Apple agreement.** Sign in at
+   developer.apple.com/account as the Account Holder and accept any updated
+   agreement it shows. Then App Store Connect > Business (Agreements, Tax,
+   and Banking): accept anything pending. Paid Apps must say Active, or the
+   reviewer sees no prices, and a pending agreement can block Submit for
+   Review.
 0. **If build 23 is already in review, pull it back.** App Store Connect >
    Apps > Capi > App Review > Submissions. Only if 1.1.0 shows Waiting for
    Review or In Review with build 23: open the submission and press Remove

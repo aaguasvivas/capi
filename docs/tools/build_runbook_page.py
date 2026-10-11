@@ -93,6 +93,9 @@ privacy_rows = "".join(f"<tr><td>{E(a)}</td><td>{E(b)}</td><td>{E(c)}</td><td>{E
 # the build number in their id, so a new build clears only those checks.
 prev = str(int(build) - 1) if build.isdigit() else "the previous build"
 steps = [
+    ("before", "agree", "Accept any pending Apple agreement", path("developer.apple.com/account, then App Store Connect > Business")
+     + "<p>Sign in at developer.apple.com/account as the Account Holder. If it asks you to review and accept an updated agreement, accept it. Then in App Store Connect &gt; Business (Agreements, Tax, and Banking), accept anything that says pending. The Paid Apps agreement must say Active: without it the reviewer sees no prices in the store, and a pending agreement can block Submit for Review.</p>",
+     "No agreement waits for you, and Paid Apps says Active."),
     ("before", f"pulled{build}", f"If build {prev} is already in review, pull it back", path("App Store Connect > Apps > Capi > App Review > Submissions")
      + f"<p>Only if 1.1.0 shows <q>Waiting for Review</q> or <q>In Review</q> with build {E(prev)}: open the submission and press <strong>Remove from Review</strong> (on some pages it is <strong>Cancel Submission</strong>). Build {E(prev)} does not have the fix for frozen turns. Everything you already entered (purchases, privacy, text, screenshots) stays. If you never submitted, tick this step and go on. While you are there, open any message from App Review that is still waiting for an answer and send it to Claude.</p>",
      f"1.1.0 is editable again, or it was never submitted."),
@@ -251,6 +254,7 @@ td.num, th.num {{ text-align: right; font-variant-numeric: tabular-nums }}
 <header>
   <h1>Capi 1.1: submit, step by step</h1>
   <p class="meta">Build to submit: <strong>1.1.0 ({E(build)})</strong> &middot; EAS <code>{E(eas_id)}</code> &middot; commit <code>{E(commit)}</code></p>
+  <p class="meta">Checked again on 2026-10-11: build {E(build)} is still the build to submit, and the live site and server are healthy.</p>
   <p class="meta">Builds 16 through {E(prev)} are superseded. Your checks from earlier stay ticked, except the steps that depend on the new build. Every paste value below comes straight from <code>docs/store-listing.md</code> and <code>docs/m5-asc-iap-setup.md</code>.</p>
 </header>
 <div class="bar" role="status"><div class="track"><div class="fill" id="fill"></div></div><span class="count" id="count">0 of {n}</span><button type="button" class="reset" id="reset">Clear checks</button></div>
