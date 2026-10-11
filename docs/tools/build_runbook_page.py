@@ -121,7 +121,7 @@ steps = [
      + "<p>Start a 1v1 game in the app and join it from the computer. Play a few moves. When it is the computer's turn, lock the iPhone, play the move on the computer, wait about 20 seconds, and unlock: the app shows your turn. Do it once more, but instead of the lock turn off Wi-Fi on the iPhone (and use no cellular data) for 20 seconds while the computer moves, then turn it back on: the app shows your turn within about 10 seconds. If a screen still shows the wrong turn after 20 seconds, stop and send Claude a screenshot of both screens.</p>",
      "Both times, the turn on the iPhone matches the computer within about 10 seconds."),
     ("before", "attach", "Attach the purchases to 1.1.0", path("Version page > In-App Purchases and Subscriptions > Select")
-     + "<p>Check all 8, Done, then Save at the top right. If the version page has no In-App Purchases section, skip this step: step 17 attaches them.</p>", "The 8 purchases are listed on the version page, or step 17 will attach them."),
+     + "<p>Check all 8, Done, then Save at the top right. If the version page has no In-App Purchases section, skip this step: the Submit for review step attaches them.</p>", "The 8 purchases are listed on the version page, or the Submit for review step will attach them."),
     ("before", "privacy", "Fill in App Privacy, then Publish", path("App Privacy > Edit")
      + "<p>Keep Name, Gameplay Content and Customer Support. Add the types below. <em>Ads &amp; analytics</em> means Third-Party Advertising, Developer's Advertising or Marketing, and Analytics.</p>"
      + f'<div class="tablewrap"><table><thead><tr><th>Data type</th><th>Purposes</th><th>Linked</th><th>Tracking</th></tr></thead><tbody>{privacy_rows}</tbody></table></div>'
@@ -138,7 +138,7 @@ steps = [
      + copy("Support URL", values["support_url"]) + copy("Marketing URL", values["marketing_url"])
      + "<p>Keywords stay as they are. Save.</p>", "Both locales saved."),
     ("before", "review2", "Fill in App Review Information", path("Version page > App Review Information")
-     + "<p class='warn'>The Notes changed on 2026-10-05: step 6 now says the browser may go first. If you pasted them before, paste them again.</p>"
+     + "<p class='warn'>The Notes changed on 2026-10-05: their step 6 now says the browser may go first. If you pasted them before, paste them again.</p>"
      + "<p>Sign-in required: off. Contact: your name, your phone in international form (+1 and the number), and your email.</p>" + copy("Notes", values["note"], True) + "<p>Save.</p>",
      f"Notes saved ({len(values['note'].encode())} of 4000 bytes)."),
     ("before", f"select{build}", f"Select build {build}", path("Version page > Build > (+)")
