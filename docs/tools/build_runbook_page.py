@@ -143,9 +143,9 @@ steps = [
      f"Notes saved ({len(values['note'].encode())} of 4000 bytes)."),
     ("before", f"select{build}", f"Select build {build}", path("Version page > Build > (+)")
      + f"<p>If build {E(prev)} is attached, remove it first (the minus sign next to it). Choose 1.1.0 ({E(build)}), Done, Save. No export compliance question should appear.</p>", f"Build {build} is attached."),
-    ("before", "shots", "Upload the iMessage screenshots", path("Version page > iMessage App (appears after the build is attached) > 6.5-inch display")
-     + "<p>From <code>apps/mobile/store-assets/screenshots/imessage</code>, in this order: <code>03-table.png</code>, <code>04-your-turn-bubble.png</code>, <code>02-invite-bubble.png</code>, <code>01-create-card.png</code>. Save. Screenshots lock when you submit. If App Store Connect says a file has an alpha channel, send Claude the message; a fixed copy takes a minute.</p>",
-     "Four screenshots in the iMessage App section."),
+    ("before", "shots2", "Upload the iMessage screenshots", path("Version page > iMessage App (appears after the build is attached) > iPhone with Dynamic Island (medium display)")
+     + "<p>Apple changed this section on 2026-10-05: the required tab is now the medium iPhone size. From <code>apps/mobile/store-assets/screenshots/imessage-medium</code> (1206 x 2622, no alpha channel), in this order: <code>03-table.png</code>, <code>04-your-turn-bubble.png</code>, <code>02-invite-bubble.png</code>, <code>01-create-card.png</code>. Skip the iPhone Duo and iPad tabs: Duo is required only from April 2027, and Capi does not run as an iPad app. Save. Screenshots lock when you submit.</p>",
+     "Four screenshots in the medium display tab of the iMessage App section."),
     ("before", "release", "Choose manual release", path("Version page > Version Release")
      + "<p>Manually release this version. Save.</p>", "Manual release selected."),
     ("before", f"submit{build}", "Submit for review", path("Version page > Add for Review (top right)")
