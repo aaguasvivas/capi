@@ -331,6 +331,8 @@ A's Todo Capi and the restore test proves nothing.
 
 ## F. Submit (You)
 
-- [ ] Add for Review with the 8 IAPs attached and build 24 selected, then
+- [x] Add for Review with the 8 IAPs attached and build 24 selected, then
+      (Done 2026-10-11 18:54 local: submission 6d86c6b4, 1.1.0 (24) and the 8
+      purchases, status Waiting for Review. Manual release.)
       submit. Review typically takes 1 to 3 days. If
       rejected, paste the message to me and I turn the fix around same day.
