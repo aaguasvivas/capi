@@ -83,7 +83,11 @@ in docs/submit-1.1-runbook.md and the published page.
 - [x] B3. AdMob ids sent and wired (app ~7274134137, banner unit /4870102119).
 - [x] B4. One-time interactive EAS credential run done; the CapiMessages
       provisioning profile exists and non-interactive builds work.
-- [ ] B5. Anti-cheat, two steps in this exact order:
+- [x] B5. Anti-cheat, two steps in this exact order. Done 2026-10-14: the key
+      is in Vercel (Production), the site was redeployed, 005 ran, and the API
+      probe passed after it (create, join, move saved, chat, server push), as
+      did postgres_changes delivery. Undo, if ever needed:
+      supabase/rollbacks/005_undo_lock_direct_writes.sql.
       1. Vercel > Project > Settings > Environment Variables: add
          SUPABASE_SERVICE_ROLE_KEY (Production, server-only, NOT NEXT_PUBLIC_)
          with the service_role key from Supabase > Project Settings > API, then
