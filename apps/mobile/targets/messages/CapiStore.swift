@@ -49,6 +49,47 @@ enum CapiStore {
         }
         set { defaults.set(newValue, forKey: "capi_avatar_color") }
     }
+    // The create card's last picks, offered again next time. Only 100 and
+    // 200 exist; anything else reads as 100.
+    static var targetScore: Int {
+        get { defaults.integer(forKey: "capi_target_score") == 200 ? 200 : 100 }
+        set { defaults.set(newValue, forKey: "capi_target_score") }
+    }
+    // A remembered table that is no longer on offer (a premium table no
+    // longer owned) falls back to Barberia.
+    static var table: String {
+        get {
+            let stored = defaults.string(forKey: "capi_table") ?? "barberia"
+            return tables.contains(stored) ? stored : "barberia"
+        }
+        set { defaults.set(newValue, forKey: "capi_table") }
+    }
+    // The tables the create card offers: the three free ones, then the
+    // premium ones this player owns. Never a locked one (guideline 4.4).
+    static var tables: [String] { ["barberia", "colmado", "patio"] + ownedTables }
+
+    // What the app shares with the extension, as capi-shared.json in the
+    // group container: the premium tile design the player picked and the
+    // premium tables they own. A missing or bad file means neither, and an
+    // id outside the known ones is dropped.
+    private struct SharedFile: Decodable { let v: Int; let tileSkin: String?; let mesas: [String] }
+    private static var sharedFile: SharedFile? {
+        guard let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)?
+                .appendingPathComponent("capi-shared.json"),
+              let data = try? Data(contentsOf: url),
+              let file = try? JSONDecoder().decode(SharedFile.self, from: data), file.v == 1 else { return nil }
+        return file
+    }
+    // The premium design this player sits with, or nil for none.
+    static var tileSkin: String? {
+        sharedFile?.tileSkin.flatMap { ["quisqueya", "borinquen", "kingston"].contains($0) ? $0 : nil }
+    }
+    // The premium tables owned, in the order the table picker lists them.
+    static var ownedTables: [String] {
+        let owned = sharedFile?.mesas ?? []
+        return ["quisqueya", "larimar", "noche"].filter(owned.contains)
+    }
+
     static func session(for gameId: String) -> CapiSession? {
         guard let data = defaults.data(forKey: sessionPrefix + gameId) else { return nil }
         return try? JSONDecoder().decode(CapiSession.self, from: data)

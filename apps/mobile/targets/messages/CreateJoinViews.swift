@@ -15,9 +15,13 @@ struct CreateCard: View {
     let allow2v2: Bool
     // The compact drawer cannot show a keyboard: the field asks to expand.
     let onNeedsKeyboard: () -> Void
-    let onCreate: (_ nickname: String, _ is2v2: Bool) -> Void
+    let onCreate: (_ nickname: String, _ is2v2: Bool, _ theme: String, _ targetScore: Int) -> Void
     @State private var nickname = CapiStore.nickname
     @State private var is2v2 = false
+    @State private var targetScore = CapiStore.targetScore
+    @State private var table = CapiStore.table
+    // Read once per card, so the list cannot change under the picker.
+    private let tables = CapiStore.tables
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -31,15 +35,40 @@ struct CreateCard: View {
                     Text("2v2").tag(true)
                 }.pickerStyle(.segmented).frame(maxWidth: 240)
             }
+            // One row for both, since the compact drawer cannot scroll. The
+            // score keeps its own width, so a longer table name never moves it.
+            HStack(spacing: 8) {
+                Picker("", selection: $targetScore) {
+                    Text(CapiStrings.score100).tag(100)
+                    Text(CapiStrings.score200).tag(200)
+                }.pickerStyle(.segmented).fixedSize()
+                Picker(CapiStrings.table, selection: $table) {
+                    ForEach(tables, id: \.self) { Text(Self.tableName($0)).tag($0) }
+                }.pickerStyle(.menu).frame(maxWidth: .infinity)
+            }.frame(maxWidth: 300)
             SubmitButton(title: CapiStrings.create, busy: state.busy, enabled: !CapiStore.clean(nickname).isEmpty) {
                 let name = CapiStore.clean(nickname)
                 guard !name.isEmpty else { return }
                 CapiStore.nickname = name
-                onCreate(name, allow2v2 && is2v2)
+                CapiStore.targetScore = targetScore
+                CapiStore.table = table
+                onCreate(name, allow2v2 && is2v2, table, targetScore)
             }
         }
         .padding()
         .avoidsOnlyOwnKeyboard(nameFocused)
+    }
+
+    // Ids come only from CapiStore.tables.
+    private static func tableName(_ id: String) -> String {
+        switch id {
+        case "colmado": return CapiStrings.themeColmado
+        case "patio": return CapiStrings.themePatio
+        case "quisqueya": return CapiStrings.themeQuisqueya
+        case "larimar": return CapiStrings.themeLarimar
+        case "noche": return CapiStrings.themeNoche
+        default: return CapiStrings.themeBarberia
+        }
     }
 }
 

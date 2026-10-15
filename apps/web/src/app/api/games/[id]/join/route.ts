@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Seat } from "@capi/engine";
 import { maxPlayersFor, type GameRow, type PlayerRow } from "@/lib/gameStart";
-import { cleanAvatarColor, cleanNickname } from "@/lib/validation";
+import { cleanAvatarColor, cleanNickname, premiumTileSkin } from "@/lib/validation";
 import { reportError } from "@/lib/report";
 import { gameLookupFailed, startIfFull } from "@/lib/gameDb";
 
@@ -14,6 +14,7 @@ export async function POST(
     const body = await req.json();
     const nickname = cleanNickname(body.nickname);
     const avatarColor = cleanAvatarColor(body.avatarColor, "#ec4899");
+    const tileSkin = premiumTileSkin(body.tileSkin);
 
     if (!nickname) {
       return NextResponse.json({ error: "Nickname is required" }, { status: 400 });
@@ -34,7 +35,8 @@ export async function POST(
     // back, found the way a rematch arrival finds its row (same name and
     // color, never the host's seat), for as long as that seat has never
     // played: the others may well have moved already. A newcomer can never
-    // join a started table, so only the original joiner is asking.
+    // join a started table, so only the original joiner is asking. The match
+    // ignores the tile design, and the hand-back writes nothing.
     if (game.status === "playing" || game.status === "round_over") {
       const { data: seatedRows } = await db.from("players").select("*").eq("game_id", params.id);
       const own = ((seatedRows ?? []) as PlayerRow[]).find(
@@ -100,6 +102,8 @@ export async function POST(
           seat: nextSeat,
           nickname,
           avatar_color: avatarColor,
+          // Only a premium design sends the key (see POST /api/games).
+          ...(tileSkin && { tile_skin: tileSkin }),
         })
         .select()
         .single();

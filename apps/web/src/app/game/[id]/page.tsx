@@ -10,6 +10,7 @@ import Hand from "@/components/game/Hand";
 import ScorePanel from "@/components/game/ScorePanel";
 import CalloutOverlay from "@/components/game/CalloutOverlay";
 import TileDisplay from "@/components/game/TileDisplay";
+import TileBack from "@/components/game/TileBack";
 import QuickChat from "@/components/game/QuickChat";
 import BugReportButton from "@/components/game/BugReportButton";
 import TablePresence from "@/components/game/TablePresence";
@@ -38,6 +39,7 @@ import {
   writeBridgeMarks,
 } from "@/lib/imessageBridge";
 import { tranqueLines, veinticincoLabel } from "@/lib/callouts";
+import { seatBackSkin } from "@/lib/tileBacks";
 import { inkOn } from "@/lib/ink";
 import {
   playSlam,
@@ -810,6 +812,9 @@ function GameContent({ id }: { id: string }) {
   const isMyTurn = mySeat !== null && gameState.currentTurn === mySeat;
 
   const myPlayer = mySeat ? players.find((p) => p.seat === mySeat) : undefined;
+  // The web has no design picker: the viewer's design is the premium one on
+  // their own seat row (sent by the app or the extension), else clasico.
+  const myBackSkin = seatBackSkin(myPlayer?.tile_skin, "clasico");
 
   // Seated view: opponent (1v1) or partner (2v2) across, opponents on the
   // sides in 2v2. A spectator has no vantage point; SpectatorSeats lists all.
@@ -817,6 +822,7 @@ function GameContent({ id }: { id: string }) {
   const topSeat = relSeats?.top ?? null;
   const topPlayer = topSeat ? players.find((p) => p.seat === topSeat) : undefined;
   const topHand = topSeat ? gameState.hands[topSeat] ?? [] : [];
+  const topBackSkin = seatBackSkin(topPlayer?.tile_skin, myBackSkin);
 
   const leftSeat = relSeats?.left ?? null;
   const rightSeat = relSeats?.right ?? null;
@@ -1145,6 +1151,7 @@ function GameContent({ id }: { id: string }) {
                       tile={[0, 0]}
                       small
                       faceDown
+                      backSkin={topBackSkin}
                     />
                   ))}
                 </div>
@@ -1179,6 +1186,11 @@ function GameContent({ id }: { id: string }) {
                     {leftPlayer?.nickname ?? "?"}
                   </span>
                 </div>
+                {/* One back in this seat's design. A short viewport (the
+                    Messages drawer on a small phone) has no room for it. */}
+                <div className="short:hidden">
+                  <TileBack skin={seatBackSkin(leftPlayer?.tile_skin, myBackSkin)} w={24} h={48} />
+                </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{leftHand.length}</span>
                   <span className="text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
@@ -1206,6 +1218,11 @@ function GameContent({ id }: { id: string }) {
                   <span className="text-white/60 text-[9px] font-medium truncate max-w-[52px] text-center leading-tight">
                     {rightPlayer?.nickname ?? "?"}
                   </span>
+                </div>
+                {/* One back in this seat's design. A short viewport (the
+                    Messages drawer on a small phone) has no room for it. */}
+                <div className="short:hidden">
+                  <TileBack skin={seatBackSkin(rightPlayer?.tile_skin, myBackSkin)} w={24} h={48} />
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{rightHand.length}</span>

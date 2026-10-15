@@ -28,6 +28,15 @@ const mirrored: Record<string, keyof Strings> = {
   connectionError: "connectionError",
   retry: "retry",
   cancel: "cancel",
+  table: "table",
+  score100: "score100",
+  score200: "score200",
+  themeBarberia: "themeBarberia",
+  themeColmado: "themeColmado",
+  themePatio: "themePatio",
+  themeQuisqueya: "themeQuisqueya",
+  themeLarimar: "themeLarimar",
+  themeNoche: "themeNoche",
 };
 
 // A function-valued key is called with the Swift interpolation of its one

@@ -131,12 +131,12 @@ final class MessagesViewController: MSMessagesAppViewController {
     private func showCreate(conversation: MSConversation) {
         guard screen != .create else { return }
         let allow2v2 = conversation.remoteParticipantIdentifiers.count >= 2
-        mountCard(.create, CreateCard(state: cardState, allow2v2: allow2v2, onNeedsKeyboard: expandForKeyboard) { [weak self] nickname, is2v2 in
-            self?.attemptCreate(nickname: nickname, is2v2: is2v2)
+        mountCard(.create, CreateCard(state: cardState, allow2v2: allow2v2, onNeedsKeyboard: expandForKeyboard) { [weak self] nickname, is2v2, theme, targetScore in
+            self?.attemptCreate(nickname: nickname, is2v2: is2v2, theme: theme, targetScore: targetScore)
         })
     }
 
-    private func attemptCreate(nickname: String, is2v2: Bool) {
+    private func attemptCreate(nickname: String, is2v2: Bool, theme: String, targetScore: Int) {
         guard !cardState.busy, !inFlight.contains(.create) else { return }
         cardState.busy = true
         cardState.status = nil
@@ -144,7 +144,8 @@ final class MessagesViewController: MSMessagesAppViewController {
         let asked = conversationKey
         Task { @MainActor in
             do {
-                let r = try await CapiAPI.create(nickname: nickname, avatarColor: CapiStore.avatarColor, is2v2: is2v2)
+                let r = try await CapiAPI.create(nickname: nickname, avatarColor: CapiStore.avatarColor, is2v2: is2v2,
+                                                 theme: theme, targetScore: targetScore, tileSkin: CapiStore.tileSkin)
                 CapiStore.save(CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId))
                 self.inFlight.remove(.create)
                 // The seat is saved either way, but the invite belongs to a
@@ -152,7 +153,7 @@ final class MessagesViewController: MSMessagesAppViewController {
                 guard self.screen == .create else { return }
                 self.cardState.busy = false
                 guard self.conversationKey == asked else { return }
-                self.insertInviteBubble(gameId: r.gameId, code: r.inviteCode, is2v2: is2v2)
+                self.insertInviteBubble(gameId: r.gameId, code: r.inviteCode, is2v2: is2v2, targetScore: targetScore)
                 // insert only stages the bubble in the compose field, so
                 // dismiss the drawer and let the user hit send, GamePigeon
                 // style: the staged bubble and its send arrow are all that
@@ -193,7 +194,8 @@ final class MessagesViewController: MSMessagesAppViewController {
         inFlight.insert(card)
         Task { @MainActor in
             do {
-                let r = try await CapiAPI.join(gameId: game.gameId, nickname: nickname, avatarColor: CapiStore.avatarColor)
+                let r = try await CapiAPI.join(gameId: game.gameId, nickname: nickname, avatarColor: CapiStore.avatarColor,
+                                               tileSkin: CapiStore.tileSkin)
                 let session = CapiSession(playerId: r.playerId, seat: r.seat, gameId: r.gameId)
                 CapiStore.save(session)
                 self.inFlight.remove(card)
@@ -288,12 +290,14 @@ final class MessagesViewController: MSMessagesAppViewController {
 
     // MARK: bubbles
 
-    private func insertInviteBubble(gameId: String, code: String, is2v2: Bool) {
+    // The invite names the table's score at the trailing edge, beside the code.
+    private func insertInviteBubble(gameId: String, code: String, is2v2: Bool, targetScore: Int) {
         let caption = is2v2 ? CapiStrings.invite2v2 : CapiStrings.invite1v1
+        let score = targetScore == 200 ? CapiStrings.score200 : CapiStrings.score100
         let session = MSSession()
         currentRef = GameRef(gameId: gameId, code: code)
         currentSession = session
-        send(caption: caption, sub: code, ref: GameRef(gameId: gameId, code: code), session: session, via: .stage)
+        send(caption: caption, sub: code, trailingSub: score, ref: GameRef(gameId: gameId, code: code), session: session, via: .stage)
     }
 
     private func handleBridge(_ event: [String: Any], gameId: String, web: GameWebView) {
@@ -431,12 +435,13 @@ final class MessagesViewController: MSMessagesAppViewController {
     // keep the thread's bubble in sync with the live game.
     private enum BubbleDelivery { case stage, send }
 
-    private func send(caption: String, sub: String?, ref: GameRef, session: MSSession, via: BubbleDelivery) {
+    private func send(caption: String, sub: String?, trailingSub: String? = nil, ref: GameRef, session: MSSession, via: BubbleDelivery) {
         guard let convo = activeConversation else { return }
         let layout = MSMessageTemplateLayout()
         layout.image = UIImage(named: "bubble-card")
         layout.caption = caption
         layout.subcaption = sub
+        layout.trailingSubcaption = trailingSub
         let message = MSMessage(session: session)
         message.layout = layout
         message.url = ref.url

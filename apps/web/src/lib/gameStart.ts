@@ -13,6 +13,8 @@ export interface PlayerRow {
   seat: string;
   nickname: string;
   avatar_color: string;
+  // Absent before migration 007, null when the seat has no premium design.
+  tile_skin?: string | null;
 }
 
 export function maxPlayersFor(game: GameRow): number {

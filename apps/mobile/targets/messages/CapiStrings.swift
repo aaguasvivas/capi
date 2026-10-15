@@ -3,8 +3,9 @@ import Foundation
 // The only strings duplicated from packages/i18n/src/strings.ts (bubbles must
 // render without the webview). Mirrored one to one: yourTurnGeneric,
 // yourTurnFor, roundWon, gameWon, gameWonTeam, invite1v1, invite2v2, inviteRematch,
-// tableNotFound, openInCapi, yourName,
-// connectionError, retry, cancel; under another name: join (joinGame), create
+// tableNotFound, openInCapi, yourName, connectionError, retry, cancel, table,
+// score100, score200, themeBarberia, themeColmado, themePatio, themeQuisqueya,
+// themeLarimar, themeNoche; under another name: join (joinGame), create
 // (createGame). apps/web/src/lib/__tests__/swiftParity.test.ts reads this file
 // and fails when a mirrored literal drifts. newGame, backToTable, cannotLoad
 // and ok exist only here.
@@ -32,4 +33,16 @@ enum CapiStrings {
     // Buttons of the page's JavaScript alert and confirm dialogs.
     static var cancel: String { es ? "Cancelar" : "Cancel" }
     static var ok: String { es ? "Aceptar" : "OK" }
+    // The create card's score and table pickers; the score also labels the
+    // invite bubble.
+    static var table: String { es ? "Mesa" : "Table" }
+    static var score100: String { es ? "100 puntos" : "100 pts" }
+    static var score200: String { es ? "200 puntos" : "200 pts" }
+    // Table names are proper nouns, the same in both languages.
+    static var themeBarberia: String { "Barbería" }
+    static var themeColmado: String { "Colmado" }
+    static var themePatio: String { "Patio" }
+    static var themeQuisqueya: String { "Quisqueya" }
+    static var themeLarimar: String { "Larimar" }
+    static var themeNoche: String { "Capi Noche" }
 }

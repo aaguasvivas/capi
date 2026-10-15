@@ -48,6 +48,8 @@ import CalloutOverlay, {
   VeinticincoBanner,
 } from "../../components/CalloutOverlay";
 import { tranqueLines, veinticincoLabel } from "../../lib/callouts";
+import { useEntitlements } from "../../lib/entitlements";
+import { seatBackSkin, skinToSend } from "../../lib/seatSkins";
 import { getSession, saveSession, type PlayerSession } from "../../lib/session";
 import { useI18n } from "../../lib/i18n";
 import {
@@ -60,6 +62,7 @@ import {
   preloadSounds,
   setMuted,
 } from "../../lib/sounds";
+import { SkinScope, useTileSkin, type TileSkinId } from "../../lib/tileSkins";
 import {
   accentTextOn,
   API_BASE,
@@ -175,6 +178,10 @@ function GameTable({
 }) {
   const { s, lang } = useI18n();
   const insets = useSafeAreaInsets();
+  // My picked design: faces stay in it, and it is the back of any seat that
+  // has no premium design. The join and rematch bodies carry it when owned.
+  const { skinId: viewerSkinId } = useTileSkin();
+  const { ent } = useEntitlements();
 
   const [session, setSession] = useState<PlayerSession | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -557,7 +564,10 @@ function GameTable({
       const res = await fetch(`${API_BASE}/api/games/${id}/rematch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId: session.playerId }),
+        body: JSON.stringify({
+          playerId: session.playerId,
+          tileSkin: skinToSend(viewerSkinId, ent.fichas),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.gameId) {
@@ -623,7 +633,11 @@ function GameTable({
       const res = await fetch(`${API_BASE}/api/games/${id}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname, avatarColor }),
+        body: JSON.stringify({
+          nickname,
+          avatarColor,
+          tileSkin: skinToSend(viewerSkinId, ent.fichas),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.playerId || !isSeat(data.seat)) {
@@ -1090,6 +1104,7 @@ function GameTable({
 
   const viewPlayer = players.find((p) => p.seat === viewSeat);
   const topPlayer = players.find((p) => p.seat === topSeat);
+  const topBackSkin = seatBackSkin(topPlayer?.tile_skin, viewerSkinId);
   const leftPlayer = leftSeat
     ? players.find((p) => p.seat === leftSeat)
     : null;
@@ -1647,18 +1662,21 @@ function GameTable({
                   </Text>
                 ) : null}
               </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 2,
-                  justifyContent: "center",
-                  overflow: "hidden",
-                }}
-              >
-                {topHand.map((_, i) => (
-                  <TileDisplay key={i} tile={[0, 0]} small faceDown />
-                ))}
-              </View>
+              {/* Backs in the seat's premium design, else in mine */}
+              <SkinScope skinId={topBackSkin}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 2,
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}
+                >
+                  {topHand.map((_, i) => (
+                    <TileDisplay key={i} tile={[0, 0]} small faceDown />
+                  ))}
+                </View>
+              </SkinScope>
             </View>
           ) : null}
 
@@ -1667,6 +1685,7 @@ function GameTable({
             <View style={{ flex: 1, flexDirection: "row" }}>
               <SideRail
                 player={leftPlayer}
+                backSkin={seatBackSkin(leftPlayer?.tile_skin, viewerSkinId)}
                 isActive={gameState.currentTurn === leftSeat}
                 tileCount={leftHand.length}
                 tilesLabel={s.tilesLabel}
@@ -1681,6 +1700,7 @@ function GameTable({
               </View>
               <SideRail
                 player={rightPlayer}
+                backSkin={seatBackSkin(rightPlayer?.tile_skin, viewerSkinId)}
                 isActive={gameState.currentTurn === rightSeat}
                 tileCount={rightHand.length}
                 tilesLabel={s.tilesLabel}
@@ -2251,14 +2271,18 @@ function ChatBubble({
 }
 
 // Narrow column flanking the board in 2v2: opponent avatar (turn ring when
-// active), name, and a tile-count chip. Their hand stays hidden.
+// active), name, one back in the seat's design, and a tile-count chip. Their
+// hand stays hidden. The column's content is about 170pt tall, inside the
+// board row's height on a 375 x 667 phone.
 function SideRail({
   player,
+  backSkin,
   isActive,
   tileCount,
   tilesLabel,
 }: {
   player?: { nickname: string; avatar_color: string } | null;
+  backSkin: TileSkinId;
   isActive: boolean;
   tileCount: number;
   tilesLabel: string;
@@ -2304,6 +2328,9 @@ function SideRail({
           {player?.nickname ?? "?"}
         </Text>
       </View>
+      <SkinScope skinId={backSkin}>
+        <TileDisplay tile={[0, 0]} faceDown w={26} h={52} />
+      </SkinScope>
       <View
         style={{
           backgroundColor: "rgba(0,0,0,0.35)",

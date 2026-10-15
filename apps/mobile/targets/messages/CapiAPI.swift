@@ -57,15 +57,21 @@ enum CapiAPI {
 
     // Games in a Messages thread are played over hours, so they are created
     // turn-based: the server never lets a silent seat be claimed in them.
-    static func create(nickname: String, avatarColor: String, is2v2: Bool, theme: String = "barberia", targetScore: Int = 100) async throws -> CreateResponse {
-        try await request(path: "/api/games", body: [
+    // tileSkin is the seat's premium design; without one the body leaves the
+    // key out, exactly as older builds send it.
+    static func create(nickname: String, avatarColor: String, is2v2: Bool, theme: String = "barberia", targetScore: Int = 100, tileSkin: String? = nil) async throws -> CreateResponse {
+        var body: [String: Any] = [
             "nickname": nickname, "avatarColor": avatarColor, "mode": "turn_based",
             "theme": theme, "is2v2": is2v2, "targetScore": targetScore,
-        ])
+        ]
+        if let tileSkin { body["tileSkin"] = tileSkin }
+        return try await request(path: "/api/games", body: body)
     }
 
-    static func join(gameId: String, nickname: String, avatarColor: String) async throws -> JoinResponse {
-        try await request(path: "/api/games/\(gameId)/join", body: ["nickname": nickname, "avatarColor": avatarColor])
+    static func join(gameId: String, nickname: String, avatarColor: String, tileSkin: String? = nil) async throws -> JoinResponse {
+        var body: [String: Any] = ["nickname": nickname, "avatarColor": avatarColor]
+        if let tileSkin { body["tileSkin"] = tileSkin }
+        return try await request(path: "/api/games/\(gameId)/join", body: body)
     }
 
     static func game(id: String) async throws -> Snapshot {

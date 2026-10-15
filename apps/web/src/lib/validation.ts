@@ -4,6 +4,10 @@
 export const NICKNAME_MAX = 20;
 export const THEMES = ["barberia", "colmado", "patio", "quisqueya", "larimar", "noche"] as const;
 export const MODES = ["live", "turn_based"] as const;
+// The tile designs a seat can carry. Clasico is never stored: it means no
+// premium design, the same as a missing or unknown value.
+export const PREMIUM_TILE_SKINS = ["quisqueya", "borinquen", "kingston"] as const;
+export type PremiumTileSkin = (typeof PREMIUM_TILE_SKINS)[number];
 
 // The cut counts UTF-16 units, like every client's maxLength, but never
 // splits an emoji or another character outside the BMP in two: a lone
@@ -26,4 +30,10 @@ export function isTheme(value: unknown): value is (typeof THEMES)[number] {
 
 export function isMode(value: unknown): value is (typeof MODES)[number] {
   return typeof value === "string" && (MODES as readonly string[]).includes(value);
+}
+
+export function premiumTileSkin(value: unknown): PremiumTileSkin | null {
+  return typeof value === "string" && (PREMIUM_TILE_SKINS as readonly string[]).includes(value)
+    ? (value as PremiumTileSkin)
+    : null;
 }

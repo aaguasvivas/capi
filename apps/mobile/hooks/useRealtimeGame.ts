@@ -56,6 +56,8 @@ interface PlayerRecord {
   nickname: string;
   avatar_color: string;
   game_id: string;
+  // The seat's premium tile design (migration 007); null or missing for none.
+  tile_skin?: string | null;
 }
 
 interface MoveIntentPayload {

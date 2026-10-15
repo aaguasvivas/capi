@@ -51,6 +51,11 @@ export const metadata: Metadata = {
     title: "Capi",
     statusBarStyle: "default",
   },
+  // Smart App Banner in Safari on iPhone (WKWebView, so the Messages drawer,
+  // ignores it). No app-argument: the app has no universal links.
+  itunes: {
+    appId: "6794404340",
+  },
   formatDetection: {
     telephone: false,
     email: false,

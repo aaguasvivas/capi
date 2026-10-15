@@ -16,7 +16,7 @@ import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AdBanner from "../components/AdBanner";
 import ModeGlyph from "../components/ModeGlyph";
-import StoreSheet from "../components/StoreSheet";
+import StoreSheet, { type StorePreview } from "../components/StoreSheet";
 import { useEntitlements } from "../lib/entitlements";
 import { loadHomePrefs, saveHomePrefs, savedThemeAction } from "../lib/homePrefs";
 import {
@@ -27,6 +27,7 @@ import {
   type ProductId,
 } from "../lib/iapCatalog";
 import { useI18n } from "../lib/i18n";
+import { skinToSend } from "../lib/seatSkins";
 import { clearSession, saveSession } from "../lib/session";
 import { TILE_SKINS, useTileSkin, type TileSkinId } from "../lib/tileSkins";
 import { API_BASE, THEME } from "../theme";
@@ -55,31 +56,27 @@ type ThemeId =
 
 const TABLE_THEMES: {
   id: ThemeId;
-  label: string;
   color: string;
   accent: string;
   premium?: PremiumMesaId;
 }[] = [
-  { id: "barberia", label: "Barbería", color: "#145228", accent: "#c0392b" },
-  { id: "colmado", label: "Colmado", color: "#3a2a1a", accent: "#d4a017" },
-  { id: "patio", label: "Patio", color: "#7a7268", accent: "#c4693d" },
+  { id: "barberia", color: "#145228", accent: "#c0392b" },
+  { id: "colmado", color: "#3a2a1a", accent: "#d4a017" },
+  { id: "patio", color: "#7a7268", accent: "#c4693d" },
   {
     id: "quisqueya",
-    label: "Quisqueya",
     color: "#0f2b56",
     accent: "#c9a227",
     premium: "quisqueya",
   },
   {
     id: "larimar",
-    label: "Larimar",
     color: "#17606f",
     accent: "#58b7c4",
     premium: "larimar",
   },
   {
     id: "noche",
-    label: "Capi Noche",
     color: "#131329",
     accent: "#6366f1",
     premium: "noche",
@@ -120,10 +117,6 @@ function productIdForFichas(id: PremiumFichasId): ProductId {
 // share a strip of the other's target.
 const PILL_SLOP_V = 11;
 const PILL_SLOP_H = 8;
-
-// Which locked picker card opened the store, so the matching purchase can
-// select that design and dismiss the sheet.
-type StoreTarget = { mesa: PremiumMesaId } | { fichas: PremiumFichasId };
 
 // Tables this device joined that are still in progress, read from the
 // per-game session keys (capi_session_<gameId>).
@@ -253,7 +246,10 @@ export default function Index() {
     null
   );
   const [storeOpen, setStoreOpen] = useState(false);
-  const storeTargetRef = useRef<StoreTarget | null>(null);
+  // Which locked picker card opened the store, so the matching purchase can
+  // select that design and dismiss the sheet. The sheet opens on its preview.
+  const storeTargetRef = useRef<StorePreview | null>(null);
+  const [storePreview, setStorePreview] = useState<StorePreview | null>(null);
   const [resumable, setResumable] = useState<ResumableGame[]>([]);
 
   // Last launch's choices. The table waits in savedTheme until entitlements
@@ -321,9 +317,10 @@ export default function Index() {
     }, [])
   );
 
-  // Premium labels come from i18n; the free three keep their TABLE_THEMES
-  // labels (proper nouns, identical in both languages).
-  const premiumLabels: Record<PremiumMesaId, string> = {
+  const tableLabels: Record<ThemeId, string> = {
+    barberia: s.themeBarberia,
+    colmado: s.themeColmado,
+    patio: s.themePatio,
     quisqueya: s.themeQuisqueya,
     larimar: s.themeLarimar,
     noche: s.themeNoche,
@@ -341,12 +338,13 @@ export default function Index() {
   const fichasLabels: Record<TileSkinId, string> = {
     clasico: s.fichasClasico,
     quisqueya: s.themeQuisqueya,
-    borinquen: "Borinquen",
-    kingston: "Kingston",
+    borinquen: s.fichasBorinquen,
+    kingston: s.fichasKingston,
   };
 
-  function openStore(target: StoreTarget | null) {
+  function openStore(target: StorePreview | null) {
     storeTargetRef.current = target;
+    setStorePreview(target);
     setStoreOpen(true);
   }
 
@@ -390,6 +388,7 @@ export default function Index() {
           theme,
           is2v2,
           targetScore,
+          tileSkin: skinToSend(skinId, ent.fichas),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -434,7 +433,11 @@ export default function Index() {
       const joinRes = await fetch(`${API_BASE}/api/games/${gameId}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname: nickname.trim(), avatarColor }),
+        body: JSON.stringify({
+          nickname: nickname.trim(),
+          avatarColor,
+          tileSkin: skinToSend(skinId, ent.fichas),
+        }),
       });
       const data = await joinRes.json().catch(() => ({}));
       if (!joinRes.ok) {
@@ -709,7 +712,7 @@ export default function Index() {
                   t.premium !== undefined && !ent.mesas.has(t.premium)
                     ? t.premium
                     : null;
-                const title = t.premium ? premiumLabels[t.premium] : t.label;
+                const title = tableLabels[t.id];
                 const price = lockedMesa
                   ? prices.get(productIdForMesa(lockedMesa)) ?? s.priceUnknown
                   : null;
@@ -1061,6 +1064,7 @@ export default function Index() {
 
       <StoreSheet
         visible={storeOpen}
+        initialPreview={storePreview}
         onClose={closeStore}
         onPurchased={handlePurchased}
       />

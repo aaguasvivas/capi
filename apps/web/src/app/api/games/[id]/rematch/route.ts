@@ -7,6 +7,7 @@ import { uniqueInviteCode } from "@/lib/inviteCode";
 import { reportError } from "@/lib/report";
 import { gameLookupFailed, startIfFull } from "@/lib/gameDb";
 import { rebroadcastState } from "@/lib/resync";
+import { premiumTileSkin, type PremiumTileSkin } from "@/lib/validation";
 
 type Db = ReturnType<typeof createServerClient>;
 
@@ -27,12 +28,15 @@ interface Arrival {
 // Seats `who` at the rematch table, in their original seat when it is free.
 // Idempotent: a second call (or a second player's client racing the first)
 // returns the existing row. Starts the table the moment the last seat fills.
-// Returns "full" only when no seat is left for them.
+// Returns "full" only when no seat is left for them. The new seat keeps the
+// tile design the request names, else the one the original seat had: the
+// iMessage web view and the 1.0 and 1.1 apps send only playerId.
 async function arrive(
   db: Db,
   rematchId: string,
   who: PlayerRow,
-  originals: PlayerRow[]
+  originals: PlayerRow[],
+  tileSkin: PremiumTileSkin | null
 ): Promise<Arrival | "full" | null> {
   const { data: game } = await db.from("games").select("*").eq("id", rematchId).single();
   if (!game) return null;
@@ -59,6 +63,7 @@ async function arrive(
     null;
 
   if (!me) {
+    const skin = tileSkin ?? premiumTileSkin(who.tile_skin);
     // Their original seat first; if someone who took the invite code holds
     // it, the next free seat, so the table can still fill. Never hand out a
     // row that belongs to another person.
@@ -72,7 +77,13 @@ async function arrive(
       if (taken.has(seat)) continue;
       const { data: inserted, error } = await db
         .from("players")
-        .insert({ game_id: rematchId, seat, nickname: who.nickname, avatar_color: who.avatar_color })
+        .insert({
+          game_id: rematchId,
+          seat,
+          nickname: who.nickname,
+          avatar_color: who.avatar_color,
+          ...(skin && { tile_skin: skin }),
+        })
         .select()
         .single();
       if (!error && inserted) {
@@ -121,6 +132,7 @@ export async function POST(
   try {
     const body = await req.json();
     const { playerId } = body as { playerId: string };
+    const tileSkin = premiumTileSkin(body.tileSkin);
     if (!playerId) {
       return NextResponse.json({ error: "Missing playerId" }, { status: 400 });
     }
@@ -150,7 +162,7 @@ export async function POST(
     // A failed read or write answers an error the client can retry, never a
     // second table: relinking would strand whoever already sits at the first.
     if (state?.rematchGameId) {
-      const arrival = await arrive(db, state.rematchGameId, requester, originals);
+      const arrival = await arrive(db, state.rematchGameId, requester, originals, tileSkin);
       if (arrival === "full") return NextResponse.json({ error: "Game is full" }, { status: 409 });
       if (!arrival) return NextResponse.json({ error: "Failed to create rematch" }, { status: 500 });
       return NextResponse.json(arrival);
@@ -208,7 +220,7 @@ export async function POST(
     // screen that misses the database event still sees the rematch.
     await rebroadcastState(db, params.id);
 
-    const arrival = await arrive(db, rematchId, requester, originals);
+    const arrival = await arrive(db, rematchId, requester, originals, tileSkin);
     if (arrival === "full") return NextResponse.json({ error: "Game is full" }, { status: 409 });
     if (!arrival) {
       return NextResponse.json({ error: "Failed to create rematch" }, { status: 500 });

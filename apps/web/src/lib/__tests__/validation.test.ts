@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NICKNAME_MAX, cleanNickname } from "../validation";
+import { NICKNAME_MAX, cleanNickname, premiumTileSkin } from "../validation";
 
 describe("cleanNickname", () => {
   it("collapses spaces and trims", () => {
@@ -22,5 +22,17 @@ describe("cleanNickname", () => {
 
   it("rejects a blank name", () => {
     expect(cleanNickname("   ")).toBeNull();
+  });
+});
+
+describe("premiumTileSkin", () => {
+  it("keeps the three premium designs", () => {
+    expect(["quisqueya", "borinquen", "kingston"].map(premiumTileSkin)).toEqual(["quisqueya", "borinquen", "kingston"]);
+  });
+
+  it("reads clasico and anything unknown as no premium design", () => {
+    for (const value of ["clasico", "Kingston", "", null, undefined, 3, {}]) {
+      expect(premiumTileSkin(value)).toBeNull();
+    }
   });
 });

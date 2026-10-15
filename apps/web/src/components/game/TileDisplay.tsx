@@ -2,6 +2,8 @@
 
 import { memo } from "react";
 import type { Tile } from "@capi/engine";
+import type { TileSkinId } from "@/lib/tileBacks";
+import TileBack from "./TileBack";
 
 interface Props {
   tile: Tile;
@@ -9,6 +11,8 @@ interface Props {
   onClick?: (tile: Tile) => void;
   small?: boolean;
   faceDown?: boolean;
+  // The design a face-down tile is drawn in (the seat's, see tileBacks).
+  backSkin?: TileSkinId;
   highlight?: boolean;
   // Explicit pixel size (board tiles). Overrides the small/large presets so
   // the board can render a crisp compact tile on narrow screens. Pips scale
@@ -81,6 +85,7 @@ function TileDisplay({
   onClick,
   small = false,
   faceDown = false,
+  backSkin = "clasico",
   highlight = false,
   w,
   h,
@@ -94,27 +99,7 @@ function TileDisplay({
       : "w-11 h-[88px]";
   const sizeStyle = explicitSize ? { width: w, height: h } : undefined;
 
-  if (faceDown) {
-    return (
-      <div
-        style={sizeStyle}
-        className={`
-          ${sizeClasses} rounded-lg
-          bg-gradient-to-br from-[#1e3a5f] via-[#1a3355] to-[#152a4a]
-          border-2 border-[#0f1f35]
-          flex items-center justify-center shadow-md
-        `}
-      >
-        <div
-          className={`
-            ${small ? "w-5 h-12" : "w-7 h-16"}
-            rounded-md border border-[#2a5a8c]/30
-            bg-gradient-to-br from-[#2a5a8c]/20 to-transparent
-          `}
-        />
-      </div>
-    );
-  }
+  if (faceDown) return <TileBack skin={backSkin} small={small} w={w} h={h} />;
 
   const tileBg = isDouble
     ? "bg-gradient-to-br from-[#F2EBDA] via-[#ECE4CC] to-[#E5DDC0]"
@@ -184,6 +169,7 @@ function tilePropsEqual(a: Props, b: Props): boolean {
     a.onClick === b.onClick &&
     a.small === b.small &&
     a.faceDown === b.faceDown &&
+    a.backSkin === b.backSkin &&
     a.highlight === b.highlight &&
     a.w === b.w &&
     a.h === b.h

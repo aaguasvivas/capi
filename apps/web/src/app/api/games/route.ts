@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { uniqueInviteCode } from "@/lib/inviteCode";
-import { cleanAvatarColor, cleanNickname, isMode, isTheme } from "@/lib/validation";
+import { cleanAvatarColor, cleanNickname, isMode, isTheme, premiumTileSkin } from "@/lib/validation";
 import { reportError } from "@/lib/report";
 
 export async function POST(req: NextRequest) {
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     const mode = isMode(body.mode) ? body.mode : "turn_based";
     const theme = isTheme(body.theme) ? body.theme : "barberia";
     const avatarColor = cleanAvatarColor(body.avatarColor, "#6366f1");
+    const tileSkin = premiumTileSkin(body.tileSkin);
 
     const db = createServerClient();
 
@@ -52,6 +53,9 @@ export async function POST(req: NextRequest) {
         seat: "n",
         nickname,
         avatar_color: avatarColor,
+        // The key goes only with a premium design, so a body without one
+        // inserts exactly what older clients always inserted.
+        ...(tileSkin && { tile_skin: tileSkin }),
       })
       .select()
       .single();

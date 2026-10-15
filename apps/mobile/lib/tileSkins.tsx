@@ -286,6 +286,9 @@ export function TileBack({
   const { bg, border, variant } = skin.back;
   // Today's presets: small tiles are 36x72, large 44x88.
   const small = width < 40;
+  // The clasico panel keeps each preset's size and shrinks in proportion on
+  // backs smaller than the small preset (the 2v2 side rail's 26x52).
+  const shrink = Math.min(1, width / 36, height / 72);
   // Content box inside the 2px border.
   const iw = width - 4;
   const ih = height - 4;
@@ -310,9 +313,9 @@ export function TileBack({
       {variant === "clasico" ? (
         <View
           style={{
-            width: small ? 20 : 28,
-            height: small ? 48 : 64,
-            borderRadius: 6,
+            width: (small ? 20 : 28) * shrink,
+            height: (small ? 48 : 64) * shrink,
+            borderRadius: 6 * shrink,
             borderWidth: 1,
             borderColor: "rgba(42,90,140,0.3)",
             backgroundColor: "rgba(42,90,140,0.2)",

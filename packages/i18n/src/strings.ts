@@ -1,7 +1,8 @@
 // NOTE: apps/mobile/targets/messages/CapiStrings.swift duplicates the iMessage
 // bubble captions and drawer strings (yourTurnGeneric/yourTurnFor/roundWon/
 // gameWon/gameWonTeam/invite1v1/invite2v2/inviteRematch/join/create/tableNotFound/
-// openInCapi/yourName/connectionError/retry/cancel). Bubbles
+// openInCapi/yourName/connectionError/retry/cancel/table/score100/score200/
+// themeBarberia/themeColmado/themePatio/themeQuisqueya/themeLarimar/themeNoche). Bubbles
 // render without JS, so they cannot read this file. If you change tone or
 // wording here, update CapiStrings.swift to match (swiftParity.test.ts fails
 // until you do).
