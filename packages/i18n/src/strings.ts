@@ -61,6 +61,17 @@ export interface Strings {
   fichasQuisqueyaDesc: string;
   fichasBorinquenDesc: string;
   fichasKingstonDesc: string;
+  // Free table names and premium fichas names (proper nouns, same in ES and EN)
+  themeBarberia: string;
+  themeColmado: string;
+  themePatio: string;
+  fichasBorinquen: string;
+  fichasKingston: string;
+  // Store preview: a tap on a design opens it full size before buying
+  previewYourTiles: string;
+  previewOthersSee: string;
+  previewOnTable: string;
+  previewOf: (name: string) => string;
 
   // Waiting room
   waitingForPlayers: (n: number) => string;
@@ -336,6 +347,15 @@ export const es: Strings = {
   fichasQuisqueyaDesc: "Bandera RD",
   fichasBorinquenDesc: "Bandera PR",
   fichasKingstonDesc: "Bandera JM",
+  themeBarberia: "Barbería",
+  themeColmado: "Colmado",
+  themePatio: "Patio",
+  fichasBorinquen: "Borinquen",
+  fichasKingston: "Kingston",
+  previewYourTiles: "Tus fichas",
+  previewOthersSee: "Lo que ven los demás",
+  previewOnTable: "En la mesa",
+  previewOf: (name) => `Ver ${name}`,
 
   waitingForPlayers: (n) => `Esperando ${n} jugador${n !== 1 ? "es" : ""}…`,
   preparing: "Preparando…",
@@ -572,6 +592,15 @@ export const en: Strings = {
   fichasQuisqueyaDesc: "DR flag",
   fichasBorinquenDesc: "PR flag",
   fichasKingstonDesc: "JM flag",
+  themeBarberia: "Barbería",
+  themeColmado: "Colmado",
+  themePatio: "Patio",
+  fichasBorinquen: "Borinquen",
+  fichasKingston: "Kingston",
+  previewYourTiles: "Your tiles",
+  previewOthersSee: "What the others see",
+  previewOnTable: "On the table",
+  previewOf: (name) => `Preview ${name}`,
 
   waitingForPlayers: (n) => `Waiting on ${n} more…`,
   preparing: "Hold on…",
