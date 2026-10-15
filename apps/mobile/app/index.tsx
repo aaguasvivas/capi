@@ -857,6 +857,8 @@ export default function Index() {
                     <Text
                       style={[cardTitleStyle, { fontSize: 10 }]}
                       numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
                     >
                       {fichasLabels[f]}
                     </Text>
