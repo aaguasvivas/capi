@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import {
   SafeAreaView,
@@ -2284,16 +2285,22 @@ function ChatBubble({
 // only when the row is tall enough. The rail is centered, so the back
 // pushes the count box down onto the mute and chat buttons in the felt's
 // bottom corners (their tops sit 38pt up). 235 = the rail with the back
-// (about 155pt) plus 38 above and below, plus a small margin. Before the
-// first layout the back stays hidden, so it never flashes in and out.
+// (about 155pt) plus 38 above and below, plus a small margin. The rail's
+// text lines (about 40pt) grow with the iOS text size, so the threshold
+// grows with them. Before the first layout the back stays hidden, so it
+// never flashes in and out.
 const RAIL_BACK_MIN_ROW = 235;
+const RAIL_TEXT_HEIGHT = 40;
 
 function SideRow({ children }: { children: (showBack: boolean) => ReactNode }) {
-  const [showBack, setShowBack] = useState(false);
+  const { fontScale } = useWindowDimensions();
+  const [rowHeight, setRowHeight] = useState(0);
+  const showBack =
+    rowHeight >= RAIL_BACK_MIN_ROW + RAIL_TEXT_HEIGHT * Math.max(0, fontScale - 1);
   return (
     <View
       style={{ flex: 1, flexDirection: "row" }}
-      onLayout={(e) => setShowBack(e.nativeEvent.layout.height >= RAIL_BACK_MIN_ROW)}
+      onLayout={(e) => setRowHeight(e.nativeEvent.layout.height)}
     >
       {children(showBack)}
     </View>
