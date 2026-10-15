@@ -459,6 +459,26 @@ html, body {
   max-height: 38dvh;
 }
 
+/* ── 2v2 side rails ───────────────────────────────────────
+   Each side column shows one tile back in that seat's design, but only
+   when the board row is tall enough: the column is centered, so the back
+   pushes its count chip down toward the mute and chat buttons in the
+   felt's bottom corners (their tops sit 52px up). 256px = the column with
+   the back (about 151px) plus 52px above and below. Without container
+   query support the back stays hidden. */
+.side-row {
+  container-type: size;
+  container-name: side-row;
+}
+.rail-back {
+  display: none;
+}
+@container side-row (min-height: 256px) {
+  .rail-back {
+    display: block;
+  }
+}
+
 /* ── Quick chat tray ──────────────────────────────────────
    The tray opens upward from the chat button at the bottom of the felt.
    The hand takes at most 38dvh, so the felt ends at 62dvh or lower; minus

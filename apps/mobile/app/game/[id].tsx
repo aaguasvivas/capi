@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -1682,30 +1682,36 @@ function GameTable({
 
           {/* Board, flanked by opponent side rails in 2v2 */}
           {is2v2 && !tableClosed ? (
-            <View style={{ flex: 1, flexDirection: "row" }}>
-              <SideRail
-                player={leftPlayer}
-                backSkin={seatBackSkin(leftPlayer?.tile_skin, viewerSkinId)}
-                isActive={gameState.currentTurn === leftSeat}
-                tileCount={leftHand.length}
-                tilesLabel={s.tilesLabel}
-              />
-              <View style={{ flex: 1 }}>
-                <Board
-                  board={board}
-                  endsGlow={isMyTurn}
-                  playableEnds={playableEnds}
-                  selectedTile={selectedTile}
-                />
-              </View>
-              <SideRail
-                player={rightPlayer}
-                backSkin={seatBackSkin(rightPlayer?.tile_skin, viewerSkinId)}
-                isActive={gameState.currentTurn === rightSeat}
-                tileCount={rightHand.length}
-                tilesLabel={s.tilesLabel}
-              />
-            </View>
+            <SideRow>
+              {(showBack) => (
+                <>
+                  <SideRail
+                    player={leftPlayer}
+                    backSkin={seatBackSkin(leftPlayer?.tile_skin, viewerSkinId)}
+                    showBack={showBack}
+                    isActive={gameState.currentTurn === leftSeat}
+                    tileCount={leftHand.length}
+                    tilesLabel={s.tilesLabel}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Board
+                      board={board}
+                      endsGlow={isMyTurn}
+                      playableEnds={playableEnds}
+                      selectedTile={selectedTile}
+                    />
+                  </View>
+                  <SideRail
+                    player={rightPlayer}
+                    backSkin={seatBackSkin(rightPlayer?.tile_skin, viewerSkinId)}
+                    showBack={showBack}
+                    isActive={gameState.currentTurn === rightSeat}
+                    tileCount={rightHand.length}
+                    tilesLabel={s.tilesLabel}
+                  />
+                </>
+              )}
+            </SideRow>
           ) : (
             <View style={{ flex: 1 }}>
               <Board
@@ -2274,15 +2280,37 @@ function ChatBubble({
 // active), name, one back in the seat's design, and a tile-count chip. Their
 // hand stays hidden. The column's content is about 170pt tall, inside the
 // board row's height on a 375 x 667 phone.
+// The 2v2 row: the board between the two side rails. A rail shows its back
+// only when the row is tall enough. The rail is centered, so the back
+// pushes the count box down onto the mute and chat buttons in the felt's
+// bottom corners (their tops sit 38pt up). 235 = the rail with the back
+// (about 155pt) plus 38 above and below, plus a small margin. Before the
+// first layout the back stays hidden, so it never flashes in and out.
+const RAIL_BACK_MIN_ROW = 235;
+
+function SideRow({ children }: { children: (showBack: boolean) => ReactNode }) {
+  const [showBack, setShowBack] = useState(false);
+  return (
+    <View
+      style={{ flex: 1, flexDirection: "row" }}
+      onLayout={(e) => setShowBack(e.nativeEvent.layout.height >= RAIL_BACK_MIN_ROW)}
+    >
+      {children(showBack)}
+    </View>
+  );
+}
+
 function SideRail({
   player,
   backSkin,
+  showBack,
   isActive,
   tileCount,
   tilesLabel,
 }: {
   player?: { nickname: string; avatar_color: string } | null;
   backSkin: TileSkinId;
+  showBack: boolean;
   isActive: boolean;
   tileCount: number;
   tilesLabel: string;
@@ -2328,9 +2356,11 @@ function SideRail({
           {player?.nickname ?? "?"}
         </Text>
       </View>
-      <SkinScope skinId={backSkin}>
-        <TileDisplay tile={[0, 0]} faceDown w={26} h={52} />
-      </SkinScope>
+      {showBack ? (
+        <SkinScope skinId={backSkin}>
+          <TileDisplay tile={[0, 0]} faceDown w={26} h={52} />
+        </SkinScope>
+      ) : null}
       <View
         style={{
           backgroundColor: "rgba(0,0,0,0.35)",

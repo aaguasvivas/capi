@@ -201,12 +201,14 @@ export default function StoreSheet({
       ? {
           name: mesaNames[p.mesa],
           desc: mesaDescs[p.mesa],
+          openLabel: s.previewMesaOf(mesaNames[p.mesa]),
           productId: MESA_PRODUCTS[p.mesa],
           owned: ent.mesas.has(p.mesa),
         }
       : {
           name: fichasNames[p.fichas],
           desc: fichasDescs[p.fichas],
+          openLabel: s.previewFichasOf(fichasNames[p.fichas]),
           productId: FICHAS_PRODUCTS[p.fichas],
           owned: ent.fichas.has(p.fichas),
         };
@@ -332,7 +334,7 @@ export default function StoreSheet({
               {MESA_IDS.map((id) => (
                 <PreviewThumb
                   key={`mesa-${id}`}
-                  label={s.previewOf(mesaNames[id])}
+                  label={s.previewMesaOf(mesaNames[id])}
                   hint={mesaDescs[id]}
                   onPress={() => setPreview({ mesa: id })}
                 >
@@ -342,7 +344,7 @@ export default function StoreSheet({
               {FICHAS_IDS.map((id) => (
                 <PreviewThumb
                   key={`fichas-${id}`}
-                  label={s.previewOf(fichasNames[id])}
+                  label={s.previewFichasOf(fichasNames[id])}
                   hint={fichasDescs[id]}
                   onPress={() => setPreview({ fichas: id })}
                 >
@@ -574,6 +576,7 @@ function ProductRow({
   owned,
   onPurchased,
   onOpen,
+  openLabel,
 }: {
   name: string;
   desc: string;
@@ -584,8 +587,10 @@ function ProductRow({
   owned: boolean;
   onPurchased?: (id: ProductId) => void;
   onOpen?: () => void;
+  // The screen reader name of the open-preview button. It names the kind
+  // (table or tiles), since a table and a tile design can share a name.
+  openLabel?: string;
 }) {
-  const { s } = useI18n();
   const infoStyle = {
     flex: 1,
     flexDirection: "row" as const,
@@ -628,7 +633,7 @@ function ProductRow({
         <Pressable
           onPress={onOpen}
           accessibilityRole="button"
-          accessibilityLabel={s.previewOf(name)}
+          accessibilityLabel={openLabel ?? name}
           accessibilityHint={desc}
           style={infoStyle}
         >

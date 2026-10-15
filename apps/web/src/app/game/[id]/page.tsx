@@ -1168,7 +1168,7 @@ function GameContent({ id }: { id: string }) {
 
           {/* Board + side hands for a seated 2v2 player */}
           {is2v2 && mySeat && !isGameEnded ? (
-            <div className="flex-1 flex min-h-0 relative">
+            <div className="side-row flex-1 flex min-h-0 relative">
               {/* Left opponent */}
               <div className="w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] py-2">
                 <div className="flex flex-col items-center gap-1">
@@ -1186,9 +1186,9 @@ function GameContent({ id }: { id: string }) {
                     {leftPlayer?.nickname ?? "?"}
                   </span>
                 </div>
-                {/* One back in this seat's design. A short viewport (the
-                    Messages drawer on a small phone) has no room for it. */}
-                <div className="short:hidden">
+                {/* One back in this seat's design, shown only when the board
+                    row has room for it (.rail-back in globals.css). */}
+                <div className="rail-back">
                   <TileBack skin={seatBackSkin(leftPlayer?.tile_skin, myBackSkin)} w={24} h={48} />
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
@@ -1219,9 +1219,9 @@ function GameContent({ id }: { id: string }) {
                     {rightPlayer?.nickname ?? "?"}
                   </span>
                 </div>
-                {/* One back in this seat's design. A short viewport (the
-                    Messages drawer on a small phone) has no room for it. */}
-                <div className="short:hidden">
+                {/* One back in this seat's design, shown only when the board
+                    row has room for it (.rail-back in globals.css). */}
+                <div className="rail-back">
                   <TileBack skin={seatBackSkin(rightPlayer?.tile_skin, myBackSkin)} w={24} h={48} />
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">

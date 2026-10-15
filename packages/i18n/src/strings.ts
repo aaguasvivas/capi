@@ -72,7 +72,8 @@ export interface Strings {
   previewYourTiles: string;
   previewOthersSee: string;
   previewOnTable: string;
-  previewOf: (name: string) => string;
+  previewMesaOf: (name: string) => string;
+  previewFichasOf: (name: string) => string;
 
   // Waiting room
   waitingForPlayers: (n: number) => string;
@@ -356,7 +357,8 @@ export const es: Strings = {
   previewYourTiles: "Tus fichas",
   previewOthersSee: "Lo que ven los demás",
   previewOnTable: "En la mesa",
-  previewOf: (name) => `Ver ${name}`,
+  previewMesaOf: (name) => `Ver la mesa ${name}`,
+  previewFichasOf: (name) => `Ver las fichas ${name}`,
 
   waitingForPlayers: (n) => `Esperando ${n} jugador${n !== 1 ? "es" : ""}…`,
   preparing: "Preparando…",
@@ -601,7 +603,8 @@ export const en: Strings = {
   previewYourTiles: "Your tiles",
   previewOthersSee: "What the others see",
   previewOnTable: "On the table",
-  previewOf: (name) => `Preview ${name}`,
+  previewMesaOf: (name) => `Preview the ${name} table`,
+  previewFichasOf: (name) => `Preview the ${name} tiles`,
 
   waitingForPlayers: (n) => `Waiting on ${n} more…`,
   preparing: "Hold on…",
