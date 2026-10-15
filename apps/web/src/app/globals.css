@@ -463,9 +463,10 @@ html, body {
    Each side column shows one tile back in that seat's design, but only
    when the board row is tall enough: the column is centered, so the back
    pushes its count chip down toward the mute and chat buttons in the
-   felt's bottom corners (their tops sit 52px up). 256px = the column with
-   the back (about 151px) plus 52px above and below. Without container
-   query support the back stays hidden. */
+   felt's bottom corners (their tops sit 52px up). The column with the back
+   is about 151px, so at 256px the count chip just touches the mute button
+   (measured); 264px leaves a 4px gap. Without container query support the
+   back stays hidden. */
 .side-row {
   container-type: size;
   container-name: side-row;
@@ -473,7 +474,7 @@ html, body {
 .rail-back {
   display: none;
 }
-@container side-row (min-height: 256px) {
+@container side-row (min-height: 264px) {
   .rail-back {
     display: block;
   }
