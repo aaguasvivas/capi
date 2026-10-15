@@ -6,10 +6,10 @@ Adelson's list from real games with friends after 1.1 went live (2026-10-13). Ea
 
 | # | Item | Decision | Where it ships |
 |---|------|----------|----------------|
-| 1 | Other players see your tile backs (option A) | Do it | Server, app, web |
-| 2 | Smart App Banner on playcapi.com | Do it | Web only, live after deploy |
-| 3 | Full preview before you buy | Do it | App |
-| 4 | 100 / 200 points and a table picker in iMessage | Do it | iMessage extension (app build) |
+| 1 | Other players see your tile backs (option A) | Built 2026-10-15; web goes live after migration 007 | Server, app, web |
+| 2 | Smart App Banner on playcapi.com | Built 2026-10-15; live with the web push | Web only, live after deploy |
+| 3 | Full preview before you buy | Built and checked in the simulator 2026-10-15 | App |
+| 4 | 100 / 200 points and a table picker in iMessage | Built and checked in the simulator 2026-10-15 | iMessage extension (app build) |
 | 5 | Voice notes for trash talk | B (players record), later | App and web |
 
 Items 1, 3, and 4 need a new iOS build and App Review, so they ship together in one release, with the deferred 1.1.1 fixes (`docs/incident-2026-09-30-stalled-turns.md`, `docs/audits/2026-10-05/README.md`). Item 2 is web only and goes live when Vercel deploys.
