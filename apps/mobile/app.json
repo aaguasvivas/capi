@@ -57,6 +57,7 @@
     "plugins": [
       "expo-router",
       "./plugins/withFmtConstevalFix",
+      "./plugins/withPodsDeploymentTarget",
       "./plugins/withMessagesExtension",
       "expo-iap",
       [
