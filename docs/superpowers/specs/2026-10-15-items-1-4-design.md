@@ -58,9 +58,9 @@ Source list and decisions: `docs/ideas-after-1.1.md`. This file fixes the contra
 
 ### Shared file from the app to the extension
 
-- The app writes `capi-shared.json` in the App Group container `group.dev.capi.app` with `expo-file-system/next` (`Paths.appleSharedContainers`).
+- The app writes `capi-shared.json` in the App Group container `group.dev.capi.app` through the local native module `CapiShared` (`apps/mobile/modules/capi-shared`), which calls `FileManager.containerURL(forSecurityApplicationGroupIdentifier:)` and writes atomically. Not `expo-file-system/next`: its permission check compares the `/private/var` and `/var` forms of the container path, so the first write on a device is refused (found in review, 2026-10-15).
 - Shape: `{"v":1,"tileSkin":"quisqueya"|null,"mesas":["larimar","quisqueya"]}`. `tileSkin` is the picked design only when it is premium and owned. `mesas` lists the owned premium tables, sorted.
-- The app writes it after entitlements hydrate and whenever entitlements or the picked design change. iOS only. A missing container (Expo Go, Android, a build without the entitlement) is a silent no-op.
+- The app writes it after entitlements hydrate and whenever entitlements or the picked design change. iOS only; Expo Go and Android have no module, so the write is skipped. A failed write is reported once (console in development, a Sentry warning in production) and never thrown.
 - The extension reads it with `FileManager.containerURL(forSecurityApplicationGroupIdentifier:)`. A missing or bad file means no premium design and no premium tables. The extension validates every value against the known ids.
 - Cross-process sharing works only on signed builds. Verify it on a TestFlight build, not in the simulator.
 
