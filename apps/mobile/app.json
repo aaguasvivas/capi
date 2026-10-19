@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "dev.capi.app",
+      "associatedDomains": ["applinks:playcapi.com"],
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },

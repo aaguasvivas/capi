@@ -671,7 +671,9 @@ function GameContent({ id }: { id: string }) {
     // the sheet is the player's choice, not a failure.
     const canShare = !!inviteCode && typeof navigator !== "undefined" && typeof navigator.share === "function";
     const shareInvite = async () => {
-      const inviteUrl = `${window.location.origin}?join=${id}`;
+      // The same /?join= form the app shares, which the universal-links file
+      // matches, so an installed app opens it.
+      const inviteUrl = `${window.location.origin}/?join=${id}`;
       if (canShare) {
         try {
           // Text only: the message already holds the link, and a separate

@@ -4,6 +4,16 @@ const nextConfig = {
   // Next 14 needs this for src/instrumentation.ts (Sentry's server and edge
   // init plus onRequestError) to load.
   experimental: { instrumentationHook: true },
+  // Apple reads the universal-links file as JSON; the file has no extension,
+  // so the type is set here.
+  async headers() {
+    return [
+      {
+        source: "/.well-known/apple-app-site-association",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+    ];
+  },
 };
 
 const { withSentryConfig } = require("@sentry/nextjs");

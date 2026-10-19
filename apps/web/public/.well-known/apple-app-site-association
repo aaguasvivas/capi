@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["JQ39X3L553.dev.capi.app"],
+        "components": [
+          {
+            "/": "/",
+            "?": { "join": "?*" },
+            "comment": "Invite links (playcapi.com/?join=<table>) open the app when it is installed. Nothing else does: a table already taken in a browser keeps its seat there."
+          }
+        ]
+      }
+    ]
+  }
+}
