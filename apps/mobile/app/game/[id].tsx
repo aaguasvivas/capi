@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
   Alert,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
+  Keyboard,
   Pressable,
+  ScrollView,
+  Share,
   Text,
   TextInput,
   View,
@@ -50,6 +52,8 @@ import CalloutOverlay, {
 } from "../../components/CalloutOverlay";
 import { tranqueLines, veinticincoLabel } from "../../lib/callouts";
 import { useEntitlements } from "../../lib/entitlements";
+import { checkFields, type FieldMessage } from "../../lib/gameForms";
+import { loadHomePrefs } from "../../lib/homePrefs";
 import { seatBackSkin, skinToSend } from "../../lib/seatSkins";
 import { getSession, saveSession, type PlayerSession } from "../../lib/session";
 import { useI18n } from "../../lib/i18n";
@@ -64,6 +68,11 @@ import {
   setMuted,
 } from "../../lib/sounds";
 import { SkinScope, useTileSkin, type TileSkinId } from "../../lib/tileSkins";
+import {
+  REFRESH_MIN_MS,
+  REFRESH_NOTE_MS,
+  refreshOutcome,
+} from "../../lib/waitingRoom";
 import {
   accentTextOn,
   API_BASE,
@@ -194,6 +203,11 @@ function GameTable({
   const [joinErrorKey, setJoinErrorKey] = useState<
     ErrorKey | "failedJoin" | null
   >(null);
+  // Set by a Join tap that found the name empty; the field shows it.
+  const [joinNameError, setJoinNameError] = useState<FieldMessage | null>(null);
+  const joinInputRef = useRef<TextInput>(null);
+  const joinNameFocusedRef = useRef(false);
+  const waitingScrollRef = useRef<ScrollView>(null);
   const [nextRoundLoading, setNextRoundLoading] = useState(false);
   const [rematchLoading, setRematchLoading] = useState(false);
   // Tile picked in the hand but not yet placed (both ends fit with different
@@ -235,6 +249,15 @@ function GameTable({
   );
   const copyTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const prevConnectionRef = useRef<Connection>("live");
+  // The waiting room's Refresh tap: running, or done with the seats it
+  // started from. The note it shows is derived at render, against players
+  // that already hold whatever the fetch brought.
+  const [refreshRun, setRefreshRun] = useState<
+    | { done: false }
+    | { done: true; ok: boolean; before: { id: string; seat: string }[] }
+    | null
+  >(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Session: a stored one wins. Otherwise the deep link seats this device:
   // "Open in Capi" from the iMessage extension arrives as
@@ -266,6 +289,33 @@ function GameTable({
     return () => {
       active = false;
     };
+  }, []);
+
+  // The join card starts from the name saved on the home screen, unless the
+  // player already typed one.
+  useEffect(() => {
+    let active = true;
+    loadHomePrefs({ colors: AVATAR_COLORS, themes: [], maxNickname: 20 }).then(
+      (p) => {
+        const name = p.nickname?.trim();
+        if (active && name) setJoinName((prev) => prev || name);
+      }
+    );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // The join card's Join button sits under the name field. iOS only scrolls
+  // far enough to show the focused field, so once the keyboard is up the
+  // waiting room scrolls to its end and Join stays above the keyboard.
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardDidShow", () => {
+      if (joinNameFocusedRef.current) {
+        waitingScrollRef.current?.scrollToEnd({ animated: true });
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   const {
@@ -349,6 +399,7 @@ function GameTable({
       bubbleTimers.forEach((t) => clearTimeout(t));
       copyTimers.forEach((t) => clearTimeout(t));
       if (localErrorTimerRef.current) clearTimeout(localErrorTimerRef.current);
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
   }, []);
 
@@ -621,11 +672,21 @@ function GameTable({
     ]);
   }
 
+  // Join never disables over the name: an empty one is flagged at the field,
+  // which takes focus (the keyboard brings it into view).
   async function handleJoin() {
-    const nickname = joinName.trim();
-    if (!nickname || joinLoading) return;
-    setJoinLoading(true);
+    if (joinLoading) return;
     setJoinErrorKey(null);
+    const nameError = checkFields([["name", joinName]]).errors.name ?? null;
+    setJoinNameError(nameError);
+    if (nameError) {
+      AccessibilityInfo.announceForAccessibility(s[nameError]);
+      joinInputRef.current?.focus();
+      return;
+    }
+    Keyboard.dismiss();
+    const nickname = joinName.trim();
+    setJoinLoading(true);
     const avatarColor =
       AVATAR_COLORS.find(
         (c) => !players.some((pl) => pl.avatar_color === c)
@@ -671,14 +732,49 @@ function GameTable({
     copyTimersRef.current.push(t);
   }
 
+  const inviteLink = `${API_BASE}/?join=${id}`;
+
+  // The share sheet carries the link Copy link copies, plus the code for a
+  // friend who joins from the home screen.
+  async function shareInvite() {
+    try {
+      await Share.share({
+        message: inviteCode
+          ? s.inviteMessage(inviteCode, inviteLink)
+          : inviteLink,
+      });
+    } catch {
+      /* Copy link and the code chip are the fallback */
+    }
+  }
+
   async function copyInviteLink() {
     try {
-      await Clipboard.setStringAsync(`${API_BASE}/?join=${id}`);
+      await Clipboard.setStringAsync(inviteLink);
       setCopied(true);
       trackTimer(setTimeout(() => setCopied(false), 2000));
     } catch {
       /* code chip is the fallback */
     }
+  }
+
+  // Refresh reads "Checking" while the fetch runs, held at least
+  // REFRESH_MIN_MS so a fast answer still registers, then says for a moment
+  // that nobody joined yet or that the connection failed.
+  async function handleRefresh() {
+    if (refreshRun && !refreshRun.done) return;
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    const before = players;
+    setRefreshRun({ done: false });
+    const [row] = await Promise.all([
+      refetch(),
+      new Promise((resolve) => setTimeout(resolve, REFRESH_MIN_MS)),
+    ]);
+    setRefreshRun({ done: true, ok: row !== null, before });
+    refreshTimerRef.current = setTimeout(() => {
+      setRefreshRun(null);
+      refreshTimerRef.current = null;
+    }, REFRESH_NOTE_MS);
   }
 
   async function copyCode() {
@@ -773,21 +869,31 @@ function GameTable({
     // No session for this table: a free seat gets a join card instead of the
     // share controls, which belong to people already seated.
     const canJoin = !session && playersNeeded > 0;
-    const joinDisabled = !joinName.trim() || joinLoading;
+    const refreshNote = !refreshRun
+      ? null
+      : !refreshRun.done
+      ? "refreshing"
+      : refreshOutcome(refreshRun.ok, refreshRun.before, players);
 
     return (
       <>
         {screen}
         {lightPageBar}
         <SafeAreaView style={{ flex: 1, backgroundColor: THEME.pageBg }}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={{
-              flex: 1,
+          {/* Scrolls when the card outgrows a small phone (2v2 with the share
+              controls) or the keyboard is up. iOS insets it by the keyboard
+              and brings the focused field into view; Android resizes the
+              window. */}
+          <ScrollView
+            ref={waitingScrollRef}
+            contentContainerStyle={{
+              flexGrow: 1,
               alignItems: "center",
               justifyContent: "center",
               padding: 16,
             }}
+            keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets
           >
             <View style={waitingCard}>
               <Text style={{ fontSize: 40 }}>
@@ -909,25 +1015,58 @@ function GameTable({
                   >
                     {s.yourName}
                   </Text>
+                  {/* Return runs Join without dropping the keyboard, so an
+                      empty name keeps focus. */}
                   <TextInput
+                    ref={joinInputRef}
                     value={joinName}
-                    onChangeText={setJoinName}
+                    onChangeText={(t) => {
+                      setJoinName(t);
+                      setJoinNameError(null);
+                    }}
+                    onFocus={() => {
+                      joinNameFocusedRef.current = true;
+                    }}
+                    onBlur={() => {
+                      joinNameFocusedRef.current = false;
+                    }}
                     placeholder={s.joinNamePlaceholder}
                     placeholderTextColor="#9ca3af"
                     maxLength={20}
                     autoCapitalize="words"
                     autoCorrect={false}
                     returnKeyType="join"
+                    submitBehavior="submit"
                     onSubmitEditing={handleJoin}
                     editable={!joinLoading}
-                    style={joinInput}
+                    accessibilityLabel={s.yourName}
+                    accessibilityHint={
+                      joinNameError ? s[joinNameError] : undefined
+                    }
+                    style={[
+                      joinInput,
+                      joinNameError ? { borderColor: "#dc2626" } : null,
+                    ]}
                   />
+                  {joinNameError ? (
+                    <Text
+                      accessibilityLiveRegion="polite"
+                      style={{
+                        fontSize: 12,
+                        color: "#dc2626",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {s[joinNameError]}
+                    </Text>
+                  ) : null}
+                  {/* Only a running request disables Join */}
                   <Pressable
                     onPress={handleJoin}
-                    disabled={joinDisabled}
+                    disabled={joinLoading}
                     accessibilityRole="button"
                     accessibilityState={{
-                      disabled: joinDisabled,
+                      disabled: joinLoading,
                       busy: joinLoading,
                     }}
                     style={{
@@ -937,7 +1076,6 @@ function GameTable({
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: THEME.scoreBg,
-                      opacity: joinDisabled ? 0.4 : 1,
                     }}
                   >
                     {joinLoading ? (
@@ -952,6 +1090,7 @@ function GameTable({
                   </Pressable>
                   {joinErrorKey ? (
                     <Text
+                      accessibilityLiveRegion="polite"
                       style={{
                         fontSize: 12,
                         color: "#dc2626",
@@ -965,25 +1104,52 @@ function GameTable({
                 </View>
               ) : (
                 <>
-                  {/* Copy invite link */}
-                  <Pressable
-                    onPress={copyInviteLink}
-                    accessibilityRole="button"
-                    style={{
-                      width: "100%",
-                      paddingVertical: 14,
-                      borderRadius: 12,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: copied ? "#22c55e" : THEME.scoreBg,
-                    }}
-                  >
-                    <Text
-                      style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}
+                  {/* Share invite opens the share sheet; Copy link is the
+                      smaller fallback under it */}
+                  <View style={{ width: "100%", alignItems: "center", gap: 8 }}>
+                    <Pressable
+                      onPress={shareInvite}
+                      accessibilityRole="button"
+                      style={{
+                        width: "100%",
+                        paddingVertical: 14,
+                        borderRadius: 12,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: THEME.scoreBg,
+                      }}
                     >
-                      {copied ? `✓ ${s.copied}` : `🔗 ${s.copyLink}`}
-                    </Text>
-                  </Pressable>
+                      <Text
+                        style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}
+                      >
+                        {s.shareInvite}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={copyInviteLink}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel={copied ? s.copied : s.copyLink}
+                      style={{
+                        paddingHorizontal: 14,
+                        paddingVertical: 6,
+                        borderRadius: 999,
+                        borderWidth: 1,
+                        borderColor: copied ? "#86efac" : "#e5e7eb",
+                        backgroundColor: copied ? "#f0fdf4" : "#ffffff",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontWeight: "600",
+                          color: copied ? "#16a34a" : "#374151",
+                        }}
+                      >
+                        {copied ? `✓ ${s.copied}` : `🔗 ${s.copyLink}`}
+                      </Text>
+                    </Pressable>
+                  </View>
 
                   {/* Code chip */}
                   {inviteCode ? (
@@ -1039,25 +1205,36 @@ function GameTable({
                 >
                   {s.autoRefresh}
                 </Text>
+                {/* The link's own text reports the tap: checking, then for a
+                    moment nobody joined yet or the connection failed. */}
                 <Pressable
-                  onPress={() => refetch()}
+                  onPress={handleRefresh}
+                  disabled={refreshNote === "refreshing"}
                   hitSlop={12}
                   accessibilityRole="button"
+                  accessibilityState={{ busy: refreshNote === "refreshing" }}
                 >
                   <Text
+                    accessibilityLiveRegion="polite"
                     style={{
                       fontSize: 13,
-                      color: "#4f46e5",
                       fontWeight: "600",
-                      textDecorationLine: "underline",
+                      textAlign: "center",
+                      color:
+                        refreshNote === "networkError"
+                          ? "#dc2626"
+                          : refreshNote
+                          ? "#6b7280"
+                          : "#4f46e5",
+                      textDecorationLine: refreshNote ? "none" : "underline",
                     }}
                   >
-                    {s.refresh}
+                    {refreshNote ? s[refreshNote] : s.refresh}
                   </Text>
                 </Pressable>
               </View>
             </View>
-          </KeyboardAvoidingView>
+          </ScrollView>
           {/* Waiting room is a calm screen; the active game below never gets
               a banner. */}
           <AdBanner />

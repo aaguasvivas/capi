@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
+  Keyboard,
   Pressable,
   ScrollView,
   Text,
@@ -18,6 +20,12 @@ import AdBanner from "../components/AdBanner";
 import ModeGlyph from "../components/ModeGlyph";
 import StoreSheet, { type StorePreview } from "../components/StoreSheet";
 import { useEntitlements } from "../lib/entitlements";
+import {
+  checkFields,
+  normalizeCode,
+  type FieldErrors,
+  type FormField,
+} from "../lib/gameForms";
 import { loadHomePrefs, saveHomePrefs, savedThemeAction } from "../lib/homePrefs";
 import {
   deriveEntitlements,
@@ -117,6 +125,10 @@ function productIdForFichas(id: PremiumFichasId): ProductId {
 // share a strip of the other's target.
 const PILL_SLOP_V = 11;
 const PILL_SLOP_H = 8;
+
+// A flagged name field scrolls to this far below the top of the scroll area,
+// the same clearance the content's top padding gives the floating pills.
+const FLAGGED_FIELD_TOP = 64;
 
 // Tables this device joined that are still in progress, read from the
 // per-game session keys (capi_session_<gameId>).
@@ -241,10 +253,21 @@ export default function Index() {
   const [targetScore, setTargetScore] = useState<100 | 200>(100);
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState<"create" | "join" | null>(null);
-  // A string key, so the message follows a language switch.
-  const [errorKey, setErrorKey] = useState<ErrorKey | "networkError" | null>(
-    null
-  );
+  // String keys, so the messages follow a language switch. Field messages sit
+  // under their field; a request's failure sits under the button that sent it.
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [requestError, setRequestError] = useState<{
+    action: "create" | "join";
+    key: ErrorKey | "networkError";
+  } | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const nameInputRef = useRef<TextInput>(null);
+  const codeInputRef = useRef<TextInput>(null);
+  // The name block's offset in the scroll content: the form card's y plus the
+  // block's y inside the card.
+  const cardYRef = useRef(0);
+  const nameYRef = useRef(0);
+  const codeFocusedRef = useRef(false);
   const [storeOpen, setStoreOpen] = useState(false);
   // Which locked picker card opened the store, so the matching purchase can
   // select that design and dismiss the sheet. The sheet opens on its preview.
@@ -317,6 +340,18 @@ export default function Index() {
     }, [])
   );
 
+  // The code field sits just above Join at the bottom of the form. iOS only
+  // scrolls far enough to show the focused field, which leaves Join under the
+  // keyboard, so once the keyboard is up the form scrolls to its end.
+  useEffect(() => {
+    const sub = Keyboard.addListener("keyboardDidShow", () => {
+      if (codeFocusedRef.current) {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   const tableLabels: Record<ThemeId, string> = {
     barberia: s.themeBarberia,
     colmado: s.themeColmado,
@@ -373,10 +408,51 @@ export default function Index() {
     if (got.fichas.size === 1) setSkinId([...got.fichas][0]);
   }
 
+  // Runs on every Create or Join tap. Flags each invalid field, brings the
+  // first one into view and focuses it, and says whether the request may go.
+  // The jump is not animated: the keyboard opening on focus re-reads the
+  // scroll offset and would stop an animated scroll partway.
+  function fieldsReady(fields: ReadonlyArray<readonly [FormField, string]>) {
+    setRequestError(null);
+    const { errors, first } = checkFields(fields);
+    setFieldErrors(errors);
+    if (!first) {
+      Keyboard.dismiss();
+      return true;
+    }
+    AccessibilityInfo.announceForAccessibility(
+      fields.flatMap(([f]) => {
+        const key = errors[f];
+        return key ? [s[key]] : [];
+      }).join(" ")
+    );
+    if (first === "name") {
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, cardYRef.current + nameYRef.current - FLAGGED_FIELD_TOP),
+        animated: false,
+      });
+      nameInputRef.current?.focus();
+    } else {
+      // The code field is the last field, right above Join.
+      scrollRef.current?.scrollToEnd({ animated: false });
+      codeInputRef.current?.focus();
+    }
+    return false;
+  }
+
+  function editName(text: string) {
+    setNickname(text);
+    setFieldErrors((e) => (e.name ? { ...e, name: undefined } : e));
+  }
+
+  function editCode(text: string) {
+    setInviteCode(normalizeCode(text));
+    setFieldErrors((e) => (e.code ? { ...e, code: undefined } : e));
+  }
+
   async function handleCreate() {
-    if (!nickname.trim() || loading) return;
+    if (loading || !fieldsReady([["name", nickname]])) return;
     setLoading("create");
-    setErrorKey(null);
     try {
       const res = await fetch(`${API_BASE}/api/games`, {
         method: "POST",
@@ -393,7 +469,10 @@ export default function Index() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErrorKey(errorKeyFor(data.error, "failedCreate"));
+        setRequestError({
+          action: "create",
+          key: errorKeyFor(data.error, "failedCreate"),
+        });
         return;
       }
       await saveSession({
@@ -403,29 +482,38 @@ export default function Index() {
       });
       router.push(`/game/${data.gameId}`);
     } catch {
-      setErrorKey("networkError");
+      setRequestError({ action: "create", key: "networkError" });
     } finally {
       setLoading(null);
     }
   }
 
   async function handleJoin() {
-    if (!nickname.trim() || inviteCode.trim().length !== 6 || loading) return;
+    if (
+      loading ||
+      !fieldsReady([
+        ["name", nickname],
+        ["code", inviteCode],
+      ])
+    ) {
+      return;
+    }
     setLoading("join");
-    setErrorKey(null);
     try {
-      const code = inviteCode.trim().toUpperCase();
-      const lookupRes = await fetch(`${API_BASE}/api/games/by-code/${code}`);
+      const lookupRes = await fetch(
+        `${API_BASE}/api/games/by-code/${encodeURIComponent(inviteCode)}`
+      );
       if (!lookupRes.ok) {
         // Only a 404 means a wrong code; a server failure is not the
         // player's typo.
         const body = await lookupRes.json().catch(() => ({}));
-        setErrorKey(
-          errorKeyFor(
+        setRequestError({
+          action: "join",
+          key: errorKeyFor(
             body.error,
             lookupRes.status === 404 ? "gameNotFound" : "failedJoin"
-          )
-        );
+          ),
+        });
         return;
       }
       const { gameId } = await lookupRes.json();
@@ -441,7 +529,10 @@ export default function Index() {
       });
       const data = await joinRes.json().catch(() => ({}));
       if (!joinRes.ok) {
-        setErrorKey(errorKeyFor(data.error, "failedJoin"));
+        setRequestError({
+          action: "join",
+          key: errorKeyFor(data.error, "failedJoin"),
+        });
         return;
       }
       await saveSession({
@@ -451,7 +542,7 @@ export default function Index() {
       });
       router.push(`/game/${gameId}`);
     } catch {
-      setErrorKey("networkError");
+      setRequestError({ action: "join", key: "networkError" });
     } finally {
       setLoading(null);
     }
@@ -551,6 +642,7 @@ export default function Index() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "center",
@@ -647,6 +739,9 @@ export default function Index() {
         ) : null}
 
         <View
+          onLayout={(e) => {
+            cardYRef.current = e.nativeEvent.layout.y;
+          }}
           style={{
             backgroundColor: "#ffffff",
             borderRadius: 24,
@@ -660,17 +755,31 @@ export default function Index() {
           }}
         >
           {/* Name */}
-          <View style={{ gap: 6 }}>
+          <View
+            onLayout={(e) => {
+              nameYRef.current = e.nativeEvent.layout.y;
+            }}
+            style={{ gap: 6 }}
+          >
             <Text style={labelStyle}>{s.yourName}</Text>
             <TextInput
+              ref={nameInputRef}
               value={nickname}
-              onChangeText={setNickname}
+              onChangeText={editName}
               maxLength={NICKNAME_MAX}
               placeholder={s.namePlaceholder}
               placeholderTextColor="#9ca3af"
               accessibilityLabel={s.yourName}
-              style={inputStyle}
+              accessibilityHint={
+                fieldErrors.name ? s[fieldErrors.name] : undefined
+              }
+              style={[inputStyle, fieldErrors.name ? invalidInputStyle : null]}
             />
+            {fieldErrors.name ? (
+              <Text accessibilityLiveRegion="polite" style={fieldErrorStyle}>
+                {s[fieldErrors.name]}
+              </Text>
+            ) : null}
           </View>
 
           {/* Color picker */}
@@ -958,38 +1067,40 @@ export default function Index() {
             </View>
           </View>
 
-          {errorKey ? (
-            <Text style={{ color: "#dc2626", fontSize: 14, fontWeight: "500" }}>
-              {s[errorKey]}
-            </Text>
-          ) : null}
-
-          {/* Create */}
-          <Pressable
-            onPress={handleCreate}
-            disabled={!nickname.trim() || loading !== null}
-            accessibilityRole="button"
-            accessibilityLabel={s.createAction}
-            accessibilityState={{
-              disabled: !nickname.trim() || loading !== null,
-              busy: loading === "create",
-            }}
-            style={{
-              backgroundColor: THEME.scoreBg,
-              borderRadius: 14,
-              paddingVertical: 14,
-              alignItems: "center",
-              opacity: !nickname.trim() || loading !== null ? 0.4 : 1,
-            }}
-          >
-            {loading === "create" ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
-                {s.createAction}
+          {/* Create: only a running request disables it; an empty name is
+              flagged on tap instead */}
+          <View style={{ gap: 8 }}>
+            <Pressable
+              onPress={handleCreate}
+              disabled={loading !== null}
+              accessibilityRole="button"
+              accessibilityLabel={s.createAction}
+              accessibilityState={{
+                disabled: loading !== null,
+                busy: loading === "create",
+              }}
+              style={{
+                backgroundColor: THEME.scoreBg,
+                borderRadius: 14,
+                paddingVertical: 14,
+                alignItems: "center",
+                opacity: loading === "join" ? 0.4 : 1,
+              }}
+            >
+              {loading === "create" ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontSize: 15, fontWeight: "700" }}>
+                  {s.createAction}
+                </Text>
+              )}
+            </Pressable>
+            {requestError?.action === "create" ? (
+              <Text accessibilityLiveRegion="polite" style={requestErrorStyle}>
+                {s[requestError.key]}
               </Text>
-            )}
-          </Pressable>
+            ) : null}
+          </View>
 
           {/* Divider */}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -1003,14 +1114,38 @@ export default function Index() {
           {/* Join by code */}
           <View style={{ gap: 6 }}>
             <Text style={labelStyle}>{s.inviteCode}</Text>
+            {/* Kept to A-Z and 0-9 as typed (normalizeCode caps it at six,
+                so no maxLength: it would cut a pasted "ABC-123" short).
+                Return runs Join without dropping the keyboard, so a flagged
+                field keeps focus. */}
             <TextInput
+              ref={codeInputRef}
               value={inviteCode}
-              onChangeText={(t) => setInviteCode(t.toUpperCase())}
-              maxLength={6}
+              onChangeText={editCode}
+              onFocus={() => {
+                codeFocusedRef.current = true;
+                // Moving here from the name field keeps the keyboard up, so
+                // no keyboardDidShow follows.
+                if (Keyboard.isVisible()) {
+                  scrollRef.current?.scrollToEnd({ animated: true });
+                }
+              }}
+              onBlur={() => {
+                codeFocusedRef.current = false;
+              }}
               autoCapitalize="characters"
+              autoCorrect={false}
+              spellCheck={false}
+              autoComplete="off"
+              returnKeyType="join"
+              submitBehavior="submit"
+              onSubmitEditing={handleJoin}
               placeholder="XXXXXX"
               placeholderTextColor="#9ca3af"
               accessibilityLabel={s.inviteCode}
+              accessibilityHint={
+                fieldErrors.code ? s[fieldErrors.code] : undefined
+              }
               style={[
                 inputStyle,
                 {
@@ -1019,44 +1154,51 @@ export default function Index() {
                   fontWeight: "700",
                   fontVariant: ["tabular-nums"],
                 },
+                fieldErrors.code ? invalidInputStyle : null,
               ]}
             />
+            {fieldErrors.code ? (
+              <Text accessibilityLiveRegion="polite" style={fieldErrorStyle}>
+                {s[fieldErrors.code]}
+              </Text>
+            ) : null}
           </View>
 
-          <Pressable
-            onPress={handleJoin}
-            disabled={
-              !nickname.trim() || inviteCode.length !== 6 || loading !== null
-            }
-            accessibilityRole="button"
-            accessibilityLabel={s.joinAction}
-            accessibilityState={{
-              disabled:
-                !nickname.trim() || inviteCode.length !== 6 || loading !== null,
-              busy: loading === "join",
-            }}
-            style={{
-              borderWidth: 2,
-              borderColor: THEME.scoreBg,
-              borderRadius: 14,
-              paddingVertical: 12,
-              alignItems: "center",
-              opacity:
-                !nickname.trim() || inviteCode.length !== 6 || loading !== null
-                  ? 0.4
-                  : 1,
-            }}
-          >
-            {loading === "join" ? (
-              <ActivityIndicator color={THEME.scoreBg} />
-            ) : (
-              <Text
-                style={{ color: THEME.scoreBg, fontSize: 15, fontWeight: "700" }}
-              >
-                {s.joinAction}
+          <View style={{ gap: 8 }}>
+            <Pressable
+              onPress={handleJoin}
+              disabled={loading !== null}
+              accessibilityRole="button"
+              accessibilityLabel={s.joinAction}
+              accessibilityState={{
+                disabled: loading !== null,
+                busy: loading === "join",
+              }}
+              style={{
+                borderWidth: 2,
+                borderColor: THEME.scoreBg,
+                borderRadius: 14,
+                paddingVertical: 12,
+                alignItems: "center",
+                opacity: loading === "create" ? 0.4 : 1,
+              }}
+            >
+              {loading === "join" ? (
+                <ActivityIndicator color={THEME.scoreBg} />
+              ) : (
+                <Text
+                  style={{ color: THEME.scoreBg, fontSize: 15, fontWeight: "700" }}
+                >
+                  {s.joinAction}
+                </Text>
+              )}
+            </Pressable>
+            {requestError?.action === "join" ? (
+              <Text accessibilityLiveRegion="polite" style={requestErrorStyle}>
+                {s[requestError.key]}
               </Text>
-            )}
-          </Pressable>
+            ) : null}
+          </View>
         </View>
       </ScrollView>
 
@@ -1139,4 +1281,19 @@ const inputStyle = {
   fontSize: 15,
   color: "#111827",
   backgroundColor: "#f9fafb",
+};
+
+const invalidInputStyle = { borderColor: "#dc2626" };
+
+// A field's own message, directly under it.
+const fieldErrorStyle = {
+  color: "#dc2626",
+  fontSize: 13,
+  fontWeight: "600" as const,
+};
+
+// A failed request, directly under the button that sent it.
+const requestErrorStyle = {
+  ...fieldErrorStyle,
+  textAlign: "center" as const,
 };

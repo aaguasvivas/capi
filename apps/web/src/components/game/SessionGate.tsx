@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Seat, Tile } from "@capi/engine";
 import { getSeatsForGame } from "@capi/engine";
 import { errorKeyFor } from "@capi/i18n";
 import { useI18n } from "@/lib/i18n/context";
 import type { EmbedSession as Session } from "@/lib/embedSession";
+import { checkFields, type FieldErrors } from "@/lib/gameForms";
 import { readProfile, saveProfile } from "@/lib/profile";
 
 // Everything the game page shows when this browser holds no seat at the
@@ -40,8 +41,12 @@ interface JoinCardProps {
 export function JoinCard({ gameId, onJoined }: JoinCardProps) {
   const { s } = useI18n();
   const [nickname, setNickname] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [joining, setJoining] = useState(false);
+  // The name field's own problem, shown under it; `error` is the server's
+  // answer, shown under the button.
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
 
   // Start from the name and color this browser used last time.
@@ -53,10 +58,17 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const name = nickname.trim();
-    if (!name || joining) return;
-    setJoining(true);
+    if (joining) return;
     setError(null);
+    const { errors, first } = checkFields([["name", nickname]]);
+    setFieldErrors(errors);
+    if (first) {
+      nameRef.current?.scrollIntoView({ block: "center" });
+      nameRef.current?.focus({ preventScroll: true });
+      return;
+    }
+    const name = nickname.trim();
+    setJoining(true);
     try {
       const res = await fetch(`/api/games/${gameId}/join`, {
         method: "POST",
@@ -89,18 +101,37 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 text-left">
       <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+        <label
+          htmlFor="join-card-name"
+          className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5"
+        >
           {s.yourName}
         </label>
         <input
+          ref={nameRef}
+          id="join-card-name"
           type="text"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => {
+            setNickname(e.target.value);
+            setFieldErrors({});
+          }}
           maxLength={20}
           autoFocus
           placeholder={s.joinNamePlaceholder}
-          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-400 transition-all bg-gray-50/50"
+          aria-invalid={fieldErrors.name ? true : undefined}
+          aria-describedby={fieldErrors.name ? "join-card-name-error" : undefined}
+          className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all bg-gray-50/50 ${
+            fieldErrors.name
+              ? "border-red-500 focus:ring-red-500/20 focus:border-red-500"
+              : "border-gray-200 focus:ring-gray-900/20 focus:border-gray-400"
+          }`}
         />
+        {fieldErrors.name && (
+          <p id="join-card-name-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+            {s[fieldErrors.name]}
+          </p>
+        )}
       </div>
 
       <div>
@@ -125,15 +156,22 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={joining || !nickname.trim()}
-        className="w-full bg-gray-900 text-white rounded-xl py-3 text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
-      >
-        {joining ? s.joining : s.joinTable}
-      </button>
+      {/* Only a running request disables the button: a tap with no name
+          says so at the name field instead of doing nothing. */}
+      <div className="space-y-2">
+        <button
+          type="submit"
+          disabled={joining}
+          className="w-full bg-gray-900 text-white rounded-xl py-3 text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
+        >
+          {joining ? s.joining : s.joinTable}
+        </button>
+        {error && (
+          <p role="alert" className="text-sm text-red-600 font-medium">
+            {error}
+          </p>
+        )}
+      </div>
     </form>
   );
 }

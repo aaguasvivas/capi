@@ -136,6 +136,14 @@ function GameContent({ id }: { id: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  // The waiting room's Refresh: "checking" while the fetch runs, then its
+  // outcome for a few seconds. `seats` is the seat list at the tap, so a
+  // player who joins meanwhile hides the outcome and the seats show them.
+  const [refreshCheck, setRefreshCheck] = useState<{
+    phase: "checking" | "done" | "failed";
+    seats: string;
+  } | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [muted, setMutedState] = useState(() => isMuted());
   // Tile picked in the hand whose end is still being chosen; the board pulses
   // the ends it can go on.
@@ -658,6 +666,53 @@ function GameContent({ id }: { id: string }) {
         </div>
       );
 
+    // The invite opens the device's share sheet where the browser has one,
+    // and copies the deep link otherwise or when the share fails. Closing
+    // the sheet is the player's choice, not a failure.
+    const canShare = !!inviteCode && typeof navigator !== "undefined" && typeof navigator.share === "function";
+    const shareInvite = async () => {
+      const inviteUrl = `${window.location.origin}?join=${id}`;
+      if (canShare) {
+        try {
+          await navigator.share({ text: s.inviteMessage(inviteCode, inviteUrl), url: inviteUrl });
+          return;
+        } catch (err) {
+          if (err instanceof DOMException && err.name === "AbortError") return;
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(inviteUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        /* clipboard blocked, the code chip below is the fallback */
+      }
+    };
+
+    // refetch resolves null when the fetch failed. It is also null for an
+    // answer older than the state on screen, which a lobby never gets: its
+    // version stays 0 until the deal, and the deal leaves this screen.
+    const seatList = players.map((p) => p.seat).sort().join(",");
+    const refreshLobby = async () => {
+      if (refreshCheck?.phase === "checking") return;
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      const seats = seatList;
+      setRefreshCheck({ phase: "checking", seats });
+      // At least 700 ms on "Checking", so a fast answer still reads as a check.
+      const [result] = await Promise.all([
+        refetch(),
+        new Promise((resolve) => setTimeout(resolve, 700)),
+      ]);
+      setRefreshCheck({ phase: result ? "done" : "failed", seats });
+      refreshTimerRef.current = setTimeout(() => setRefreshCheck(null), 3000);
+    };
+    const refreshNote =
+      !refreshCheck || refreshCheck.phase === "checking" || refreshCheck.seats !== seatList
+        ? ""
+        : refreshCheck.phase === "failed"
+          ? s.networkError
+          : s.refreshNoChange;
+
     return (
       <div
         data-theme={waitingTheme ?? "barberia"}
@@ -737,17 +792,11 @@ function GameContent({ id }: { id: string }) {
 
           {session && !embedded && (
             <>
-              {/* Primary action: copy the deep link */}
+              {/* Primary action: share or copy the deep link */}
               <button
-                onClick={async () => {
-                  const inviteUrl = `${window.location.origin}?join=${id}`;
-                  try {
-                    await navigator.clipboard.writeText(inviteUrl);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  } catch {
-                    /* clipboard blocked, the code chip below is the fallback */
-                  }
+                type="button"
+                onClick={() => {
+                  void shareInvite();
                 }}
                 className={`w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
                   copied
@@ -759,6 +808,22 @@ function GameContent({ id }: { id: string }) {
                   <>
                     <span aria-hidden>✓</span>
                     {s.copied}
+                  </>
+                ) : canShare ? (
+                  <>
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 15V3M7 8l5-5 5 5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+                    </svg>
+                    {s.shareInvite}
                   </>
                 ) : (
                   <>
@@ -779,24 +844,37 @@ function GameContent({ id }: { id: string }) {
 
           <p className="text-xs text-gray-500">{s.autoRefresh}</p>
 
-          <div className="flex items-center justify-center gap-2 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => {
-                void refetch();
-              }}
-              className="min-h-[44px] px-3 inline-flex items-center text-indigo-600 hover:text-indigo-800"
-            >
-              {s.refresh}
-            </button>
-            {!embedded && (
-              <Link
-                href="/"
-                className="min-h-[44px] px-3 inline-flex items-center text-gray-500 hover:text-gray-700"
+          <div>
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => {
+                  void refreshLobby();
+                }}
+                aria-busy={refreshCheck?.phase === "checking"}
+                className="min-h-[44px] px-3 inline-flex items-center text-indigo-600 hover:text-indigo-800"
               >
-                {s.leaveTable}
-              </Link>
-            )}
+                {refreshCheck?.phase === "checking" ? s.refreshing : s.refresh}
+              </button>
+              {!embedded && (
+                <Link
+                  href="/"
+                  className="min-h-[44px] px-3 inline-flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  {s.leaveTable}
+                </Link>
+              )}
+            </div>
+            {/* Always in the page, empty between checks, so a screen reader
+                hears each outcome. */}
+            <p
+              role="status"
+              className={`text-xs font-medium ${
+                refreshCheck?.phase === "failed" ? "text-red-600" : "text-gray-500"
+              }`}
+            >
+              {refreshNote}
+            </p>
           </div>
         </div>
       </div>

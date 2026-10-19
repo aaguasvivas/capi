@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { checkFields, type FieldErrors } from "@/lib/gameForms";
 import { apiErrorText, useI18n } from "@/lib/i18n/context";
 import { readProfile, saveProfile } from "@/lib/profile";
 
@@ -63,11 +64,15 @@ export default function CreateGameForm() {
   const router = useRouter();
   const { s } = useI18n();
   const [nickname, setNickname] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
   const [theme, setTheme] = useState<ThemeId>("barberia");
   const [is2v2, setIs2v2] = useState(false);
   const [targetScore, setTargetScore] = useState<100 | 200>(100);
   const [loading, setLoading] = useState(false);
+  // The name field's own problem, shown under it; `error` is the server's
+  // answer, shown under the button.
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState("");
 
   // Start from the name and color this browser used last time.
@@ -85,9 +90,17 @@ export default function CreateGameForm() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!nickname.trim()) return;
-    setLoading(true);
+    if (loading) return;
     setError("");
+    const { errors, first } = checkFields([["name", nickname]]);
+    setFieldErrors(errors);
+    if (first) {
+      // The name sits at the top, so a tap on Create far below scrolls up.
+      nameRef.current?.scrollIntoView({ block: "center" });
+      nameRef.current?.focus({ preventScroll: true });
+      return;
+    }
+    setLoading(true);
 
     try {
       const res = await fetch("/api/games", {
@@ -131,14 +144,29 @@ export default function CreateGameForm() {
           {s.yourName}
         </label>
         <input
+          ref={nameRef}
           id="create-name"
           type="text"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(e) => {
+            setNickname(e.target.value);
+            setFieldErrors({});
+          }}
           maxLength={20}
           placeholder={s.namePlaceholder}
-          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-400 transition-all bg-gray-50/50"
+          aria-invalid={fieldErrors.name ? true : undefined}
+          aria-describedby={fieldErrors.name ? "create-name-error" : undefined}
+          className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all bg-gray-50/50 ${
+            fieldErrors.name
+              ? "border-red-500 focus:ring-red-500/20 focus:border-red-500"
+              : "border-gray-200 focus:ring-gray-900/20 focus:border-gray-400"
+          }`}
         />
+        {fieldErrors.name && (
+          <p id="create-name-error" role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+            {s[fieldErrors.name]}
+          </p>
+        )}
       </div>
 
       {/* The choice groups below are buttons, not inputs, so each heading
@@ -266,15 +294,22 @@ export default function CreateGameForm() {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={loading || !nickname.trim()}
-        className="w-full bg-gray-900 text-white rounded-xl py-3 text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
-      >
-        {loading ? s.creating : s.createAction}
-      </button>
+      {/* Only a running request disables the button: a tap with no name
+          says so at the name field instead of doing nothing. */}
+      <div className="space-y-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-gray-900 text-white rounded-xl py-3 text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-all active:scale-[0.98] shadow-sm"
+        >
+          {loading ? s.creating : s.createAction}
+        </button>
+        {error && (
+          <p role="alert" className="text-sm text-red-600 font-medium">
+            {error}
+          </p>
+        )}
+      </div>
     </form>
   );
 }
