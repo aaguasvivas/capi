@@ -19,12 +19,15 @@ function seatsKey(players: readonly SeatHolder[]): string {
 }
 
 // A failed fetch says so. A fetch that changed a seat needs no note: the new
-// player is on screen. Otherwise the player learns nobody has joined yet.
+// player is on screen. A full table waiting for its deal has no one left to
+// wait for. Otherwise the player learns that no one new has joined.
 export function refreshOutcome(
   ok: boolean,
   before: readonly SeatHolder[],
-  after: readonly SeatHolder[]
+  after: readonly SeatHolder[],
+  seatsFree: number
 ): "networkError" | "refreshNoChange" | null {
   if (!ok) return "networkError";
+  if (seatsFree <= 0) return null;
   return seatsKey(before) === seatsKey(after) ? "refreshNoChange" : null;
 }

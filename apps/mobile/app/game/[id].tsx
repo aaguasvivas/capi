@@ -5,6 +5,7 @@ import {
   Alert,
   Animated,
   Keyboard,
+  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -339,6 +340,9 @@ function GameTable({
     dismissChat,
     refetch,
   } = useRealtimeGame(id, session);
+  // The latest players for code that runs after an await (handleRefresh).
+  const playersRef = useRef(players);
+  playersRef.current = players;
 
   // Single source for the slam sound: the board grew.
   useEffect(() => {
@@ -760,7 +764,8 @@ function GameTable({
 
   // Refresh reads "Checking" while the fetch runs, held at least
   // REFRESH_MIN_MS so a fast answer still registers, then says for a moment
-  // that nobody joined yet or that the connection failed.
+  // that no one new joined or that the connection failed. VoiceOver hears
+  // the same outcome: iOS ignores accessibilityLiveRegion.
   async function handleRefresh() {
     if (refreshRun && !refreshRun.done) return;
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
@@ -771,6 +776,17 @@ function GameTable({
       new Promise((resolve) => setTimeout(resolve, REFRESH_MIN_MS)),
     ]);
     setRefreshRun({ done: true, ok: row !== null, before });
+    if (Platform.OS === "ios") {
+      // playersRef holds what the fetch brought; the closure's players do not.
+      const after = playersRef.current;
+      const note = refreshOutcome(
+        row !== null,
+        before,
+        after,
+        (gameSettings?.is2v2 ? 4 : 2) - after.length
+      );
+      if (note) AccessibilityInfo.announceForAccessibility(s[note]);
+    }
     refreshTimerRef.current = setTimeout(() => {
       setRefreshRun(null);
       refreshTimerRef.current = null;
@@ -873,7 +889,7 @@ function GameTable({
       ? null
       : !refreshRun.done
       ? "refreshing"
-      : refreshOutcome(refreshRun.ok, refreshRun.before, players);
+      : refreshOutcome(refreshRun.ok, refreshRun.before, players, playersNeeded);
 
     return (
       <>

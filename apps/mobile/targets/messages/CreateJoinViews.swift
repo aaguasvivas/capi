@@ -23,12 +23,13 @@ struct CreateCard: View {
     // Read once per card, so the list cannot change under the picker.
     private let tables = CapiStore.tables
     @FocusState private var nameFocused: Bool
+    @State private var nameMissing = false
 
     var body: some View {
         VStack(spacing: 12) {
             Text("Capi").font(.system(size: 28, weight: .heavy))
             if let status = state.status { Text(status).foregroundColor(.secondary) }
-            NameField(nickname: $nickname, focused: $nameFocused, focusRequest: state.focusRequest, onNeedsKeyboard: onNeedsKeyboard)
+            NameField(nickname: $nickname, missing: $nameMissing, focused: $nameFocused, focusRequest: state.focusRequest, onNeedsKeyboard: onNeedsKeyboard)
             if allow2v2 {
                 Picker("", selection: $is2v2) {
                     Text("1v1").tag(false)
@@ -46,9 +47,12 @@ struct CreateCard: View {
                     ForEach(tables, id: \.self) { Text(Self.tableName($0)).tag($0) }
                 }.pickerStyle(.menu).frame(maxWidth: .infinity)
             }.frame(maxWidth: 300)
-            SubmitButton(title: CapiStrings.create, busy: state.busy, enabled: !CapiStore.clean(nickname).isEmpty) {
+            SubmitButton(title: CapiStrings.create, busy: state.busy) {
                 let name = CapiStore.clean(nickname)
-                guard !name.isEmpty else { return }
+                guard !name.isEmpty else {
+                    flagMissingName($nameMissing, focus: $nameFocused)
+                    return
+                }
                 CapiStore.nickname = name
                 CapiStore.targetScore = targetScore
                 CapiStore.table = table
@@ -78,15 +82,19 @@ struct JoinCard: View {
     let onJoin: (_ nickname: String) -> Void
     @State private var nickname = CapiStore.nickname
     @FocusState private var nameFocused: Bool
+    @State private var nameMissing = false
 
     var body: some View {
         VStack(spacing: 12) {
             Text("Capi").font(.system(size: 28, weight: .heavy))
             if let status = state.status { Text(status).foregroundColor(.secondary) }
-            NameField(nickname: $nickname, focused: $nameFocused, focusRequest: state.focusRequest, onNeedsKeyboard: onNeedsKeyboard)
-            SubmitButton(title: CapiStrings.join, busy: state.busy, enabled: !CapiStore.clean(nickname).isEmpty) {
+            NameField(nickname: $nickname, missing: $nameMissing, focused: $nameFocused, focusRequest: state.focusRequest, onNeedsKeyboard: onNeedsKeyboard)
+            SubmitButton(title: CapiStrings.join, busy: state.busy) {
                 let name = CapiStore.clean(nickname)
-                guard !name.isEmpty else { return }
+                guard !name.isEmpty else {
+                    flagMissingName($nameMissing, focus: $nameFocused)
+                    return
+                }
                 CapiStore.nickname = name
                 onJoin(name)
             }
@@ -99,33 +107,52 @@ struct JoinCard: View {
 // The name field of both cards. Focus asks the drawer to expand, since the
 // compact drawer has no keyboard, and the field never holds more UTF-16
 // units than the server keeps (CapiStore.clean counts the same way), cut at
-// a whole character.
+// a whole character. A tap that found it empty marks it and says why, until
+// the player types.
 struct NameField: View {
     @Binding var nickname: String
+    @Binding var missing: Bool
     var focused: FocusState<Bool>.Binding
     let focusRequest: Int
     let onNeedsKeyboard: () -> Void
 
     var body: some View {
-        TextField(CapiStrings.yourName, text: $nickname)
-            .textFieldStyle(.roundedBorder)
-            .frame(maxWidth: 240)
-            .textContentType(.nickname)
-            .submitLabel(.done)
-            .focused(focused)
-            .onChange(of: focused.wrappedValue) { if $0 { onNeedsKeyboard() } }
-            .onChange(of: focusRequest) { _ in focused.wrappedValue = true }
-            .onChange(of: nickname) { value in
-                var units = 0
-                var out = ""
-                for ch in value {
-                    units += ch.utf16.count
-                    if units > CapiStore.nicknameMax { break }
-                    out.append(ch)
+        VStack(spacing: 4) {
+            TextField(CapiStrings.yourName, text: $nickname)
+                .textFieldStyle(.roundedBorder)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.red, lineWidth: missing ? 1 : 0))
+                .frame(maxWidth: 240)
+                .textContentType(.nickname)
+                .submitLabel(.done)
+                .focused(focused)
+                .onChange(of: focused.wrappedValue) { if $0 { onNeedsKeyboard() } }
+                .onChange(of: focusRequest) { _ in focused.wrappedValue = true }
+                .onChange(of: nickname) { value in
+                    missing = false
+                    var units = 0
+                    var out = ""
+                    for ch in value {
+                        units += ch.utf16.count
+                        if units > CapiStore.nicknameMax { break }
+                        out.append(ch)
+                    }
+                    if out != value { nickname = out }
                 }
-                if out != value { nickname = out }
+            if missing {
+                Text(CapiStrings.nameNeeded)
+                    .font(.footnote)
+                    .foregroundColor(.red)
             }
+        }
     }
+}
+
+// A tap with no name: mark the field, move the focus there (which expands
+// the drawer for the keyboard), and tell VoiceOver why nothing was sent.
+func flagMissingName(_ missing: Binding<Bool>, focus: FocusState<Bool>.Binding) {
+    missing.wrappedValue = true
+    focus.wrappedValue = true
+    UIAccessibility.post(notification: .announcement, argument: CapiStrings.nameNeeded)
 }
 
 extension View {
@@ -156,12 +183,11 @@ struct TableCard: View {
     }
 }
 
-// The card's one action: spins and ignores taps while a request is in flight,
-// and stays dimmed until there is a name to send.
+// The card's one action: spins and ignores taps while a request is in flight.
+// It never dims for an empty name: the tap says what is missing instead.
 struct SubmitButton: View {
     let title: String
     let busy: Bool
-    let enabled: Bool
     let action: () -> Void
 
     var body: some View {
@@ -172,6 +198,6 @@ struct SubmitButton: View {
             }
         }
         .buttonStyle(.borderedProminent)
-        .disabled(busy || !enabled)
+        .disabled(busy)
     }
 }

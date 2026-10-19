@@ -25,6 +25,7 @@ const mirrored: Record<string, keyof Strings> = {
   join: "joinGame",
   create: "createGame",
   yourName: "yourName",
+    nameNeeded: "nameNeeded",
   connectionError: "connectionError",
   retry: "retry",
   cancel: "cancel",

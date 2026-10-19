@@ -1,7 +1,7 @@
 // NOTE: apps/mobile/targets/messages/CapiStrings.swift duplicates the iMessage
 // bubble captions and drawer strings (yourTurnGeneric/yourTurnFor/roundWon/
 // gameWon/gameWonTeam/invite1v1/invite2v2/inviteRematch/join/create/tableNotFound/
-// openInCapi/yourName/connectionError/retry/cancel/table/score100/score200/
+// openInCapi/yourName/nameNeeded/connectionError/retry/cancel/table/score100/score200/
 // themeBarberia/themeColmado/themePatio/themeQuisqueya/themeLarimar/themeNoche). Bubbles
 // render without JS, so they cannot read this file. If you change tone or
 // wording here, update CapiStrings.swift to match (swiftParity.test.ts fails
@@ -376,7 +376,7 @@ export const es: Strings = {
   codeCopied: "¡Código copiado!",
   autoRefresh: "Se actualiza sola cuando se unan.",
   refreshing: "Buscando…",
-  refreshNoChange: "Nadie se ha unido todavía.",
+  refreshNoChange: "Nadie más se ha unido todavía.",
   shareInvite: "Compartir invitación",
   inviteMessage: (code, link) => `¡Echemos una partida de dominó en Capi! Entra aquí: ${link} (código ${code})`,
   nameNeeded: "Escribe tu nombre para jugar.",
@@ -627,7 +627,7 @@ export const en: Strings = {
   codeCopied: "Code copied!",
   autoRefresh: "Updates by itself when they join.",
   refreshing: "Checking…",
-  refreshNoChange: "No one has joined yet.",
+  refreshNoChange: "No one new has joined yet.",
   shareInvite: "Share invite",
   inviteMessage: (code, link) => `Let's play dominoes on Capi! Join here: ${link} (code ${code})`,
   nameNeeded: "Enter your name to play.",

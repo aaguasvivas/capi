@@ -21,11 +21,6 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
   const codeRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
-  // A link prefill never replaces a code the player already typed.
-  useEffect(() => {
-    if (!prefillCode) return;
-    setInviteCode((typed) => typed || normalizeCode(prefillCode));
-  }, [prefillCode]);
 
   const [nickname, setNickname] = useState("");
   const [avatarColor, setAvatarColor] = useState(AVATAR_COLORS[0]);
@@ -46,6 +41,16 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
   function edited(field: FormField) {
     setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }
+
+  // A link prefill never replaces a code the player already typed. When it
+  // fills an empty field, a code message from an early tap no longer applies.
+  useEffect(() => {
+    if (!prefillCode || inviteCode) return;
+    setInviteCode(normalizeCode(prefillCode));
+    edited("code");
+    // Only a new prefill matters here, not each typed character.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillCode]);
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();

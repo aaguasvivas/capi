@@ -674,7 +674,9 @@ function GameContent({ id }: { id: string }) {
       const inviteUrl = `${window.location.origin}?join=${id}`;
       if (canShare) {
         try {
-          await navigator.share({ text: s.inviteMessage(inviteCode, inviteUrl), url: inviteUrl });
+          // Text only: the message already holds the link, and a separate
+          // url makes Messages and WhatsApp show it twice.
+          await navigator.share({ text: s.inviteMessage(inviteCode, inviteUrl) });
           return;
         } catch (err) {
           if (err instanceof DOMException && err.name === "AbortError") return;
@@ -706,12 +708,15 @@ function GameContent({ id }: { id: string }) {
       setRefreshCheck({ phase: result ? "done" : "failed", seats });
       refreshTimerRef.current = setTimeout(() => setRefreshCheck(null), 3000);
     };
+    // A full table waiting for its deal has no one left to wait for.
     const refreshNote =
       !refreshCheck || refreshCheck.phase === "checking" || refreshCheck.seats !== seatList
         ? ""
         : refreshCheck.phase === "failed"
           ? s.networkError
-          : s.refreshNoChange;
+          : playersNeeded === 0
+            ? ""
+            : s.refreshNoChange;
 
     return (
       <div
