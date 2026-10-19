@@ -260,6 +260,9 @@ export default function Index() {
     action: "create" | "join";
     key: ErrorKey | "networkError";
   } | null>(null);
+  // The button whose tap found the name empty. The name field's Return key
+  // then finishes that action, so the player need not scroll back to it.
+  const [nameFor, setNameFor] = useState<"create" | "join" | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const nameInputRef = useRef<TextInput>(null);
   const codeInputRef = useRef<TextInput>(null);
@@ -412,10 +415,14 @@ export default function Index() {
   // first one into view and focuses it, and says whether the request may go.
   // The jump is not animated: the keyboard opening on focus re-reads the
   // scroll offset and would stop an animated scroll partway.
-  function fieldsReady(fields: ReadonlyArray<readonly [FormField, string]>) {
+  function fieldsReady(
+    action: "create" | "join",
+    fields: ReadonlyArray<readonly [FormField, string]>
+  ) {
     setRequestError(null);
     const { errors, first } = checkFields(fields);
     setFieldErrors(errors);
+    setNameFor(errors.name ? action : null);
     if (!first) {
       Keyboard.dismiss();
       return true;
@@ -431,7 +438,9 @@ export default function Index() {
         y: Math.max(0, cardYRef.current + nameYRef.current - FLAGGED_FIELD_TOP),
         animated: false,
       });
-      nameInputRef.current?.focus();
+      // One frame later, so the field already shows the Join (or Go) return
+      // key that nameFor sets: iOS reads the key type only on focus.
+      requestAnimationFrame(() => nameInputRef.current?.focus());
     } else {
       // The code field is the last field, right above Join.
       scrollRef.current?.scrollToEnd({ animated: false });
@@ -451,7 +460,7 @@ export default function Index() {
   }
 
   async function handleCreate() {
-    if (loading || !fieldsReady([["name", nickname]])) return;
+    if (loading || !fieldsReady("create", [["name", nickname]])) return;
     setLoading("create");
     try {
       const res = await fetch(`${API_BASE}/api/games`, {
@@ -491,7 +500,7 @@ export default function Index() {
   async function handleJoin() {
     if (
       loading ||
-      !fieldsReady([
+      !fieldsReady("join", [
         ["name", nickname],
         ["code", inviteCode],
       ])
@@ -769,6 +778,13 @@ export default function Index() {
               maxLength={NICKNAME_MAX}
               placeholder={s.namePlaceholder}
               placeholderTextColor="#9ca3af"
+              returnKeyType={
+                nameFor === "join" ? "join" : nameFor === "create" ? "go" : "done"
+              }
+              onSubmitEditing={() => {
+                if (nameFor === "join") handleJoin();
+                else if (nameFor === "create") handleCreate();
+              }}
               accessibilityLabel={s.yourName}
               accessibilityHint={
                 fieldErrors.name ? s[fieldErrors.name] : undefined
