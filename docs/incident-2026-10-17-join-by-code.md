@@ -26,9 +26,14 @@ Two friends sat side by side for one friend's first game. The host created a tab
 - **playcapi.com:** live since 2026-10-18 and checked on the live site: an empty name is flagged and gets the cursor, a lowercase code is accepted, and a real join started the table.
 - **iOS app and iMessage:** ships with version 1.2. The live 1.1 app keeps the old behavior until then. Until 1.2 is out, the most reliable way to invite from 1.1 is the link (Copy link), because it opens the fixed web form.
 
+## Follow-up: invite links open the app (2026-10-19, owner decision)
+
+- playcapi.com serves `/.well-known/apple-app-site-association` as JSON (`apps/web/public/.well-known/`, type set in `apps/web/next.config.js`). It claims only invite links, `playcapi.com/?join=<table>`, for `JQ39X3L553.dev.capi.app`. Every other page, including a table already taken in a browser, stays in the browser. Live, and Apple's CDN copy matched on 2026-10-19.
+- The app declares `applinks:playcapi.com` (`apps/mobile/app.json`). `apps/mobile/app/+native-intent.tsx` sends an invite link to that table (`apps/mobile/lib/inviteLink.ts`, with tests), where a free seat shows the join card with the saved name filled in. Checked in the simulator through `capi://?join=` on a cold start and with the app open, and a real join landed.
+- The universal link itself needs a signed build: check it on TestFlight (tap an invite link in Messages or WhatsApp with 1.2 installed).
+
 ## Not fixed here (owner decisions or later work)
 
-- **Invite links open the website, never the app.** Opening the app needs universal links: `ios.associatedDomains` in `apps/mobile/app.json` plus an `apple-app-site-association` file on playcapi.com (it returns 404 today).
 - The app and the website start in Spanish whatever the device language is.
 - A rate-limit answer reads as a generic join failure; a finished table found by code reads as "not found"; old empty lobbies stay listed on the home screen.
 - If an iMessage player does not press send on the staged invite bubble, nothing reaches the chat, and the drawer gives no reminder.
