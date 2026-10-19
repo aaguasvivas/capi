@@ -84,6 +84,13 @@ export interface Strings {
   orShareCode: string;
   codeCopied: string;
   autoRefresh: string;
+  // Waiting room: feedback for the Refresh link, and a one-tap invite
+  refreshing: string;
+  refreshNoChange: string;
+  shareInvite: string;
+  inviteMessage: (code: string, link: string) => string;
+  // Create and join forms: shown at the name field when a tap finds it empty
+  nameNeeded: string;
   conTuFrente: string;
   // Messages waiting room: the invite bubble reaches the chat, and this code
   // lets a player on the web join too.
@@ -368,6 +375,11 @@ export const es: Strings = {
   orShareCode: "o comparte el código",
   codeCopied: "¡Código copiado!",
   autoRefresh: "Se actualiza sola cuando se unan.",
+  refreshing: "Buscando…",
+  refreshNoChange: "Nadie se ha unido todavía.",
+  shareInvite: "Compartir invitación",
+  inviteMessage: (code, link) => `¡Echemos una partida de dominó en Capi! Entra aquí: ${link} (código ${code})`,
+  nameNeeded: "Escribe tu nombre para jugar.",
   conTuFrente: "Con tu frente",
   embedShareCode: "Desde la web se entra en playcapi.com con este código.",
 
@@ -512,7 +524,7 @@ export const es: Strings = {
   joinLookupFull: "Esa mesa está llena",
   joinLookupStarted: "Esa partida ya empezó",
   joiningTableOf: (name) => `Uniéndote a la mesa de ${name}`,
-  codeIs6: "El código tiene 6 letras",
+  codeIs6: "El código tiene 6 caracteres",
 
   errNotYourTurn: "No es tu turno",
   errMustPlay: "Tienes ficha para jugar",
@@ -614,6 +626,11 @@ export const en: Strings = {
   orShareCode: "or share the code",
   codeCopied: "Code copied!",
   autoRefresh: "Updates by itself when they join.",
+  refreshing: "Checking…",
+  refreshNoChange: "No one has joined yet.",
+  shareInvite: "Share invite",
+  inviteMessage: (code, link) => `Let's play dominoes on Capi! Join here: ${link} (code ${code})`,
+  nameNeeded: "Enter your name to play.",
   conTuFrente: "With your partner",
   embedShareCode: "On the web, join at playcapi.com with this code.",
 
