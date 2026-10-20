@@ -23,7 +23,7 @@
         "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       },
       "ios": {
-        "image": "latest"
+        "image": "macos-tahoe-26.6-xcode-27.0"
       }
     },
     "simulator": {
@@ -32,7 +32,7 @@
       "autoIncrement": false,
       "ios": {
         "simulator": true,
-        "image": "latest"
+        "image": "macos-tahoe-26.6-xcode-27.0"
       }
     }
   },

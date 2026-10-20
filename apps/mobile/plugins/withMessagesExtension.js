@@ -153,8 +153,11 @@ function applyExtensionBuildSettings(proj, config) {
   const configurations = proj.pbxXCBuildConfigurationSection();
   for (const key of Object.keys(configurations)) {
     const entry = configurations[key];
+    // addTarget writes PRODUCT_NAME = "CapiMessages", but pod install rewrites
+    // the pbxproj without the quotes, so a re-prebuild reads CapiMessages.
+    // Compare without quotes, or the appex keeps the old version (ITMS-90473).
     if (typeof entry === "object" && entry.buildSettings &&
-        entry.buildSettings.PRODUCT_NAME === `"${TARGET}"`) {
+        String(entry.buildSettings.PRODUCT_NAME).replace(/"/g, "") === TARGET) {
       Object.assign(entry.buildSettings, {
         PRODUCT_BUNDLE_IDENTIFIER: BUNDLE_ID,
         SWIFT_VERSION: "5.0",
