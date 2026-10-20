@@ -4,7 +4,8 @@ Do the steps in order. Each step tells you what to do and how to check it.
 Stop at a failed check and send Claude the screen or the output.
 
 The paste values are in docs/store-listing.md: the "Version 1.2" What's New
-blocks, the App Review note, and the promotional texts. The 1.1 runbook
+blocks, the App Review note, the promotional texts, and the App Store
+descriptions. The 1.1 runbook
 (docs/submit-1.1-runbook.md) stays as the record of 1.1.
 
 What 1.2 adds:
@@ -124,6 +125,9 @@ Have open:
    - **What's New:** the "Version 1.2" blocks in docs/store-listing.md.
    - **Promotional Text:** the values in the App Store tables (161 and 167 of
      170 characters).
+   - **Description:** the App Store description blocks (EN and ES). They now
+     say 6-character codes. App Store Connect copies the 1.1 text into 1.2.0,
+     and that text says 6-letter. The description locks when you submit.
    - **Screenshots:** under iPhone, open the Dynamic Island (medium) size and
      upload the 8 files in apps/mobile/store-assets/screenshots/marketing-medium.
      Keep the 1.1 order: 07-hero-en, 06-create-en, 02-jalar-es,
@@ -131,7 +135,7 @@ Have open:
      01-hero-board-es. Each file is 1206x2622, RGB, with no alpha channel.
    - **Build:** Build > (+) > 1.2.0 (N) > Done.
    - **App Review Information > Notes:** the whole block under "Apple
-     Guideline 4.2" in docs/store-listing.md (3640 of 4000 bytes). Sign-in
+     Guideline 4.2" in docs/store-listing.md (3743 of 4000 bytes). Sign-in
      required stays off.
    - **App Privacy:** no change. The existing Gameplay Content entry covers
      the stored tile design (players.tile_skin). That entry has covered the
