@@ -267,6 +267,11 @@ export interface Strings {
   joinLookupStarted: string;
   joiningTableOf: (name: string) => string;
   codeIs6: string;
+  // Waiting room code chip, the copy fallback when the clipboard is blocked,
+  // and the notice shown on a phone held sideways at the table
+  copyCode: string;
+  copyThisLink: string;
+  rotatePhone: string;
 
   // Server and engine errors, by key (see errors.ts)
   errNotYourTurn: string;
@@ -524,7 +529,10 @@ export const es: Strings = {
   joinLookupFull: "Esa mesa está llena",
   joinLookupStarted: "Esa partida ya empezó",
   joiningTableOf: (name) => `Uniéndote a la mesa de ${name}`,
-  codeIs6: "El código tiene 6 caracteres",
+  codeIs6: "El código tiene 6 caracteres.",
+  copyCode: "Copiar código",
+  copyThisLink: "Copia este enlace:",
+  rotatePhone: "Gira el teléfono para jugar.",
 
   errNotYourTurn: "No es tu turno",
   errMustPlay: "Tienes ficha para jugar",
@@ -775,7 +783,10 @@ export const en: Strings = {
   joinLookupFull: "That table is full",
   joinLookupStarted: "That game already started",
   joiningTableOf: (name) => `Joining ${name}'s table`,
-  codeIs6: "The code is 6 characters",
+  codeIs6: "The code is 6 characters.",
+  copyCode: "Copy code",
+  copyThisLink: "Copy this link:",
+  rotatePhone: "Turn your phone upright to play.",
 
   errNotYourTurn: "Not your turn",
   errMustPlay: "You have a tile you can play",
