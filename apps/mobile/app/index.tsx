@@ -657,7 +657,7 @@ export default function Index() {
               style={{
                 fontSize: 11,
                 fontWeight: "800",
-                color: lang === l ? "#ffffff" : "#9ca3af",
+                color: lang === l ? "#ffffff" : "#6b7280",
               }}
               maxFontSizeMultiplier={PILL_MAX_FONT_SCALE}
             >
@@ -683,7 +683,9 @@ export default function Index() {
         // window by default and needs nothing.
         automaticallyAdjustKeyboardInsets
       >
-        {/* Title */}
+        {/* Title. The word mark grows to 3 times its size and then stops:
+            at the largest text size (3.57) "Capi" is about 341pt wide and
+            breaks as "Cap/i" in the 327pt column; at 3 it is about 287pt. */}
         <View style={{ alignItems: "center", marginBottom: 28 }}>
           <Text
             style={{
@@ -692,6 +694,7 @@ export default function Index() {
               color: THEME.scoreBg,
               letterSpacing: -1,
             }}
+            maxFontSizeMultiplier={3}
           >
             Capi
           </Text>
@@ -699,7 +702,7 @@ export default function Index() {
             style={{
               fontSize: 14,
               fontWeight: "600",
-              color: "#9ca3af",
+              color: "#4b5563",
               marginTop: 2,
             }}
           >
@@ -747,7 +750,7 @@ export default function Index() {
                       <Text
                         style={{
                           fontSize: 11,
-                          color: "#9ca3af",
+                          color: "#6b7280",
                           marginTop: 1,
                           fontVariant: ["tabular-nums"],
                         }}
@@ -1292,9 +1295,10 @@ const cardTitleStyle = {
   textAlign: "center" as const,
 };
 
+// Gray-500: 4.83:1 on a card, 4.63:1 on a selected one.
 const cardDescStyle = {
   fontSize: 10,
-  color: "#9ca3af",
+  color: "#6b7280",
   textAlign: "center" as const,
   marginTop: 1,
 };

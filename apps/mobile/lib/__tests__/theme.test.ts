@@ -6,6 +6,7 @@ import {
   feltColors,
   inkOn,
   INK_DARK,
+  RAIL_CHIP,
   THEMES,
 } from "../../theme";
 
@@ -60,6 +61,12 @@ describe("table text contrast", () => {
       expect(FELT_LOCATIONS[1]).toBeGreaterThanOrEqual(0.1);
       expect(contrast(over(p.feltLabel, p.feltMid), p.feltMid)).toBeGreaterThanOrEqual(BODY);
       expect(contrast(over(p.feltGold, p.feltMid), p.feltMid)).toBeGreaterThanOrEqual(BODY);
+    });
+
+    it(`${name}: the 2v2 rail names and tile lines read on their chips over the light pool`, () => {
+      // The rails sit level with the light pool, so feltCenter is the worst case.
+      const chip = over(RAIL_CHIP, p.feltCenter);
+      expect(contrast(over(p.feltLabel, chip), chip)).toBeGreaterThanOrEqual(BODY);
     });
 
     it(`${name}: accent text on the score panel falls back where it fails`, () => {

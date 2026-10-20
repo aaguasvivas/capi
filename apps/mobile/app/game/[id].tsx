@@ -80,6 +80,7 @@ import {
   FELT_LOCATIONS,
   feltColors,
   getTheme,
+  RAIL_CHIP,
   inkOn,
   THEME,
 } from "../../theme";
@@ -1887,6 +1888,7 @@ function GameTable({
                     isActive={gameState.currentTurn === leftSeat}
                     tileCount={leftHand.length}
                     tilesLabel={s.tilesLabel}
+                    labelColor={palette.feltLabel}
                   />
                   <View style={{ flex: 1 }}>
                     <Board
@@ -1903,6 +1905,7 @@ function GameTable({
                     isActive={gameState.currentTurn === rightSeat}
                     tileCount={rightHand.length}
                     tilesLabel={s.tilesLabel}
+                    labelColor={palette.feltLabel}
                   />
                 </>
               )}
@@ -2508,6 +2511,7 @@ function SideRail({
   isActive,
   tileCount,
   tilesLabel,
+  labelColor,
 }: {
   player?: { nickname: string; avatar_color: string } | null;
   backSkin: TileSkinId;
@@ -2515,6 +2519,8 @@ function SideRail({
   isActive: boolean;
   tileCount: number;
   tilesLabel: string;
+  // The theme's feltLabel, on the dark rail chips.
+  labelColor: string;
 }) {
   return (
     <View
@@ -2544,18 +2550,26 @@ function SideRail({
             {player?.nickname?.[0]?.toUpperCase() ?? "?"}
           </Text>
         </View>
-        <Text
+        <View
           style={{
-            color: "rgba(255,255,255,0.7)",
-            fontSize: 9,
-            fontWeight: "500",
+            backgroundColor: RAIL_CHIP,
+            borderRadius: 4,
+            paddingHorizontal: 3,
             maxWidth: 50,
-            textAlign: "center",
           }}
-          numberOfLines={1}
         >
-          {player?.nickname ?? "?"}
-        </Text>
+          <Text
+            style={{
+              color: labelColor,
+              fontSize: 9,
+              fontWeight: "500",
+              textAlign: "center",
+            }}
+            numberOfLines={1}
+          >
+            {player?.nickname ?? "?"}
+          </Text>
+        </View>
       </View>
       {showBack ? (
         <SkinScope skinId={backSkin}>
@@ -2564,7 +2578,7 @@ function SideRail({
       ) : null}
       <View
         style={{
-          backgroundColor: "rgba(0,0,0,0.35)",
+          backgroundColor: RAIL_CHIP,
           borderRadius: 8,
           paddingHorizontal: 8,
           paddingVertical: 6,
@@ -2585,7 +2599,7 @@ function SideRail({
         </Text>
         <Text
           style={{
-            color: "rgba(255,255,255,0.5)",
+            color: labelColor,
             fontSize: 8,
             marginTop: 1,
           }}

@@ -112,6 +112,11 @@ export const THEMES: Record<
 // The top band is where the web's ellipse reaches the top edge, near feltMid.
 export const FELT_LOCATIONS = [0, 0.1, 0.42, 0.82, 1] as const;
 
+// The dark backing of the 2v2 side rails' name and tile count chips. The
+// rails sit level with the light pool, so their text needs it: feltLabel on
+// it reads at least 4.97:1 on every feltCenter.
+export const RAIL_CHIP = "rgba(0,0,0,0.35)";
+
 export function feltColors(
   p: ThemePalette
 ): readonly [string, string, string, string, string] {
