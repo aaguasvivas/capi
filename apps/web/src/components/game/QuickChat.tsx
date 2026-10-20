@@ -12,9 +12,10 @@ interface QuickChatProps {
 export default function QuickChat({ onSend, disabled }: QuickChatProps) {
   const { lang, s } = useI18n();
   // Stays open while the player reads: it closes on a pick, a tap outside,
-  // or the chat button.
+  // the chat button, or Escape.
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -26,8 +27,19 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
         setOpen(false);
       }
     };
+    // Escape hands focus back to the chat button, where the keyboard
+    // player opened the tray from.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
     document.addEventListener("pointerdown", handler);
-    return () => document.removeEventListener("pointerdown", handler);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", handler);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   // Phrases travel as ids so every receiver renders them in its own language.
@@ -81,6 +93,7 @@ export default function QuickChat({ onSend, disabled }: QuickChatProps) {
       {/* 44px hit area around the 36px bubble; the negative margin keeps the
           layout footprint the bubble's own size. */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => {
           if (!disabled) setOpen((prev) => !prev);

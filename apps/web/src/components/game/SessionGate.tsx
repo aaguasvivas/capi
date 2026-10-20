@@ -134,16 +134,19 @@ export function JoinCard({ gameId, onJoined }: JoinCardProps) {
         )}
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      {/* Buttons, not inputs: the heading names the group and each swatch
+          says whether it is selected. */}
+      <div role="group" aria-labelledby="join-card-color">
+        <p id="join-card-color" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.yourColor}
-        </label>
+        </p>
         <div className="flex gap-2.5">
-          {AVATAR_COLORS.map((c) => (
+          {AVATAR_COLORS.map((c, i) => (
             <button
               key={c}
               type="button"
               onClick={() => setAvatarColor(c)}
+              aria-label={`${s.yourColor} ${i + 1}`}
               aria-pressed={avatarColor === c}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
                 avatarColor === c
@@ -306,7 +309,7 @@ export function SpectatorSeats({
               {/* Only the name truncates: the tile count always shows. */}
               <span
                 className={`flex min-w-0 text-xs font-medium ${
-                  onTurn ? "text-white" : "text-white/60"
+                  onTurn ? "text-white" : "text-[var(--felt-label)]"
                 }`}
               >
                 <span className="truncate max-w-[120px]">{p?.nickname ?? "?"}</span>
@@ -319,7 +322,7 @@ export function SpectatorSeats({
           );
         })}
         {!is2v2 && boneyardCount > 0 && (
-          <span className="text-amber-300/80 text-xs font-medium flex-shrink-0">
+          <span className="text-[var(--felt-gold)] text-xs font-medium flex-shrink-0">
             {s.boneyard}: {boneyardCount}
           </span>
         )}

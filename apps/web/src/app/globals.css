@@ -24,6 +24,14 @@
   --hand-text: #4b5563;
   --hand-line: #d1d5db;
   --hand-hover: rgba(0, 0, 0, 0.05);
+  /* Labels drawn straight on the felt: the seat line with its tile count,
+     the rail names, and the gold boneyard count. Colmado, quisqueya and
+     noche inherit these from :root; patio and larimar set their own. Label
+     and gold on each felt's base color (the labels sit at the edges, on
+     the base or darker): barberia 4.85 and 4.82, colmado 8.59 and 9.37,
+     quisqueya 7.56 and 8.08, noche 9.23 and 10.38. */
+  --felt-label: rgba(255, 255, 255, 0.7);
+  --felt-gold: rgba(252, 211, 77, 0.9);
 }
 
 /* ── Colmado ──────────────────────────────────────────────
@@ -62,6 +70,11 @@
      without it fall back to their accent. */
   --score-accent: var(--score-text);
   --hand-bg: #e0ceb8;
+  /* The lightest felt: the shared white at 70% and gold at 90% read at 3.70
+     and 3.49 on its #6e6660 base, so patio's labels are near opaque: the
+     panel cream at 4.74:1 and a pale gold at 4.78:1. */
+  --felt-label: #f0ebe3;
+  --felt-gold: #feecb0;
 }
 
 /* ── Quisqueya ────────────────────────────────────────────
@@ -94,6 +107,10 @@
   --accent-light: #7fd0da;
   --accent-ink: #111827; /* 7.59:1 on the accent */
   --hand-bg: #d9e9eb;
+  /* The shared label and gold read at 4.40 and 4.32 on the #17606f base,
+     so larimar's are a little stronger: 4.80 and 4.62. */
+  --felt-label: rgba(255, 255, 255, 0.75);
+  --felt-gold: rgba(252, 211, 77, 0.95);
 }
 
 /* ── Capi Noche ───────────────────────────────────────────
@@ -460,23 +477,57 @@ html, body {
 }
 
 /* ── 2v2 side rails ───────────────────────────────────────
-   Each side column shows one tile back in that seat's design, but only
-   when the board row is tall enough: the column is centered, so the back
-   pushes its count chip down toward the mute and chat buttons in the
-   felt's bottom corners (their tops sit 52px up). The column with the back
-   is about 151px, so at 256px the count chip just touches the mute button
-   (measured); 264px leaves a 4px gap. Without container query support the
-   back stays hidden. */
+   Each side column holds the seat's avatar, name and tile count box, plus
+   one tile back in that seat's design when the board row is tall enough.
+   On the website the chat button (bottom-left) and the mute cluster
+   (bottom-right) sit in the felt's bottom corners with their tops 52px up,
+   so those columns carry .rail-band: 56px of bottom padding (the buttons
+   plus a 4px gap) under pt-2, and the content centers in the rest. In
+   Messages the cluster moves to the top and there is no chat button, so
+   the columns keep py-2.
+   Content: avatar and name 43px, count box 44px, back 48px, 8px gaps, so
+   95px without the back and 151px with it. A banded column fits that in a
+   row of 95 + 64 = 159px, or 151 + 64 = 215px with the back, so the back
+   shows from 216px (also enough for py-2). Up to 159px a banded column
+   drops the name and the "fichas" line: 68px, which clears the buttons
+   down to a 132px row. Without container query support the back stays
+   hidden and nothing is dropped. */
 .side-row {
   container-type: size;
   container-name: side-row;
 }
+.rail-band {
+  padding-bottom: 3.5rem;
+}
 .rail-back {
   display: none;
 }
-@container side-row (min-height: 264px) {
+@container side-row (min-height: 216px) {
   .rail-back {
     display: block;
+  }
+}
+@container side-row (max-height: 159px) {
+  .rail-band .rail-name,
+  .rail-band .rail-label {
+    display: none;
+  }
+}
+
+/* ── Phone held sideways ──────────────────────────────────
+   A landscape phone leaves the table no room to play: at 568x320 the hand's
+   tile list is 20px tall with none of 7 tiles in view and the board is
+   gone, and at 667x375 the list is 38px. The table page (round card and
+   game over included, inside Messages too) shows a full-screen notice
+   instead; the waiting room fits with a page scroll and keeps working.
+   Coarse pointer only, so a short desktop window is not told to turn a
+   phone. Above every overlay on the table (they top out at z-50). */
+.rotate-notice {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .rotate-notice {
+    display: flex;
   }
 }
 

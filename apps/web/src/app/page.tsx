@@ -228,7 +228,7 @@ function HomeContent() {
             className="mx-auto h-[3px] w-12 rounded-full"
             style={{ background: "#b8860b" }}
           />
-          <p className="text-[11px] font-bold tracking-[0.22em] text-gray-500 uppercase pt-1">
+          <p className="text-[11px] font-bold tracking-[0.22em] text-gray-600 uppercase pt-1">
             {s.tagline}
           </p>
           <p className="text-base italic text-gray-700 font-medium pt-1">
@@ -254,7 +254,7 @@ function HomeContent() {
         {/* Resume: games this browser is seated at and that are still going */}
         {resume.length > 0 && (
           <section className="space-y-1.5">
-            <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-gray-600">
               {s.resumeGame}
             </p>
             {resume.map((g) => (

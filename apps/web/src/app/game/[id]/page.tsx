@@ -136,6 +136,10 @@ function GameContent({ id }: { id: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  // A copy the clipboard refused: the invite link to copy by hand, or the
+  // code under its chip.
+  const [linkFallback, setLinkFallback] = useState<string | null>(null);
+  const [codeFallback, setCodeFallback] = useState(false);
   // The waiting room's Refresh: "checking" while the fetch runs, then its
   // outcome for a few seconds. `seats` is the seat list at the tap, so a
   // player who joins meanwhile hides the outcome and the seats show them.
@@ -636,7 +640,8 @@ function GameContent({ id }: { id: string }) {
     const playersNeeded = Math.max(0, maxPlayers - players.length);
     // A visitor with no seat can take a free one from right here.
     const canJoin = !session && playersNeeded > 0;
-    // The invite code under a one-line lead, copied on tap.
+    // The invite code under a one-line lead, copied on tap (or shown in a
+    // field to copy by hand when the clipboard refuses).
     const codeChip = (lead: string) =>
       inviteCode && (
         <div className="space-y-1.5">
@@ -645,14 +650,16 @@ function GameContent({ id }: { id: string }) {
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(inviteCode);
+                setCodeFallback(false);
                 setCodeCopied(true);
                 setTimeout(() => setCodeCopied(false), 2000);
               } catch {
-                /* no-op */
+                setCodeFallback(true);
               }
             }}
             className="mx-auto block px-5 py-2 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors active:scale-[0.98]"
-            title={s.copyLink}
+            title={s.copyCode}
+            aria-label={`${s.copyCode} ${inviteCode}`}
           >
             <span className="font-mono text-2xl font-black tracking-[0.3em] text-gray-900 pl-[0.3em]">
               {inviteCode}
@@ -663,12 +670,14 @@ function GameContent({ id }: { id: string }) {
               {s.codeCopied}
             </p>
           )}
+          {codeFallback && <CopyField label={s.copyCode} value={inviteCode} />}
         </div>
       );
 
     // The invite opens the device's share sheet where the browser has one,
     // and copies the deep link otherwise or when the share fails. Closing
-    // the sheet is the player's choice, not a failure.
+    // the sheet is the player's choice, not a failure. When the clipboard
+    // refuses too, the link shows in a field to copy by hand.
     const canShare = !!inviteCode && typeof navigator !== "undefined" && typeof navigator.share === "function";
     const shareInvite = async () => {
       // The same /?join= form the app shares, which the universal-links file
@@ -686,10 +695,11 @@ function GameContent({ id }: { id: string }) {
       }
       try {
         await navigator.clipboard.writeText(inviteUrl);
+        setLinkFallback(null);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch {
-        /* clipboard blocked, the code chip below is the fallback */
+        setLinkFallback(inviteUrl);
       }
     };
 
@@ -839,6 +849,7 @@ function GameContent({ id }: { id: string }) {
                   </>
                 )}
               </button>
+              {linkFallback && <CopyField label={s.copyThisLink} value={linkFallback} />}
 
               {/* Secondary: the short code, for typing in by hand */}
               {codeChip(s.orShareCode)}
@@ -1023,6 +1034,10 @@ function GameContent({ id }: { id: string }) {
   // warning, or claim.
   const turnBased = gameState.mode === "turn_based";
   const muteOnTop = embedded && is2v2 && mySeat !== null;
+  // The 2v2 side rails keep their content above the chat and mute buttons
+  // in the felt's bottom corners (.rail-band in globals.css). With the
+  // cluster on top and no chat button (Messages) the corners are free.
+  const railPad = muteOnTop ? "py-2" : "rail-band pt-2";
 
   return (
     // touch-manipulation stops double-tap zoom on the table; pinch zoom
@@ -1031,6 +1046,26 @@ function GameContent({ id }: { id: string }) {
       data-theme={gameState.theme}
       className="h-screen h-[100dvh] overflow-hidden flex flex-col bg-theme-page theme-pattern select-game-none touch-manipulation"
     >
+      {/* A phone held sideways has no room for the table: this covers all
+          of it, cards and overlays included. Hidden unless .rotate-notice
+          (globals.css) matches. */}
+      <div className="rotate-notice fixed inset-0 z-[60] flex-col items-center justify-center gap-4 bg-theme-score text-theme-score-text px-6 text-center">
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          className="w-12 h-12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="7" y="2" width="10" height="20" rx="2" />
+          <path d="M11 18h2" />
+        </svg>
+        <p className="text-lg font-bold max-w-xs">{s.rotatePhone}</p>
+      </div>
+
       {/* Callout: mid-round bonus banner vs round-ending overlay */}
       {lastCallout &&
         (isMidRoundCallout ? (
@@ -1216,15 +1251,15 @@ function GameContent({ id }: { id: string }) {
                     >
                       {topPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
                     </div>
-                    <span className="text-white/60 text-xs font-medium truncate min-w-0">
+                    <span className="text-[var(--felt-label)] text-xs font-medium truncate min-w-0">
                       {topPlayer?.nickname ?? (is2v2 ? s.partner : s.opponent)}
-                      {is2v2 && <span className="opacity-60 ml-1">{s.partnerTag}</span>}
+                      {is2v2 && <span className="ml-1">{s.partnerTag}</span>}
                       {" · "}
                       {s.tileCount(topHand.length)}
                     </span>
                   </div>
                   {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 && (
-                    <span className="text-amber-300/80 text-xs font-medium flex-shrink-0">
+                    <span className="text-[var(--felt-gold)] text-xs font-medium flex-shrink-0">
                       {s.boneyard}: {gameState.boneyard.length}
                     </span>
                   )}
@@ -1255,7 +1290,7 @@ function GameContent({ id }: { id: string }) {
           {is2v2 && mySeat && !isGameEnded ? (
             <div className="side-row flex-1 flex min-h-0 relative">
               {/* Left opponent */}
-              <div className="w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] py-2">
+              <div className={`w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] ${railPad}`}>
                 <div className="flex flex-col items-center gap-1">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md transition-all ${
@@ -1267,7 +1302,7 @@ function GameContent({ id }: { id: string }) {
                   >
                     {leftPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
                   </div>
-                  <span className="text-white/60 text-[9px] font-medium truncate max-w-[52px] text-center leading-tight">
+                  <span className="rail-name text-[var(--felt-label)] text-[9px] font-medium truncate max-w-[52px] text-center leading-tight">
                     {leftPlayer?.nickname ?? "?"}
                   </span>
                 </div>
@@ -1278,7 +1313,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{leftHand.length}</span>
-                  <span className="text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
+                  <span className="rail-label text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
                 </div>
               </div>
 
@@ -1288,7 +1323,7 @@ function GameContent({ id }: { id: string }) {
               </div>
 
               {/* Right opponent */}
-              <div className="w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] py-2">
+              <div className={`w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] ${railPad}`}>
                 <div className="flex flex-col items-center gap-1">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md transition-all ${
@@ -1300,7 +1335,7 @@ function GameContent({ id }: { id: string }) {
                   >
                     {rightPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
                   </div>
-                  <span className="text-white/60 text-[9px] font-medium truncate max-w-[52px] text-center leading-tight">
+                  <span className="rail-name text-[var(--felt-label)] text-[9px] font-medium truncate max-w-[52px] text-center leading-tight">
                     {rightPlayer?.nickname ?? "?"}
                   </span>
                 </div>
@@ -1311,7 +1346,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{rightHand.length}</span>
-                  <span className="text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
+                  <span className="rail-label text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
                 </div>
               </div>
             </div>
@@ -1411,9 +1446,11 @@ function GameContent({ id }: { id: string }) {
           )}
 
           {/* ── Game Over overlay ── */}
+          {/* The short variants keep the card, the leave link included,
+              inside a 320x568 phone (about 400px of card in 429px). */}
           {isFinished && !lastCallout && (
             <div className="absolute inset-0 bg-black/70 flex overflow-y-auto py-6 px-6 z-10">
-              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-5 relative overflow-hidden">
+              <div className="m-auto bg-[var(--score-bg)] text-[var(--score-text)] rounded-2xl p-6 sm:p-8 text-center max-w-xs w-full shadow-2xl animate-callout-enter space-y-5 relative overflow-hidden short:p-4 short:space-y-3">
                 {/* Confetti particles */}
                 {iWonGame && (
                   <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -1434,7 +1471,7 @@ function GameContent({ id }: { id: string }) {
                   </div>
                 )}
 
-                <p className="text-6xl relative z-10">
+                <p className="text-6xl relative z-10 short:text-5xl">
                   {myTeam === null || iWonGame ? "🏆" : "💪"}
                 </p>
                 <h2 className="text-3xl font-black relative z-10">
@@ -1547,6 +1584,16 @@ function GameContent({ id }: { id: string }) {
                       : s.playAgain}
                   </button>
                 )}
+
+                {/* The way home; inside Messages the drawer is the way on. */}
+                {!embedded && (
+                  <Link
+                    href="/"
+                    className="relative z-10 mx-auto flex w-fit min-h-[44px] items-center px-3 text-sm font-semibold underline opacity-80 hover:opacity-100"
+                  >
+                    {s.leaveTable}
+                  </Link>
+                )}
               </div>
             </div>
           )}
@@ -1647,6 +1694,26 @@ function VeinticincoBanner({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Copy by hand ────────────────────────────────────────────────────────────
+// Shown when the clipboard refuses a copy: the text in a read-only field that
+// takes focus and selects itself, so the player copies it from there.
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  return (
+    <label className="block space-y-1 text-left">
+      <span className="block text-xs text-gray-500">{label}</span>
+      <input
+        type="text"
+        readOnly
+        autoFocus
+        value={value}
+        onFocus={(e) => e.currentTarget.select()}
+        className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/20"
+      />
+    </label>
   );
 }
 

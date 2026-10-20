@@ -119,11 +119,15 @@ export default function BugReportButton({
 
       {/* Portaled to body: the button sits in a z-[3] cluster on the felt,
           and rendered there the modal could not paint above the quick chat
-          button, its tray, or the chat bubbles. */}
+          button, its tray, or the chat bubbles. The dialog (about 400px)
+          sits at the bottom on a phone and centered from sm up through
+          auto margins, not flex alignment, so on a screen shorter than it
+          the backdrop scrolls from the dialog's top instead of cutting the
+          title off above the viewport. */}
       {open &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 sm:p-4 animate-fade-in"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex overflow-y-auto overscroll-contain p-3 sm:p-4 animate-fade-in"
             onClick={(e) => {
               if (e.target === e.currentTarget && status !== "sending")
                 setOpen(false);
@@ -134,7 +138,7 @@ export default function BugReportButton({
               role="dialog"
               aria-modal="true"
               aria-labelledby="bug-report-title"
-              className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4"
+              className="mx-auto mt-auto sm:mb-auto bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4"
             >
               <div className="flex items-start justify-between">
                 <h2

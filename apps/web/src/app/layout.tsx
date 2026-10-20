@@ -32,19 +32,19 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Capi" }],
   creator: "Capi",
+  // No title or description in these two: Next fills them from each page's
+  // own (the default above on the home page). A page that set an openGraph
+  // object of its own would replace this one whole, image included. No url
+  // either: one fixed og:url would make every page share as the home page,
+  // and without it a link preview uses the address it fetched.
   openGraph: {
     type: "website",
     siteName: "Capi",
-    title: TITLE,
-    description: DESCRIPTION,
-    url: SITE_URL,
     locale: "es_DO",
     alternateLocale: ["en_US"],
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
   },
   appleWebApp: {
     capable: true,
@@ -52,7 +52,8 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   // Smart App Banner in Safari on iPhone (WKWebView, so the Messages drawer,
-  // ignores it). No app-argument: the app has no universal links.
+  // ignores it). Invite links open the app through universal links; the
+  // banner has no app-argument (owner decision pending).
   itunes: {
     appId: "6794404340",
   },

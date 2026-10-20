@@ -37,9 +37,11 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
     if (color) setAvatarColor(color);
   }, []);
 
-  // Editing a field clears only that field's message.
+  // Editing a field clears that field's message and the server's answer,
+  // which was about the values before the edit.
   function edited(field: FormField) {
     setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+    setError("");
   }
 
   // A link prefill never replaces a code the player already typed. When it
@@ -77,6 +79,13 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
         return;
       }
       const { gameId } = lookup;
+
+      // This browser already holds a seat at that table: go back to it
+      // instead of taking a second one.
+      if (localStorage.getItem(`capi_session_${gameId}`)) {
+        router.push(`/game/${gameId}`);
+        return;
+      }
 
       const joinRes = await fetch(`/api/games/${gameId}/join`, {
         method: "POST",
@@ -181,16 +190,20 @@ export default function JoinGameForm({ prefillCode = "" }: Props) {
         )}
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+      {/* Buttons, not inputs: the heading names the group and each swatch
+          says whether it is selected. */}
+      <div role="group" aria-labelledby="join-color">
+        <p id="join-color" className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           {s.yourColor}
-        </label>
+        </p>
         <div className="flex gap-2.5">
-          {AVATAR_COLORS.map((c) => (
+          {AVATAR_COLORS.map((c, i) => (
             <button
               key={c}
               type="button"
               onClick={() => setAvatarColor(c)}
+              aria-label={`${s.yourColor} ${i + 1}`}
+              aria-pressed={avatarColor === c}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
                 avatarColor === c ? "border-gray-900 scale-110 shadow-md" : "border-transparent hover:scale-105"
               }`}
