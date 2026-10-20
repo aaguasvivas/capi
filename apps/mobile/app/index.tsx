@@ -7,6 +7,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -35,6 +36,7 @@ import {
   type ProductId,
 } from "../lib/iapCatalog";
 import { useI18n } from "../lib/i18n";
+import { pickerColumns, ROW_BASIS } from "../lib/pickerColumns";
 import { skinToSend } from "../lib/seatSkins";
 import { clearSession, saveSession } from "../lib/session";
 import { TILE_SKINS, useTileSkin, type TileSkinId } from "../lib/tileSkins";
@@ -125,6 +127,15 @@ function productIdForFichas(id: PremiumFichasId): ProductId {
 // share a strip of the other's target.
 const PILL_SLOP_V = 11;
 const PILL_SLOP_H = 8;
+
+// Pill labels grow with the text size up to 1.09 times, then stop. At 375pt
+// in Spanish (the longer labels) the two pills sit 31pt apart at the default
+// size and 16.6pt apart at 1.09; any closer and their facing 8pt slops
+// overlap, and past 1.18 the pills themselves do. The pills are navigation
+// chrome, and iOS keeps a navigation bar's buttons at a fixed size too;
+// VoiceOver reads their full labels, and the store and rules screens they open
+// scale in full.
+const PILL_MAX_FONT_SCALE = 1.09;
 
 // A flagged name field scrolls to this far below the top of the scroll area,
 // the same clearance the content's top padding gives the floating pills.
@@ -244,6 +255,9 @@ function SkinSwatch({ id }: { id: TileSkinId }) {
 export default function Index() {
   const { lang, setLang, s } = useI18n();
   const insets = useSafeAreaInsets();
+  // Larger text sizes give the table and fichas pickers fewer cards per row.
+  const { fontScale } = useWindowDimensions();
+  const columns = pickerColumns(fontScale);
   const { ent, prices, reconciled } = useEntitlements();
   const { skinId, setSkinId } = useTileSkin();
   const [nickname, setNickname] = useState("");
@@ -586,6 +600,7 @@ export default function Index() {
         >
           <Text
             style={{ fontSize: 11, fontWeight: "800", color: THEME.scoreBg }}
+            maxFontSizeMultiplier={PILL_MAX_FONT_SCALE}
           >
             🛍 {s.store}
           </Text>
@@ -604,6 +619,7 @@ export default function Index() {
         >
           <Text
             style={{ fontSize: 11, fontWeight: "800", color: THEME.scoreBg }}
+            maxFontSizeMultiplier={PILL_MAX_FONT_SCALE}
           >
             📖 {s.howToPlay}
           </Text>
@@ -643,6 +659,7 @@ export default function Index() {
                 fontWeight: "800",
                 color: lang === l ? "#ffffff" : "#9ca3af",
               }}
+              maxFontSizeMultiplier={PILL_MAX_FONT_SCALE}
             >
               {l === "es" ? "ES" : "EN"}
             </Text>
@@ -827,7 +844,8 @@ export default function Index() {
             </View>
           </View>
 
-          {/* Table theme: two rows of three, premium rows gated */}
+          {/* Table theme: two rows of three (fewer per row at large text
+              sizes), premium cards gated */}
           <View style={{ gap: 8 }}>
             <Text style={labelStyle}>{s.table}</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -863,7 +881,7 @@ export default function Index() {
                     style={[
                       cardStyle,
                       {
-                        flexBasis: "30%",
+                        flexBasis: ROW_BASIS[columns.mesa],
                         flexGrow: 1,
                         borderColor: theme === t.id ? THEME.scoreBg : "#e5e7eb",
                         backgroundColor:
@@ -936,7 +954,7 @@ export default function Index() {
           {/* Fichas skin picker */}
           <View style={{ gap: 8 }}>
             <Text style={labelStyle}>{s.fichasLabel}</Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {FICHAS_IDS.map((f) => {
                 // Non-null when this skin is premium and not owned yet.
                 const lockedFichas =
@@ -963,7 +981,7 @@ export default function Index() {
                     style={[
                       cardStyle,
                       {
-                        flexBasis: "22%",
+                        flexBasis: ROW_BASIS[columns.fichas],
                         paddingHorizontal: 4,
                         borderColor: skinId === f ? THEME.scoreBg : "#e5e7eb",
                         backgroundColor:

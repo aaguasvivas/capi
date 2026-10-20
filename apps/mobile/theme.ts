@@ -8,6 +8,11 @@ export interface ThemePalette {
   accent: string;
   handBg: string;
   handText: string;
+  // Text drawn straight on the felt's top band (the opponent line and the
+  // boneyard count), the same values as the web's --felt-label and
+  // --felt-gold: at least 4.5:1 on feltMid, where FELT_LOCATIONS keeps it.
+  feltLabel: string;
+  feltGold: string;
   watermark: string;
 }
 
@@ -25,6 +30,8 @@ export const THEMES: Record<
     accent: "#c0392b",
     handBg: "#ebe4d4",
     handText: "#4b5563",
+    feltLabel: "rgba(255,255,255,0.7)",
+    feltGold: "rgba(252,211,77,0.9)",
     watermark: "BARBERÍA DON RAMÓN",
   },
   colmado: {
@@ -37,18 +44,22 @@ export const THEMES: Record<
     accent: "#d4a017",
     handBg: "#f0dcc0",
     handText: "#4b5563",
+    feltLabel: "rgba(255,255,255,0.7)",
+    feltGold: "rgba(252,211,77,0.9)",
     watermark: "COLMADO LA ESQUINA",
   },
   patio: {
     pageBg: "#e8d5c0",
     feltCenter: "#8a8278",
-    feltMid: "#7a7268",
+    feltMid: "#6e6660", // the web felt's base color
     feltEdge: "#5f574d",
     scoreBg: "#5a4a3a",
     scoreText: "#f0ebe3",
     accent: "#c4693d",
     handBg: "#e0ceb8",
     handText: "#4b5563",
+    feltLabel: "#f0ebe3",
+    feltGold: "#feecb0",
     watermark: "EL PATIO DE TÍA",
   },
   quisqueya: {
@@ -61,6 +72,8 @@ export const THEMES: Record<
     accent: "#c9a227",
     handBg: "#e2e8f2",
     handText: "#5a6577",
+    feltLabel: "rgba(255,255,255,0.7)",
+    feltGold: "rgba(252,211,77,0.9)",
     watermark: "QUISQUEYA LA BELLA",
   },
   larimar: {
@@ -73,6 +86,8 @@ export const THEMES: Record<
     accent: "#58b7c4",
     handBg: "#d9e9eb",
     handText: "#4e6b70",
+    feltLabel: "rgba(255,255,255,0.75)",
+    feltGold: "rgba(252,211,77,0.95)",
     watermark: "LARIMAR",
   },
   noche: {
@@ -85,9 +100,23 @@ export const THEMES: Record<
     accent: "#6366f1",
     handBg: "#1d1d3a",
     handText: "#a5a8c9",
+    feltLabel: "rgba(255,255,255,0.7)",
+    feltGold: "rgba(252,211,77,0.9)",
     watermark: "CAPI NOCHE",
   },
 };
+
+// The felt as a vertical gradient that approximates the web's radial light
+// pool (ellipse at 50% 40%): a flat feltMid band at the top for the opponent
+// line, the light at 42%, then feltMid again and the dark edge at the bottom.
+// The top band is where the web's ellipse reaches the top edge, near feltMid.
+export const FELT_LOCATIONS = [0, 0.1, 0.42, 0.82, 1] as const;
+
+export function feltColors(
+  p: ThemePalette
+): readonly [string, string, string, string, string] {
+  return [p.feltMid, p.feltMid, p.feltCenter, p.feltMid, p.feltEdge];
+}
 
 // Label inks for text drawn on a filled accent (buttons, chips, pills).
 export const INK_DARK = "#111827";

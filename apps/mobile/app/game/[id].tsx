@@ -77,6 +77,8 @@ import {
 import {
   accentTextOn,
   API_BASE,
+  FELT_LOCATIONS,
+  feltColors,
   getTheme,
   inkOn,
   THEME,
@@ -1545,11 +1547,10 @@ function GameTable({
           </View>
         </View>
 
-        {/* Felt game area. The vertical gradient approximates the web's radial
-            light pool (center glow fading to dark edges) */}
+        {/* Felt game area (the gradient is in theme.ts) */}
         <LinearGradient
-          colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
-          locations={[0, 0.55, 1]}
+          colors={feltColors(palette)}
+          locations={FELT_LOCATIONS}
           style={{ flex: 1 }}
         >
           {/* Table watermark, behind the board and all floating UI */}
@@ -1826,7 +1827,7 @@ function GameTable({
                       {topPlayer?.nickname?.[0]?.toUpperCase() ?? "?"}
                     </Text>
                   </View>
-                  <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
+                  <Text style={{ color: palette.feltLabel, fontSize: 12 }}>
                     {topPlayer?.nickname ??
                       (spectating
                         ? seatLabels[topSeat]
@@ -1834,7 +1835,7 @@ function GameTable({
                         ? s.partner
                         : s.opponent)}
                     {is2v2 && !spectating ? (
-                      <Text style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <Text>
                         {" "}
                         {s.partnerTag}
                       </Text>
@@ -1847,7 +1848,7 @@ function GameTable({
                 {!is2v2 && (gameState.boneyard?.length ?? 0) > 0 ? (
                   <Text
                     style={{
-                      color: "rgba(252,211,77,0.85)",
+                      color: palette.feltGold,
                       fontSize: 12,
                       fontWeight: "500",
                     }}

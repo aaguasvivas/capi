@@ -23,7 +23,7 @@ import {
   type ProductId,
 } from "../lib/iapCatalog";
 import { SkinScope } from "../lib/tileSkins";
-import { THEME, THEMES } from "../theme";
+import { FELT_LOCATIONS, THEME, THEMES, feltColors } from "../theme";
 import ScorePanel from "./ScorePanel";
 import TileDisplay from "./TileDisplay";
 
@@ -725,8 +725,8 @@ function MesaPreview({
   return (
     <LinearGradient
       {...DECORATIVE}
-      colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
-      locations={[0, 0.55, 1]}
+      colors={feltColors(palette)}
+      locations={FELT_LOCATIONS}
       style={{
         width: w,
         height: h,
@@ -876,8 +876,8 @@ function FichasShowcase({ id }: { id: PremiumFichasId }) {
         <ShowcaseGroup label={s.previewOnTable}>
           <LinearGradient
             {...DECORATIVE}
-            colors={[felt.feltCenter, felt.feltMid, felt.feltEdge]}
-            locations={[0, 0.55, 1]}
+            colors={feltColors(felt)}
+            locations={FELT_LOCATIONS}
             style={{
               height: 88,
               borderRadius: 12,
@@ -921,8 +921,8 @@ function MesaShowcase({ id }: { id: PremiumMesaId }) {
         textColor={palette.scoreText}
       />
       <LinearGradient
-        colors={[palette.feltCenter, palette.feltMid, palette.feltEdge]}
-        locations={[0, 0.55, 1]}
+        colors={feltColors(palette)}
+        locations={FELT_LOCATIONS}
         style={{ height: 200, alignItems: "center", justifyContent: "center" }}
       >
         <View
