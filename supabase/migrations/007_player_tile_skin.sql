@@ -1,7 +1,10 @@
 -- ============================================================
 -- Capi 1.2: each seat keeps the player's premium tile design
--- Run this entire file in the Supabase SQL Editor, BEFORE the web
--- deploy that writes the column.
+-- Run this entire file in the Supabase SQL Editor BEFORE the first 1.2
+-- app build goes to TestFlight. Without the column, a 1.2 player with a
+-- premium tile design cannot create or join a game (HTTP 500). The web
+-- that writes the column went live first; that is harmless, because the
+-- API adds tile_skin to the insert only for a premium design.
 -- The other players draw this seat's face-down tiles (backs) in this
 -- design. Null means no premium design: each viewer then uses their own.
 -- Only the API writes it (005 removed public writes). Older apps and the

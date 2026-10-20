@@ -6,7 +6,7 @@ Adelson's list from real games with friends after 1.1 went live (2026-10-13). Ea
 
 | # | Item | Decision | Where it ships |
 |---|------|----------|----------------|
-| 1 | Other players see your tile backs (option A) | Built 2026-10-15; web goes live after migration 007 | Server, app, web |
+| 1 | Other players see your tile backs (option A) | Built 2026-10-15; web live by 2026-10-18 (harmless before migration 007); 007 runs before the 1.2 build | Server, app, web |
 | 2 | Smart App Banner on playcapi.com | Built 2026-10-15; live with the web push | Web only, live after deploy |
 | 3 | Full preview before you buy | Built and checked in the simulator 2026-10-15 | App |
 | 4 | 100 / 200 points and a table picker in iMessage | Built and checked in the simulator 2026-10-15 | iMessage extension (app build) |

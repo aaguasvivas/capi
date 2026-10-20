@@ -15,7 +15,7 @@ Source list and decisions: `docs/ideas-after-1.1.md`. This file fixes the contra
 
 - `public.players.tile_skin text null`, check `tile_skin is null or tile_skin in ('quisqueya','borinquen','kingston')`.
 - File: `supabase/migrations/007_player_tile_skin.sql`. Undo: `supabase/rollbacks/007_undo_player_tile_skin.sql`.
-- Adelson runs 007 in the Supabase SQL Editor before the web deploy that writes the column.
+- Adelson runs 007 in the Supabase SQL Editor before the first 1.2 app build goes to TestFlight. The web that writes the column went live first (live by 2026-10-18, probed 2026-10-19) and is harmless without it: the insert carries `tile_skin` only for a premium design, and no web or 1.1 client sends one. Without the column, a 1.2 player with a premium tile design cannot create or join (HTTP 500, audit probe 2026-10-19).
 
 ### API
 
@@ -37,7 +37,7 @@ Source list and decisions: `docs/ideas-after-1.1.md`. This file fixes the contra
 
 ## Item 2: Smart App Banner
 
-- Root layout metadata: `itunes: { appId: "6794404340" }`, site-wide. No `app-argument`, because the app has no universal links and a `capi://` argument is untested.
+- Root layout metadata: `itunes: { appId: "6794404340" }`, site-wide. No `app-argument`: the banner opens the app on its home screen. Since 55d5346 (2026-10-19) the app has universal links, but only for invite links (`https://playcapi.com/?join=<table>`, which open the table's join card); a per-page `app-argument` is not built.
 - Safari on iPhone shows the banner. WKWebView (the iMessage drawer) ignores it.
 
 ## Item 3: store preview
@@ -66,6 +66,6 @@ Source list and decisions: `docs/ideas-after-1.1.md`. This file fixes the contra
 
 ## Rollout order
 
-1. Adelson runs migration 007.
-2. Push the web (banner, API, web backs). It goes live in the 1.1 iMessage drawer too, so the drawer layout is checked first.
-3. Build the app (version 1.2.0), test on TestFlight (App Group, purchases, previews), submit.
+1. Push the web (banner, API, web backs). It goes live in the 1.1 iMessage drawer too, so the drawer layout is checked first. Done before 007 (live by 2026-10-18); harmless, see Database above.
+2. Adelson runs migration 007.
+3. Build the app (version 1.2.0), test on TestFlight (App Group, purchases, previews), submit. The step list is `docs/submit-1.2-runbook.md`.

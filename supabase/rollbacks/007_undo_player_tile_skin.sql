@@ -1,7 +1,8 @@
 -- ============================================================
--- Undo for 007_player_tile_skin.sql. Run ONLY after the web deploy that
--- writes players.tile_skin is rolled back, or creating and joining games
--- fails for every client. Safe to run more than once.
+-- Undo for 007_player_tile_skin.sql. Without the column, 1.2 players with
+-- a premium tile design cannot create or join a game (the API adds
+-- tile_skin to their insert, which then fails with HTTP 500). Never run
+-- this once 1.2 is in review or live. Safe to run more than once.
 -- ============================================================
 
 alter table public.players

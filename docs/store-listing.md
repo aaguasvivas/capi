@@ -2,7 +2,7 @@
 
 > Paste-ready App Store + Google Play copy (EN + ES), verified against the app and store limits (every limited field counted by script).
 > Positioning: **the real Dominican game you play WITH your people online**: capicúa, parejas, tranque, against competitors that are generic "block dominoes" apps with bots.
-> Honest by design: v1 has no AI opponents and no matchmaking. You play with friends via a 6-letter invite code, in the app or cross-play with the browser at playcapi.com. Copy never claims otherwise.
+> Honest by design: v1 has no AI opponents and no matchmaking. You play with friends via a 6-character invite code, in the app or cross-play with the browser at playcapi.com. Copy never claims otherwise.
 
 ---
 
@@ -13,7 +13,7 @@
 | **Name** | `Capi: Dominican Dominoes` | 24/30 |
 | **Subtitle** | `Dominoes online with friends` | 28/30 |
 | **Keywords** | `domino,multiplayer,kapicu,capicu,capicua,tranque,parejas,caribbean,latino,block,tiles,team,family` | 97/100 |
-| **Promotional text** | `Real Dominican dominoes with your people, now inside iMessage too. Capicúa, tranque and parejas the way the table plays. Share a 6-letter code and play. Free.` | 158/170 |
+| **Promotional text** | `Real Dominican dominoes with your people, now inside iMessage too. Capicúa, tranque and parejas the way the table plays. Share a 6-character code and play. Free.` | 161/170 |
 | **Category** | Games > Board (primary). Optional secondary: Games > Casual. |
 
 > Keyword notes: comma-separated, no spaces, no word repeated from the name or subtitle (Apple indexes name + subtitle + keywords as one bag). The subtitle repeats "Dominoes" from the name on purpose: capicúa is the winning play, not what Dominicans call the game, so the subtitle must say dominoes for clarity even at a small ASO cost. `capicua`/`capicu`/`kapicu` cover the play's real spelling plus the phonetic forms players type. `domino` is the singular; the name already covers "dominoes" (the `dominos` misspelling was dropped to fit `capicua`). `tranque` and `parejas` in the EN field capture diaspora searches from English-language phones, same convention as Anota's kit. `block` targets "block dominoes" searches, the generic style Capi's rules belong to.
@@ -22,7 +22,7 @@
 ```
 This is the dominoes you grew up with. Capi is real Dominican dominoes, online, with your own people. Capicúa, tranque, paso and parejas, played the way the table really plays it, not another generic block-dominoes app.
 
-Capi is multiplayer you play WITH your people: create a table, send the 6-letter invite code, and real friends fill the seats. Every seat is a real person (there are no computer opponents), so bring your crew. Anyone without the app can join from the browser at playcapi.com.
+Capi is multiplayer you play WITH your people: create a table, send the 6-character invite code, and real friends fill the seats. Every seat is a real person (there are no computer opponents), so bring your crew. Anyone without the app can join from the browser at playcapi.com.
 
 THE REAL RULES
 • Capicúa: go out with a ficha that fits both open ends and take a +25 bonus
@@ -33,7 +33,7 @@ THE REAL RULES
 
 WITH YOUR PEOPLE
 • 1v1, or 2v2 en parejas with your partner across the table
-• Create a game and share a 6-letter invite code; friends join in seconds
+• Create a game and share a 6-character invite code; friends join in seconds
 • No account and no sign-up: pick a name, pick a color, play
 • Cross-play with the web: app and browser players sit at the same table
 • Play inside iMessage on iPhone: start a game from your group chat, and each turn arrives as a bubble
@@ -60,7 +60,7 @@ Free. Download Capi and tell your people to pull up.
 | **Nombre** | `Capi: Dominó Dominicano` | 23/30 |
 | **Subtítulo** | `Juega en línea con los tuyos` | 28/30 |
 | **Keywords** | `capicua,kapicu,parejas,multijugador,online,tranque,paso,mesa,fichas,equipo,amigos,latino,RD,gratis` | 98/100 |
-| **Texto promocional** | `Dominó dominicano de verdad con tu gente, ahora también en iMessage. Capicúa, tranque y parejas como en el patio. Comparte un código de 6 letras y a jugar. Gratis.` | 163/170 |
+| **Texto promocional** | `Dominó dominicano de verdad con tu gente, ahora también en iMessage. Capicúa, tranque y parejas como en el patio. Comparte un código de 6 caracteres y a jugar. Gratis.` | 167/170 |
 
 > Notas de keywords: formas sin acento porque la búsqueda de Apple en español es insensible a acentos (convención del kit de Anota). "dominicano" no se repite porque ya está en el nombre; "dominó" tampoco. `kapicu` es la grafía fonética que la gente teclea.
 
@@ -68,7 +68,7 @@ Free. Download Capi and tell your people to pull up.
 ```
 Este es el dominó con el que tú creciste. Capi es dominó dominicano de verdad, en línea y con tu gente. Capicúa, tranque, paso y parejas, como se juega en la mesa de verdad, no otra app genérica de dominó.
 
-Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de 6 letras y tus panas ocupan las sillas. En cada silla hay una persona real (no hay rivales de computadora), así que trae a tu gente. El que no tenga la app puede entrar desde el navegador en playcapi.com.
+Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de 6 caracteres y tus panas ocupan las sillas. En cada silla hay una persona real (no hay rivales de computadora), así que trae a tu gente. El que no tenga la app puede entrar desde el navegador en playcapi.com.
 
 LAS REGLAS DE VERDAD
 • Capicúa: si sales con una ficha que pegue por las dos puntas, llévate +25
@@ -79,7 +79,7 @@ LAS REGLAS DE VERDAD
 
 CON TU GENTE
 • 1v1, o 2v2 en parejas con tu frente al otro lado de la mesa
-• Crea la partida y comparte un código de 6 letras; tus panas entran en segundos
+• Crea la partida y comparte un código de 6 caracteres; tus panas entran en segundos
 • Sin cuenta y sin registro: pon tu nombre, elige tu color y a jugar
 • Juego cruzado con la web: los de la app y los del navegador comparten la misma mesa
 • Juega dentro de iMessage en el iPhone: empieza la partida desde el chat y cada turno llega como una burbuja
@@ -113,7 +113,7 @@ Gratis. Descarga Capi y dile a tu gente que llegue.
 ```
 This is the dominoes you grew up with. Capi is real Dominican dominoes, online, with your own people. Capicúa, tranque, paso and parejas, played the way the table really plays it, not another generic block-dominoes app.
 
-Capi is multiplayer you play WITH your people: create a table, send the 6-letter invite code, and real friends fill the seats. Every seat is a real person (there are no computer opponents), so bring your crew. Anyone without the app can join from the browser at playcapi.com.
+Capi is multiplayer you play WITH your people: create a table, send the 6-character invite code, and real friends fill the seats. Every seat is a real person (there are no computer opponents), so bring your crew. Anyone without the app can join from the browser at playcapi.com.
 
 THE REAL RULES
 • Capicúa: go out with a ficha that fits both open ends and take a +25 bonus
@@ -124,7 +124,7 @@ THE REAL RULES
 
 WITH YOUR PEOPLE
 • 1v1, or 2v2 en parejas with your partner across the table
-• Create a game and share a 6-letter invite code; friends join in seconds
+• Create a game and share a 6-character invite code; friends join in seconds
 • No account and no sign-up: pick a name, pick a color, play
 • Cross-play with the web: app and browser players sit at the same table
 
@@ -154,7 +154,7 @@ Free. Download Capi and tell your people to pull up.
 ```
 Este es el dominó con el que tú creciste. Capi es dominó dominicano de verdad, en línea y con tu gente. Capicúa, tranque, paso y parejas, como se juega en la mesa de verdad, no otra app genérica de dominó.
 
-Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de 6 letras y tus panas ocupan las sillas. En cada silla hay una persona real (no hay rivales de computadora), así que trae a tu gente. El que no tenga la app puede entrar desde el navegador en playcapi.com.
+Capi es multijugador para jugar CON los tuyos: crea la mesa, manda el código de 6 caracteres y tus panas ocupan las sillas. En cada silla hay una persona real (no hay rivales de computadora), así que trae a tu gente. El que no tenga la app puede entrar desde el navegador en playcapi.com.
 
 LAS REGLAS DE VERDAD
 • Capicúa: si sales con una ficha que pegue por las dos puntas, llévate +25
@@ -165,7 +165,7 @@ LAS REGLAS DE VERDAD
 
 CON TU GENTE
 • 1v1, o 2v2 en parejas con tu frente al otro lado de la mesa
-• Crea la partida y comparte un código de 6 letras; tus panas entran en segundos
+• Crea la partida y comparte un código de 6 caracteres; tus panas entran en segundos
 • Sin cuenta y sin registro: pon tu nombre, elige tu color y a jugar
 • Juego cruzado con la web: los de la app y los del navegador comparten la misma mesa
 
@@ -187,14 +187,22 @@ Gratis. Descarga Capi y dile a tu gente que llegue.
 ---
 
 ## Age rating
-**Apple 4+ / Google Play "Everyone".** The 1.1 questionnaire answers live in docs/m5-submission-checklist.md D4, the source of truth. This paragraph is the background for them. No objectionable content: no violence, profanity, sexual or suggestive content; no gambling or simulated gambling (points only, no wagers, no currency, no prizes). Since 1.1 the iOS app shows ads (one AdMob banner on the home screen and in the waiting room, never during play) and offers optional non-consumable in-app purchases (cosmetic designs, Remove Ads, and a bundle). No unrestricted web access: the iMessage extension shows only the playcapi.com game page. Multiplayer interaction exists but is bounded: players talk to each other only through a fixed set of predefined Dominican phrases and emotes, and there is no free-text chat between players. The only free text a user types is their own nickname and an optional problem report, which goes by email to the developer and never to other players. Games are private tables joined by 6-letter invite code; there is no public matchmaking and no open lobby.
+**Apple 4+ / Google Play "Everyone".** The 1.1 questionnaire answers live in docs/m5-submission-checklist.md D4, the source of truth. This paragraph is the background for them. No objectionable content: no violence, profanity, sexual or suggestive content; no gambling or simulated gambling (points only, no wagers, no currency, no prizes). Since 1.1 the iOS app shows ads (one AdMob banner on the home screen and in the waiting room, never during play) and offers optional non-consumable in-app purchases (cosmetic designs, Remove Ads, and a bundle). No unrestricted web access: the iMessage extension shows only the playcapi.com game page. Multiplayer interaction exists but is bounded: players talk to each other only through a fixed set of predefined Dominican phrases and emotes, and there is no free-text chat between players. The only free text a user types is their own nickname and an optional problem report, which goes by email to the developer and never to other players. Games are private tables joined by 6-character invite code; there is no public matchmaking and no open lobby.
 
 ## Apple Guideline 4.2 (minimum functionality), App Review note
-> Capi is a complete real-time online multiplayer game of Dominican dominoes, built natively with React Native and Expo. It is not a thin wrapper of the playcapi.com website: the app ships the full native game client (native board rendering with an auto-scaling snake layout, tile animations, haptic feedback, tile slam audio, safe-area layouts, persisted language and sound preferences), and it talks to the same server API and realtime channels as the web client, so app users and browser users can sit at the same table. The rules engine runs on the server, which checks every move against the rules before applying it. Gameplay implements the authentic Dominican ruleset: the capicúa bonus, tranque resolved by comparing the pips of the player who locked the table with the next player's, and full-table pip scoring when a player dominates the round, in both 1v1 and 2v2, plus a 25-point award in 2v2 partner mode (parejas) when the other three players all pass after a player's tile, or when the player after the opener cannot play on the round's first tile and the opener's partner then plays, as long as the award leaves that side below the target score. A game is won only by winning a round. Safety: there is no free-text chat between players; in-game communication is limited to a fixed set of predefined phrases and emotes. The only free text a user types is a nickname and an optional problem report, which goes privately to the developer by email and never to other players. Games are private, joined only by 6-letter invite codes shared between friends; there is no public matchmaking and no gambling or wagering. Version 1.1 adds an iMessage app extension: a player starts a game from Messages, the invite is a message bubble, and the expanded view embeds the playcapi.com game page with the same private session. Games started in Messages are turn-based: after a player moves, the drawer collapses and a new bubble, ready to send, tells the other player it is their turn, and tapping a bubble opens the table again. The extension has no ads, no purchases, and no store links. Version 1.1 also adds optional non-consumable in-app purchases (cosmetic table and tile designs, Remove Ads, and an everything bundle, with a Restore Purchases button in the in-app store), and a single AdMob banner shown only on the home screen and the waiting room, never during gameplay. Ads use Google UMP consent plus App Tracking Transparency, and purchasing Remove Ads or the bundle disables the ads SDK entirely. The App Tracking Transparency prompt appears once, over the home screen, a few seconds after first launch. Each banner carries Google's AdChoices icon, where users can report an ad. No account is required and gameplay data is not linked to user identity. To test the app: create a game with any nickname on one device, then join with the invite code from a second device or from a browser at playcapi.com; cosmetics can be reviewed via the store sheet on the home screen. To test the iMessage app with one Apple ID and one iPhone: 1) Open Messages and any conversation (one with your own number or Apple ID email works). 2) Tap +, then Capi (scroll the list if needed). 3) Tap the name field (the drawer expands and the keyboard opens), type any name, and tap Start a game. The drawer closes and the invite bubble waits in the message field: tap Send. 4) The 6-letter code under the bubble's title is the table's invite code. Tap the bubble to sit at the table. 5) For the second player, open https://playcapi.com in Safari (on the same iPhone or on any computer), tap Unirse (Join up; the EN switch is at the top), and enter the code and a name. The table in Messages starts at once. 6) On your turn (the browser may go first), play a tile in Messages: the drawer gets small and a "Your turn" bubble is ready to send. Tap Back to the table to watch the browser player move live. Open in Capi opens the same seat in the app. 2v2 appears in group chats with two or more other people.
+Version 1.2. Paste the whole block into App Review Information > Notes: 3640 of 4000 UTF-8 bytes (measured 2026-10-20, each line break counted as one byte). It replaces the 1.1 note. Button and picker names are the English ones the reviewer sees: Start game and the Store in the app, Start a game and 100 pts on the Messages card, Unirse on the Spanish web home.
+```
+Capi is a complete real-time online multiplayer game of Dominican dominoes, built natively with React Native and Expo. It is not a wrapper of the playcapi.com website: the app ships the full native game client (native board rendering with an auto-scaling snake layout, tile animations, haptics, tile slam audio, safe-area layouts, saved language and sound settings) and talks to the same server API and realtime channels as the web client, so app and browser players sit at the same table. The server checks every move against the rules: capicúa bonus, tranque, full-table pip scoring, and in 2v2 (parejas) the 25-point pase corrido and pase de salida awards. Safety: no free-text chat between players; in-game messages are a fixed set of predefined phrases and emotes. The only free text is a nickname and an optional problem report, which goes privately to the developer by email. Games are private, joined only by 6-character invite codes or invite links; no public matchmaking, no gambling. No account is required and gameplay data is not linked to user identity.
+Purchases and ads (since 1.1): optional non-consumable cosmetics (table and tile designs, Remove Ads, an everything bundle) with Restore Purchases in the in-app Store, and one AdMob banner on the home screen and waiting room only, never during play. Ads use Google UMP consent plus App Tracking Transparency (one prompt, a few seconds after first launch); Remove Ads or the bundle turns the ads SDK off. Each banner carries the AdChoices icon to report an ad.
+iMessage app extension (since 1.1): a player starts a game from Messages, the invite is a message bubble, and the expanded view shows the playcapi.com game page with the same private session. Messages games are turn-based: after a move the drawer gets small and a bubble, ready to send, tells the other player it is their turn.
+New in 1.2: tap any design in the Store to preview it full size before buying. Other players at the table see the buyer's tile design on the backs of the buyer's tiles. Invite links (https://playcapi.com/?join=...) open the app when it is installed; Share invite in the waiting room sends one. In Messages, the create card also picks 100 or 200 points and the table; tables bought in the app appear in that list (the app shares them through an App Group file when it opens and after a purchase). The extension has no ads, no purchases, no prices, and no store links.
+To test the app: tap Start game with any nickname, then join with the invite code from a second device or from a browser at playcapi.com. The Store button is on the home screen.
+To test the iMessage app with one Apple ID and one iPhone: 1) Open Messages and any conversation (one with your own number or Apple ID email works). 2) Tap +, then Capi (scroll the list if needed). 3) Tap the name field (the drawer expands and the keyboard opens), type any name, keep 100 pts and Barbería, and tap Start a game. The drawer closes and the invite bubble waits in the message field: tap Send. 4) The 6-character code under the bubble's title is the table's invite code. Tap the bubble to sit at the table. 5) For the second player, open https://playcapi.com in Safari (on the same iPhone or any computer), tap Unirse (Join up; the EN switch is at the top), and enter the code and a name. The table in Messages starts at once. 6) On your turn (the browser may go first), play a tile in Messages: the drawer gets small and a "Your turn" bubble is ready to send. Tap Back to the table to watch the browser player move live. Open in Capi opens the same seat in the app. 2v2 appears in group chats with two or more other people.
+```
 
 ## Reminders before submitting
 - App Store device availability: iPhone only (app.json `supportsTablet: false`, portrait). Do not market iPad support.
-- https://playcapi.com/privacy and https://playcapi.com/support must be live before filling the URL fields. The approved 1.1 text is live on both pages (approved 2026-09-26, commit 727b10c; checked live 2026-09-29).
+- https://playcapi.com/privacy and https://playcapi.com/support must be live before filling the URL fields. The approved 1.1 text is live on both pages (approved 2026-09-26, commit 727b10c; checked live 2026-09-29). For 1.2 the privacy page gains the stored tile design: docs/privacy-1.2-draft.md waits for approval and goes live before 1.2 is submitted.
 - Privacy, tracking and age-rating answers: follow docs/m5-submission-checklist.md D3 (App Privacy, also the basis for Play Data Safety) and D4 (age rating). Those two items are the source of truth. 1.1 ships AdMob, the ATT prompt and in-app purchases, and D3 declares Device ID with Tracking = YES. Do not reuse the 1.0 answers or Anota's.
 - Never claim in any copy: AI opponents, solo play, matchmaking, free-text chat, offline play, or that nobody can cheat. Capi is friends-by-invite-code only and needs the internet.
 - The iMessage bullet belongs in the App Store descriptions only. Android has no iMessage, so the Google Play copy never mentions it.
@@ -261,4 +269,34 @@ También en esta versión:
 • Reglas de patio, como se juega en la mesa: el tranque cuenta al que trancó contra el de su derecha, el pase de salida paga 25 en 2v2, y un pase corrido nunca gana la partida solo
 • Frases nuevas en el chat rápido: "¡Te toca!", "¿Tú ta' ahí?", "¡Apúrate!" y "¡Buena mano!"
 • "Reportar un problema" ahora dice que le llega al equipo de Capi, no a tu oponente
+```
+
+## Version 1.2 "What's New" (release notes)
+
+English 972 and Spanish 1008 characters (limit 4000). Button names match packages/i18n: Store/Tienda, Share invite/Compartir invitación, Start game/Crear partida, Join game/Unirse, Refresh/Actualizar, and the refresh message. Tables bought in 1.1 reach the iMessage picker only after the 1.2 app opens once (it writes the App Group file), so both notes say so.
+
+**English:**
+```
+Your tile design now shows at the table. Play with Quisqueya, Borinquen or Kingston tiles and the others see your tile backs in that design, in the app, on playcapi.com and in iMessage.
+
+Also in this update:
+• Preview before you buy: tap a design in the Store to see it full size, with your tiles, what the others see and the table
+• iMessage: pick 100 or 200 points and the table when you start a game, and the bubble shows the points. The tables you bought in the app show up there, and you play there with your tile design: open Capi once after updating
+• Share invite: one tap in the waiting room sends a ready message with the link and the code
+• Invite links open Capi when you have it installed
+• Tap Start game or Join game with your name or the code missing and the field tells you what to fill in. Spaces and dashes in a code no longer get in the way, and Join game stays above the keyboard
+• Refresh in the waiting room answers too: "No one new has joined yet."
+```
+
+**Español:**
+```
+Tu diseño de fichas ahora se ve en la mesa. Juega con las fichas Quisqueya, Borinquen o Kingston y los demás ven el dorso de tus fichas en ese diseño, en la app, en playcapi.com y en iMessage.
+
+También en esta versión:
+• Míralo antes de comprar: toca un diseño en la Tienda para verlo en grande, con tus fichas, lo que ven los demás y la mesa
+• iMessage: elige 100 o 200 puntos y la mesa al empezar la partida, y la burbuja dice los puntos. Las mesas que compraste en la app salen ahí, y allí juegas con tu diseño de fichas: abre Capi una vez después de actualizar
+• Compartir invitación: un toque en la sala de espera manda un mensaje listo con el enlace y el código
+• Los enlaces de invitación abren Capi si lo tienes instalado
+• Si tocas Crear partida o Unirse sin tu nombre o sin el código, el campo te dice qué falta. Los espacios y guiones en el código ya no estorban, y el botón Unirse se queda encima del teclado
+• Actualizar en la sala de espera también te responde: "Nadie más se ha unido todavía."
 ```

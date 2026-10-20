@@ -13,3 +13,5 @@ Reference, open when needed:
 
 - `store-listing.md`: paste-ready store copy (EN + ES), App Review notes, What's New.
 - `m5-asc-iap-setup.md`: the App Store Connect IAP product table for 1.1.
+- `submit-1.2-runbook.md`: the step list for the 1.2 submission, from the Apple agreement and migration 007 to the review freeze.
+- `privacy-1.2-draft.md`: the 1.2 change to playcapi.com/privacy, waiting for approval.

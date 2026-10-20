@@ -293,6 +293,9 @@ A's Todo Capi and the restore test proves nothing.
 - [ ] A web opponent at playcapi.com sees the premium table phone A created.
 - [ ] Fichas are local-view: phone A's Kingston tiles do not change what
       phone B or web sees.
+      1.2 note: this check is for 1.1 only. From 1.2 on, phone B and the web
+      see phone A's tile backs in Kingston (migration 007). The 1.2 check is
+      step 4 of docs/submit-1.2-runbook.md.
 - [ ] Fresh install with no purchases: ATT prompt appears exactly once, banner
       shows on home + waiting room, NEVER during play or on the round/game
       overlays. Ad-free reinstall: no banner flashes before restore settles.
