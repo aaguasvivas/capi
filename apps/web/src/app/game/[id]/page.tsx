@@ -1291,7 +1291,7 @@ function GameContent({ id }: { id: string }) {
             <div className="side-row flex-1 flex min-h-0 relative">
               {/* Left opponent */}
               <div className={`w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] ${railPad}`}>
-                <div className="flex flex-col items-center gap-1">
+                <div className="rail-who flex flex-col items-center gap-1">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md transition-all ${
                       gameState.currentTurn === leftSeat
@@ -1313,7 +1313,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{leftHand.length}</span>
-                  <span className="rail-label text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
+                  <span className="rail-label text-white text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
                 </div>
               </div>
 
@@ -1324,7 +1324,7 @@ function GameContent({ id }: { id: string }) {
 
               {/* Right opponent */}
               <div className={`w-12 sm:w-14 flex-shrink-0 flex flex-col items-center justify-center gap-2 z-[2] ${railPad}`}>
-                <div className="flex flex-col items-center gap-1">
+                <div className="rail-who flex flex-col items-center gap-1">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md transition-all ${
                       gameState.currentTurn === rightSeat
@@ -1346,7 +1346,7 @@ function GameContent({ id }: { id: string }) {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1.5 flex flex-col items-center border border-white/10 shadow-lg">
                   <span className="text-white font-black text-lg tabular-nums leading-none">{rightHand.length}</span>
-                  <span className="rail-label text-white/50 text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
+                  <span className="rail-label text-white text-[8px] leading-tight mt-0.5">{s.tilesLabel}</span>
                 </div>
               </div>
             </div>

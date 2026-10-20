@@ -490,8 +490,11 @@ html, body {
    row of 95 + 64 = 159px, or 151 + 64 = 215px with the back, so the back
    shows from 216px (also enough for py-2). Up to 159px a banded column
    drops the name and the "fichas" line: 68px, which clears the buttons
-   down to a 132px row. Without container query support the back stays
-   hidden and nothing is dropped. */
+   down to a 132px row. A taller presence bar (the claim button, a stall
+   notice, an error) can shrink the row to about 83px at 375x548, so below
+   132px the column drops the avatar too and sits its 32px count box on the
+   band; any overflow goes up into the empty corner. Without container
+   query support the back stays hidden and nothing is dropped. */
 .side-row {
   container-type: size;
   container-name: side-row;
@@ -510,6 +513,14 @@ html, body {
 @container side-row (max-height: 159px) {
   .rail-band .rail-name,
   .rail-band .rail-label {
+    display: none;
+  }
+}
+@container side-row (max-height: 131px) {
+  .side-row .rail-band {
+    justify-content: flex-end;
+  }
+  .rail-band .rail-who {
     display: none;
   }
 }
