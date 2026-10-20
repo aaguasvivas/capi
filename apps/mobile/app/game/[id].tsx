@@ -999,7 +999,7 @@ function GameTable({
                       <Text
                         style={{
                           fontSize: 13,
-                          color: p ? "#1f2937" : "#9ca3af",
+                          color: p ? "#1f2937" : "#6b7280",
                           fontWeight: p ? "500" : "400",
                           flexShrink: 1,
                         }}
@@ -1015,7 +1015,7 @@ function GameTable({
 
               {is2v2Waiting ? (
                 <Text
-                  style={{ fontSize: 10, color: "#9ca3af", textAlign: "center" }}
+                  style={{ fontSize: 10, color: "#6b7280", textAlign: "center" }}
                 >
                   {s.seatsNS}: {s.team1} · {s.seatsEW}: {s.team2}
                 </Text>
@@ -1173,7 +1173,7 @@ function GameTable({
                   {/* Code chip */}
                   {inviteCode ? (
                     <View style={{ alignItems: "center", gap: 6 }}>
-                      <Text style={{ fontSize: 12, color: "#9ca3af" }}>
+                      <Text style={{ fontSize: 12, color: "#6b7280" }}>
                         {s.orShareCode}
                       </Text>
                       <Pressable
@@ -1220,7 +1220,7 @@ function GameTable({
 
               <View style={{ alignItems: "center", gap: 6 }}>
                 <Text
-                  style={{ fontSize: 12, color: "#9ca3af", textAlign: "center" }}
+                  style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}
                 >
                   {s.autoRefresh}
                 </Text>

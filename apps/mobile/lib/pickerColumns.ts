@@ -20,15 +20,22 @@
 //
 // iOS sizes (RN fontScale): Large 1.0 keeps 3 and 4 per row; XL 1.118 through
 // AX1 1.786 give 2 per row; AX2 2.143 through AX5 3.571 give 1 per row.
+//
+// The mode and score pairs (1v1 / 2v2, 100 / 200 points) share the mesa
+// card's 12pt bold title and inset, two per row: 115.5pt for a title. Their
+// longest word is "puntos" at 41.96pt, so a pair holds up to
+// 115.5 / 41.96 = 2.75 (AX3 2.643) and stacks from AX4 3.143.
 export interface PickerColumns {
   mesa: 1 | 2 | 3;
   fichas: 1 | 2 | 4;
+  pair: 1 | 2;
 }
 
 export function pickerColumns(fontScale: number): PickerColumns {
-  if (fontScale <= 1.06) return { mesa: 3, fichas: 4 };
-  if (fontScale <= 1.81) return { mesa: 2, fichas: 2 };
-  return { mesa: 1, fichas: 1 };
+  const pair = fontScale <= 2.75 ? 2 : 1;
+  if (fontScale <= 1.06) return { mesa: 3, fichas: 4, pair };
+  if (fontScale <= 1.81) return { mesa: 2, fichas: 2, pair };
+  return { mesa: 1, fichas: 1, pair };
 }
 
 // A card's flexBasis for n per row: n bases and the 8pt gaps between them fit

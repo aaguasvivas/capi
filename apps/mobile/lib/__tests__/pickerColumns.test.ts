@@ -33,24 +33,26 @@ function textWidth(n: number, inset: number): number {
 const MESA_TITLE = 63.57;
 const FICHAS_NAME = 54.03;
 const MESA_DESC = 40.15;
+// "puntos" at 12pt bold, the longest word on the mode and score pairs.
+const PAIR_TITLE = 41.96;
 const FICHAS_MIN_SCALE = 0.75;
 
 describe("pickerColumns", () => {
   it("keeps 3 tables and 4 tile sets per row at and below the default size", () => {
     for (const s of [IOS_SIZES.xSmall, IOS_SIZES.small, IOS_SIZES.medium, IOS_SIZES.large]) {
-      expect(pickerColumns(s)).toEqual({ mesa: 3, fichas: 4 });
+      expect(pickerColumns(s)).toEqual({ mesa: 3, fichas: 4, pair: 2 });
     }
   });
 
   it("gives 2 per row from XL through AX1", () => {
     for (const s of [IOS_SIZES.xLarge, IOS_SIZES.xxLarge, IOS_SIZES.xxxLarge, IOS_SIZES.ax1]) {
-      expect(pickerColumns(s)).toEqual({ mesa: 2, fichas: 2 });
+      expect(pickerColumns(s)).toEqual({ mesa: 2, fichas: 2, pair: 2 });
     }
   });
 
   it("gives 1 per row from AX2 up", () => {
     for (const s of [IOS_SIZES.ax2, IOS_SIZES.ax3, IOS_SIZES.ax4, IOS_SIZES.ax5]) {
-      expect(pickerColumns(s)).toEqual({ mesa: 1, fichas: 1 });
+      expect(pickerColumns(s)).toMatchObject({ mesa: 1, fichas: 1 });
     }
   });
 
@@ -61,6 +63,18 @@ describe("pickerColumns", () => {
       expect(MESA_TITLE * s).toBeLessThanOrEqual(mesaWidth);
       expect(MESA_DESC * s).toBeLessThanOrEqual(mesaWidth);
       expect(FICHAS_NAME * FICHAS_MIN_SCALE * s).toBeLessThanOrEqual(textWidth(fichas, 12));
+    }
+  });
+
+  it("keeps the mode and score pairs side by side through AX3 and stacks them from AX4", () => {
+    expect(pickerColumns(IOS_SIZES.ax3).pair).toBe(2);
+    expect(pickerColumns(IOS_SIZES.ax4).pair).toBe(1);
+    expect(pickerColumns(IOS_SIZES.ax5).pair).toBe(1);
+  });
+
+  it("never breaks a word on the mode and score pairs", () => {
+    for (let s = 0.8; s <= 4.0; s += 0.01) {
+      expect(PAIR_TITLE * s).toBeLessThanOrEqual(textWidth(pickerColumns(s).pair, 20));
     }
   });
 

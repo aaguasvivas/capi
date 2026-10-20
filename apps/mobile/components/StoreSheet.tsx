@@ -296,7 +296,7 @@ export default function StoreSheet({
             <Text
               style={{
                 fontSize: 12,
-                color: "#9ca3af",
+                color: "#4b5563",
                 textAlign: "center",
                 marginBottom: 2,
               }}
@@ -431,7 +431,7 @@ export default function StoreSheet({
           >
             <Text
               style={{
-                color: "#9ca3af",
+                color: "#4b5563",
                 fontSize: 12,
                 textDecorationLine: "underline",
               }}
@@ -449,7 +449,7 @@ export default function StoreSheet({
             >
               <Text
                 style={{
-                  color: "#9ca3af",
+                  color: "#4b5563",
                   fontSize: 12,
                   textDecorationLine: "underline",
                 }}
@@ -611,7 +611,7 @@ function ProductRow({
         </Text>
         <Text
           numberOfLines={2}
-          style={{ fontSize: 11, color: "#9ca3af", marginTop: 1 }}
+          style={{ fontSize: 11, color: "#6b7280", marginTop: 1 }}
         >
           {desc}
         </Text>

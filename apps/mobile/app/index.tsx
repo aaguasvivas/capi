@@ -736,13 +736,13 @@ export default function Index() {
                   }}
                 >
                   <View style={{ flex: 1 }}>
+                    {/* Wraps at large text sizes instead of cutting off */}
                     <Text
                       style={{
                         fontSize: 13,
                         fontWeight: "700",
                         color: "#1f2937",
                       }}
-                      numberOfLines={1}
                     >
                       {s.resumeGame}
                     </Text>
@@ -1023,10 +1023,10 @@ export default function Index() {
             </View>
           </View>
 
-          {/* Mode */}
+          {/* Mode (stacked at the largest text sizes, like the score pair) */}
           <View style={{ gap: 8 }}>
             <Text style={labelStyle}>{s.mode}</Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               <Pressable
                 onPress={() => setIs2v2(false)}
                 accessibilityRole="button"
@@ -1035,6 +1035,7 @@ export default function Index() {
                 style={[
                   cardStyle,
                   {
+                    flexBasis: ROW_BASIS[columns.pair],
                     borderColor: !is2v2 ? THEME.scoreBg : "#e5e7eb",
                     backgroundColor: !is2v2 ? "#f9fafb" : "#ffffff",
                   },
@@ -1051,6 +1052,7 @@ export default function Index() {
                 style={[
                   cardStyle,
                   {
+                    flexBasis: ROW_BASIS[columns.pair],
                     borderColor: is2v2 ? THEME.scoreBg : "#e5e7eb",
                     backgroundColor: is2v2 ? "#f9fafb" : "#ffffff",
                   },
@@ -1066,7 +1068,7 @@ export default function Index() {
           {/* Target score */}
           <View style={{ gap: 8 }}>
             <Text style={labelStyle}>{s.firstTo}</Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               <Pressable
                 onPress={() => setTargetScore(100)}
                 accessibilityRole="button"
@@ -1075,6 +1077,7 @@ export default function Index() {
                 style={[
                   cardStyle,
                   {
+                    flexBasis: ROW_BASIS[columns.pair],
                     borderColor:
                       targetScore === 100 ? THEME.scoreBg : "#e5e7eb",
                     backgroundColor:
@@ -1092,6 +1095,7 @@ export default function Index() {
                 style={[
                   cardStyle,
                   {
+                    flexBasis: ROW_BASIS[columns.pair],
                     borderColor:
                       targetScore === 200 ? THEME.scoreBg : "#e5e7eb",
                     backgroundColor:
