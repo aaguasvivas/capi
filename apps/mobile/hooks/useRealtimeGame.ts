@@ -112,6 +112,10 @@ export function useRealtimeGame(
   // measures from here.
   const lastChangeAtRef = useRef(Date.now());
   const lastResyncAtRef = useRef(0);
+  // When the waiting room last saw a sign of life: a join, the screen's own
+  // request (Refresh, after a join), or the app coming back. The lobby poll
+  // stops IDLE_RESYNC_STOP_MS after it.
+  const lobbyActiveAtRef = useRef(Date.now());
 
   // Lets fetchGame tell a first load apart from a background refetch without
   // depending on gameState (which would re-run every effect built on it).
@@ -178,6 +182,7 @@ export function useRealtimeGame(
     setChatMessages([]);
     lastChangeAtRef.current = Date.now();
     lastResyncAtRef.current = 0;
+    lobbyActiveAtRef.current = Date.now();
     loadedRef.current = false;
     serverStateRef.current = null;
     preOptimisticRef.current = null;
@@ -311,12 +316,20 @@ export function useRealtimeGame(
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {
       if (next === "active") {
+        lobbyActiveAtRef.current = Date.now();
         fetchGame();
       }
     });
     return () => {
       sub.remove();
     };
+  }, [fetchGame]);
+
+  // The screen's own requests (Refresh, after a join or a claim) are a sign
+  // of life for the waiting room.
+  const refetch = useCallback(() => {
+    lobbyActiveAtRef.current = Date.now();
+    return fetchGame();
   }, [fetchGame]);
 
   // Asks the server for the row and relays it as the next "state" message.
@@ -344,12 +357,15 @@ export function useRealtimeGame(
   // while the table is still forming and no state has arrived, poll so a
   // missed event can only delay an update, never lose it. A table in play
   // relays each poll too: a send without a joined socket goes out over REST,
-  // so a degraded screen still unsticks a 1.0 opponent.
+  // so a degraded screen still unsticks a 1.0 opponent. A waiting room with
+  // no sign of life for IDLE_RESYNC_STOP_MS stops: a join still arrives over
+  // realtime, and the app coming back asks again.
   const polling = connection !== "live" || gameState === null;
   const hasGameState = gameState !== null;
   useEffect(() => {
     if (!polling) return;
     const id = setInterval(() => {
+      if (!hasGameState && Date.now() - lobbyActiveAtRef.current > IDLE_RESYNC_STOP_MS) return;
       void (hasGameState ? resync() : fetchGame());
     }, POLL_INTERVAL_MS);
     return () => clearInterval(id);
@@ -435,6 +451,7 @@ export function useRealtimeGame(
           filter: `game_id=eq.${gameId}`,
         },
         () => {
+          lobbyActiveAtRef.current = Date.now();
           fetchGame();
         }
       )
@@ -738,6 +755,6 @@ export function useRealtimeGame(
     sendChat,
     clearCallout,
     dismissChat,
-    refetch: fetchGame,
+    refetch,
   };
 }

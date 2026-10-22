@@ -153,6 +153,10 @@ export function useRealtimeGame(
   // measures from here.
   const lastChangeAtRef = useRef(Date.now());
   const lastResyncAtRef = useRef(0);
+  // When the waiting room last saw a sign of life: a join, the screen's own
+  // request (Refresh, after a join), or the page coming back. The lobby poll
+  // stops IDLE_RESYNC_STOP_MS after it.
+  const lobbyActiveAtRef = useRef(Date.now());
   // Whether a fetch for this game has succeeded. Before that a failure is
   // the error screen; after it, a failure is a connection blip.
   const loadedRef = useRef(false);
@@ -243,6 +247,7 @@ export function useRealtimeGame(
     versionRef.current = 0;
     lastChangeAtRef.current = Date.now();
     lastResyncAtRef.current = 0;
+    lobbyActiveAtRef.current = Date.now();
     loadedRef.current = false;
     serverStateRef.current = null;
     preOptimisticRef.current = null;
@@ -427,6 +432,7 @@ export function useRealtimeGame(
           filter: `game_id=eq.${gameId}`,
         },
         () => {
+          lobbyActiveAtRef.current = Date.now();
           void fetchGame();
         }
       )
@@ -566,10 +572,15 @@ export function useRealtimeGame(
   // degraded, or while the table has no state yet (lobby), poll the row. A
   // table in play relays each poll too: a send without a joined socket goes
   // out over REST, so a degraded screen still unsticks a 1.0 opponent.
+  // A waiting room with no sign of life for IDLE_RESYNC_STOP_MS stops: an
+  // open tab nobody watches would otherwise ask every 10 seconds for as long
+  // as it stays open. A join still arrives over realtime, and the page
+  // coming back asks again.
   const hasGameState = gameState !== null;
   useEffect(() => {
     if (connection === "live" && hasGameState) return;
     const timer = setInterval(() => {
+      if (!hasGameState && Date.now() - lobbyActiveAtRef.current > IDLE_RESYNC_STOP_MS) return;
       void (hasGameState ? resync() : fetchGame());
     }, POLL_MS);
     return () => clearInterval(timer);
@@ -599,13 +610,23 @@ export function useRealtimeGame(
     return () => clearInterval(timer);
   }, [connection, hasGameState, resync]);
 
+  // The screen's own requests (Refresh, after a join or a claim) are a sign
+  // of life for the waiting room.
+  const refetch = useCallback(() => {
+    lobbyActiveAtRef.current = Date.now();
+    return fetchGame();
+  }, [fetchGame]);
+
   // Catch up whenever the page comes back (tab shown, network back), and
   // mirror the browser's own network signal in the banner.
   useEffect(() => {
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") void fetchGame();
+      if (document.visibilityState !== "visible") return;
+      lobbyActiveAtRef.current = Date.now();
+      void fetchGame();
     };
     const onOnline = () => {
+      lobbyActiveAtRef.current = Date.now();
       // The socket may have survived a short blip: trust the last status the
       // channel reported, and let a rejoin (if one follows) correct it.
       setConnection(gameChannelLiveRef.current ? "live" : "reconnecting");
@@ -834,6 +855,6 @@ export function useRealtimeGame(
     submitMove,
     sendChat,
     clearCallout,
-    refetch: fetchGame,
+    refetch,
   };
 }
